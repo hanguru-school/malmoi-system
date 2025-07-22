@@ -1,103 +1,152 @@
-import Image from "next/image";
+import Link from 'next/link';
+import { 
+  Settings, 
+  Home, 
+  Users, 
+  Tag, 
+  GraduationCap, 
+  MessageSquare,
+  Star
+} from 'lucide-react';
 
-export default function Home() {
+export default function HomePage() {
+  const cards = [
+    {
+      id: 'admin-dashboard',
+      title: '관리자 대시보드',
+      description: '시스템 전반을 관리하고 요약 정보를 확인',
+      buttonText: '대시보드 열기',
+      href: '/admin/home',
+      icon: Settings,
+      bgColor: 'bg-blue-50',
+      borderColor: 'border-blue-200',
+      iconColor: 'text-blue-600',
+      buttonColor: 'bg-blue-600 hover:bg-blue-700'
+    },
+    {
+      id: 'tagging-system',
+      title: '태깅 시스템',
+      description: 'NFC/FeliCa 태그를 통한 출석 및 방문 기록 관리',
+      buttonText: '태깅 페이지 열기',
+      href: '/tagging/home',
+      icon: Tag,
+      bgColor: 'bg-green-50',
+      borderColor: 'border-green-200',
+      iconColor: 'text-green-600',
+      buttonColor: 'bg-green-600 hover:bg-green-700'
+    },
+    {
+      id: 'student-portal',
+      title: '학생 포털',
+      description: '예약·노트·숙제·학습 이력 페이지로 이동',
+      buttonText: '학생 포털 열기',
+      href: '/student/home',
+      icon: GraduationCap,
+      bgColor: 'bg-purple-50',
+      borderColor: 'border-purple-200',
+      iconColor: 'text-purple-600',
+      buttonColor: 'bg-purple-600 hover:bg-purple-700'
+    },
+    {
+      id: 'teacher-portal',
+      title: '선생님 포털',
+      description: '강사 일정·메모·급여 확인 페이지로 이동',
+      buttonText: '선생님 포털 열기',
+      href: '/teacher/home',
+      icon: Users,
+      bgColor: 'bg-pink-50',
+      borderColor: 'border-pink-200',
+      iconColor: 'text-pink-600',
+      buttonColor: 'bg-pink-600 hover:bg-pink-700'
+    }
+  ];
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6">
+      <div className="max-w-6xl mx-auto">
+        {/* 헤더 */}
+        <div className="text-center mb-12">
+          <h1 className="text-5xl font-bold text-gray-900 mb-4">
+            한국어 교실 MalMoi 시스템
+          </h1>
+          <p className="text-xl text-gray-600 mb-8">
+            효율적인 한국어 교육 관리 시스템
+          </p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        {/* 카드 그리드 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {cards.map((card) => {
+            const IconComponent = card.icon;
+            return (
+              <div
+                key={card.id}
+                className={`${card.bgColor} ${card.borderColor} border-2 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105`}
+              >
+                <div className="text-center">
+                  {/* 아이콘 */}
+                  <div className={`${card.iconColor} mb-4`}>
+                    <IconComponent className="w-16 h-16 mx-auto" />
+                  </div>
+                  
+                  {/* 타이틀 */}
+                  <h2 className="text-xl font-bold text-gray-900 mb-3">
+                    {card.title}
+                  </h2>
+                  
+                  {/* 설명 */}
+                  <p className="text-gray-600 mb-6 leading-relaxed">
+                    {card.description}
+                  </p>
+                  
+                  {/* 액션 버튼 */}
+                  <Link
+                    href={card.href}
+                    className={`${card.buttonColor} text-white px-6 py-3 rounded-lg font-medium transition-colors inline-flex items-center gap-2 shadow-md hover:shadow-lg`}
+                    aria-label={`${card.title} 페이지로 이동`}
+                  >
+                    {card.buttonText}
+                    <Home className="w-4 h-4" />
+                  </Link>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* 추가 관리 섹션 */}
+        <div className="mt-16 text-center space-y-4">
+          <div className="inline-flex items-center gap-2 px-6 py-3 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors shadow-lg">
+            <MessageSquare className="w-5 h-5" />
+            <Link
+              href="/community"
+              className="text-white hover:text-gray-100"
+              aria-label="커뮤니티 페이지로 이동"
+            >
+              커뮤니티
+            </Link>
+          </div>
+          
+          <div className="inline-flex items-center gap-2 px-6 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors shadow-lg">
+            <Star className="w-5 h-5" />
+            <Link
+              href="/review-system"
+              className="text-white hover:text-gray-100"
+              aria-label="리뷰 시스템 페이지로 이동"
+            >
+              리뷰 시스템
+            </Link>
+          </div>
+        </div>
+
+        {/* 푸터 */}
+        <div className="mt-8 text-center text-sm text-gray-500">
+          <p>© 2024 한국어 교실 MalMoi. 모든 권리 보유</p>
+          <p className="mt-2">
+            접근성 및 키보드 네비게이션을 지원합니다
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

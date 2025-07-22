@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입 테스트</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎯 회원가입 시스템 테스트</h1>
+    
+    <div class="test-section">
+        <h2>📋 테스트 가이드</h2>
+        <p>아래 버튼을 클릭하여 회원가입 페이지를 테스트하세요.</p>
+        
+        <button class="test-button" onclick="openRegistration()">회원가입 페이지 열기</button>
+        <button class="test-button" onclick="openTerms()">약관 페이지 열기</button>
+        <button class="test-button" onclick="openLogin()">로그인 페이지 열기</button>
+    </div>
+
+    <div class="test-section">
+        <h2>🔍 테스트 시나리오</h2>
+        <div class="info">
+            <h3>1. 실시간 이메일 중복 확인</h3>
+            <ul>
+                <li>이메일 필드에 <code>admin@hanguru.school</code> 입력 → 빨간 X 아이콘</li>
+                <li>이메일 필드에 <code>newuser@hanguru.school</code> 입력 → 초록 체크 아이콘</li>
+            </ul>
+        </div>
+        
+        <div class="info">
+            <h3>2. 비밀번호 강도 표시</h3>
+            <ul>
+                <li><code>123</code> → 빨간 바 (약함)</li>
+                <li><code>Test123</code> → 노란 바 (보통)</li>
+                <li><code>TestPassword123!</code> → 초록 바 (강함)</li>
+            </ul>
+        </div>
+        
+        <div class="info">
+            <h3>3. 실시간 비밀번호 확인</h3>
+            <ul>
+                <li>비밀번호와 확인 비밀번호가 다르면 실시간 에러 메시지</li>
+            </ul>
+        </div>
+        
+        <div class="info">
+            <h3>4. 약관 동의 필수</h3>
+            <ul>
+                <li>체크하지 않고 제출 → "약관에 동의해야 합니다" 에러</li>
+                <li>약관 페이지에서 "동의하기" 버튼 클릭 → 자동 체크박스 체크</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🎮 테스트 실행</h2>
+        <div id="testFrame"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 테스트 결과</h2>
+        <div id="testResults"></div>
+    </div>
+
+    <script>
+        function openRegistration() {
+            const frame = document.getElementById('testFrame');
+            frame.innerHTML = '<iframe src="http://localhost:3001/auth/register"></iframe>';
+            addResult('✅ 회원가입 페이지 로드됨');
+        }
+
+        function openTerms() {
+            const frame = document.getElementById('testFrame');
+            frame.innerHTML = '<iframe src="http://localhost:3001/terms"></iframe>';
+            addResult('✅ 약관 페이지 로드됨');
+        }
+
+        function openLogin() {
+            const frame = document.getElementById('testFrame');
+            frame.innerHTML = '<iframe src="http://localhost:3001/auth/login"></iframe>';
+            addResult('✅ 로그인 페이지 로드됨');
+        }
+
+        function addResult(message) {
+            const results = document.getElementById('testResults');
+            const div = document.createElement('div');
+            div.className = 'status success';
+            div.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            results.appendChild(div);
+        }
+
+        // 페이지 로드 시 서버 상태 확인
+        window.onload = function() {
+            fetch('http://localhost:3001/auth/register')
+                .then(response => {
+                    if (response.ok) {
+                        addResult('✅ 서버가 정상적으로 실행 중입니다');
+                    } else {
+                        addResult('❌ 서버 응답 오류');
+                    }
+                })
+                .catch(error => {
+                    addResult('❌ 서버 연결 실패: ' + error.message);
+                });
+        };
+    </script>
+</body>
+</html> 
