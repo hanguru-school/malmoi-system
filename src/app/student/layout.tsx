@@ -25,7 +25,7 @@ const navigation = [
   { name: '홈', href: '/student/home', icon: Home },
   { name: '예약', href: '/student/reservations', icon: Calendar },
   { name: '마이페이지', href: '/student/profile', icon: User },
-  { name: '레슨노트', href: '/student/notes', icon: BookOpen, comingSoon: true },
+  { name: '레슨노트', href: '/student/notes', icon: BookOpen },
   { name: '숙제', href: '/student/homework', icon: FileText, comingSoon: true },
   { name: '단어복습', href: '/student/vocabulary', icon: BookMarked, comingSoon: true },
   { name: '듣기/녹음', href: '/student/listening', icon: Mic, comingSoon: true },

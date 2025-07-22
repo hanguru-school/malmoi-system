@@ -12,7 +12,8 @@ import {
   ArrowLeft, 
   CheckCircle,
   AlertCircle,
-  Loader2
+  Loader2,
+  X
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -57,6 +58,13 @@ export default function NewReservationPage() {
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
 
+  // 모달 상태
+  const [showTimeConfirmModal, setShowTimeConfirmModal] = useState(false);
+  const [tempSelectedTime, setTempSelectedTime] = useState<string>('');
+
+  // 호버 상태 관리
+  const [hoveredTime, setHoveredTime] = useState<string>('');
+
   // 데이터
   const [availableTimeSlots, setAvailableTimeSlots] = useState<TimeSlot[]>([]);
 
@@ -89,8 +97,12 @@ export default function NewReservationPage() {
     const threeMonthsLater = new Date();
     threeMonthsLater.setMonth(today.getMonth() + 3);
 
-    setMinDate(today.toISOString().split('T')[0]);
+    const todayString = today.toISOString().split('T')[0];
+    setMinDate(todayString);
     setMaxDate(threeMonthsLater.toISOString().split('T')[0]);
+    
+    // 기본값을 오늘 날짜로 설정
+    setSelectedDate(todayString);
 
     // 데이터 로드
     loadInitialData();
@@ -157,8 +169,24 @@ export default function NewReservationPage() {
     }
   };
 
-  // 시간대 호버 상태 관리
-  const [hoveredTime, setHoveredTime] = useState<string>('');
+  // 시간 선택 처리
+  const handleTimeSelect = (time: string) => {
+    setTempSelectedTime(time);
+    setShowTimeConfirmModal(true);
+  };
+
+  // 시간 확인 모달에서 확인
+  const handleTimeConfirm = () => {
+    setSelectedTime(tempSelectedTime);
+    setShowTimeConfirmModal(false);
+    setTempSelectedTime('');
+  };
+
+  // 시간 확인 모달에서 취소
+  const handleTimeCancel = () => {
+    setShowTimeConfirmModal(false);
+    setTempSelectedTime('');
+  };
 
   // 시간대가 겹치는지 확인하는 함수
   const isTimeConflicting = (time: string) => {
@@ -186,23 +214,6 @@ export default function NewReservationPage() {
     return currentTime >= selectedStart && currentTime < selectedEnd;
   };
 
-  // 시간대의 상태를 결정하는 함수
-  const getTimeSlotStatus = (time: string) => {
-    if (!selectedDuration) return 'disabled';
-    
-    const isConflicting = isTimeConflicting(time);
-    const isHovered = isTimeInHoveredRange(time);
-    const isSelected = isTimeInSelectedRange(time);
-    
-    if (isSelected) {
-      return 'selected';
-    } else if (isConflicting) {
-      return isHovered ? 'conflicting-hover' : 'conflicting';
-    } else {
-      return isHovered ? 'available-hover' : 'available';
-    }
-  };
-
   // 시간이 호버된 범위에 포함되는지 확인하는 함수
   const isTimeInHoveredRange = (time: string) => {
     if (!hoveredTime || !selectedDuration) return false;
@@ -226,6 +237,23 @@ export default function NewReservationPage() {
       const reservationEnd = new Date(reservationStart.getTime() + (reservation.duration + 10) * 60000);
       return currentTime >= reservationStart && currentTime < reservationEnd;
     });
+  };
+
+  // 시간대의 상태를 결정하는 함수
+  const getTimeSlotStatus = (time: string) => {
+    if (!selectedDuration) return 'disabled';
+    
+    const isConflicting = isTimeConflicting(time);
+    const isHovered = isTimeInHoveredRange(time);
+    const isSelected = isTimeInSelectedRange(time);
+    
+    if (isSelected) {
+      return 'selected';
+    } else if (isConflicting) {
+      return isHovered ? 'conflicting-hover' : 'conflicting';
+    } else {
+      return isHovered ? 'available-hover' : 'available';
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -270,6 +298,13 @@ export default function NewReservationPage() {
 
   const getDayOfWeek = (date: string) => {
     return new Date(date).toLocaleDateString('ko-KR', { weekday: 'long' });
+  };
+
+  // 선택된 시간의 종료 시간 계산
+  const getEndTime = (startTime: string, duration: number) => {
+    const start = new Date(`2024-01-15 ${startTime}`);
+    const end = new Date(start.getTime() + (duration + 10) * 60000); // +10분 준비시간
+    return end.toTimeString().slice(0, 5);
   };
 
   if (loading) {
@@ -335,34 +370,36 @@ export default function NewReservationPage() {
         {/* 예약 폼 */}
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* 온라인/대면 선택 */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-blue-600" />
-              수업 방식 선택
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {['온라인', '대면'].map((location) => (
-                <button
-                  key={location}
-                  type="button"
-                  onClick={() => setSelectedLocation(location)}
-                  className={`p-6 border-2 rounded-lg text-center transition-all ${
-                    selectedLocation === location
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  <div className="text-lg font-semibold text-gray-900 mb-2">{location}</div>
-                  <div className="text-sm text-gray-600">
-                    {location === '온라인' ? '화상 수업으로 진행' : '직접 만나서 수업'}
-                  </div>
-                </button>
-              ))}
+          {!selectedTime && (
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-blue-600" />
+                수업 방식 선택
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {['온라인', '대면'].map((location) => (
+                  <button
+                    key={location}
+                    type="button"
+                    onClick={() => setSelectedLocation(location)}
+                    className={`p-6 border-2 rounded-lg text-center transition-all ${
+                      selectedLocation === location
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="text-lg font-semibold text-gray-900 mb-2">{location}</div>
+                    <div className="text-sm text-gray-600">
+                      {location === '온라인' ? '화상 수업으로 진행' : '직접 만나서 수업'}
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* 수업 시간 선택 */}
-          {selectedLocation && (
+          {selectedLocation && !selectedTime && (
             <div className="bg-white rounded-xl shadow-lg p-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <Clock className="w-5 h-5 text-green-600" />
@@ -391,7 +428,7 @@ export default function NewReservationPage() {
           )}
 
           {/* 날짜 선택 */}
-          {selectedDuration > 0 && (
+          {selectedDuration > 0 && !selectedTime && (
             <div className="bg-white rounded-xl shadow-lg p-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-purple-600" />
@@ -416,13 +453,13 @@ export default function NewReservationPage() {
           )}
 
           {/* 시간 선택 */}
-          {selectedDate && availableTimeSlots.length > 0 && (
+          {selectedDate && availableTimeSlots.length > 0 && !selectedTime && (
             <div className="bg-white rounded-xl shadow-lg p-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <Clock className="w-5 h-5 text-orange-600" />
                 시간 선택
               </h2>
-              <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
+              <div className="grid grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2">
                 {availableTimeSlots.map((slot) => {
                   const status = getTimeSlotStatus(slot.time);
                   const isInConflictingRange = isTimeInConflictingRange(slot.time);
@@ -433,7 +470,7 @@ export default function NewReservationPage() {
 
                     switch (status) {
                       case 'available':
-                        return `${baseClasses} bg-white border border-gray-200 hover:bg-blue-50 hover:border-blue-300 text-gray-400`;
+                        return `${baseClasses} bg-white border border-gray-200 hover:bg-blue-50 hover:border-blue-300 text-gray-700`;
                       case 'available-hover':
                         return `${baseClasses} bg-blue-100 border border-blue-400 text-blue-800`;
                       case 'conflicting':
@@ -452,7 +489,7 @@ export default function NewReservationPage() {
                       key={slot.time}
                       type="button"
                       disabled={!slot.available}
-                      onClick={() => slot.available && setSelectedTime(slot.time)}
+                      onClick={() => slot.available && handleTimeSelect(slot.time)}
                       onMouseEnter={() => setHoveredTime(slot.time)}
                       onMouseLeave={() => setHoveredTime('')}
                       className={getButtonClasses()}
@@ -502,10 +539,19 @@ export default function NewReservationPage() {
           {/* 예약 요약 */}
           {selectedLocation && selectedDuration > 0 && selectedDate && selectedTime && (
             <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <CheckCircle className="w-5 h-5 text-blue-600" />
-                예약 요약
-              </h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-blue-600" />
+                  예약 요약
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setSelectedTime('')}
+                  className="text-sm text-blue-600 hover:text-blue-700 underline"
+                >
+                  시간 다시 선택
+                </button>
+              </div>
               <div className="space-y-4">
                 <div className="flex justify-between">
                   <span className="text-gray-600">수업 방식:</span>
@@ -517,16 +563,12 @@ export default function NewReservationPage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">날짜:</span>
-                  <span className="font-medium">{selectedDate}</span>
+                  <span className="font-medium">{selectedDate} ({getDayOfWeek(selectedDate)})</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">시간:</span>
                   <span className="font-medium">
-                    {selectedTime} ~ {(() => {
-                      const startTime = new Date(`2024-01-15 ${selectedTime}`);
-                      const endTime = new Date(startTime.getTime() + (selectedDuration + 10) * 60000);
-                      return endTime.toTimeString().slice(0, 5);
-                    })()}
+                    {selectedTime} ~ {getEndTime(selectedTime, selectedDuration)}
                   </span>
                 </div>
                 {notes && (
@@ -568,6 +610,64 @@ export default function NewReservationPage() {
             </div>
           )}
         </form>
+
+        {/* 시간 확인 모달 */}
+        {showTimeConfirmModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl shadow-xl p-6 max-w-md w-full mx-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">시간 확인</h3>
+                <button
+                  onClick={handleTimeCancel}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              
+              <div className="mb-6">
+                <p className="text-gray-600 mb-4">
+                  선택하신 시간으로 예약을 진행하시겠습니까?
+                </p>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">날짜:</span>
+                      <span className="font-medium">{selectedDate} ({getDayOfWeek(selectedDate)})</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">시간:</span>
+                      <span className="font-medium">
+                        {tempSelectedTime} ~ {getEndTime(tempSelectedTime, selectedDuration)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">수업 시간:</span>
+                      <span className="font-medium">{selectedDuration}분</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={handleTimeCancel}
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  돌아가기
+                </button>
+                <button
+                  type="button"
+                  onClick={handleTimeConfirm}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  확인
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

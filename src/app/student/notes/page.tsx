@@ -20,7 +20,8 @@ import {
   Pause,
   Volume2,
   MessageSquare,
-  ThumbsUp
+  ThumbsUp,
+  AlertCircle
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -78,6 +79,7 @@ export default function StudentNotesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<'all' | 'recent' | 'favorite'>('all');
   const [selectedNote, setSelectedNote] = useState<LessonNote | null>(null);
+  const [currentNoteIndex, setCurrentNoteIndex] = useState<number>(-1); // 현재 선택된 노트의 인덱스
   
   // 언어 설정
   const [currentLanguage, setCurrentLanguage] = useState<'ko' | 'ja'>('ko');
@@ -99,18 +101,47 @@ export default function StudentNotesPage() {
     feedback: '',
     hideFromTeacher: false, // 선생님에게 숨기기 체크박스
     questionnaireAnswers: {
-      q1: 5, // 수업 내용이 이해하기 쉬웠나요?
-      q2: 5, // 선생님의 설명이 명확했나요?
-      q3: 5, // 수업 속도가 적절했나요?
-      q4: 5, // 학습 자료가 유용했나요?
-      q5: 5, // 수업 분위기가 좋았나요?
-      q6: 5, // 질문에 대한 답변이 만족스러웠나요?
-      q7: 5, // 수업 시간이 적절했나요?
-      q8: 5, // 개별 피드백이 도움이 되었나요?
-      q9: 5, // 다음 수업에 대한 기대가 생겼나요?
-      q10: 5 // 전반적으로 만족스러운 수업이었나요?
+      q1: 5, q2: 5, q3: 5, q4: 5, q5: 5,
+      q6: 5, q7: 5, q8: 5, q9: 5, q10: 5
     }
   });
+
+  // 모달 타입 상태 추가
+  const [modalType, setModalType] = useState<'teacher' | 'student'>('student');
+
+  // 이전 노트 확인하기
+  const handlePreviousNote = () => {
+    if (currentNoteIndex > 0) {
+      const newIndex = currentNoteIndex - 1;
+      setCurrentNoteIndex(newIndex);
+      setSelectedNote(notes[newIndex]);
+      // 음성 재생 상태 초기화
+      setIsPlaying(false);
+      setCurrentSentenceIndex(0);
+      setAudioProgress(0);
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+    }
+  };
+
+  // 다음 노트 확인하기
+  const handleNextNote = () => {
+    if (currentNoteIndex < notes.length - 1) {
+      const newIndex = currentNoteIndex + 1;
+      setCurrentNoteIndex(newIndex);
+      setSelectedNote(notes[newIndex]);
+      // 음성 재생 상태 초기화
+      setIsPlaying(false);
+      setCurrentSentenceIndex(0);
+      setAudioProgress(0);
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+    }
+  };
 
   // 언어 전환 함수
   const toggleLanguage = () => {
@@ -371,10 +402,12 @@ export default function StudentNotesPage() {
 
   const handleNoteClick = (note: LessonNote) => {
     setSelectedNote(note);
+    setCurrentNoteIndex(notes.findIndex(n => n.id === note.id));
   };
 
   const handleBackToList = () => {
     setSelectedNote(null);
+    setCurrentNoteIndex(-1);
   };
 
   // 음성 재생 관련 함수들
@@ -561,21 +594,73 @@ export default function StudentNotesPage() {
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-4xl mx-auto p-6">
           {/* 헤더 */}
-          <div className="flex items-center gap-4 mb-6">
-            <button
-              onClick={handleBackToList}
-              className="p-2 rounded-lg bg-white shadow-sm hover:bg-gray-50 transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5 text-gray-600" />
-            </button>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">{selectedNote.title}</h1>
-              <p className="text-gray-600">{selectedNote.duration}</p>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={handleBackToList}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>{t.back}</span>
+              </button>
+              
+              {/* 이전/다음 노트 버튼 */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handlePreviousNote}
+                  disabled={currentNoteIndex <= 0}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
+                    currentNoteIndex <= 0
+                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                  }`}
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span className="text-sm">이전</span>
+                </button>
+                
+                <span className="text-sm text-gray-600 px-2">
+                  {currentNoteIndex + 1} / {notes.length}
+                </span>
+                
+                <button
+                  onClick={handleNextNote}
+                  disabled={currentNoteIndex >= notes.length - 1}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
+                    currentNoteIndex >= notes.length - 1
+                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                  }`}
+                >
+                  <span className="text-sm">다음</span>
+                  <ArrowLeft className="w-4 h-4 rotate-180" />
+                </button>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              {/* 언어 전환 버튼 */}
+              <button
+                onClick={toggleLanguage}
+                className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                title={currentLanguage === 'ko' ? '日本語に切り替え' : '한국어로 전환'}
+              >
+                <Globe className="w-4 h-4" />
+                <span className="text-xs font-medium">
+                  {currentLanguage === 'ko' ? '🇯🇵' : '🇰🇷'}
+                </span>
+              </button>
             </div>
           </div>
 
-          {/* 노트 상세 내용 */}
-          <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+          {/* 노트 제목 */}
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-gray-900">{selectedNote.title}</h1>
+            <p className="text-gray-600">{selectedNote.duration}</p>
+          </div>
+
+          {/* 노트 내용 */}
+          <div className="bg-white rounded-xl shadow-lg p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-4 text-sm text-gray-600">
                 <div className="flex items-center gap-1">
@@ -747,41 +832,56 @@ export default function StudentNotesPage() {
               </div>
 
               {/* 평가 및 액션 버튼 */}
-              <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                <div className="flex items-center gap-4">
-                  {/* 선생님 평가 표시 */}
+              <div className="pt-6 border-t border-gray-200">
+                {/* 첫 번째 행: 평가 버튼들 */}
+                <div className="flex flex-wrap items-center gap-3 mb-4">
+                  {/* 선생님 평가 버튼 */}
                   {selectedNote.teacherEvaluation?.isCompleted && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                      <span className="text-gray-700">
-                        {t.teacherEvaluation}: {selectedNote.teacherEvaluation.score}점
-                      </span>
-                    </div>
-                  )}
-                  
-                  {/* 학생 평가 표시 */}
-                  {selectedNote.studentEvaluation?.isCompleted && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <ThumbsUp className="w-4 h-4 text-green-500" />
-                      <span className="text-gray-700">
-                        {t.studentEvaluation}: {selectedNote.studentEvaluation.overallScore}점
-                      </span>
-                    </div>
-                  )}
-                </div>
-                
-                <div className="flex items-center gap-3">
-                  {/* 평가하기 버튼 */}
-                  {selectedNote.teacherEvaluation?.isCompleted && !selectedNote.studentEvaluation?.isCompleted && (
                     <button
-                      onClick={() => setShowEvaluationModal(true)}
-                      className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                      onClick={() => {
+                        setModalType('teacher');
+                        setShowEvaluationModal(true);
+                      }}
+                      className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
                     >
-                      <MessageSquare className="w-4 h-4" />
-                      <span>{t.evaluateLesson}</span>
+                      <Star className="w-4 h-4" />
+                      <span>선생님 평가 보기</span>
                     </button>
                   )}
                   
+                  {/* 내 수업 평가 버튼 */}
+                  {selectedNote.teacherEvaluation?.isCompleted && (
+                    <button
+                      onClick={() => {
+                        setModalType('student');
+                        setShowEvaluationModal(true);
+                      }}
+                      className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors text-sm font-medium"
+                    >
+                      <MessageSquare className="w-4 h-4" />
+                      <span>
+                        {selectedNote.studentEvaluation?.isCompleted ? '내 수업 평가' : '수업 평가하기'}
+                      </span>
+                    </button>
+                  )}
+                  
+                  {/* 평가 수정하기 버튼 (85점 미만일 때만) */}
+                  {selectedNote.studentEvaluation?.isCompleted && selectedNote.studentEvaluation.overallScore < 85 && (
+                    <button
+                      onClick={() => {
+                        setModalType('student');
+                        setShowEvaluationModal(true);
+                      }}
+                      className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+                    >
+                      <MessageSquare className="w-4 h-4" />
+                      <span>평가 수정하기</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* 두 번째 행: 액션 버튼들 */}
+                <div className="flex flex-wrap items-center gap-3">
                   {/* 구글맵 업로드 버튼 */}
                   {selectedNote.studentEvaluation?.isCompleted && selectedNote.studentEvaluation.overallScore >= 85 && (
                     <button
@@ -791,20 +891,20 @@ export default function StudentNotesPage() {
                           alert('구글맵에 업로드되었습니다.');
                         }
                       }}
-                      className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                      className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium shadow-sm"
                     >
                       <ThumbsUp className="w-4 h-4" />
-                      <span>{t.uploadToGoogle}</span>
+                      <span>구글맵 업로드</span>
                     </button>
                   )}
                   
                   {/* 프린트 버튼 */}
                   <button 
                     onClick={handlePrint}
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium shadow-sm"
                   >
                     <Printer className="w-4 h-4" />
-                    <span>{t.print}</span>
+                    <span>프린트</span>
                   </button>
                 </div>
               </div>
@@ -816,7 +916,14 @@ export default function StudentNotesPage() {
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
               <div className="bg-white rounded-xl shadow-xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-2xl font-bold text-gray-900">{t.studentEvaluation}</h2>
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    {modalType === 'teacher' 
+                      ? '선생님 평가'
+                      : selectedNote.studentEvaluation?.isCompleted 
+                        ? (selectedNote.studentEvaluation.overallScore >= 85 ? '내 수업 평가' : '평가 수정하기')
+                        : '수업 평가하기'
+                    }
+                  </h2>
                   <button 
                     onClick={() => setShowEvaluationModal(false)}
                     className="text-gray-400 hover:text-gray-600"
@@ -825,185 +932,264 @@ export default function StudentNotesPage() {
                   </button>
                 </div>
 
-                {/* 선생님 평가 표시 */}
-                {selectedNote.teacherEvaluation?.isCompleted && (
-                  <div className="mb-6 p-4 bg-blue-50 rounded-lg">
-                    <h3 className="font-semibold text-blue-900 mb-2">{t.teacherEvaluation}</h3>
-                    <div className="flex items-center gap-2 mb-2">
-                      <Star className="w-5 h-5 text-yellow-500 fill-current" />
-                      <span className="text-lg font-bold text-blue-900">{selectedNote.teacherEvaluation.score}점</span>
+                {/* 선생님 평가 모달 */}
+                {modalType === 'teacher' && selectedNote.teacherEvaluation?.isCompleted && (
+                  <div className="space-y-6">
+                    <div className="p-6 bg-blue-50 rounded-lg">
+                      <div className="flex items-center gap-2 mb-4">
+                        <Star className="w-6 h-6 text-yellow-500 fill-current" />
+                        <h3 className="text-xl font-semibold text-blue-900">선생님 평가</h3>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg font-bold text-blue-900">{selectedNote.teacherEvaluation.score}점</span>
+                          <span className="text-blue-700">/ 100점</span>
+                        </div>
+                        <div className="bg-white p-4 rounded-lg">
+                          <h4 className="font-medium text-blue-900 mb-2">평가 코멘트</h4>
+                          <p className="text-blue-800 leading-relaxed">{selectedNote.teacherEvaluation.comment}</p>
+                        </div>
+                      </div>
                     </div>
-                    <p className="text-blue-800">{selectedNote.teacherEvaluation.comment}</p>
                   </div>
                 )}
 
-                {/* 학생 평가 폼 또는 완료된 평가 표시 */}
-                {selectedNote.studentEvaluation?.isCompleted ? (
-                  <div className="space-y-6">
-                    {/* 완료된 평가 요약 */}
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="text-center p-3 bg-gray-50 rounded-lg">
-                        <div className="text-2xl font-bold text-gray-900">{selectedNote.studentEvaluation.overallScore}</div>
-                        <div className="text-sm text-gray-600">{t.overallScore}</div>
+                {/* 학생 평가 모달 */}
+                {modalType === 'student' && (
+                  <>
+                    {/* 선생님 평가 표시 (학생 평가 모달에서도 상단에 표시) */}
+                    {selectedNote.teacherEvaluation?.isCompleted && (
+                      <div className="mb-6 p-4 bg-blue-50 rounded-lg">
+                        <h3 className="font-semibold text-blue-900 mb-2">선생님 평가</h3>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Star className="w-5 h-5 text-yellow-500 fill-current" />
+                          <span className="text-lg font-bold text-blue-900">{selectedNote.teacherEvaluation.score}점</span>
+                        </div>
+                        <p className="text-blue-800">{selectedNote.teacherEvaluation.comment}</p>
                       </div>
-                      <div className="text-center p-3 bg-gray-50 rounded-lg">
-                        <div className="text-2xl font-bold text-gray-900">{selectedNote.studentEvaluation.questionnaireScore}</div>
-                        <div className="text-sm text-gray-600">{t.questionnaireScore}</div>
-                      </div>
-                      <div className="text-center p-3 bg-gray-50 rounded-lg">
-                        <div className="text-2xl font-bold text-gray-900">{selectedNote.studentEvaluation.feedbackScore}</div>
-                        <div className="text-sm text-gray-600">{t.feedbackScore}</div>
-                      </div>
-                    </div>
+                    )}
 
-                    {/* 앙케이트 상세 결과 */}
-                    <div>
-                      <h3 className="font-semibold text-gray-900 mb-3">{t.questionnaireTitle}</h3>
-                      <div className="space-y-3">
-                        {Object.entries(selectedNote.studentEvaluation.questionnaireAnswers).map(([key, score]) => (
-                          <div key={key} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <span className="text-sm text-gray-700">
-                              {t.questionnaireQuestions[key as keyof typeof t.questionnaireQuestions]}
-                            </span>
-                            <div className="flex items-center gap-1">
-                              {[1, 2, 3, 4, 5].map((star) => (
-                                <Star 
-                                  key={star} 
-                                  className={`w-4 h-4 ${star <= score ? 'text-yellow-500 fill-current' : 'text-gray-300'}`} 
-                                />
-                              ))}
-                              <span className="ml-2 text-sm font-medium text-gray-900">{score}점</span>
+                    {/* 학생 평가 폼 또는 완료된 평가 표시 */}
+                    {selectedNote.studentEvaluation?.isCompleted ? (
+                      <div className="space-y-6">
+                        {/* 85점 이상일 때 수정 불가능 안내 */}
+                        {selectedNote.studentEvaluation.overallScore >= 85 && (
+                          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                            <div className="flex items-center gap-2 mb-2">
+                              <AlertCircle className="w-5 h-5 text-yellow-600" />
+                              <h3 className="font-semibold text-yellow-800">평가 수정 불가</h3>
+                            </div>
+                            <p className="text-yellow-700 text-sm">
+                              평가 점수가 85점 이상이므로 인터넷 상에 공개될 수 있습니다. 
+                              이로 인해 평가 내용을 수정할 수 없습니다.
+                            </p>
+                          </div>
+                        )}
+
+                        {/* 완료된 평가 요약 */}
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="text-center p-3 bg-gray-50 rounded-lg">
+                            <div className="text-2xl font-bold text-gray-900">{selectedNote.studentEvaluation.overallScore}</div>
+                            <div className="text-sm text-gray-600">{t.overallScore}</div>
+                          </div>
+                          <div className="text-center p-3 bg-gray-50 rounded-lg">
+                            <div className="text-2xl font-bold text-gray-900">{selectedNote.studentEvaluation.questionnaireScore}</div>
+                            <div className="text-sm text-gray-600">{t.questionnaireScore}</div>
+                          </div>
+                          <div className="text-center p-3 bg-gray-50 rounded-lg">
+                            <div className="text-2xl font-bold text-gray-900">{selectedNote.studentEvaluation.feedbackScore}</div>
+                            <div className="text-sm text-gray-600">{t.feedbackScore}</div>
+                          </div>
+                        </div>
+
+                        {/* 앙케이트 상세 결과 */}
+                        <div>
+                          <h3 className="font-semibold text-gray-900 mb-3">{t.questionnaireTitle}</h3>
+                          <div className="space-y-3">
+                            {Object.entries(selectedNote.studentEvaluation.questionnaireAnswers).map(([key, score]) => (
+                              <div key={key} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <span className="text-sm text-gray-700">
+                                  {t.questionnaireQuestions[key as keyof typeof t.questionnaireQuestions]}
+                                </span>
+                                <div className="flex items-center gap-1">
+                                  {[1, 2, 3, 4, 5].map((star) => (
+                                    <Star 
+                                      key={star} 
+                                      className={`w-4 h-4 ${star <= score ? 'text-yellow-500 fill-current' : 'text-gray-300'}`} 
+                                    />
+                                  ))}
+                                  <span className="ml-2 text-sm font-medium text-gray-900">{score}점</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* 감상 */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">{t.feedback}</label>
+                          <p className="text-gray-700 bg-gray-50 p-3 rounded-lg">{selectedNote.studentEvaluation.feedback}</p>
+                        </div>
+
+                        {/* 선생님 답장 */}
+                        {selectedNote.studentEvaluation.teacherReply?.isReplied && (
+                          <div className="p-4 bg-green-50 rounded-lg">
+                            <h3 className="font-semibold text-green-900 mb-2">{t.teacherReply}</h3>
+                            <p className="text-green-800 mb-2">{selectedNote.studentEvaluation.teacherReply.comment}</p>
+                            <div className="text-sm text-green-600">
+                              {t.teacherReplyDate}: {new Date(selectedNote.studentEvaluation.teacherReply.date).toLocaleDateString(currentLanguage === 'ko' ? 'ko-KR' : 'ja-JP')}
                             </div>
                           </div>
-                        ))}
+                        )}
+
+                        <div className="text-center text-green-600 font-medium">
+                          ✓ {t.evaluationCompleted}
+                        </div>
+                        
+                        {/* 85점 미만일 때 평가 수정하기 버튼 */}
+                        {selectedNote.studentEvaluation && selectedNote.studentEvaluation.overallScore < 85 && (
+                          <div className="text-center mt-4">
+                            <button
+                              onClick={() => {
+                                if (!selectedNote.studentEvaluation) return;
+                                
+                                // 평가 폼을 현재 평가 데이터로 초기화
+                                setEvaluationForm({
+                                  questionnaireScore: selectedNote.studentEvaluation.questionnaireScore,
+                                  feedbackScore: selectedNote.studentEvaluation.feedbackScore,
+                                  feedback: selectedNote.studentEvaluation.feedback,
+                                  hideFromTeacher: selectedNote.studentEvaluation.hideFromTeacher,
+                                  questionnaireAnswers: { ...selectedNote.studentEvaluation.questionnaireAnswers }
+                                });
+                                // 평가 완료 상태를 false로 변경하여 수정 모드로 전환
+                                const updatedNote: LessonNote = {
+                                  ...selectedNote,
+                                  studentEvaluation: {
+                                    ...selectedNote.studentEvaluation,
+                                    isCompleted: false
+                                  }
+                                };
+                                setSelectedNote(updatedNote);
+                                // 노트 목록도 업데이트
+                                setNotes(prevNotes => 
+                                  prevNotes.map(note => 
+                                    note.id === selectedNote.id ? updatedNote : note
+                                  )
+                                );
+                              }}
+                              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                            >
+                              평가 수정하기
+                            </button>
+                          </div>
+                        )}
                       </div>
-                    </div>
+                    ) : (
+                      <div className="space-y-6">
+                        {/* 앙케이트 질문들 */}
+                        <div>
+                          <h3 className="font-semibold text-gray-900 mb-4">{t.questionnaireTitle}</h3>
+                          <div className="space-y-4">
+                            {Object.entries(t.questionnaireQuestions).map(([key, question]) => (
+                              <div key={key} className="p-4 border border-gray-200 rounded-lg">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">{question}</label>
+                                <div className="flex items-center gap-1">
+                                  {[1, 2, 3, 4, 5].map((star) => (
+                                    <button
+                                      key={star}
+                                      onClick={() => setEvaluationForm(prev => ({
+                                        ...prev,
+                                        questionnaireAnswers: {
+                                          ...prev.questionnaireAnswers,
+                                          [key]: star
+                                        }
+                                      }))}
+                                      className={`text-2xl ${star <= evaluationForm.questionnaireAnswers[key as keyof typeof evaluationForm.questionnaireAnswers] ? 'text-yellow-500' : 'text-gray-300'}`}
+                                    >
+                                      ★
+                                    </button>
+                                  ))}
+                                  <span className="ml-2 text-sm text-gray-600">
+                                    {evaluationForm.questionnaireAnswers[key as keyof typeof evaluationForm.questionnaireAnswers]}점
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
 
-                    {/* 감상 */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">{t.feedback}</label>
-                      <p className="text-gray-700 bg-gray-50 p-3 rounded-lg">{selectedNote.studentEvaluation.feedback}</p>
-                    </div>
+                        {/* 감상 입력 */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">{t.feedback}</label>
+                          <textarea
+                            value={evaluationForm.feedback}
+                            onChange={(e) => setEvaluationForm(prev => ({ ...prev, feedback: e.target.value }))}
+                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            rows={4}
+                            placeholder="수업에 대한 감상과 의견을 자유롭게 작성해주세요..."
+                          />
+                        </div>
 
-                    {/* 선생님 답장 */}
-                    {selectedNote.studentEvaluation.teacherReply?.isReplied && (
-                      <div className="p-4 bg-green-50 rounded-lg">
-                        <h3 className="font-semibold text-green-900 mb-2">{t.teacherReply}</h3>
-                        <p className="text-green-800 mb-2">{selectedNote.studentEvaluation.teacherReply.comment}</p>
-                        <div className="text-sm text-green-600">
-                          {t.teacherReplyDate}: {new Date(selectedNote.studentEvaluation.teacherReply.date).toLocaleDateString(currentLanguage === 'ko' ? 'ko-KR' : 'ja-JP')}
+                        {/* 감상 별점 */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">{t.feedbackScore}</label>
+                          <div className="flex items-center gap-1">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <button
+                                key={star}
+                                onClick={() => setEvaluationForm(prev => ({ ...prev, feedbackScore: star }))}
+                                className={`text-2xl ${star <= evaluationForm.feedbackScore ? 'text-yellow-500' : 'text-gray-300'}`}
+                              >
+                                ★
+                              </button>
+                            ))}
+                            <span className="ml-2 text-sm text-gray-600">{evaluationForm.feedbackScore}점</span>
+                          </div>
+                        </div>
+
+                        {/* 선생님에게 숨기기 옵션 */}
+                        <div className="p-4 bg-yellow-50 rounded-lg">
+                          <div className="flex items-start gap-3">
+                            <input
+                              type="checkbox"
+                              id="hideFromTeacher"
+                              checked={evaluationForm.hideFromTeacher}
+                              onChange={(e) => setEvaluationForm(prev => ({ ...prev, hideFromTeacher: e.target.checked }))}
+                              className="mt-1"
+                            />
+                            <div>
+                              <label htmlFor="hideFromTeacher" className="block text-sm font-medium text-gray-700">
+                                {t.hideFromTeacher}
+                              </label>
+                              <p className="text-sm text-gray-600 mt-1">{t.hideFromTeacherDesc}</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
+                          {t.consentText}
                         </div>
                       </div>
                     )}
 
-                    <div className="text-center text-green-600 font-medium">
-                      ✓ {t.evaluationCompleted}
+                    <div className="flex justify-end gap-3 mt-6">
+                      <button 
+                        onClick={() => setShowEvaluationModal(false)}
+                        className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+                      >
+                        {t.back}
+                      </button>
+                      {!selectedNote.studentEvaluation?.isCompleted && (
+                        <button 
+                          onClick={handleSubmitEvaluation}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                          {t.submitEvaluation}
+                        </button>
+                      )}
                     </div>
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    {/* 앙케이트 질문들 */}
-                    <div>
-                      <h3 className="font-semibold text-gray-900 mb-4">{t.questionnaireTitle}</h3>
-                      <div className="space-y-4">
-                        {Object.entries(t.questionnaireQuestions).map(([key, question]) => (
-                          <div key={key} className="p-4 border border-gray-200 rounded-lg">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">{question}</label>
-                            <div className="flex items-center gap-1">
-                              {[1, 2, 3, 4, 5].map((star) => (
-                                <button
-                                  key={star}
-                                  onClick={() => setEvaluationForm(prev => ({
-                                    ...prev,
-                                    questionnaireAnswers: {
-                                      ...prev.questionnaireAnswers,
-                                      [key]: star
-                                    }
-                                  }))}
-                                  className={`text-2xl ${star <= evaluationForm.questionnaireAnswers[key as keyof typeof evaluationForm.questionnaireAnswers] ? 'text-yellow-500' : 'text-gray-300'}`}
-                                >
-                                  ★
-                                </button>
-                              ))}
-                              <span className="ml-2 text-sm text-gray-600">
-                                {evaluationForm.questionnaireAnswers[key as keyof typeof evaluationForm.questionnaireAnswers]}점
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* 감상 입력 */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">{t.feedback}</label>
-                      <textarea
-                        value={evaluationForm.feedback}
-                        onChange={(e) => setEvaluationForm(prev => ({ ...prev, feedback: e.target.value }))}
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        rows={4}
-                        placeholder="수업에 대한 감상과 의견을 자유롭게 작성해주세요..."
-                      />
-                    </div>
-
-                    {/* 감상 별점 */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">{t.feedbackScore}</label>
-                      <div className="flex items-center gap-1">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <button
-                            key={star}
-                            onClick={() => setEvaluationForm(prev => ({ ...prev, feedbackScore: star }))}
-                            className={`text-2xl ${star <= evaluationForm.feedbackScore ? 'text-yellow-500' : 'text-gray-300'}`}
-                          >
-                            ★
-                          </button>
-                        ))}
-                        <span className="ml-2 text-sm text-gray-600">{evaluationForm.feedbackScore}점</span>
-                      </div>
-                    </div>
-
-                    {/* 선생님에게 숨기기 옵션 */}
-                    <div className="p-4 bg-yellow-50 rounded-lg">
-                      <div className="flex items-start gap-3">
-                        <input
-                          type="checkbox"
-                          id="hideFromTeacher"
-                          checked={evaluationForm.hideFromTeacher}
-                          onChange={(e) => setEvaluationForm(prev => ({ ...prev, hideFromTeacher: e.target.checked }))}
-                          className="mt-1"
-                        />
-                        <div>
-                          <label htmlFor="hideFromTeacher" className="block text-sm font-medium text-gray-700">
-                            {t.hideFromTeacher}
-                          </label>
-                          <p className="text-sm text-gray-600 mt-1">{t.hideFromTeacherDesc}</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
-                      {t.consentText}
-                    </div>
-                  </div>
+                  </>
                 )}
-
-                <div className="flex justify-end gap-3 mt-6">
-                  <button 
-                    onClick={() => setShowEvaluationModal(false)}
-                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
-                  >
-                    {t.back}
-                  </button>
-                  {!selectedNote.studentEvaluation?.isCompleted && (
-                    <button 
-                      onClick={handleSubmitEvaluation}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      {t.submitEvaluation}
-                    </button>
-                  )}
-                </div>
               </div>
             </div>
           )}
@@ -1092,11 +1278,13 @@ export default function StudentNotesPage() {
 
         {/* 노트 목록 */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredNotes.map((note) => (
+          {filteredNotes.map((note, index) => (
             <div
               key={note.id}
               onClick={() => handleNoteClick(note)}
-              className="bg-white rounded-xl shadow-sm p-6 cursor-pointer hover:shadow-md transition-shadow"
+              className={`bg-white rounded-xl shadow-sm p-6 cursor-pointer hover:shadow-md transition-shadow ${
+                selectedNote?.id === note.id ? 'ring-2 ring-blue-500' : ''
+              }`}
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-2">
