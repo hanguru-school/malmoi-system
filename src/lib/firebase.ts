@@ -48,7 +48,7 @@ export const COLLECTIONS = {
 } as const;
 
 // 사용자 역할 타입
-export type UserRole = 'admin' | 'teacher' | 'student' | 'staff';
+export type UserRole = 'admin' | 'teacher' | 'student' | 'staff' | 'parent';
 
 // 사용자 인터페이스
 export interface User {

@@ -1,6 +1,6 @@
 'use client';
 
-import { Settings, Search, Plus, Pause, Play, Edit, Trash2, Activity } from 'lucide-react';
+import { Settings, Search, Plus, Pause, Play, Edit, Trash2, Activity, MessageSquare, BarChart3 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 interface AutomationRule {
@@ -109,7 +109,7 @@ export default function AutomationManagementPage() {
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
+                  onClick={() => setActiveTab(tab.id as 'rules' | 'logs' | 'queue' | 'analytics')}
                   className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors ${
                     activeTab === tab.id
                       ? 'text-blue-600 border-b-2 border-blue-600'

@@ -436,7 +436,7 @@ export default function StudentTaggingPage() {
                       name="otherType"
                       value="consultation"
                       checked={selectedOtherType === 'consultation'}
-                      onChange={(e) => setSelectedOtherType(e.target.value as any)}
+                      onChange={(e) => setSelectedOtherType(e.target.value as 'consultation' | 'materials' | 'other')}
                       className="text-green-600 focus:ring-green-500"
                     />
                     <MessageSquare className="w-5 h-5 text-blue-600" />
@@ -448,7 +448,7 @@ export default function StudentTaggingPage() {
                       name="otherType"
                       value="materials"
                       checked={selectedOtherType === 'materials'}
-                      onChange={(e) => setSelectedOtherType(e.target.value as any)}
+                      onChange={(e) => setSelectedOtherType(e.target.value as 'consultation' | 'materials' | 'other')}
                       className="text-green-600 focus:ring-green-500"
                     />
                     <ShoppingCart className="w-5 h-5 text-purple-600" />
@@ -460,7 +460,7 @@ export default function StudentTaggingPage() {
                       name="otherType"
                       value="other"
                       checked={selectedOtherType === 'other'}
-                      onChange={(e) => setSelectedOtherType(e.target.value as any)}
+                      onChange={(e) => setSelectedOtherType(e.target.value as 'consultation' | 'materials' | 'other')}
                       className="text-green-600 focus:ring-green-500"
                     />
                     <MoreHorizontal className="w-5 h-5 text-gray-600" />

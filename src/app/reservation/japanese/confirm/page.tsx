@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { 
   CheckCircle, 
@@ -29,7 +29,7 @@ interface Reservation {
   studentEmail: string;
 }
 
-export default function ReservationConfirmPage() {
+function ReservationConfirmPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const reservationId = searchParams.get('reservationId');
@@ -311,5 +311,20 @@ export default function ReservationConfirmPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ReservationConfirmPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600" />
+          <p className="text-gray-600">読み込み中...</p>
+        </div>
+      </div>
+    }>
+      <ReservationConfirmPageContent />
+    </Suspense>
   );
 } 

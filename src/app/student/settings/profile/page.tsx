@@ -97,7 +97,7 @@ export default function StudentProfileSettingsPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
 
-  const handleInputChange = (field: keyof ProfileData, value: any) => {
+  const handleInputChange = (field: keyof ProfileData, value: string | boolean) => {
     setProfile(prev => ({
       ...prev,
       [field]: value

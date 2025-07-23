@@ -130,9 +130,10 @@ export default function LoginPage() {
       await signIn(email, password);
       console.log('로그인 성공, 사용자 상태 대기 중...');
       // useEffect에서 사용자 상태 변경을 감지하여 리다이렉션 처리
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('로그인 실패:', error);
-      setError(error.message || t.loginFailed);
+      const errorMessage = error instanceof Error ? error.message : t.loginFailed;
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -146,8 +147,9 @@ export default function LoginPage() {
     try {
       await signInWithLine();
       // useEffect에서 사용자 상태 변경을 감지하여 리다이렉션 처리
-    } catch (error: any) {
-      setError(error.message || t.lineLoginFailed);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : t.lineLoginFailed;
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -423,6 +425,24 @@ export default function LoginPage() {
                       className="px-2 py-1 bg-blue-100 hover:bg-blue-200 rounded text-blue-800 transition-colors"
                     >
                       student789!
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="flex flex-col space-y-1">
+                  <span className="font-medium">학부모 계정:</span>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => copyToClipboard('parent@hanguru.school', '학부모 이메일')}
+                      className="px-2 py-1 bg-blue-100 hover:bg-blue-200 rounded text-blue-800 transition-colors"
+                    >
+                      parent@hanguru.school
+                    </button>
+                    <button
+                      onClick={() => copyToClipboard('parent345!', '학부모 비밀번호')}
+                      className="px-2 py-1 bg-blue-100 hover:bg-blue-200 rounded text-blue-800 transition-colors"
+                    >
+                      parent345!
                     </button>
                   </div>
                 </div>

@@ -462,7 +462,7 @@ export default function GrammarClassificationPage() {
                     {/* Type Filter */}
                     <select
                       value={selectedType}
-                      onChange={(e) => setSelectedType(e.target.value as any)}
+                      onChange={(e) => setSelectedType(e.target.value as 'all' | 'grammar' | 'vocabulary' | 'expression')}
                       className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value="all">전체</option>
@@ -581,7 +581,7 @@ export default function GrammarClassificationPage() {
                               <div className="flex items-center space-x-2">
                                 <select
                                   value={item.category}
-                                  onChange={(e) => handleCategoryChange(item.id, e.target.value as any)}
+                                  onChange={(e) => handleCategoryChange(item.id, e.target.value as 'completed' | 'frequent' | 'unexplained')}
                                   onClick={(e) => e.stopPropagation()}
                                   className="text-xs border border-gray-300 rounded px-2 py-1"
                                 >

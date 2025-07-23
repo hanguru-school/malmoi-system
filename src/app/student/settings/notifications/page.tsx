@@ -88,7 +88,7 @@ export default function StudentNotificationSettingsPage() {
       ...prev,
       [category]: {
         ...prev[category],
-        [field]: !(prev[category] as any)[field]
+        [field]: !(prev[category] as Record<string, boolean>)[field]
       }
     }));
   };

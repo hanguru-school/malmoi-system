@@ -1,9 +1,26 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function TestPage() {
   const [message, setMessage] = useState('테스트 페이지가 정상적으로 로드되었습니다!');
+  const [browserAPIs, setBrowserAPIs] = useState({
+    webSerial: false,
+    usbHid: false,
+    webNfc: false,
+    usb: false
+  });
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    setBrowserAPIs({
+      webSerial: 'serial' in navigator,
+      usbHid: 'hid' in navigator,
+      webNfc: 'NDEFReader' in window,
+      usb: 'usb' in navigator
+    });
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -22,16 +39,16 @@ export default function TestPage() {
               <h2 className="text-lg font-semibold text-blue-900 mb-2">브라우저 API 지원 확인</h2>
               <div className="space-y-2">
                 <p className="text-blue-800">
-                  Web Serial API: {'serial' in navigator ? '✅ 지원됨' : '❌ 지원 안됨'}
+                  Web Serial API: {isClient ? (browserAPIs.webSerial ? '✅ 지원됨' : '❌ 지원 안됨') : '로딩 중...'}
                 </p>
                 <p className="text-blue-800">
-                  USB HID API: {'hid' in navigator ? '✅ 지원됨' : '❌ 지원 안됨'}
+                  USB HID API: {isClient ? (browserAPIs.usbHid ? '✅ 지원됨' : '❌ 지원 안됨') : '로딩 중...'}
                 </p>
                 <p className="text-blue-800">
-                  Web NFC API: {'NDEFReader' in window ? '✅ 지원됨' : '❌ 지원 안됨'}
+                  Web NFC API: {isClient ? (browserAPIs.webNfc ? '✅ 지원됨' : '❌ 지원 안됨') : '로딩 중...'}
                 </p>
                 <p className="text-blue-800">
-                  USB API: {'usb' in navigator ? '✅ 지원됨' : '❌ 지원 안됨'}
+                  USB API: {isClient ? (browserAPIs.usb ? '✅ 지원됨' : '❌ 지원 안됨') : '로딩 중...'}
                 </p>
               </div>
             </div>

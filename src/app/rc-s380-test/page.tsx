@@ -20,12 +20,26 @@ import { hardwareReaderManager } from '@/lib/hardware-reader';
 
 export default function RC380TestPage() {
   const [connectionStatus, setConnectionStatus] = useState<'disconnected' | 'connecting' | 'connected' | 'error'>('disconnected');
-  const [deviceInfo, setDeviceInfo] = useState<any>(null);
+  const [deviceInfo, setDeviceInfo] = useState<{
+    name: string;
+    type: string;
+    vendorId?: number;
+    productId?: number;
+    serialNumber?: string;
+    version?: string;
+    capabilities?: string[] | Record<string, unknown>;
+  } | null>(null);
   const [lastUID, setLastUID] = useState<string>('');
   const [isReading, setIsReading] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
   const [error, setError] = useState<string>('');
-  const [availableDevices, setAvailableDevices] = useState<any[]>([]);
+  const [availableDevices, setAvailableDevices] = useState<{
+    name: string;
+    type: string;
+    vendorId?: number;
+    productId?: number;
+    serialNumber?: string;
+  }[]>([]);
   const [isScanning, setIsScanning] = useState(false);
 
   const addLog = (message: string) => {

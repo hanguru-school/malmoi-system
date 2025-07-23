@@ -56,6 +56,7 @@ export default function StaffHomePage() {
   const [permissions, setPermissions] = useState<StaffPermissions | null>(null);
   const [loading, setLoading] = useState(true);
   const [attendanceStatus, setAttendanceStatus] = useState<'not_checked' | 'checked_in' | 'checked_out'>('not_checked');
+  const [attendanceTime, setAttendanceTime] = useState<string>('');
 
   useEffect(() => {
     // 실제 API 호출로 대체
@@ -111,10 +112,48 @@ export default function StaffHomePage() {
         canManageStudents: false
       });
 
-      setAttendanceStatus('checked_in');
+      // 오늘 날짜 확인
+      const today = new Date().toISOString().split('T')[0];
+      const storedAttendance = localStorage.getItem(`attendance_${today}_${user?.id}`);
+      
+      if (storedAttendance) {
+        const attendanceData = JSON.parse(storedAttendance);
+        setAttendanceStatus(attendanceData.status);
+        setAttendanceTime(attendanceData.time);
+      } else {
+        setAttendanceStatus('not_checked');
+      }
+      
       setLoading(false);
     }, 1000);
-  }, []);
+  }, [user?.id]);
+
+  const handleAttendance = () => {
+    const now = new Date();
+    const today = now.toISOString().split('T')[0];
+    const currentTime = now.toTimeString().split(' ')[0];
+    
+    if (attendanceStatus === 'not_checked') {
+      // 출근 처리
+      const attendanceData = {
+        status: 'checked_in',
+        time: currentTime,
+        date: today
+      };
+      localStorage.setItem(`attendance_${today}_${user?.id}`, JSON.stringify(attendanceData));
+      setAttendanceStatus('checked_in');
+      setAttendanceTime(currentTime);
+    } else if (attendanceStatus === 'checked_in') {
+      // 퇴근 처리
+      const attendanceData = {
+        status: 'checked_out',
+        time: currentTime,
+        date: today
+      };
+      localStorage.setItem(`attendance_${today}_${user?.id}`, JSON.stringify(attendanceData));
+      setAttendanceStatus('checked_out');
+    }
+  };
 
   const getWorkTypeColor = (type: string) => {
     switch (type) {
@@ -276,13 +315,18 @@ export default function StaffHomePage() {
                  attendanceStatus === 'checked_out' ? '퇴근 완료' : '출근 대기'}
               </h3>
               <p className="text-sm text-gray-600">
-                {attendanceStatus === 'checked_in' ? '오늘도 열심히 일하세요!' :
+                {attendanceStatus === 'checked_in' ? `출근 시간: ${attendanceTime}` :
                  attendanceStatus === 'checked_out' ? '수고하셨습니다!' :
-                 'UID 카드로 출근 체크해주세요'}
+                 '출근하기 버튼을 눌러주세요'}
               </p>
             </div>
           </div>
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+          <button 
+            onClick={handleAttendance} 
+            className={`px-4 py-2 rounded-lg transition-colors ${
+              attendanceStatus === 'checked_in' ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'
+            }`}
+          >
             {attendanceStatus === 'checked_in' ? '퇴근하기' : '출근하기'}
           </button>
         </div>

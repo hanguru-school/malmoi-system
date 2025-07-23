@@ -26,7 +26,9 @@ export default function TeacherSchedulePage() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'upcoming' | 'in_progress' | 'completed' | 'cancelled'>('all');
 
   useEffect(() => {
-    // 실제 API 호출로 대체
+    // 실제 API 호출로 대체 - 로그인된 선생님 ID로 필터링
+    const teacherId = localStorage.getItem('teacherId') || 'T-001';
+    
     setTimeout(() => {
       const mockSchedule: ClassSchedule[] = [
         {
@@ -186,10 +188,7 @@ export default function TeacherSchedulePage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-            <Plus className="w-4 h-4" />
-            새 수업
-          </button>
+          {/* 새 수업 추가 버튼 제거됨 */}
         </div>
       </div>
 
@@ -205,7 +204,7 @@ export default function TeacherSchedulePage() {
             ].map((mode) => (
               <button
                 key={mode.id}
-                onClick={() => setViewMode(mode.id as any)}
+                onClick={() => setViewMode(mode.id as 'today' | 'week' | 'month')}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                   viewMode === mode.id
                     ? 'bg-blue-600 text-white'
@@ -256,7 +255,7 @@ export default function TeacherSchedulePage() {
           {/* 상태 필터 */}
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as any)}
+            onChange={(e) => setStatusFilter(e.target.value as 'all' | 'upcoming' | 'in_progress' | 'completed' | 'cancelled')}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="all">전체 상태</option>

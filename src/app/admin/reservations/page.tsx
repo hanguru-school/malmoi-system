@@ -1,482 +1,456 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { 
-  Calendar, 
-  Search, 
-  Filter,
-  Eye,
-  Edit,
-  Trash2,
-  CheckCircle,
-  Clock,
-  XCircle,
-  AlertCircle,
-  Loader2,
-  Plus,
-  User,
-  BookOpen
-} from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Filter, Plus, Calendar, Clock, User, BookOpen, CheckCircle, XCircle, AlertCircle, MoreVertical, Edit, Trash2, Eye } from 'lucide-react';
 import Link from 'next/link';
 
 interface Reservation {
   id: string;
+  studentName: string;
+  studentId: string;
+  courseName: string;
+  teacherName: string;
   date: string;
   time: string;
-  student: {
-    id: string;
-    name: string;
-    email: string;
-    phone: string;
-  };
-  teacher: {
-    id: string;
-    name: string;
-    email: string;
-  };
-  subject: {
-    id: string;
-    name: string;
-  };
-  status: 'upcoming' | 'confirmed' | 'completed' | 'cancelled';
   duration: number;
-  location: string;
+  status: 'confirmed' | 'completed' | 'canceled' | 'pending';
   price: number;
+  paymentStatus: 'paid' | 'unpaid' | 'partial';
+  notes?: string;
   createdAt: string;
 }
 
-export default function AdminReservationsPage() {
-  const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'upcoming' | 'confirmed' | 'completed' | 'cancelled'>('all');
-  const [dateFilter, setDateFilter] = useState<string>('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const itemsPerPage = 10;
+interface Student {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  grade: string;
+  parentName: string;
+  parentPhone: string;
+}
 
+const AdminReservationsPage = () => {
+  const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [students, setStudents] = useState<Student[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [dateFilter, setDateFilter] = useState<string>('');
+  const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
+  const [showNewReservationModal, setShowNewReservationModal] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [newReservationData, setNewReservationData] = useState({
+    courseName: '',
+    teacherName: '',
+    date: '',
+    time: '',
+    duration: 60,
+    price: 0,
+    notes: ''
+  });
+
+  // Mock data
   useEffect(() => {
-    loadReservations();
+    const mockReservations: Reservation[] = [
+      {
+        id: '1',
+        studentName: '김민수',
+        studentId: 'ST001',
+        courseName: '수학 기초',
+        teacherName: '이선생님',
+        date: '2024-01-15',
+        time: '14:00',
+        duration: 60,
+        status: 'confirmed',
+        price: 50000,
+        paymentStatus: 'paid',
+        notes: '기초 수학 개념 정리',
+        createdAt: '2024-01-10'
+      },
+      {
+        id: '2',
+        studentName: '박지영',
+        studentId: 'ST002',
+        courseName: '영어 회화',
+        teacherName: '김선생님',
+        date: '2024-01-16',
+        time: '16:00',
+        duration: 90,
+        status: 'completed',
+        price: 75000,
+        paymentStatus: 'paid',
+        notes: '일상 회화 연습',
+        createdAt: '2024-01-11'
+      },
+      {
+        id: '3',
+        studentName: '이준호',
+        studentId: 'ST003',
+        courseName: '과학 실험',
+        teacherName: '최선생님',
+        date: '2024-01-17',
+        time: '10:00',
+        duration: 120,
+        status: 'pending',
+        price: 100000,
+        paymentStatus: 'unpaid',
+        notes: '화학 실험 준비',
+        createdAt: '2024-01-12'
+      },
+      {
+        id: '4',
+        studentName: '정수진',
+        studentId: 'ST004',
+        courseName: '국어 문학',
+        teacherName: '박선생님',
+        date: '2024-01-18',
+        time: '13:00',
+        duration: 60,
+        status: 'canceled',
+        price: 50000,
+        paymentStatus: 'unpaid',
+        notes: '고전 문학 읽기',
+        createdAt: '2024-01-13'
+      }
+    ];
+
+    const mockStudents: Student[] = [
+      {
+        id: 'ST001',
+        name: '김민수',
+        email: 'kim@example.com',
+        phone: '010-1234-5678',
+        grade: '중2',
+        parentName: '김부모',
+        parentPhone: '010-1234-5679'
+      },
+      {
+        id: 'ST002',
+        name: '박지영',
+        email: 'park@example.com',
+        phone: '010-2345-6789',
+        grade: '고1',
+        parentName: '박부모',
+        parentPhone: '010-2345-6790'
+      },
+      {
+        id: 'ST003',
+        name: '이준호',
+        email: 'lee@example.com',
+        phone: '010-3456-7890',
+        grade: '중3',
+        parentName: '이부모',
+        parentPhone: '010-3456-7891'
+      },
+      {
+        id: 'ST004',
+        name: '정수진',
+        email: 'jung@example.com',
+        phone: '010-4567-8901',
+        grade: '고2',
+        parentName: '정부모',
+        parentPhone: '010-4567-8902'
+      }
+    ];
+
+    setReservations(mockReservations);
+    setStudents(mockStudents);
   }, []);
 
-  const loadReservations = async () => {
-    try {
-      setLoading(true);
-      
-      // 실제 API 호출로 대체
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      const mockReservations: Reservation[] = [
-        {
-          id: '1',
-          date: '2024-01-15',
-          time: '14:00',
-          student: {
-            id: '1',
-            name: '김학생',
-            email: 'student1@example.com',
-            phone: '010-1234-5678'
-          },
-          teacher: {
-            id: '1',
-            name: '김선생님',
-            email: 'teacher1@example.com'
-          },
-          subject: {
-            id: '1',
-            name: '한국어 회화'
-          },
-          status: 'confirmed',
-          duration: 60,
-          location: '온라인',
-          price: 30000,
-          createdAt: '2024-01-10T10:00:00Z'
-        },
-        {
-          id: '2',
-          date: '2024-01-16',
-          time: '16:00',
-          student: {
-            id: '2',
-            name: '이학생',
-            email: 'student2@example.com',
-            phone: '010-2345-6789'
-          },
-          teacher: {
-            id: '2',
-            name: '이선생님',
-            email: 'teacher2@example.com'
-          },
-          subject: {
-            id: '2',
-            name: '문법'
-          },
-          status: 'upcoming',
-          duration: 60,
-          location: '오프라인',
-          price: 35000,
-          createdAt: '2024-01-11T14:30:00Z'
-        },
-        {
-          id: '3',
-          date: '2024-01-14',
-          time: '10:00',
-          student: {
-            id: '3',
-            name: '박학생',
-            email: 'student3@example.com',
-            phone: '010-3456-7890'
-          },
-          teacher: {
-            id: '1',
-            name: '김선생님',
-            email: 'teacher1@example.com'
-          },
-          subject: {
-            id: '3',
-            name: '작문'
-          },
-          status: 'completed',
-          duration: 90,
-          location: '온라인',
-          price: 45000,
-          createdAt: '2024-01-09T09:15:00Z'
-        },
-        {
-          id: '4',
-          date: '2024-01-17',
-          time: '15:30',
-          student: {
-            id: '4',
-            name: '최학생',
-            email: 'student4@example.com',
-            phone: '010-4567-8901'
-          },
-          teacher: {
-            id: '3',
-            name: '박선생님',
-            email: 'teacher3@example.com'
-          },
-          subject: {
-            id: '4',
-            name: '리스닝'
-          },
-          status: 'cancelled',
-          duration: 45,
-          location: '오프라인',
-          price: 25000,
-          createdAt: '2024-01-12T16:45:00Z'
-        }
-      ];
-
-      setReservations(mockReservations);
-      setTotalPages(Math.ceil(mockReservations.length / itemsPerPage));
-      setLoading(false);
-    } catch (error) {
-      console.error('예약 로드 실패:', error);
-      setLoading(false);
-    }
-  };
-
-  // 필터링 및 검색
   const filteredReservations = reservations.filter(reservation => {
-    const matchesSearch = 
-      reservation.student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      reservation.teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      reservation.subject.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      reservation.student.email.toLowerCase().includes(searchTerm.toLowerCase());
-    
+    const matchesSearch = reservation.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         reservation.courseName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         reservation.teacherName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || reservation.status === statusFilter;
     const matchesDate = !dateFilter || reservation.date === dateFilter;
     
     return matchesSearch && matchesStatus && matchesDate;
   });
 
-  // 페이지네이션
-  const paginatedReservations = filteredReservations.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const reservationStats = {
+    total: reservations.length,
+    confirmed: reservations.filter(r => r.status === 'confirmed').length,
+    completed: reservations.filter(r => r.status === 'completed').length,
+    canceled: reservations.filter(r => r.status === 'canceled').length
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'upcoming':
-        return 'bg-blue-100 text-blue-800';
-      case 'confirmed':
-        return 'bg-green-100 text-green-800';
-      case 'completed':
-        return 'bg-purple-100 text-purple-800';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+      case 'confirmed': return 'bg-blue-100 text-blue-800';
+      case 'completed': return 'bg-green-100 text-green-800';
+      case 'canceled': return 'bg-red-100 text-red-800';
+      case 'pending': return 'bg-yellow-100 text-yellow-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const getStatusIcon = (status: string) => {
+  const getPaymentStatusColor = (status: string) => {
     switch (status) {
-      case 'upcoming':
-        return <Clock className="w-4 h-4" />;
-      case 'confirmed':
-        return <CheckCircle className="w-4 h-4" />;
-      case 'completed':
-        return <CheckCircle className="w-4 h-4" />;
-      case 'cancelled':
-        return <XCircle className="w-4 h-4" />;
-      default:
-        return <AlertCircle className="w-4 h-4" />;
+      case 'paid': return 'bg-green-100 text-green-800';
+      case 'unpaid': return 'bg-red-100 text-red-800';
+      case 'partial': return 'bg-yellow-100 text-yellow-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'upcoming':
-        return '예정';
-      case 'confirmed':
-        return '확정';
-      case 'completed':
-        return '완료';
-      case 'cancelled':
-        return '취소';
-      default:
-        return '알 수 없음';
+  const handleCreateReservation = () => {
+    if (selectedStudent && newReservationData.courseName && newReservationData.date && newReservationData.time) {
+      const newReservation: Reservation = {
+        id: Date.now().toString(),
+        studentName: selectedStudent.name,
+        studentId: selectedStudent.id,
+        courseName: newReservationData.courseName,
+        teacherName: newReservationData.teacherName,
+        date: newReservationData.date,
+        time: newReservationData.time,
+        duration: newReservationData.duration,
+        status: 'pending',
+        price: newReservationData.price,
+        paymentStatus: 'unpaid',
+        notes: newReservationData.notes,
+        createdAt: new Date().toISOString().split('T')[0]
+      };
+      
+      setReservations([...reservations, newReservation]);
+      setShowNewReservationModal(false);
+      setSelectedStudent(null);
+      setNewReservationData({
+        courseName: '',
+        teacherName: '',
+        date: '',
+        time: '',
+        duration: 60,
+        price: 0,
+        notes: ''
+      });
     }
   };
 
-  const getDayOfWeek = (date: string) => {
-    return new Date(date).toLocaleDateString('ko-KR', { weekday: 'short' });
+  const handleStatusChange = (reservationId: string, newStatus: Reservation['status']) => {
+    setReservations(reservations.map(r => 
+      r.id === reservationId ? { ...r, status: newStatus } : r
+    ));
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">예약 정보를 불러오는 중...</p>
-        </div>
-      </div>
-    );
-  }
+  const handleDeleteReservation = (reservationId: string) => {
+    setReservations(reservations.filter(r => r.id !== reservationId));
+    setSelectedReservation(null);
+  };
 
   return (
-    <div className="max-w-7xl mx-auto">
-      {/* 헤더 */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
+    <div className="p-6 bg-gray-50 min-h-screen">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">예약 관리</h1>
-          <p className="text-lg text-gray-600">
-            모든 예약을 확인하고 관리하세요
-          </p>
-        </div>
-        <Link
-          href="/admin/reservations/new"
-          className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          <Plus className="w-5 h-5" />
-          새 예약 추가
-        </Link>
-      </div>
-
-      {/* 필터 및 검색 */}
-      <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {/* 검색 */}
-          <div className="md:col-span-2">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                placeholder="학생, 선생님, 과목으로 검색..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-          </div>
-
-          {/* 상태 필터 */}
-          <div>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as 'all' | 'upcoming' | 'confirmed' | 'completed' | 'cancelled')}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="all">전체 상태</option>
-              <option value="upcoming">예정</option>
-              <option value="confirmed">확정</option>
-              <option value="completed">완료</option>
-              <option value="cancelled">취소</option>
-            </select>
-          </div>
-
-          {/* 날짜 필터 */}
-          <div>
-            <input
-              type="date"
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* 통계 카드 */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-sm text-gray-600">총 예약</div>
-              <div className="text-2xl font-bold text-gray-900">{reservations.length}건</div>
-            </div>
-            <Calendar className="w-8 h-8 text-blue-600" />
-          </div>
+          <p className="text-gray-600">학생 예약을 관리하고 새로운 예약을 생성할 수 있습니다.</p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-sm text-gray-600">확정</div>
-              <div className="text-2xl font-bold text-green-600">
-                {reservations.filter(r => r.status === 'confirmed').length}건
+        {/* Reservation Statistics */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Calendar className="h-6 w-6 text-blue-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">전체 예약</p>
+                <p className="text-2xl font-bold text-gray-900">{reservationStats.total}</p>
               </div>
             </div>
-            <CheckCircle className="w-8 h-8 text-green-600" />
           </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-sm text-gray-600">완료</div>
-              <div className="text-2xl font-bold text-purple-600">
-                {reservations.filter(r => r.status === 'completed').length}건
+          
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <CheckCircle className="h-6 w-6 text-blue-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">확정된 예약</p>
+                <p className="text-2xl font-bold text-blue-600">{reservationStats.confirmed}</p>
               </div>
             </div>
-            <CheckCircle className="w-8 h-8 text-purple-600" />
           </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-sm text-gray-600">취소</div>
-              <div className="text-2xl font-bold text-red-600">
-                {reservations.filter(r => r.status === 'cancelled').length}건
+          
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <CheckCircle className="h-6 w-6 text-green-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">완료된 예약</p>
+                <p className="text-2xl font-bold text-green-600">{reservationStats.completed}</p>
               </div>
             </div>
-            <XCircle className="w-8 h-8 text-red-600" />
+          </div>
+          
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center">
+              <div className="p-2 bg-red-100 rounded-lg">
+                <XCircle className="h-6 w-6 text-red-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">취소된 예약</p>
+                <p className="text-2xl font-bold text-red-600">{reservationStats.canceled}</p>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* 예약 목록 */}
-      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-        {paginatedReservations.length === 0 ? (
-          <div className="text-center py-12">
-            <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">예약이 없습니다</h3>
-            <p className="text-gray-600 mb-6">
-              {searchTerm || statusFilter !== 'all' || dateFilter
-                ? '검색 조건에 맞는 예약이 없습니다.' 
-                : '등록된 예약이 없습니다.'}
-            </p>
-            <Link
-              href="/admin/reservations/new"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <Plus className="w-5 h-5" />
-              첫 예약 추가하기
-            </Link>
+        {/* Controls */}
+        <div className="bg-white rounded-lg shadow mb-6">
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+              <div className="flex flex-col sm:flex-row gap-4 flex-1">
+                <div className="relative flex-1 max-w-md">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <input
+                    type="text"
+                    placeholder="학생명, 코스명, 선생님명으로 검색..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="all">전체 상태</option>
+                  <option value="pending">대기중</option>
+                  <option value="confirmed">확정</option>
+                  <option value="completed">완료</option>
+                  <option value="canceled">취소</option>
+                </select>
+                
+                <input
+                  type="date"
+                  value={dateFilter}
+                  onChange={(e) => setDateFilter(e.target.value)}
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowHistoryModal(true)}
+                  className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center gap-2"
+                >
+                  <Clock className="h-4 w-4" />
+                  예약 히스토리
+                </button>
+                <button
+                  onClick={() => setShowNewReservationModal(true)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  새 예약
+                </button>
+              </div>
+            </div>
           </div>
-        ) : (
+        </div>
+
+        {/* Reservations Table */}
+        <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    예약 정보
+                    학생 정보
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    학생
+                    코스 정보
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    선생님
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    과목/가격
+                    일정
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     상태
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    관리
+                    결제
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    가격
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    작업
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {paginatedReservations.map((reservation) => (
+                {filteredReservations.map((reservation) => (
                   <tr key={reservation.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {new Date(reservation.date).toLocaleDateString('ko-KR')} ({getDayOfWeek(reservation.date)})
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {reservation.time} ({reservation.duration}분)
-                      </div>
-                      <div className="text-xs text-gray-400">
-                        {reservation.location}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <User className="w-4 h-4 text-gray-400 mr-2" />
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">{reservation.student.name}</div>
-                          <div className="text-xs text-gray-500">{reservation.student.email}</div>
+                        <div className="flex-shrink-0 h-10 w-10">
+                          <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                            <User className="h-5 w-5 text-blue-600" />
+                          </div>
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-gray-900 cursor-pointer hover:text-blue-600"
+                               onClick={() => setSelectedReservation(reservation)}>
+                            {reservation.studentName}
+                          </div>
+                          <div className="text-sm text-gray-500">{reservation.studentId}</div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <User className="w-4 h-4 text-gray-400 mr-2" />
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">{reservation.teacher.name}</div>
-                          <div className="text-xs text-gray-500">{reservation.teacher.email}</div>
-                        </div>
-                      </div>
+                      <div className="text-sm text-gray-900">{reservation.courseName}</div>
+                      <div className="text-sm text-gray-500">{reservation.teacherName}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <BookOpen className="w-4 h-4 text-gray-400 mr-2" />
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">{reservation.subject.name}</div>
-                          <div className="text-xs text-gray-500">{reservation.price.toLocaleString()}원</div>
-                        </div>
-                      </div>
+                      <div className="text-sm text-gray-900">{reservation.date}</div>
+                      <div className="text-sm text-gray-500">{reservation.time} ({reservation.duration}분)</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(reservation.status)}`}>
-                        {getStatusIcon(reservation.status)}
-                        <span className="ml-1">{getStatusText(reservation.status)}</span>
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(reservation.status)}`}>
+                        {reservation.status === 'confirmed' && '확정'}
+                        {reservation.status === 'completed' && '완료'}
+                        {reservation.status === 'canceled' && '취소'}
+                        {reservation.status === 'pending' && '대기중'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex items-center space-x-2">
-                        <Link
-                          href={`/admin/reservations/${reservation.id}`}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getPaymentStatusColor(reservation.paymentStatus)}`}>
+                        {reservation.paymentStatus === 'paid' && '결제완료'}
+                        {reservation.paymentStatus === 'unpaid' && '미결제'}
+                        {reservation.paymentStatus === 'partial' && '부분결제'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {reservation.price.toLocaleString()}원
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => setSelectedReservation(reservation)}
                           className="text-blue-600 hover:text-blue-900"
                         >
-                          <Eye className="w-4 h-4" />
-                        </Link>
-                        <Link
-                          href={`/admin/reservations/${reservation.id}/edit`}
-                          className="text-green-600 hover:text-green-900"
+                          <Eye className="h-4 w-4" />
+                        </button>
+                        <select
+                          value={reservation.status}
+                          onChange={(e) => handleStatusChange(reservation.id, e.target.value as Reservation['status'])}
+                          className="text-xs border border-gray-300 rounded px-2 py-1"
                         >
-                          <Edit className="w-4 h-4" />
-                        </Link>
-                        <button className="text-red-600 hover:text-red-900">
-                          <Trash2 className="w-4 h-4" />
+                          <option value="pending">대기중</option>
+                          <option value="confirmed">확정</option>
+                          <option value="completed">완료</option>
+                          <option value="canceled">취소</option>
+                        </select>
+                        <button
+                          onClick={() => handleDeleteReservation(reservation.id)}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
                     </td>
@@ -485,58 +459,331 @@ export default function AdminReservationsPage() {
               </tbody>
             </table>
           </div>
-        )}
+        </div>
+      </div>
 
-        {/* 페이지네이션 */}
-        {totalPages > 1 && (
-          <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-            <div className="flex-1 flex justify-between sm:hidden">
+      {/* New Reservation Modal */}
+      {showNewReservationModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">새 예약 생성</h2>
               <button
-                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                disabled={currentPage === 1}
-                className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                onClick={() => setShowNewReservationModal(false)}
+                className="text-gray-400 hover:text-gray-600"
               >
-                이전
-              </button>
-              <button
-                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                disabled={currentPage === totalPages}
-                className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
-              >
-                다음
+                <XCircle className="h-6 w-6" />
               </button>
             </div>
-            <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+
+            <div className="space-y-6">
+              {/* Student Selection */}
               <div>
-                <p className="text-sm text-gray-700">
-                  <span className="font-medium">{(currentPage - 1) * itemsPerPage + 1}</span>부터{' '}
-                  <span className="font-medium">
-                    {Math.min(currentPage * itemsPerPage, filteredReservations.length)}
-                  </span>까지{' '}
-                  <span className="font-medium">{filteredReservations.length}</span>개 중
-                </p>
-              </div>
-              <div>
-                <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                    <button
-                      key={page}
-                      onClick={() => setCurrentPage(page)}
-                      className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                        page === currentPage
-                          ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
-                          : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                      }`}
-                    >
-                      {page}
-                    </button>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  학생 선택
+                </label>
+                <select
+                  value={selectedStudent?.id || ''}
+                  onChange={(e) => {
+                    const student = students.find(s => s.id === e.target.value);
+                    setSelectedStudent(student || null);
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">학생을 선택하세요</option>
+                  {students.map(student => (
+                    <option key={student.id} value={student.id}>
+                      {student.name} ({student.id}) - {student.grade}
+                    </option>
                   ))}
-                </nav>
+                </select>
+              </div>
+
+              {/* Course and Teacher */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    코스명
+                  </label>
+                  <input
+                    type="text"
+                    value={newReservationData.courseName}
+                    onChange={(e) => setNewReservationData({...newReservationData, courseName: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="코스명을 입력하세요"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    담당 선생님
+                  </label>
+                  <input
+                    type="text"
+                    value={newReservationData.teacherName}
+                    onChange={(e) => setNewReservationData({...newReservationData, teacherName: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="선생님명을 입력하세요"
+                  />
+                </div>
+              </div>
+
+              {/* Date and Time */}
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    날짜
+                  </label>
+                  <input
+                    type="date"
+                    value={newReservationData.date}
+                    onChange={(e) => setNewReservationData({...newReservationData, date: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    시간
+                  </label>
+                  <input
+                    type="time"
+                    value={newReservationData.time}
+                    onChange={(e) => setNewReservationData({...newReservationData, time: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    수업 시간 (분)
+                  </label>
+                  <input
+                    type="number"
+                    value={newReservationData.duration}
+                    onChange={(e) => setNewReservationData({...newReservationData, duration: parseInt(e.target.value)})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    min="30"
+                    max="180"
+                    step="30"
+                  />
+                </div>
+              </div>
+
+              {/* Price and Notes */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    가격 (원)
+                  </label>
+                  <input
+                    type="number"
+                    value={newReservationData.price}
+                    onChange={(e) => setNewReservationData({...newReservationData, price: parseInt(e.target.value)})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="0"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    메모
+                  </label>
+                  <input
+                    type="text"
+                    value={newReservationData.notes}
+                    onChange={(e) => setNewReservationData({...newReservationData, notes: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="메모를 입력하세요"
+                  />
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex justify-end gap-3 pt-4">
+                <button
+                  onClick={() => setShowNewReservationModal(false)}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  취소
+                </button>
+                <button
+                  onClick={handleCreateReservation}
+                  disabled={!selectedStudent || !newReservationData.courseName || !newReservationData.date || !newReservationData.time}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  예약 생성
+                </button>
               </div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* Reservation Detail Modal */}
+      {selectedReservation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">예약 상세 정보</h2>
+              <button
+                onClick={() => setSelectedReservation(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <XCircle className="h-6 w-6" />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">학생 정보</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <span className="text-sm font-medium text-gray-500">이름:</span>
+                      <span className="ml-2 text-sm text-gray-900">{selectedReservation.studentName}</span>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-gray-500">학생 ID:</span>
+                      <span className="ml-2 text-sm text-gray-900">{selectedReservation.studentId}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">수업 정보</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <span className="text-sm font-medium text-gray-500">코스:</span>
+                      <span className="ml-2 text-sm text-gray-900">{selectedReservation.courseName}</span>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-gray-500">선생님:</span>
+                      <span className="ml-2 text-sm text-gray-900">{selectedReservation.teacherName}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">일정 정보</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <span className="text-sm font-medium text-gray-500">날짜:</span>
+                      <span className="ml-2 text-sm text-gray-900">{selectedReservation.date}</span>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-gray-500">시간:</span>
+                      <span className="ml-2 text-sm text-gray-900">{selectedReservation.time} ({selectedReservation.duration}분)</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">결제 정보</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <span className="text-sm font-medium text-gray-500">가격:</span>
+                      <span className="ml-2 text-sm text-gray-900">{selectedReservation.price.toLocaleString()}원</span>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-gray-500">결제 상태:</span>
+                      <span className={`ml-2 inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getPaymentStatusColor(selectedReservation.paymentStatus)}`}>
+                        {selectedReservation.paymentStatus === 'paid' && '결제완료'}
+                        {selectedReservation.paymentStatus === 'unpaid' && '미결제'}
+                        {selectedReservation.paymentStatus === 'partial' && '부분결제'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {selectedReservation.notes && (
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">메모</h3>
+                  <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg">
+                    {selectedReservation.notes}
+                  </p>
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                <button
+                  onClick={() => handleDeleteReservation(selectedReservation.id)}
+                  className="px-4 py-2 text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+                >
+                  예약 삭제
+                </button>
+                <button
+                  onClick={() => setSelectedReservation(null)}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  닫기
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reservation History Modal */}
+      {showHistoryModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">예약 히스토리</h2>
+              <button
+                onClick={() => setShowHistoryModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <XCircle className="h-6 w-6" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {reservations
+                .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                .map((reservation) => (
+                  <div key={reservation.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <div className="flex-shrink-0 h-10 w-10">
+                          <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                            <User className="h-5 w-5 text-blue-600" />
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">{reservation.studentName}</div>
+                          <div className="text-sm text-gray-500">{reservation.courseName} - {reservation.teacherName}</div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-medium text-gray-900">{reservation.date} {reservation.time}</div>
+                        <div className="flex items-center space-x-2 mt-1">
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(reservation.status)}`}>
+                            {reservation.status === 'confirmed' && '확정'}
+                            {reservation.status === 'completed' && '완료'}
+                            {reservation.status === 'canceled' && '취소'}
+                            {reservation.status === 'pending' && '대기중'}
+                          </span>
+                          <span className="text-sm text-gray-500">{reservation.price.toLocaleString()}원</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+            </div>
+
+            <div className="flex justify-end pt-4 border-t border-gray-200">
+              <button
+                onClick={() => setShowHistoryModal(false)}
+                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                닫기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
-} 
+};
+
+export default AdminReservationsPage; 

@@ -191,31 +191,37 @@ export default function StudentProfilePage() {
               <p className="text-gray-600">{profile.email}</p>
             </div>
 
-            {/* 레벨 및 포인트 */}
-            <div className="space-y-4 mb-6">
-              <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                <div className="flex items-center">
-                  <Award className="w-5 h-5 text-blue-600 mr-2" />
-                  <span className="text-sm font-medium text-gray-900">현재 레벨</span>
+            {/* 학생 정보 카드들 */}
+            <div className="space-y-3 mb-6">
+              <Link href="/student/level" className="block">
+                <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer">
+                  <div className="flex items-center">
+                    <TrendingUp className="w-5 h-5 text-blue-600 mr-2" />
+                    <span className="text-sm font-medium text-gray-900">현재 레벨</span>
+                  </div>
+                  <span className="text-lg font-bold text-blue-600">{profile.level}</span>
                 </div>
-                <span className="text-lg font-bold text-blue-600">{profile.level}</span>
-              </div>
+              </Link>
 
-              <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
-                <div className="flex items-center">
-                  <Star className="w-5 h-5 text-yellow-600 mr-2" />
-                  <span className="text-sm font-medium text-gray-900">보유 포인트</span>
+              <Link href="/student/points" className="block">
+                <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition-colors cursor-pointer">
+                  <div className="flex items-center">
+                    <Star className="w-5 h-5 text-yellow-600 mr-2" />
+                    <span className="text-sm font-medium text-gray-900">보유 포인트</span>
+                  </div>
+                  <span className="text-lg font-bold text-yellow-600">{profile.points}P</span>
                 </div>
-                <span className="text-lg font-bold text-yellow-600">{profile.points}P</span>
-              </div>
+              </Link>
 
-              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                <div className="flex items-center">
-                  <Clock className="w-5 h-5 text-green-600 mr-2" />
-                  <span className="text-sm font-medium text-gray-900">남은 시간</span>
+              <Link href="/student/time" className="block">
+                <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg hover:bg-green-100 transition-colors cursor-pointer">
+                  <div className="flex items-center">
+                    <Clock className="w-5 h-5 text-green-600 mr-2" />
+                    <span className="text-sm font-medium text-gray-900">남은 시간</span>
+                  </div>
+                  <span className="text-lg font-bold text-green-600">{profile.remainingHours}시간</span>
                 </div>
-                <span className="text-lg font-bold text-green-600">{profile.remainingHours}시간</span>
-              </div>
+              </Link>
             </div>
 
             {/* 통계 */}
@@ -247,10 +253,12 @@ export default function StudentProfilePage() {
                   프로필 수정
                 </button>
               </Link>
-              <button className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
-                <Settings className="w-4 h-4" />
-                설정
-              </button>
+              <Link href="/student/settings" className="block">
+                <button className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                  <Settings className="w-4 h-4" />
+                  설정
+                </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -269,7 +277,7 @@ export default function StudentProfilePage() {
                 ].map((tab) => (
                   <button
                     key={tab.id}
-                    onClick={() => setActiveTab(tab.id as any)}
+                    onClick={() => setActiveTab(tab.id as 'overview' | 'history' | 'achievements' | 'settings')}
                     className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm ${
                       activeTab === tab.id
                         ? 'border-blue-500 text-blue-600'
@@ -288,19 +296,24 @@ export default function StudentProfilePage() {
               {activeTab === 'overview' && (
                 <div className="space-y-6">
                   {/* 학습 진행도 */}
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">학습 진행도</h3>
-                    <div className="bg-gray-200 rounded-full h-3 mb-2">
-                      <div 
-                        className="bg-blue-600 h-3 rounded-full transition-all duration-300"
-                        style={{ width: `${(profile.completedClasses / profile.totalClasses) * 100}%` }}
-                      />
+                  <Link href="/student/progress-settings" className="block">
+                    <div className="cursor-pointer hover:bg-gray-50 p-4 rounded-lg transition-colors">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        학습 진행도
+                        <ChevronRight className="w-4 h-4 text-gray-400" />
+                      </h3>
+                      <div className="bg-gray-200 rounded-full h-3 mb-2">
+                        <div 
+                          className="bg-blue-600 h-3 rounded-full transition-all duration-300"
+                          style={{ width: `${(profile.completedClasses / profile.totalClasses) * 100}%` }}
+                        />
+                      </div>
+                      <div className="flex justify-between text-sm text-gray-600">
+                        <span>완료: {profile.completedClasses}회</span>
+                        <span>목표: {profile.totalClasses}회</span>
+                      </div>
                     </div>
-                    <div className="flex justify-between text-sm text-gray-600">
-                      <span>완료: {profile.completedClasses}회</span>
-                      <span>목표: {profile.totalClasses}회</span>
-                    </div>
-                  </div>
+                  </Link>
 
                   {/* 최근 활동 */}
                   <div>
@@ -404,9 +417,18 @@ export default function StudentProfilePage() {
               {/* 성취 탭 */}
               {activeTab === 'achievements' && (
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">성취</h3>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">성취</h3>
+                    <Link
+                      href="/student/achievements"
+                      className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700"
+                    >
+                      전체 보기
+                      <ChevronRight className="w-4 h-4" />
+                    </Link>
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {achievements.map((achievement) => (
+                    {achievements.slice(0, 4).map((achievement) => (
                       <div key={achievement.id} className="border border-gray-200 rounded-lg p-4">
                         <div className="flex items-center gap-3 mb-2">
                           <span className="text-2xl">{achievement.icon}</span>
@@ -432,6 +454,16 @@ export default function StudentProfilePage() {
                       </div>
                     ))}
                   </div>
+                  {achievements.length > 4 && (
+                    <div className="mt-4 text-center">
+                      <Link
+                        href="/student/achievements"
+                        className="text-sm text-blue-600 hover:text-blue-700"
+                      >
+                        +{achievements.length - 4}개 더보기
+                      </Link>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -440,21 +472,11 @@ export default function StudentProfilePage() {
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">설정</h3>
                   <div className="space-y-4">
-                    <Link href="/student/settings/notifications" className="block">
+                    <Link href="/student/settings" className="block">
                       <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
                         <div>
-                          <h4 className="font-medium text-gray-900">알림 설정</h4>
-                          <p className="text-sm text-gray-600">수업 알림 및 리마인더 설정</p>
-                        </div>
-                        <ChevronRight className="w-5 h-5 text-gray-400" />
-                      </div>
-                    </Link>
-                    
-                    <Link href="/student/settings/line" className="block">
-                      <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
-                        <div>
-                          <h4 className="font-medium text-gray-900">LINE 연동</h4>
-                          <p className="text-sm text-gray-600">LINE 알림 연동 설정</p>
+                          <h4 className="font-medium text-gray-900">전체 설정</h4>
+                          <p className="text-sm text-gray-600">모든 설정을 한 곳에서 관리</p>
                         </div>
                         <ChevronRight className="w-5 h-5 text-gray-400" />
                       </div>
@@ -463,8 +485,8 @@ export default function StudentProfilePage() {
                     <Link href="/student/settings/profile" className="block">
                       <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
                         <div>
-                          <h4 className="font-medium text-gray-900">개인정보</h4>
-                          <p className="text-sm text-gray-600">개인정보 수정 및 관리</p>
+                          <h4 className="font-medium text-gray-900">프로필 관리</h4>
+                          <p className="text-sm text-gray-600">개인 정보 및 기본 설정</p>
                         </div>
                         <ChevronRight className="w-5 h-5 text-gray-400" />
                       </div>
@@ -475,6 +497,16 @@ export default function StudentProfilePage() {
                         <div>
                           <h4 className="font-medium text-gray-900">계정 보안</h4>
                           <p className="text-sm text-gray-600">비밀번호 변경 및 보안 설정</p>
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-gray-400" />
+                      </div>
+                    </Link>
+                    
+                    <Link href="/student/settings/notifications" className="block">
+                      <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                        <div>
+                          <h4 className="font-medium text-gray-900">알림 설정</h4>
+                          <p className="text-sm text-gray-600">수업 알림 및 리마인더 설정</p>
                         </div>
                         <ChevronRight className="w-5 h-5 text-gray-400" />
                       </div>

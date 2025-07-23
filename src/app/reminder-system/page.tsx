@@ -298,7 +298,7 @@ export default function ReminderSystemPage() {
                     </div>
                     <select
                       value={filterType}
-                      onChange={(e) => setFilterType(e.target.value as any)}
+                      onChange={(e) => setFilterType(e.target.value as 'all' | 'lesson-reminder' | 'monthly-summary' | 'tagging-warning' | 'encouragement' | 'next-booking' | 'no-booking' | 'mid-month' | 'next-month')}
                       className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value="all">전체 유형</option>

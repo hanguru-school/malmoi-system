@@ -1,520 +1,410 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
-  BarChart3, 
-  TrendingUp, 
   Users, 
+  GraduationCap, 
   Calendar, 
-  Star, 
-  Clock, 
-  BookOpen, 
-  MessageSquare,
-  Download,
-  Filter,
-  Calendar as CalendarIcon,
-  User,
-  Target,
-  Award
+  DollarSign, 
+  TrendingUp, 
+  TrendingDown,
+  BarChart3,
+  PieChart,
+  Activity,
+  Clock,
+  Star,
+  CheckCircle,
+  AlertCircle
 } from 'lucide-react';
 
 interface StatisticsData {
-  attendance: {
-    total: number;
-    present: number;
-    absent: number;
-    late: number;
-    rate: number;
+  overview: {
+    totalStudents: number;
+    totalTeachers: number;
+    totalRevenue: number;
+    activeLessons: number;
+    monthlyGrowth: number;
+    attendanceRate: number;
   };
-  reservations: {
-    total: number;
-    completed: number;
-    cancelled: number;
-    noShow: number;
-    completionRate: number;
+  trends: {
+    studentGrowth: { month: string; count: number }[];
+    revenueGrowth: { month: string; amount: number }[];
+    lessonCompletion: { month: string; rate: number }[];
   };
-  reviews: {
-    total: number;
-    averageRating: number;
-    responseRate: number;
-    googleReviews: number;
+  demographics: {
+    ageGroups: { group: string; count: number }[];
+    levels: { level: string; count: number }[];
+    subjects: { subject: string; count: number }[];
   };
-  students: {
-    total: number;
-    active: number;
-    newThisMonth: number;
-    averageLessons: number;
+  performance: {
+    teacherRatings: { teacher: string; rating: number; students: number }[];
+    topStudents: { student: string; attendance: number; progress: number }[];
+    popularCourses: { course: string; enrollment: number; rating: number }[];
   };
-  teachers: {
-    total: number;
-    active: number;
-    averageRating: number;
-    totalLessons: number;
-  };
-  monthlyData: {
-    month: string;
-    attendance: number;
-    reservations: number;
-    reviews: number;
-    revenue: number;
-  }[];
-  topStudents: {
-    id: string;
-    name: string;
-    level: string;
-    lessonsCompleted: number;
-    averageRating: number;
-  }[];
-  topTeachers: {
-    id: string;
-    name: string;
-    lessonsTaught: number;
-    averageRating: number;
-    responseRate: number;
-  }[];
-  serviceStats: {
-    service: string;
-    bookings: number;
-    revenue: number;
-    averageRating: number;
-  }[];
 }
 
-export default function StatisticsPage() {
-  const [data, setData] = useState<StatisticsData | null>(null);
+export default function AdminStatisticsPage() {
+  const [stats, setStats] = useState<StatisticsData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedPeriod, setSelectedPeriod] = useState('month');
-  const [selectedTeacher, setSelectedTeacher] = useState('all');
+  const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'quarter' | 'year'>('month');
 
   useEffect(() => {
-    initializeMockData();
+    // 실제 API 호출로 대체
+    setTimeout(() => {
+      const mockStats: StatisticsData = {
+        overview: {
+          totalStudents: 156,
+          totalTeachers: 12,
+          totalRevenue: 45000000,
+          activeLessons: 8,
+          monthlyGrowth: 12.5,
+          attendanceRate: 94.2
+        },
+        trends: {
+          studentGrowth: [
+            { month: '10월', count: 120 },
+            { month: '11월', count: 135 },
+            { month: '12월', count: 145 },
+            { month: '1월', count: 156 }
+          ],
+          revenueGrowth: [
+            { month: '10월', amount: 38000000 },
+            { month: '11월', amount: 41000000 },
+            { month: '12월', amount: 43000000 },
+            { month: '1월', amount: 45000000 }
+          ],
+          lessonCompletion: [
+            { month: '10월', rate: 88 },
+            { month: '11월', rate: 91 },
+            { month: '12월', rate: 89 },
+            { month: '1월', rate: 94 }
+          ]
+        },
+        demographics: {
+          ageGroups: [
+            { group: '10-15세', count: 45 },
+            { group: '16-20세', count: 38 },
+            { group: '21-25세', count: 32 },
+            { group: '26-30세', count: 28 },
+            { group: '31세+', count: 13 }
+          ],
+          levels: [
+            { level: 'A-1 (기초)', count: 52 },
+            { level: 'A-2 (초급)', count: 45 },
+            { level: 'B-1 (중급)', count: 38 },
+            { level: 'B-2 (고급)', count: 21 }
+          ],
+          subjects: [
+            { subject: '한국어 회화', count: 68 },
+            { subject: '한국어 문법', count: 45 },
+            { subject: '한국어 작문', count: 32 },
+            { subject: '한국어 듣기', count: 11 }
+          ]
+        },
+        performance: {
+          teacherRatings: [
+            { teacher: '김선생님', rating: 4.8, students: 25 },
+            { teacher: '이선생님', rating: 4.6, students: 22 },
+            { teacher: '박선생님', rating: 4.7, students: 20 },
+            { teacher: '최선생님', rating: 4.5, students: 18 }
+          ],
+          topStudents: [
+            { student: '김학생', attendance: 98, progress: 95 },
+            { student: '이학생', attendance: 96, progress: 92 },
+            { student: '박학생', attendance: 94, progress: 88 },
+            { student: '최학생', attendance: 92, progress: 85 }
+          ],
+          popularCourses: [
+            { course: '한국어 기초 과정', enrollment: 45, rating: 4.6 },
+            { course: '한국어 초급 과정', enrollment: 38, rating: 4.5 },
+            { course: '한국어 중급 과정', enrollment: 32, rating: 4.7 },
+            { course: '한국어 고급 과정', enrollment: 18, rating: 4.8 }
+          ]
+        }
+      };
+
+      setStats(mockStats);
+      setLoading(false);
+    }, 1000);
   }, []);
 
-  const initializeMockData = () => {
-    const mockData: StatisticsData = {
-      attendance: {
-        total: 1250,
-        present: 1180,
-        absent: 45,
-        late: 25,
-        rate: 94.4
-      },
-      reservations: {
-        total: 1300,
-        completed: 1180,
-        cancelled: 75,
-        noShow: 45,
-        completionRate: 90.8
-      },
-      reviews: {
-        total: 890,
-        averageRating: 4.6,
-        responseRate: 85.2,
-        googleReviews: 156
-      },
-      students: {
-        total: 85,
-        active: 72,
-        newThisMonth: 12,
-        averageLessons: 14.7
-      },
-      teachers: {
-        total: 8,
-        active: 7,
-        averageRating: 4.7,
-        totalLessons: 1180
-      },
-      monthlyData: [
-        { month: '1월', attendance: 95, reservations: 120, reviews: 85, revenue: 8500000 },
-        { month: '2월', attendance: 92, reservations: 115, reviews: 78, revenue: 8200000 },
-        { month: '3월', attendance: 88, reservations: 110, reviews: 72, revenue: 7800000 },
-        { month: '4월', attendance: 94, reservations: 125, reviews: 88, revenue: 8800000 },
-        { month: '5월', attendance: 96, reservations: 130, reviews: 92, revenue: 9200000 },
-        { month: '6월', attendance: 98, reservations: 135, reviews: 95, revenue: 9500000 }
-      ],
-      topStudents: [
-        { id: '1', name: '김학생', level: 'B', lessonsCompleted: 45, averageRating: 4.8 },
-        { id: '2', name: '이학생', level: 'A', lessonsCompleted: 42, averageRating: 4.7 },
-        { id: '3', name: '박학생', level: 'C', lessonsCompleted: 38, averageRating: 4.6 },
-        { id: '4', name: '최학생', level: 'B', lessonsCompleted: 35, averageRating: 4.5 },
-        { id: '5', name: '정학생', level: 'A', lessonsCompleted: 32, averageRating: 4.4 }
-      ],
-      topTeachers: [
-        { id: '1', name: '박선생님', lessonsTaught: 180, averageRating: 4.8, responseRate: 95 },
-        { id: '2', name: '김선생님', lessonsTaught: 165, averageRating: 4.7, responseRate: 92 },
-        { id: '3', name: '이선생님', lessonsTaught: 150, averageRating: 4.6, responseRate: 88 },
-        { id: '4', name: '최선생님', lessonsTaught: 135, averageRating: 4.5, responseRate: 85 },
-        { id: '5', name: '정선생님', lessonsTaught: 120, averageRating: 4.4, responseRate: 82 }
-      ],
-      serviceStats: [
-        { service: '초급 회화', bookings: 450, revenue: 31500000, averageRating: 4.6 },
-        { service: '중급 문법', bookings: 380, revenue: 26600000, averageRating: 4.7 },
-        { service: '고급 읽기', bookings: 320, revenue: 22400000, averageRating: 4.5 },
-        { service: '비즈니스 한국어', bookings: 150, revenue: 10500000, averageRating: 4.8 }
-      ]
-    };
-
-    setData(mockData);
-    setLoading(false);
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('ko-KR').format(amount);
   };
 
-  const renderProgressBar = (percentage: number, color: string) => (
-    <div className="w-full bg-gray-200 rounded-full h-2">
-      <div 
-        className={`h-2 rounded-full ${color}`}
-        style={{ width: `${percentage}%` }}
-      ></div>
-    </div>
-  );
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('ko-KR', {
-      style: 'currency',
-      currency: 'KRW'
-    }).format(amount);
+  const formatNumber = (num: number) => {
+    return new Intl.NumberFormat('ko-KR').format(num);
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">데이터를 불러오는 중...</p>
-        </div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
-  if (!data) return null;
+  if (!stats) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-gray-600">데이터를 불러올 수 없습니다.</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">데이터 통계 및 분석</h1>
-          <p className="text-gray-600">교실 운영 현황을 한눈에 파악할 수 있는 종합 통계</p>
+    <div className="p-6 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">통계 및 분석</h1>
+          <p className="text-lg text-gray-600">학원 운영 통계를 확인하세요</p>
         </div>
+        <select
+          value={selectedPeriod}
+          onChange={(e) => setSelectedPeriod(e.target.value as 'week' | 'month' | 'quarter' | 'year')}
+          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="week">주간</option>
+          <option value="month">월간</option>
+          <option value="quarter">분기</option>
+          <option value="year">연간</option>
+        </select>
+      </div>
 
-        {/* Filters */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <select
-              value={selectedPeriod}
-              onChange={(e) => setSelectedPeriod(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="week">이번 주</option>
-              <option value="month">이번 달</option>
-              <option value="quarter">이번 분기</option>
-              <option value="year">올해</option>
-            </select>
-            
-            <select
-              value={selectedTeacher}
-              onChange={(e) => setSelectedTeacher(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="all">모든 선생님</option>
-              <option value="teacher1">박선생님</option>
-              <option value="teacher2">김선생님</option>
-              <option value="teacher3">이선생님</option>
-            </select>
-            
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center space-x-2">
-              <Download className="w-4 h-4" />
-              <span>보고서 다운로드</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Key Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Users className="w-6 h-6 text-blue-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm text-gray-600">출석률</p>
-                <p className="text-2xl font-bold text-gray-900">{data.attendance.rate}%</p>
-                <p className="text-xs text-gray-500">
-                  {data.attendance.present}/{data.attendance.total} 수업
-                </p>
-              </div>
-            </div>
-            {renderProgressBar(data.attendance.rate, 'bg-blue-500')}
-          </div>
-
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <Calendar className="w-6 h-6 text-green-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm text-gray-600">예약 완료율</p>
-                <p className="text-2xl font-bold text-gray-900">{data.reservations.completionRate}%</p>
-                <p className="text-xs text-gray-500">
-                  {data.reservations.completed}/{data.reservations.total} 예약
-                </p>
-              </div>
-            </div>
-            {renderProgressBar(data.reservations.completionRate, 'bg-green-500')}
-          </div>
-
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <Star className="w-6 h-6 text-yellow-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm text-gray-600">평균 평점</p>
-                <p className="text-2xl font-bold text-gray-900">{data.reviews.averageRating}</p>
-                <p className="text-xs text-gray-500">
-                  {data.reviews.total}개 리뷰
-                </p>
-              </div>
-            </div>
-            <div className="flex space-x-1 mt-2">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <Star 
-                  key={star}
-                  className={`w-4 h-4 ${
-                    star <= data.reviews.averageRating 
-                      ? 'text-yellow-400 fill-current' 
-                      : 'text-gray-300'
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <MessageSquare className="w-6 h-6 text-purple-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm text-gray-600">답변율</p>
-                <p className="text-2xl font-bold text-gray-900">{data.reviews.responseRate}%</p>
-                <p className="text-xs text-gray-500">
-                  리뷰 응답률
-                </p>
-              </div>
-            </div>
-            {renderProgressBar(data.reviews.responseRate, 'bg-purple-500')}
-          </div>
-        </div>
-
-        {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Monthly Trends */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-              <TrendingUp className="w-5 h-5 mr-2" />
-              월별 추이
-            </h3>
-            <div className="space-y-4">
-              {data.monthlyData.map((monthData, index) => (
-                <div key={index} className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600 w-12">{monthData.month}</span>
-                  <div className="flex-1 mx-4">
-                    <div className="flex justify-between text-xs text-gray-500 mb-1">
-                      <span>출석률: {monthData.attendance}%</span>
-                      <span>예약: {monthData.reservations}건</span>
-                    </div>
-                    <div className="flex space-x-2">
-                      <div className="flex-1 bg-blue-100 rounded h-2">
-                        <div 
-                          className="bg-blue-500 h-2 rounded"
-                          style={{ width: `${monthData.attendance}%` }}
-                        ></div>
-                      </div>
-                      <div className="flex-1 bg-green-100 rounded h-2">
-                        <div 
-                          className="bg-green-500 h-2 rounded"
-                          style={{ width: `${(monthData.reservations / 150) * 100}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-                  <span className="text-sm font-medium text-gray-900">
-                    {formatCurrency(monthData.revenue)}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Service Performance */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-              <BookOpen className="w-5 h-5 mr-2" />
-              서비스별 성과
-            </h3>
-            <div className="space-y-4">
-              {data.serviceStats.map((service, index) => (
-                <div key={index} className="border-b border-gray-100 pb-3 last:border-b-0">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium text-gray-900">{service.service}</span>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm text-gray-500">{service.bookings}건</span>
-                      <div className="flex space-x-1">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star 
-                            key={star}
-                            className={`w-3 h-3 ${
-                              star <= service.averageRating 
-                                ? 'text-yellow-400 fill-current' 
-                                : 'text-gray-300'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex justify-between text-sm text-gray-600">
-                    <span>매출: {formatCurrency(service.revenue)}</span>
-                    <span>평점: {service.averageRating}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Top Performers */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Top Students */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-              <Award className="w-5 h-5 mr-2" />
-              우수 학생
-            </h3>
-            <div className="space-y-3">
-              {data.topStudents.map((student, index) => (
-                <div key={student.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                      <span className="text-sm font-medium text-blue-600">{index + 1}</span>
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900">{student.name}</p>
-                      <p className="text-sm text-gray-500">레벨 {student.level}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-gray-900">{student.lessonsCompleted}회</p>
-                    <div className="flex items-center space-x-1">
-                      <Star className="w-3 h-3 text-yellow-400 fill-current" />
-                      <span className="text-xs text-gray-500">{student.averageRating}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Top Teachers */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-              <Target className="w-5 h-5 mr-2" />
-              우수 선생님
-            </h3>
-            <div className="space-y-3">
-              {data.topTeachers.map((teacher, index) => (
-                <div key={teacher.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                      <span className="text-sm font-medium text-green-600">{index + 1}</span>
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900">{teacher.name}</p>
-                      <p className="text-sm text-gray-500">{teacher.lessonsTaught}회 수업</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="flex items-center space-x-1 mb-1">
-                      <Star className="w-3 h-3 text-yellow-400 fill-current" />
-                      <span className="text-sm font-medium text-gray-900">{teacher.averageRating}</span>
-                    </div>
-                    <p className="text-xs text-gray-500">답변율 {teacher.responseRate}%</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Detailed Statistics */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">상세 통계</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* 주요 통계 카드 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+          <div className="flex items-center justify-between">
             <div>
-              <h4 className="font-medium text-gray-900 mb-3">학생 현황</h4>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">총 학생 수</span>
-                  <span className="font-medium">{data.students.total}명</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">활성 학생</span>
-                  <span className="font-medium">{data.students.active}명</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">신규 학생 (이번 달)</span>
-                  <span className="font-medium">{data.students.newThisMonth}명</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">평균 수업 수</span>
-                  <span className="font-medium">{data.students.averageLessons}회</span>
-                </div>
-              </div>
+              <p className="text-sm text-gray-600">총 학생 수</p>
+              <p className="text-2xl font-bold text-gray-900">{formatNumber(stats.overview.totalStudents)}명</p>
             </div>
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <Users className="w-6 h-6 text-blue-600" />
+            </div>
+          </div>
+          <div className="mt-2 flex items-center text-sm">
+            <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
+            <span className="text-green-600">+{stats.overview.monthlyGrowth}%</span>
+            <span className="text-gray-500 ml-1">이번 달</span>
+          </div>
+        </div>
 
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+          <div className="flex items-center justify-between">
             <div>
-              <h4 className="font-medium text-gray-900 mb-3">선생님 현황</h4>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">총 선생님 수</span>
-                  <span className="font-medium">{data.teachers.total}명</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">활성 선생님</span>
-                  <span className="font-medium">{data.teachers.active}명</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">평균 평점</span>
-                  <span className="font-medium">{data.teachers.averageRating}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">총 수업 수</span>
-                  <span className="font-medium">{data.teachers.totalLessons}회</span>
-                </div>
-              </div>
+              <p className="text-sm text-gray-600">총 강사 수</p>
+              <p className="text-2xl font-bold text-gray-900">{formatNumber(stats.overview.totalTeachers)}명</p>
             </div>
+            <div className="p-2 bg-green-100 rounded-lg">
+              <GraduationCap className="w-6 h-6 text-green-600" />
+            </div>
+          </div>
+          <div className="mt-2 flex items-center text-sm">
+            <CheckCircle className="w-4 h-4 text-green-500 mr-1" />
+            <span className="text-green-600">활성</span>
+            <span className="text-gray-500 ml-1">모든 강사</span>
+          </div>
+        </div>
 
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+          <div className="flex items-center justify-between">
             <div>
-              <h4 className="font-medium text-gray-900 mb-3">리뷰 현황</h4>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">총 리뷰 수</span>
-                  <span className="font-medium">{data.reviews.total}개</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">평균 평점</span>
-                  <span className="font-medium">{data.reviews.averageRating}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">답변율</span>
-                  <span className="font-medium">{data.reviews.responseRate}%</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Google 리뷰</span>
-                  <span className="font-medium">{data.reviews.googleReviews}개</span>
+              <p className="text-sm text-gray-600">총 수익</p>
+              <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.overview.totalRevenue)}원</p>
+            </div>
+            <div className="p-2 bg-yellow-100 rounded-lg">
+              <DollarSign className="w-6 h-6 text-yellow-600" />
+            </div>
+          </div>
+          <div className="mt-2 flex items-center text-sm">
+            <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
+            <span className="text-green-600">+8.2%</span>
+            <span className="text-gray-500 ml-1">이번 달</span>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">평균 출석률</p>
+              <p className="text-2xl font-bold text-gray-900">{stats.overview.attendanceRate}%</p>
+            </div>
+            <div className="p-2 bg-purple-100 rounded-lg">
+              <Activity className="w-6 h-6 text-purple-600" />
+            </div>
+          </div>
+          <div className="mt-2 flex items-center text-sm">
+            <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
+            <span className="text-green-600">+2.1%</span>
+            <span className="text-gray-500 ml-1">이번 달</span>
+          </div>
+        </div>
+      </div>
+
+      {/* 차트 섹션 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* 학생 성장 추이 */}
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">학생 성장 추이</h3>
+          <div className="space-y-3">
+            {stats.trends.studentGrowth.map((item, index) => (
+              <div key={index} className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">{item.month}</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-32 bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-blue-600 h-2 rounded-full" 
+                      style={{ width: `${(item.count / 200) * 100}%` }}
+                    ></div>
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">{item.count}명</span>
                 </div>
               </div>
-            </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 수익 성장 추이 */}
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">수익 성장 추이</h3>
+          <div className="space-y-3">
+            {stats.trends.revenueGrowth.map((item, index) => (
+              <div key={index} className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">{item.month}</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-32 bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-green-600 h-2 rounded-full" 
+                      style={{ width: `${(item.amount / 50000000) * 100}%` }}
+                    ></div>
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">{formatCurrency(item.amount)}원</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* 상세 통계 */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* 인구 통계 */}
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">연령대별 분포</h3>
+          <div className="space-y-3">
+            {stats.demographics.ageGroups.map((item, index) => (
+              <div key={index} className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">{item.group}</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-20 bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-blue-600 h-2 rounded-full" 
+                      style={{ width: `${(item.count / 60) * 100}%` }}
+                    ></div>
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">{item.count}명</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 레벨별 분포 */}
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">레벨별 분포</h3>
+          <div className="space-y-3">
+            {stats.demographics.levels.map((item, index) => (
+              <div key={index} className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">{item.level}</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-20 bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-green-600 h-2 rounded-full" 
+                      style={{ width: `${(item.count / 60) * 100}%` }}
+                    ></div>
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">{item.count}명</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 과목별 분포 */}
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">과목별 분포</h3>
+          <div className="space-y-3">
+            {stats.demographics.subjects.map((item, index) => (
+              <div key={index} className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">{item.subject}</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-20 bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-purple-600 h-2 rounded-full" 
+                      style={{ width: `${(item.count / 80) * 100}%` }}
+                    ></div>
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">{item.count}명</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* 성과 분석 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* 강사 평가 */}
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">강사 평가</h3>
+          <div className="space-y-4">
+            {stats.performance.teacherRatings.map((teacher, index) => (
+              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div>
+                  <p className="font-medium text-gray-900">{teacher.teacher}</p>
+                  <p className="text-sm text-gray-600">{teacher.students}명의 학생</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center">
+                    {[...Array(5)].map((_, i) => (
+                      <Star 
+                        key={i} 
+                        className={`w-4 h-4 ${i < Math.floor(teacher.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} 
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">{teacher.rating}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 인기 코스 */}
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">인기 코스</h3>
+          <div className="space-y-4">
+            {stats.performance.popularCourses.map((course, index) => (
+              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div>
+                  <p className="font-medium text-gray-900">{course.course}</p>
+                  <p className="text-sm text-gray-600">{course.enrollment}명 수강</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center">
+                    {[...Array(5)].map((_, i) => (
+                      <Star 
+                        key={i} 
+                        className={`w-4 h-4 ${i < Math.floor(course.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} 
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">{course.rating}</span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>

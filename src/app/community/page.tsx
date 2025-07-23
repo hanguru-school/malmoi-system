@@ -451,7 +451,7 @@ export default function CommunityPage() {
                     {categories.map(category => (
                       <button
                         key={category.id}
-                        onClick={() => setSelectedCategory(category.id as any)}
+                        onClick={() => setSelectedCategory(category.id as 'introduction' | 'daily-phrase' | 'question' | 'study-share' | 'class-notice')}
                         className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium flex items-center space-x-2 ${
                           selectedCategory === category.id
                             ? 'bg-blue-50 text-blue-700'

@@ -135,7 +135,7 @@ export default function PageManagementPage() {
     }
   };
 
-  const updatePagePermission = (pageId: string, field: keyof PagePermission, value: any) => {
+  const updatePagePermission = (pageId: string, field: keyof PagePermission, value: string | boolean | string[]) => {
     setPages(prev => prev.map(page => 
       page.id === pageId ? { ...page, [field]: value } : page
     ));

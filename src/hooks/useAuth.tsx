@@ -40,6 +40,8 @@ const getDefaultPageByRole = (role: UserRole): string => {
       return '/student/home';
     case 'staff':
       return '/staff/home';
+    case 'parent':
+      return '/parent/dashboard';
     default:
       return '/master';
   }
@@ -90,6 +92,17 @@ const devUsers: Record<string, User> = {
     phone: '010-3456-7890',
     createdAt: new Date(),
     updatedAt: new Date()
+  },
+  'parent@hanguru.school': {
+    id: 'parent-001',
+    email: 'parent@hanguru.school',
+    name: '부모님',
+    role: 'parent',
+    department: '일반',
+    permissions: ['user:view', 'reservation:view', 'notification:manage'],
+    phone: '010-9876-5432',
+    createdAt: new Date(),
+    updatedAt: new Date()
   }
 };
 
@@ -98,7 +111,8 @@ const devPasswords: Record<string, string> = {
   'admin@hanguru.school': 'admin123!',
   'teacher@hanguru.school': 'teacher456!',
   'student@hanguru.school': 'student789!',
-  'staff@hanguru.school': 'staff012!'
+  'staff@hanguru.school': 'staff012!',
+  'parent@hanguru.school': 'parent345!'
 };
 
 // 인증 프로바이더 컴포넌트
@@ -402,6 +416,8 @@ function getDefaultPermissions(role: UserRole): string[] {
       return ['reservation:create', 'reservation:view', 'facility:view'];
     case 'staff':
       return ['reservation:manage', 'facility:manage', 'user:view', 'notification:manage'];
+    case 'parent':
+      return ['user:view', 'reservation:view', 'notification:view'];
     default:
       return [];
   }

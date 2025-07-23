@@ -1,6 +1,6 @@
 'use client';
 
-import { Clock, CheckCircle, XCircle, AlertCircle, Plus, Search, Calendar, User, Edit, Trash2, ChevronLeft, ChevronRight, Globe } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, AlertCircle, Plus, Search, Calendar, User, Edit, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
@@ -292,18 +292,6 @@ export default function StudentReservationsPage() {
           </p>
         </div>
         <div className="flex items-center gap-4">
-          {/* 언어 전환 버튼 */}
-          <button
-            onClick={toggleLanguage}
-            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-            title={currentLanguage === 'ko' ? '日本語に切り替え' : '한국어로 전환'}
-          >
-            <Globe className="w-4 h-4" />
-            <span className="text-xs font-medium">
-              {currentLanguage === 'ko' ? '🇯🇵' : '🇰🇷'}
-            </span>
-          </button>
-          
           <Link
             href="/student/reservations/new"
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -335,7 +323,7 @@ export default function StudentReservationsPage() {
           <div className="flex gap-2">
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as any)}
+              onChange={(e) => setStatusFilter(e.target.value as 'all' | 'upcoming' | 'completed' | 'cancelled')}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">{t.all}</option>

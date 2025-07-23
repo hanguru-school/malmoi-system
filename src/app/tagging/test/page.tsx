@@ -217,7 +217,7 @@ export default function TaggingSystemTestPage() {
             // 잘못된 디바이스 ID
             taggingSystem.processTagging('TEST123', 'invalid-device', 'felica'),
             // 잘못된 태깅 방법
-            taggingSystem.processTagging('TEST123', 'test-device', 'invalid' as any)
+            taggingSystem.processTagging('TEST123', 'test-device', 'invalid' as 'felica' | 'nfc' | 'qr')
           ];
           
           const results = await Promise.allSettled(errorTests);

@@ -347,7 +347,7 @@ export default function StudentLearningStatsPage() {
                 <h3 className="text-lg font-semibold text-gray-900">월별 학습 진도</h3>
                 <select
                   value={timeFilter}
-                  onChange={(e) => setTimeFilter(e.target.value as any)}
+                  onChange={(e) => setTimeFilter(e.target.value as '3months' | '6months' | '1year')}
                   className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="3months">최근 3개월</option>

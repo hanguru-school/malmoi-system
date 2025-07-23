@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { 
   User, 
@@ -28,7 +28,7 @@ interface RegisterForm {
   uid: string;
 }
 
-export default function JapaneseLoginPage() {
+function JapaneseLoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const action = searchParams.get('action') || 'new';
@@ -433,5 +433,13 @@ export default function JapaneseLoginPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function JapaneseLoginPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <JapaneseLoginPageContent />
+    </Suspense>
   );
 } 

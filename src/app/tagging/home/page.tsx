@@ -445,7 +445,13 @@ export default function TaggingHomePage() {
 
   // 하드웨어 리더 상태
   const [hardwareStatus, setHardwareStatus] = useState<'disconnected' | 'connecting' | 'connected' | 'error'>('disconnected');
-  const [deviceInfo, setDeviceInfo] = useState<any>(null);
+  const [deviceInfo, setDeviceInfo] = useState<{
+    name: string;
+    type: string;
+    version?: string;
+    capabilities?: string[];
+    serialNumber?: string;
+  } | null>(null);
 
   // 하드웨어 리더 상태 확인
   const checkHardwareStatus = async () => {

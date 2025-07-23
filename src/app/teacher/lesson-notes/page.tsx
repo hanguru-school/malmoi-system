@@ -88,7 +88,8 @@ export default function TeacherLessonNotesPage() {
   const fetchStudents = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/teacher/students');
+      const teacherId = localStorage.getItem('teacherId') || 'T-001'; // 실제로는 인증 시스템에서 가져옴
+      const response = await fetch(`/api/teacher/students?teacherId=${teacherId}`);
       const data = await response.json();
       
       if (data.success) {
@@ -109,7 +110,8 @@ export default function TeacherLessonNotesPage() {
   // 레슨 노트 조회
   const fetchLessonNote = async (studentId: string) => {
     try {
-      const response = await fetch(`/api/teacher/lesson-notes/${studentId}`);
+      const teacherId = localStorage.getItem('teacherId') || 'T-001';
+      const response = await fetch(`/api/teacher/lesson-notes/${studentId}?teacherId=${teacherId}`);
       const data = await response.json();
       
       if (data.success) {
@@ -228,7 +230,7 @@ export default function TeacherLessonNotesPage() {
 
         {/* 검색 및 필터 */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
@@ -256,6 +258,13 @@ export default function TeacherLessonNotesPage() {
             <div className="text-sm text-gray-600">
               총 {filteredStudents.length}명의 학생
             </div>
+            
+            <button
+              onClick={() => setShowStudentSelector(true)}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            >
+              테스트용 수업 선택
+            </button>
           </div>
         </div>
 

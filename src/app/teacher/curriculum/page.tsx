@@ -409,7 +409,7 @@ export default function TeacherCurriculumPage() {
                 
                 <select
                   value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value as any)}
+                  onChange={(e) => setStatusFilter(e.target.value as 'all' | 'not_started' | 'in_progress' | 'completed' | 'review_needed')}
                   className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="all">전체 상태</option>

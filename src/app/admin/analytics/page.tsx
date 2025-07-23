@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { BarChart3, TrendingUp, Users, Calendar, Star, BookOpen, Target, Download, Filter } from 'lucide-react';
+import { Calendar, Star, BookOpen, Target, Download } from 'lucide-react';
 
 interface AnalyticsData {
   bookingStats: {
