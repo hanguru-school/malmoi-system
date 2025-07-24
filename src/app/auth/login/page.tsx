@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
-import { isFirebaseConfigValid } from '@/lib/firebase';
 import { Globe } from 'lucide-react';
 
 export default function LoginPage() {
@@ -23,7 +22,7 @@ export default function LoginPage() {
   const [countdown, setCountdown] = useState(15);
   const [isCountingDown, setIsCountingDown] = useState(false);
 
-  const { signIn, signInWithLine, user, getDefaultPageByRole, loading: authLoading } = useAuth();
+  const { login, user, loading: authLoading } = useAuth();
   const router = useRouter();
 
   // 언어 전환 함수 (학생 메인 페이지와 동일한 형식)
@@ -100,7 +99,7 @@ export default function LoginPage() {
     console.log('useEffect 실행 - user:', user, 'loading:', loading, 'authLoading:', authLoading);
     if (user && !loading && !authLoading) {
       console.log('사용자 로그인됨:', user.role, user.name);
-      const defaultPage = getDefaultPageByRole(user.role);
+      const defaultPage = user.role === 'admin' ? '/admin/dashboard' : '/student/dashboard';
       console.log('리다이렉션할 페이지:', defaultPage);
       
       // 약간의 지연을 두고 리다이렉션
@@ -109,7 +108,7 @@ export default function LoginPage() {
         router.push(defaultPage);
       }, 100);
     }
-  }, [user, loading, authLoading, router, getDefaultPageByRole]);
+  }, [user, loading, authLoading, router]);
 
   // 이메일/비밀번호 로그인
   const handlePasswordLogin = async (e: React.FormEvent) => {
@@ -119,7 +118,7 @@ export default function LoginPage() {
 
     try {
       console.log('로그인 시도:', email);
-      await signIn(email, password);
+      await login(email, password);
       console.log('로그인 성공, 사용자 상태 대기 중...');
       // useEffect에서 사용자 상태 변경을 감지하여 리다이렉션 처리
     } catch (error: unknown) {
@@ -131,20 +130,9 @@ export default function LoginPage() {
     }
   };
 
-  // LINE 로그인
+  // LINE 로그인 (임시 비활성화)
   const handleLineLogin = async () => {
-    setLoading(true);
-    setError('');
-
-    try {
-      await signInWithLine();
-      // useEffect에서 사용자 상태 변경을 감지하여 리다이렉션 처리
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : t.lineLoginFailed;
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
-    }
+    setError('LINE 로그인은 현재 지원되지 않습니다.');
   };
 
   // 카드 인증 시뮬레이션
