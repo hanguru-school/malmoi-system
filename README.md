@@ -2,283 +2,239 @@
 
 강의실 예약 및 관리 시스템입니다.
 
-## 🚀 실전 배포 완료
+## 🚀 배포된 시스템
 
-### **✅ 구축된 실전 시스템:**
+**현재 배포 상태:** ✅ **완료**
+- **URL:** https://malmoi-system.vercel.app
+- **GitHub:** https://github.com/hanguru-school/malmoi-system
 
-1. **AWS Cognito** - 사용자 인증 및 권한 관리
-2. **AWS RDS PostgreSQL** - 실시간 데이터베이스
-3. **AWS S3** - 파일 저장소
-4. **Vercel** - 웹 애플리케이션 배포
-5. **토스페이먼츠** - 실전 결제 시스템
+## 🏗️ 시스템 아키텍처
 
----
+### **Frontend**
+- **Next.js 14** (App Router)
+- **TypeScript**
+- **Tailwind CSS**
+- **Vercel 배포**
 
-## 🔧 AWS 설정 가이드
+### **Backend**
+- **AWS Cognito** - 사용자 인증
+- **AWS RDS PostgreSQL** - 데이터베이스
+- **AWS S3** - 파일 저장소
+- **Next.js API Routes** - 서버리스 함수
 
-### **1. AWS Cognito 설정**
-
-**사용자 풀 생성:**
-1. AWS 콘솔 → Cognito → User Pools → Create user pool
-2. **Step 1: Configure sign-in experience**
-   - Cognito user pool sign-in options: Email
-   - User name requirements: Allow email addresses
-3. **Step 2: Configure security requirements**
-   - Password policy: Custom
-   - Minimum length: 8
-   - Require uppercase letters: Yes
-   - Require lowercase letters: Yes
-   - Require numbers: Yes
-   - Require special characters: Yes
-4. **Step 3: Configure sign-up experience**
-   - Self-service sign-up: Enabled
-   - Cognito-assisted verification and confirmation: Email
-5. **Step 4: Configure message delivery**
-   - Email provider: Send email with Cognito
-6. **Step 5: Integrate your app**
-   - User pool name: `malmoi-system-users`
-   - App client name: `malmoi-system-client`
-7. **Step 6: Review and create**
-
-**앱 클라이언트 설정:**
-- Authentication flows: ALLOW_USER_PASSWORD_AUTH
-- Generate client secret: No
-
-### **2. AWS RDS PostgreSQL 설정**
-
-**데이터베이스 생성:**
-1. AWS 콘솔 → RDS → Databases → Create database
-2. **Choose a database creation method:** Standard create
-3. **Engine type:** PostgreSQL
-4. **Version:** PostgreSQL 15.4
-5. **Templates:** Free tier
-6. **Settings:**
-   - DB instance identifier: `malmoi-system-db`
-   - Master username: `malmoi_admin`
-   - Master password: `강력한비밀번호설정`
-7. **Instance configuration:** db.t3.micro
-8. **Storage:** 20 GB
-9. **Connectivity:** Public access: Yes
-10. **Database authentication:** Password authentication
-
-### **3. AWS S3 버킷 설정**
-
-**버킷 생성:**
-1. AWS 콘솔 → S3 → Create bucket
-2. **Bucket name:** `malmoi-system-files`
-3. **Region:** Asia Pacific (Seoul) ap-northeast-2
-4. **Block Public Access settings:** Uncheck all
-5. **Bucket Versioning:** Enable
-6. **Default encryption:** Enable (SSE-S3)
-7. **Object Lock:** Disable
-
-### **4. 토스페이먼츠 설정**
-
-**계정 생성 및 설정:**
-1. [토스페이먼츠](https://pay.toss.im/) 가입
-2. **가맹점 정보 등록**
-3. **API 키 발급**
-   - Client Key
-   - Secret Key
-
----
-
-## 🔐 환경 변수 설정
-
-### **Vercel 대시보드에서 설정:**
-
-**AWS 설정:**
-```
-AWS_REGION=ap-northeast-2
-AWS_ACCESS_KEY_ID=your-access-key
-AWS_SECRET_ACCESS_KEY=your-secret-key
-```
-
-**AWS Cognito 설정:**
-```
-AWS_COGNITO_USER_POOL_ID=ap-northeast-2_xxxxxxxxx
-AWS_COGNITO_CLIENT_ID=xxxxxxxxxxxxxxxxxxxxxxxxxx
-AWS_COGNITO_IDENTITY_POOL_ID=ap-northeast-2:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-```
-
-**AWS RDS 설정:**
-```
-AWS_RDS_HOST=malmoi-system-db.xxxxxxxxx.ap-northeast-2.rds.amazonaws.com
-AWS_RDS_PORT=5432
-AWS_RDS_DATABASE=malmoi_system
-AWS_RDS_USERNAME=malmoi_admin
-AWS_RDS_PASSWORD=your-database-password
-```
-
-**AWS S3 설정:**
-```
-AWS_S3_BUCKET=malmoi-system-files
-```
-
-**토스페이먼츠 설정:**
-```
-TOSS_PAYMENTS_CLIENT_KEY=test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq
-TOSS_PAYMENTS_SECRET_KEY=test_sk_D4yKeq5bgrpKRd0JYbLVGX0lzW6Y
-```
-
-**JWT 설정:**
-```
-JWT_SECRET=your-super-secret-jwt-key-here
-```
-
-**앱 URL:**
-```
-NEXT_PUBLIC_APP_URL=https://your-app.vercel.app
-```
-
----
-
-## 📊 데이터베이스 스키마
-
-### **PostgreSQL 테이블 생성:**
-
+### **데이터베이스 스키마**
 ```sql
 -- 사용자 테이블
 CREATE TABLE users (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id SERIAL PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
     name VARCHAR(255) NOT NULL,
-    role VARCHAR(50) NOT NULL DEFAULT 'STUDENT',
-    cognito_user_id VARCHAR(255) UNIQUE NOT NULL,
-    is_active BOOLEAN DEFAULT true,
+    role VARCHAR(50) NOT NULL DEFAULT 'student',
+    cognito_user_id VARCHAR(255) UNIQUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP NULL
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 강의실 테이블
 CREATE TABLE rooms (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     capacity INTEGER NOT NULL,
     description TEXT,
-    hourly_rate INTEGER DEFAULT 0,
     is_active BOOLEAN DEFAULT true,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP NULL
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 예약 테이블
 CREATE TABLE reservations (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID REFERENCES users(id),
-    room_id UUID REFERENCES rooms(id),
-    start_time TIMESTAMP NOT NULL,
-    end_time TIMESTAMP NOT NULL,
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    room_id INTEGER REFERENCES rooms(id),
     title VARCHAR(255) NOT NULL,
     description TEXT,
+    start_time TIMESTAMP NOT NULL,
+    end_time TIMESTAMP NOT NULL,
     status VARCHAR(50) DEFAULT 'confirmed',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP NULL
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 결제 테이블
 CREATE TABLE payments (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID REFERENCES users(id),
-    reservation_id UUID REFERENCES reservations(id),
-    amount INTEGER NOT NULL,
-    currency VARCHAR(10) DEFAULT 'KRW',
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    reservation_id INTEGER REFERENCES reservations(id),
+    amount DECIMAL(10,2) NOT NULL,
+    currency VARCHAR(3) DEFAULT 'KRW',
     payment_method VARCHAR(50) NOT NULL,
-    description TEXT,
     status VARCHAR(50) DEFAULT 'pending',
     transaction_id VARCHAR(255),
-    failure_reason TEXT,
-    metadata JSONB,
+    description TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    completed_at TIMESTAMP NULL,
-    failed_at TIMESTAMP NULL
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
--- 인덱스 생성
-CREATE INDEX idx_users_email ON users(email);
-CREATE INDEX idx_reservations_user_id ON reservations(user_id);
-CREATE INDEX idx_reservations_room_id ON reservations(room_id);
-CREATE INDEX idx_reservations_time ON reservations(start_time, end_time);
-CREATE INDEX idx_payments_user_id ON payments(user_id);
-CREATE INDEX idx_payments_status ON payments(status);
 ```
 
----
+## 🔧 설정 완료된 AWS 서비스
 
-## 🚀 배포 명령어
+### **1. AWS S3 (파일 저장소)**
+- **버킷 이름:** `malmoi-system-files`
+- **리전:** `ap-northeast-2` (서울)
+- **버전 관리:** 활성화
+- **기본 암호화:** SSE-S3
+- **공개 액세스:** 차단됨
 
-### **자동 배포 (GitHub 연동):**
-```bash
-# 코드 변경 후
-git add .
-git commit -m "실전 시스템 업데이트"
-git push origin main
-# Vercel에서 자동 배포
+### **2. AWS Cognito (인증)**
+- **User Pool ID:** `ap-northeast-2_gnMo24nfg`
+- **Client ID:** `597vkd6rjamd92p6s3bvk39p21`
+- **리전:** `ap-northeast-2` (서울)
+
+### **3. AWS RDS PostgreSQL (데이터베이스)**
+- **엔드포인트:** `malmoi-system-db.cp4q8o4akkqg.ap-northeast-2.rds.amazonaws.com`
+- **데이터베이스:** `malmoi_system`
+- **사용자:** `malmoi_admin`
+- **리전:** `ap-northeast-2` (서울)
+
+## 📋 Vercel 환경 변수 설정
+
+**Vercel 대시보드 → Settings → Environment Variables**에서 다음 변수들을 설정해야 합니다:
+
+### **필수 환경 변수:**
+```
+AWS_ACCESS_KEY_ID=your_access_key
+AWS_SECRET_ACCESS_KEY=your_secret_key
+AWS_REGION=ap-northeast-2
+AWS_S3_BUCKET=malmoi-system-files
+AWS_COGNITO_USER_POOL_ID=ap-northeast-2_gnMo24nfg
+AWS_COGNITO_CLIENT_ID=597vkd6rjamd92p6s3bvk39p21
+AWS_RDS_HOST=malmoi-system-db.cp4q8o4akkqg.ap-northeast-2.rds.amazonaws.com
+AWS_RDS_PORT=5432
+AWS_RDS_DATABASE=malmoi_system
+AWS_RDS_USERNAME=malmoi_admin
+AWS_RDS_PASSWORD=your_rds_password
+JWT_SECRET=your_jwt_secret_key
 ```
 
-### **수동 배포:**
+## 👤 관리자 계정 설정
+
+### **AWS Cognito에서 관리자 사용자 생성:**
+
+1. **AWS 콘솔** → **Cognito** → **User Pools** → **malmoi-system-users**
+2. **Users and groups** → **Create user**
+3. **사용자 정보 입력:**
+   - **Username:** `hanguru.school@gmail.com`
+   - **Email:** `hanguru.school@gmail.com`
+   - **Password:** `alfl1204`
+   - **Mark email as verified:** ✅ 체크
+4. **Create user** 클릭
+
+### **데이터베이스에 관리자 정보 추가:**
+```sql
+INSERT INTO users (email, name, role, cognito_user_id) VALUES 
+('hanguru.school@gmail.com', '관리자', 'admin', 'admin_user_001');
+```
+
+## 🎯 주요 기능
+
+### **관리자 기능**
+- 📊 대시보드 통계
+- 👥 사용자 관리
+- 📅 예약 관리
+- 🏢 강의실 관리
+- 💰 결제 관리
+
+### **학생 기능**
+- 📅 예약 생성/수정/취소
+- 🔍 예약 검색 및 필터
+- 📋 예약 목록 조회
+- 👤 프로필 관리
+
+### **공통 기능**
+- 🔐 AWS Cognito 인증
+- 📱 반응형 디자인
+- 🌐 다국어 지원 (한국어/일본어)
+
+## 🚀 배포 방법
+
+### **자동 배포 (권장)**
+1. **GitHub 저장소 연결**
+2. **Vercel 환경 변수 설정**
+3. **자동 배포 완료**
+
+### **수동 배포**
 ```bash
+# 의존성 설치
+npm install
+
+# 빌드
 npm run build
+
+# Vercel 배포
 vercel --prod
 ```
 
----
+## 🔗 API 엔드포인트
 
-## 📱 실전 기능
+### **인증**
+- `POST /api/auth/aws-login` - 로그인
+- `POST /api/auth/aws-register` - 회원가입
+- `POST /api/auth/verify` - 토큰 검증
 
-### **✅ 완료된 기능:**
+### **예약**
+- `POST /api/reservations/create` - 예약 생성
+- `GET /api/reservations/list` - 예약 목록
+- `PUT /api/reservations/[id]` - 예약 수정
+- `DELETE /api/reservations/[id]` - 예약 삭제
 
-1. **사용자 관리**
-   - AWS Cognito 기반 인증
-   - 역할별 권한 관리 (관리자/강사/학생)
-   - 프로필 관리
+### **강의실**
+- `GET /api/rooms/list` - 강의실 목록
 
-2. **강의실 예약**
-   - 실시간 예약 가능 여부 확인
-   - 예약 충돌 방지
-   - 예약 시간 제한 (최대 4시간)
+### **파일 업로드**
+- `POST /api/upload` - 파일 업로드
+- `DELETE /api/upload` - 파일 삭제
 
-3. **결제 시스템**
-   - 토스페이먼츠 연동
-   - 실시간 결제 처리
-   - 결제 내역 관리
+## 🛠️ 개발 환경 설정
 
-4. **관리자 대시보드**
-   - 실시간 통계
-   - 시스템 모니터링
-   - 사용자 활동 추적
+```bash
+# 저장소 클론
+git clone https://github.com/hanguru-school/malmoi-system.git
+cd malmoi-system
 
-5. **파일 관리**
-   - AWS S3 파일 업로드/다운로드
-   - 파일 버전 관리
-   - 보안 접근 제어
+# 의존성 설치
+npm install
 
----
+# 개발 서버 실행
+npm run dev
 
-## 🔒 보안 설정
+# 빌드
+npm run build
 
-### **AWS IAM 권한:**
-- Cognito 사용자 풀 관리
-- RDS 데이터베이스 접근
-- S3 버킷 읽기/쓰기
-- SNS 알림 발송
+# 프로덕션 서버 실행
+npm start
+```
 
-### **네트워크 보안:**
-- RDS 보안 그룹 설정
-- VPC 구성
-- SSL/TLS 암호화
+## 📝 기술 스택
 
----
+- **Frontend:** Next.js 14, TypeScript, Tailwind CSS
+- **Backend:** Next.js API Routes, AWS SDK
+- **Database:** PostgreSQL (AWS RDS)
+- **Authentication:** AWS Cognito
+- **Storage:** AWS S3
+- **Deployment:** Vercel
+- **Version Control:** Git, GitHub
+
+## 🔒 보안
+
+- **JWT 토큰 기반 인증**
+- **AWS IAM 권한 관리**
+- **HTTPS 강제 적용**
+- **SQL 인젝션 방지**
+- **XSS 방지**
 
 ## 📞 지원
 
-**문제 발생 시:**
-1. Vercel 대시보드에서 로그 확인
-2. AWS CloudWatch에서 오류 추적
-3. 데이터베이스 연결 상태 확인
+**시스템 관련 문의:** hanguru.school@gmail.com
 
-**실전 운영 준비 완료!** 🎉
+---
+
+**© 2024 Malmoi System. All rights reserved.**
