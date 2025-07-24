@@ -1,218 +1,227 @@
-# 🚀 hanguru.school 배포 가이드
+# 🚀 교실 시스템 배포 가이드
 
-## ✅ 빌드 완료!
+## 📋 배포 옵션
 
-프로덕션 빌드가 성공적으로 완료되었습니다. 이제 서버에 배포하겠습니다.
+### 1. Vercel 배포 (권장)
 
----
+#### 자동 배포 (GitHub 연동)
+1. GitHub에 저장소 생성
+2. 코드 푸시
+3. Vercel에서 GitHub 저장소 연결
+4. 자동 배포 완료
 
-## 📋 배포 전 체크리스트
-
-### **1. 빌드 파일 확인**
-- ✅ `.next/` 디렉터리 생성됨
-- ✅ `public/robots.txt` 생성됨
-- ✅ `src/middleware.ts` 보안 설정 적용됨
-- ✅ `next.config.js` 보안 헤더 설정됨
-
-### **2. 보안 설정 확인**
-- ✅ 브라우저만 접근 허용 (User-Agent 체크)
-- ✅ hanguru.school 도메인에서만 API 호출 허용
-- ✅ 검색엔진 크롤링 차단 (robots.txt)
-- ✅ 모든 페이지 noindex, nofollow 설정
-
----
-
-## 🎯 배포 방법
-
-### **방법 1: 직접 서버 배포 (권장)**
-
-#### **1단계: 파일 업로드**
+#### 수동 배포
 ```bash
-# 서버에 접속
-ssh user@hanguru.school
-
-# Next.js 앱 디렉터리 생성
-mkdir -p /var/www/hanguru-app
-
-# 로컬에서 파일 업로드 (scp 사용)
-scp -r .next/ user@hanguru.school:/var/www/hanguru-app/
-scp -r public/ user@hanguru.school:/var/www/hanguru-app/
-scp package.json user@hanguru.school:/var/www/hanguru-app/
-scp next.config.js user@hanguru.school:/var/www/hanguru-app/
-```
-
-#### **2단계: 의존성 설치**
-```bash
-# 서버에서 실행
-cd /var/www/hanguru-app
-npm install --production
-```
-
-#### **3단계: nginx 설정**
-```nginx
-server {
-    listen 443 ssl;
-    server_name hanguru.school;
-
-    # SSL 설정
-    ssl_certificate /path/to/certificate.crt;
-    ssl_certificate_key /path/to/private.key;
-
-    # 워드프레스 (메인)
-    location / {
-        # 워드프레스 설정
-        try_files $uri $uri/ /index.php?$args;
-    }
-
-    # Next.js 앱 (서브 디렉터리)
-    location /app/ {
-        # 추가 보안: 브라우저 User-Agent 체크
-        if ($http_user_agent !~* "(Mozilla|Chrome|Safari|Edge|Opera|Firefox)") {
-            return 403;
-        }
-        
-        # Next.js로 프록시
-        proxy_pass http://localhost:3000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        
-        # 보안 헤더
-        proxy_hide_header X-Powered-By;
-        add_header X-Frame-Options "DENY" always;
-        add_header X-Content-Type-Options "nosniff" always;
-    }
-}
-```
-
-#### **4단계: PM2로 실행**
-```bash
-# PM2 설치 (없다면)
-npm install -g pm2
-
-# Next.js 앱 실행
-cd /var/www/hanguru-app
-pm2 start npm --name "hanguru-app" -- start
-
-# PM2 자동 시작 설정
-pm2 startup
-pm2 save
-```
-
-#### **5단계: nginx 재시작**
-```bash
-sudo nginx -t  # 설정 테스트
-sudo systemctl reload nginx
-```
-
----
-
-### **방법 2: Vercel 배포 (간단)**
-
-#### **1단계: Vercel CLI 설치**
-```bash
+# Vercel CLI 설치
 npm install -g vercel
-```
 
-#### **2단계: 배포**
-```bash
+# 로그인
+vercel login
+
+# 배포
 vercel --prod
 ```
 
-#### **3단계: 도메인 연결**
-- Vercel 대시보드에서 `hanguru.school/app` 서브 디렉터리 설정
-- DNS 설정에서 CNAME 추가
+### 2. Netlify 배포
 
----
+#### 자동 배포
+1. GitHub 저장소 연결
+2. 빌드 설정:
+   - Build command: `npm run build`
+   - Publish directory: `out`
+3. 자동 배포 완료
+
+#### 수동 배포
+```bash
+# 정적 사이트 생성
+npm run build
+npm run export
+
+# Netlify CLI 설치
+npm install -g netlify-cli
+
+# 배포
+netlify deploy --prod --dir=out
+```
+
+### 3. GitHub Pages 배포
+
+#### 설정
+1. `next.config.js` 수정:
+```javascript
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  output: 'export',
+  trailingSlash: true,
+  images: {
+    unoptimized: true
+  }
+}
+
+module.exports = nextConfig
+```
+
+2. 빌드 및 배포:
+```bash
+npm run build
+npm run export
+```
+
+3. GitHub Pages 설정에서 `out` 폴더 배포
+
+### 4. Docker 배포
+
+#### Dockerfile 생성
+```dockerfile
+FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci --only=production
+
+COPY . .
+RUN npm run build
+
+EXPOSE 3000
+
+CMD ["npm", "start"]
+```
+
+#### 배포
+```bash
+# 이미지 빌드
+docker build -t booking-system .
+
+# 컨테이너 실행
+docker run -p 3000:3000 booking-system
+```
 
 ## 🔧 환경 변수 설정
 
-### **서버에서 .env.local 생성**
-```bash
-# /var/www/hanguru-app/.env.local
-NEXT_PUBLIC_APP_URL=https://hanguru.school
-NEXT_PUBLIC_ALLOWED_DOMAIN=hanguru.school
-NEXT_PUBLIC_HARDWARE_READER_ENABLED=true
-NEXT_PUBLIC_NFC_ENABLED=true
-NEXT_PUBLIC_SERIAL_ENABLED=true
-NEXT_PUBLIC_USB_HID_ENABLED=true
-NEXT_PUBLIC_BLUETOOTH_ENABLED=true
+### 필수 환경 변수
+```env
+# 데이터베이스
+DATABASE_URL="postgresql://username:password@localhost:5432/booking_system"
+
+# Firebase (선택사항)
+NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+
+# 기타 설정
+NODE_ENV=production
 ```
 
----
+## 📊 배포 상태 확인
 
-## 🧪 배포 후 테스트
-
-### **1. 기본 접근 테스트**
+### 빌드 테스트
 ```bash
-# 브라우저로 접근 (정상)
-curl -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" \
-     https://hanguru.school/app/
+# 로컬 빌드 테스트
+npm run build
 
-# 비정상 User-Agent (차단됨)
-curl -H "User-Agent: python-requests/2.25.1" \
-     https://hanguru.school/app/
+# 타입 체크
+npm run type-check
+
+# 린트 체크
+npm run lint
 ```
 
-### **2. 하드웨어 리더 테스트**
-- `https://hanguru.school/app/tagging/home` 접속
-- "카드 읽기" 버튼 클릭
-- 실제 NFC 리더 연결 테스트
+### 성능 최적화
+- 이미지 최적화
+- 코드 스플리팅
+- 캐싱 설정
+- CDN 사용
 
-### **3. 보안 헤더 확인**
-```bash
-curl -I https://hanguru.school/app/
-# X-Frame-Options: DENY
-# X-Content-Type-Options: nosniff
-# X-XSS-Protection: 1; mode=block
+## 🛡️ 보안 설정
+
+### HTTPS 강제
+- 모든 배포 플랫폼에서 HTTPS 자동 적용
+
+### 환경 변수 보안
+- 민감한 정보는 환경 변수로 관리
+- Git에 커밋하지 않음
+
+### 접근 제어
+- 미들웨어를 통한 인증
+- 역할 기반 권한 관리
+
+## 📱 모바일 최적화
+
+### PWA 설정
+- Service Worker 설정
+- 매니페스트 파일 생성
+- 오프라인 지원
+
+### 반응형 디자인
+- 모바일 우선 디자인
+- 터치 인터페이스 최적화
+
+## 🔄 CI/CD 파이프라인
+
+### GitHub Actions
+```yaml
+name: Deploy
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+      - run: npm ci
+      - run: npm run build
+      - run: npm run test
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v20
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.ORG_ID }}
+          vercel-project-id: ${{ secrets.PROJECT_ID }}
 ```
 
----
+## 📈 모니터링
 
-## 📱 접속 URL
+### 성능 모니터링
+- Core Web Vitals 추적
+- 에러 로깅
+- 사용자 행동 분석
 
-### **워드프레스 (기존)**
-- `https://hanguru.school/` - 교실 홈페이지
+### 알림 설정
+- 배포 성공/실패 알림
+- 에러 알림
+- 성능 저하 알림
 
-### **Next.js 앱 (새로 추가)**
-- `https://hanguru.school/app/` - 메인 대시보드
-- `https://hanguru.school/app/tagging/home` - IC 카드 등록
-- `https://hanguru.school/app/tagging/student` - 학생 태깅
-- `https://hanguru.school/app/admin/` - 관리자 포털
-- `https://hanguru.school/app/student/` - 학생 포털
-- `https://hanguru.school/app/teacher/` - 선생님 포털
+## 🆘 문제 해결
 
----
+### 일반적인 문제
+1. **빌드 실패**: 의존성 문제 확인
+2. **환경 변수 누락**: 배포 플랫폼에서 설정 확인
+3. **데이터베이스 연결 실패**: 연결 문자열 확인
+4. **API 라우트 오류**: 서버리스 함수 설정 확인
 
-## 🔍 문제 해결
+### 디버깅
+```bash
+# 로컬 테스트
+npm run dev
 
-### **403 Forbidden 오류**
-- User-Agent가 브라우저인지 확인
-- nginx 설정에서 User-Agent 체크 확인
+# 프로덕션 빌드 테스트
+npm run build && npm start
 
-### **502 Bad Gateway 오류**
-- Next.js 앱이 실행 중인지 확인: `pm2 status`
-- 포트 3000이 열려있는지 확인: `netstat -tlnp | grep 3000`
-
-### **하드웨어 리더 연결 실패**
-- HTTPS 환경인지 확인
-- 브라우저에서 권한 허용 확인
-- 실제 리더가 연결되어 있는지 확인
-
----
+# 로그 확인
+vercel logs
+```
 
 ## 📞 지원
 
-배포 중 문제가 발생하면:
-1. 서버 로그 확인: `pm2 logs hanguru-app`
-2. nginx 로그 확인: `sudo tail -f /var/log/nginx/error.log`
-3. 브라우저 개발자 도구에서 콘솔 오류 확인
-
----
-
-## 🎉 배포 완료!
-
-이제 **워드프레스는 그대로 두고**, **Next.js 앱이 강력한 보안으로 보호**되어 `https://hanguru.school/app/`에서 접속할 수 있습니다!
-
-실제 하드웨어 리더와 연동하여 실제 카드 UID를 읽어오는 시스템이 완성되었습니다! 🚀 
+배포 관련 문제가 발생하면:
+1. 로그 확인
+2. 환경 변수 검증
+3. 빌드 설정 확인
+4. 플랫폼별 문서 참조 

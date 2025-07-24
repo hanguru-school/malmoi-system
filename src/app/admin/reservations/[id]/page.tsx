@@ -68,6 +68,8 @@ interface Reservation {
   };
 }
 
+
+
 export default function AdminReservationDetailPage() {
   const params = useParams();
   const router = useRouter();

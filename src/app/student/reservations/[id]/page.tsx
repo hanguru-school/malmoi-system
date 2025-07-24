@@ -36,6 +36,8 @@ interface Reservation {
   teacherBio?: string; // 선생님 자기소개
 }
 
+
+
 export default function ReservationDetailPage() {
   const params = useParams();
   const router = useRouter();

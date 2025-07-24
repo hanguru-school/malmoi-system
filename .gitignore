@@ -39,3 +39,23 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# media files
+*.mp3
+*.wav
+*.flac
+*.m4a
+*.aac
+*.ogg
+*.wma
+*.avi
+*.mp4
+*.mov
+*.wmv
+*.flv
+*.mkv
+
+# backup files
+*.tar.gz
+*.zip
+*.rar

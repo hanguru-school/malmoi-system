@@ -1,19 +1,13 @@
 {
   "version": 2,
-  "name": "booking-system",
   "builds": [
     {
       "src": "package.json",
       "use": "@vercel/next"
     }
   ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
-    }
-  ],
   "env": {
+    "AWS_REGION": "ap-northeast-2",
     "NODE_ENV": "production"
   },
   "functions": {
