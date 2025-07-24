@@ -48,11 +48,7 @@ export default function LoginPage() {
       loginWithLine: 'LINE으로 로그인',
       noAccount: '계정이 없으신가요?',
       signUp: '가입하기',
-      testAccounts: '테스트 계정',
-      studentAccount: '학생 계정',
-      teacherAccount: '선생님 계정',
-      adminAccount: '관리자 계정',
-      staffAccount: '직원 계정',
+
       copySuccess: '복사되었습니다',
       copyEmail: '이메일 복사',
       copyPassword: '비밀번호 복사',
@@ -81,11 +77,7 @@ export default function LoginPage() {
       loginWithLine: 'LINEでログイン',
       noAccount: 'アカウントをお持ちでない方は',
       signUp: '新規登録',
-      testAccounts: 'テストアカウント',
-      studentAccount: '学生アカウント',
-      teacherAccount: '教師アカウント',
-      adminAccount: '管理者アカウント',
-      staffAccount: 'スタッフアカウント',
+
       copySuccess: 'コピーされました',
       copyEmail: 'メールアドレスをコピー',
       copyPassword: 'パスワードをコピー',
@@ -239,25 +231,7 @@ export default function LoginPage() {
             </button>
           </div>
           
-          {/* 개발 모드 표시 */}
-          {!isFirebaseConfigValid() && (
-            <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <div className="flex items-center justify-center">
-                <svg className="w-5 h-5 text-yellow-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                </svg>
-                <span className="text-sm text-yellow-800 font-medium">
-                  {currentLanguage === 'ko' ? '개발 모드 (Firebase 미연결)' : '開発モード (Firebase未接続)'}
-                </span>
-              </div>
-              <p className="text-xs text-yellow-600 mt-1 text-center">
-                {currentLanguage === 'ko' 
-                  ? '테스트 계정으로 로그인 가능: admin@hanguru.school / password123' 
-                  : 'テストアカウントでログイン可能: admin@hanguru.school / password123'
-                }
-              </p>
-            </div>
-          )}
+
         </div>
 
         {/* 로그인 방법 선택 */}
@@ -371,101 +345,7 @@ export default function LoginPage() {
               </p>
             </div>
 
-            {/* 테스트 계정 정보 */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h3 className="text-sm font-medium text-blue-800 mb-2">{t.testAccounts}</h3>
-              <div className="text-xs text-blue-700 space-y-2">
-                <div className="flex flex-col space-y-1">
-                  <span className="font-medium">{t.adminAccount}:</span>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => copyToClipboard('admin@hanguru.school', '관리자 이메일')}
-                      className="px-2 py-1 bg-blue-100 hover:bg-blue-200 rounded text-blue-800 transition-colors"
-                    >
-                      admin@hanguru.school
-                    </button>
-                    <button
-                      onClick={() => copyToClipboard('admin123!', '관리자 비밀번호')}
-                      className="px-2 py-1 bg-blue-100 hover:bg-blue-200 rounded text-blue-800 transition-colors"
-                    >
-                      admin123!
-                    </button>
-                  </div>
-                </div>
-                
-                <div className="flex flex-col space-y-1">
-                  <span className="font-medium">{t.teacherAccount}:</span>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => copyToClipboard('teacher@hanguru.school', '강사 이메일')}
-                      className="px-2 py-1 bg-blue-100 hover:bg-blue-200 rounded text-blue-800 transition-colors"
-                    >
-                      teacher@hanguru.school
-                    </button>
-                    <button
-                      onClick={() => copyToClipboard('teacher456!', '강사 비밀번호')}
-                      className="px-2 py-1 bg-blue-100 hover:bg-blue-200 rounded text-blue-800 transition-colors"
-                    >
-                      teacher456!
-                    </button>
-                  </div>
-                </div>
-                
-                <div className="flex flex-col space-y-1">
-                  <span className="font-medium">{t.studentAccount}:</span>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => copyToClipboard('student@hanguru.school', '학생 이메일')}
-                      className="px-2 py-1 bg-blue-100 hover:bg-blue-200 rounded text-blue-800 transition-colors"
-                    >
-                      student@hanguru.school
-                    </button>
-                    <button
-                      onClick={() => copyToClipboard('student789!', '학생 비밀번호')}
-                      className="px-2 py-1 bg-blue-100 hover:bg-blue-200 rounded text-blue-800 transition-colors"
-                    >
-                      student789!
-                    </button>
-                  </div>
-                </div>
-                
-                <div className="flex flex-col space-y-1">
-                  <span className="font-medium">학부모 계정:</span>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => copyToClipboard('parent@hanguru.school', '학부모 이메일')}
-                      className="px-2 py-1 bg-blue-100 hover:bg-blue-200 rounded text-blue-800 transition-colors"
-                    >
-                      parent@hanguru.school
-                    </button>
-                    <button
-                      onClick={() => copyToClipboard('parent345!', '학부모 비밀번호')}
-                      className="px-2 py-1 bg-blue-100 hover:bg-blue-200 rounded text-blue-800 transition-colors"
-                    >
-                      parent345!
-                    </button>
-                  </div>
-                </div>
-                
-                <div className="flex flex-col space-y-1">
-                  <span className="font-medium">{t.staffAccount}:</span>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => copyToClipboard('staff@hanguru.school', '직원 이메일')}
-                      className="px-2 py-1 bg-blue-100 hover:bg-blue-200 rounded text-blue-800 transition-colors"
-                    >
-                      staff@hanguru.school
-                    </button>
-                    <button
-                      onClick={() => copyToClipboard('staff012!', '직원 비밀번호')}
-                      className="px-2 py-1 bg-blue-100 hover:bg-blue-200 rounded text-blue-800 transition-colors"
-                    >
-                      staff012!
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+
           </form>
         )}
 
