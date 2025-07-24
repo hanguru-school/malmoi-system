@@ -9,10 +9,5 @@
   "env": {
     "AWS_REGION": "ap-northeast-2",
     "NODE_ENV": "production"
-  },
-  "functions": {
-    "src/app/api/**/*.ts": {
-      "maxDuration": 30
-    }
   }
 } 
