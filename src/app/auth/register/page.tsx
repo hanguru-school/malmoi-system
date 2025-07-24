@@ -25,7 +25,7 @@ export default function RegisterPage() {
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
 
-  const { signUp, user, getDefaultPageByRole } = useAuth();
+  const { register, user } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -39,10 +39,10 @@ export default function RegisterPage() {
         setShowProfileModal(true);
         return;
       }
-      const defaultPage = getDefaultPageByRole(user.role);
+      const defaultPage = user.role === 'admin' ? '/admin/dashboard' : '/student/dashboard';
       router.push(defaultPage);
     }
-  }, [user, loading, router, getDefaultPageByRole]);
+  }, [user, loading, router]);
 
   const toggleLanguage = () => {
     const newLanguage = language === 'ko' ? 'ja' : 'ko';
@@ -90,7 +90,7 @@ export default function RegisterPage() {
     setError('');
 
     try {
-      await signUp(formData.email, formData.password, formData.name, formData.role);
+      await register(formData.email, formData.password, formData.name, formData.role);
       
       // Parent role synchronization logic
       if (formData.role === 'parent') {
