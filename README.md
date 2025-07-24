@@ -1,6 +1,8 @@
-# 🏫 Malmoi System - AWS 기반 실전 시스템
+# Booking System
 
-강의실 예약 및 관리 시스템입니다.
+<!-- Last updated: 2024-07-24 -->
+
+A comprehensive classroom booking system built with Next.js, AWS Cognito, RDS, and S3.
 
 ## 🚀 배포된 시스템
 
