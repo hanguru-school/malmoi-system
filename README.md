@@ -1,6 +1,7 @@
 # Booking System
 
 <!-- Last updated: 2024-07-24 -->
+<!-- Environment variables configured -->
 
 A comprehensive classroom booking system built with Next.js, AWS Cognito, RDS, and S3.
 
