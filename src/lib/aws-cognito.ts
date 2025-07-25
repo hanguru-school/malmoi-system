@@ -67,7 +67,8 @@ export class CognitoService {
   async signIn(email: string, password: string) {
     try {
       const params = {
-        AuthFlow: 'USER_PASSWORD_AUTH',
+        AuthFlow: 'ADMIN_USER_PASSWORD_AUTH',
+        UserPoolId: cognitoConfig.userPoolId,
         ClientId: cognitoConfig.clientId,
         AuthParameters: {
           USERNAME: email,
