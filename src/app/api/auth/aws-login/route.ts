@@ -15,9 +15,12 @@ export async function POST(request: NextRequest) {
     }
 
     // AWS Cognito 로그인
+    console.log('Cognito 로그인 시도:', { email });
     const cognitoResult = await cognitoService.signIn(email, password);
+    console.log('Cognito 결과:', cognitoResult);
 
     if (!cognitoResult.success) {
+      console.error('Cognito 로그인 실패:', cognitoResult.message);
       return NextResponse.json(
         { error: cognitoResult.message },
         { status: 401 }
@@ -71,6 +74,15 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('AWS 로그인 오류:', error);
+    
+    // 더 자세한 오류 정보 반환
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { error: `로그인 오류: ${error.message}` },
+        { status: 500 }
+      );
+    }
+    
     return NextResponse.json(
       { error: '로그인 중 오류가 발생했습니다.' },
       { status: 500 }
