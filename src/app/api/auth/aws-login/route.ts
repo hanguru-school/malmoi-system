@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cognitoService } from '@/lib/aws-cognito';
-import { databaseService } from '@/lib/aws-rds';
-import jwt from 'jsonwebtoken';
+import { simpleAuthService } from '@/lib/simple-auth';
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,66 +12,41 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // AWS Cognito 로그인
-    console.log('Cognito 로그인 시도:', { email });
-    const cognitoResult = await cognitoService.signIn(email, password);
-    console.log('Cognito 결과:', cognitoResult);
+    // 간단한 인증 로그인
+    console.log('Simple auth 로그인 시도:', { email });
+    const authResult = await simpleAuthService.signIn(email, password);
+    console.log('Simple auth 결과:', authResult);
 
-    if (!cognitoResult.success) {
-      console.error('Cognito 로그인 실패:', cognitoResult.message);
+    if (!authResult.success) {
+      console.error('Simple auth 로그인 실패:', authResult.message);
       return NextResponse.json(
-        { error: cognitoResult.message },
+        { error: authResult.message },
         { status: 401 }
       );
     }
 
-    // 데이터베이스에서 사용자 정보 조회
-    const user = await databaseService.getUserByEmail(email);
-
-    if (!user) {
-      return NextResponse.json(
-        { error: '사용자 정보를 찾을 수 없습니다.' },
-        { status: 404 }
-      );
-    }
-
-    // JWT 토큰 생성
-    const token = jwt.sign(
-      {
-        userId: user.id,
-        email: user.email,
-        role: user.role,
-        cognitoUserId: user.cognito_user_id
-      },
-      process.env.JWT_SECRET || 'your-secret-key',
-      { expiresIn: '24h' }
-    );
-
     // 응답 설정
     const response = NextResponse.json({
       success: true,
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role
-      },
-      token,
+      user: authResult.user,
+      token: authResult.token,
       message: '로그인에 성공했습니다.'
     });
 
     // 쿠키에 토큰 저장
-    response.cookies.set('auth-token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 24 * 60 * 60 // 24시간
-    });
+    if (authResult.token) {
+      response.cookies.set('auth-token', authResult.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 24 * 60 * 60 // 24시간
+      });
+    }
 
     return response;
 
   } catch (error) {
-    console.error('AWS 로그인 오류:', error);
+    console.error('Simple auth 로그인 오류:', error);
     
     // 더 자세한 오류 정보 반환
     if (error instanceof Error) {

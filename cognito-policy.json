@@ -1,0 +1,40 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "cognito-idp:AdminInitiateAuth",
+                "cognito-idp:AdminCreateUser",
+                "cognito-idp:AdminGetUser",
+                "cognito-idp:AdminUpdateUserAttributes",
+                "cognito-idp:AdminDeleteUser",
+                "cognito-idp:AdminSetUserPassword",
+                "cognito-idp:AdminConfirmSignUp",
+                "cognito-idp:AdminRespondToAuthChallenge",
+                "cognito-idp:GetUser",
+                "cognito-idp:SignUp",
+                "cognito-idp:ConfirmSignUp",
+                "cognito-idp:InitiateAuth",
+                "cognito-idp:RespondToAuthChallenge",
+                "cognito-idp:ChangePassword",
+                "cognito-idp:UpdateUserAttributes",
+                "cognito-idp:DeleteUser",
+                "cognito-idp:ListUsers",
+                "cognito-idp:DescribeUserPool",
+                "cognito-idp:DescribeUserPoolClient"
+            ],
+            "Resource": [
+                "arn:aws:cognito-idp:ap-northeast-2:*:userpool/ap-northeast-2_gnMo24nfg",
+                "arn:aws:cognito-idp:ap-northeast-2:*:userpool/ap-northeast-2_gnMo24nfg/*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "cognito-identity:*"
+            ],
+            "Resource": "*"
+        }
+    ]
+} 

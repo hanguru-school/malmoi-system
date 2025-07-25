@@ -74,10 +74,11 @@ export class DatabaseService {
     name: string;
     role: string;
     cognitoUserId: string;
+    passwordHash?: string;
   }) {
     const query = `
-      INSERT INTO users (email, name, role, cognito_user_id, created_at, updated_at)
-      VALUES ($1, $2, $3, $4, NOW(), NOW())
+      INSERT INTO users (email, name, role, cognito_user_id, password_hash, created_at, updated_at)
+      VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
       RETURNING *
     `;
     
@@ -85,7 +86,8 @@ export class DatabaseService {
       userData.email,
       userData.name,
       userData.role,
-      userData.cognitoUserId
+      userData.cognitoUserId,
+      userData.passwordHash || null
     ]);
     
     return result.rows[0];
