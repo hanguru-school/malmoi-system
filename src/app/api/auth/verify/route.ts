@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cognitoService } from '@/lib/aws-cognito';
-import { databaseService } from '@/lib/aws-rds';
-import jwt from 'jsonwebtoken';
+import { simpleAuthService } from '@/lib/simple-auth';
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,30 +12,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify JWT token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as any;
+    // Verify token with simple auth service
+    const result = await simpleAuthService.verifyToken(token);
     
-    // Verify with Cognito
-    const cognitoUser = await cognitoService.verifyToken(token);
-    
-    // Get user from database
-    const user = await databaseService.getUserByEmail(decoded.email);
-    
-    if (!user) {
+    if (!result.success) {
       return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
+        { error: result.message },
+        { status: 401 }
       );
     }
 
     return NextResponse.json({
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-        cognitoUserId: user.cognito_user_id
-      }
+      user: result.user
     });
 
   } catch (error) {

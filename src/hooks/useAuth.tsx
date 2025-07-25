@@ -60,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await fetch('/api/auth/aws-login', {
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -84,7 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = async (email: string, password: string, name: string, role: string) => {
     try {
-      const response = await fetch('/api/auth/aws-register', {
+      const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
