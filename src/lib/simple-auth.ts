@@ -12,7 +12,20 @@ export class SimpleAuthService {
   async signIn(email: string, password: string) {
     try {
       // 데이터베이스에서 사용자 조회
-      const user = await databaseService.getUserByEmail(email);
+      let user = await databaseService.getUserByEmail(email);
+      
+      // 사용자가 없으면 자동 생성 (관리자 계정인 경우)
+      if (!user && email === 'hanguru.school@gmail.com') {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        user = await databaseService.createUser({
+          email: 'hanguru.school@gmail.com',
+          name: '관리자',
+          role: 'admin',
+          cognitoUserId: 'simple_admin_001',
+          passwordHash: hashedPassword
+        });
+        console.log('관리자 사용자가 자동 생성되었습니다:', user.email);
+      }
       
       if (!user) {
         return {
