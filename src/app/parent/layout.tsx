@@ -1,30 +1,24 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
-  Home,
-  Users,
-  Calendar,
-  BookOpen,
+  Home, 
+  Users, 
+  MessageSquare, 
+  Calendar, 
+  FileText, 
   Settings,
-  BarChart3,
-  MessageSquare,
-  CreditCard,
-  FileText,
-  Award,
-  TrendingUp,
-  Shield,
   Menu,
   X,
   LogOut,
-  User,
-  Star,
   Bell,
-  Globe
+  Globe,
+  CreditCard,
+  Star,
+  BarChart3
 } from 'lucide-react';
-import { useTranslation, Language } from '@/lib/translations';
 
 const navigation = [
   { name: '대시보드', href: '/parent/home', icon: Home },
@@ -43,15 +37,13 @@ export default function ParentLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [currentLanguage, setCurrentLanguage] = useState<Language>(() => {
-    // localStorage에서 언어 설정을 가져오거나 기본값 사용
+  const [currentLanguage, setCurrentLanguage] = useState<string>(() => {
     if (typeof window !== 'undefined') {
-      return (localStorage.getItem('language') as Language) || 'ko';
+      return localStorage.getItem('language') || 'ko';
     }
     return 'ko';
   });
   const pathname = usePathname();
-  const t = useTranslation(currentLanguage);
 
   // 언어 전환 함수
   const toggleLanguage = () => {
@@ -105,7 +97,7 @@ export default function ParentLayout({
                       }`}
                     >
                       <item.icon className="w-5 h-5 mr-3" />
-                      {currentLanguage === 'ko' ? item.name : t.parent.navigation[item.name as keyof typeof t.parent.navigation]}
+                      {item.name}
                     </Link>
                   </div>
                 );
@@ -136,7 +128,7 @@ export default function ParentLayout({
               className="flex items-center w-full px-3 py-2 text-sm font-medium text-blue-300 rounded-md hover:bg-blue-700 hover:text-white transition-colors"
             >
               <LogOut className="w-5 h-5 mr-3" />
-              {t.common.logout}
+              {currentLanguage === 'ko' ? '로그아웃' : 'ログアウト'}
             </button>
           </div>
         </div>

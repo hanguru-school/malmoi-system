@@ -25,7 +25,8 @@ export async function POST(request: NextRequest) {
         id: '1',
         email: 'hanguru.school@gmail.com',
         name: '관리자',
-        role: 'admin'
+        role: 'admin',
+        cognitoUserId: 'simple_admin_001'
       };
       
       const token = 'mock-token-' + Date.now();

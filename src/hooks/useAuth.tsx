@@ -6,7 +6,7 @@ interface User {
   email: string;
   name: string;
   role: string;
-  cognitoUserId: string;
+  cognitoUserId?: string;
 }
 
 interface AuthContextType {
@@ -74,7 +74,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       const data = await response.json();
+      
+      // localStorage와 쿠키 모두에 토큰 저장
       localStorage.setItem('authToken', data.token);
+      document.cookie = `auth_token=${data.token}; path=/; max-age=86400; SameSite=Strict`;
+      
       setUser(data.user);
     } catch (error) {
       console.error('Login error:', error);
@@ -98,7 +102,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       const data = await response.json();
+      
+      // localStorage와 쿠키 모두에 토큰 저장
       localStorage.setItem('authToken', data.token);
+      document.cookie = `auth_token=${data.token}; path=/; max-age=86400; SameSite=Strict`;
+      
       setUser(data.user);
     } catch (error) {
       console.error('Registration error:', error);
@@ -108,6 +116,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     localStorage.removeItem('authToken');
+    // 쿠키도 삭제
+    document.cookie = 'auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     setUser(null);
   };
 

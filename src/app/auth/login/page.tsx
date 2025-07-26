@@ -99,7 +99,20 @@ export default function LoginPage() {
     console.log('useEffect 실행 - user:', user, 'loading:', loading, 'authLoading:', authLoading);
     if (user && !loading && !authLoading) {
       console.log('사용자 로그인됨:', user.role, user.name);
-      const defaultPage = user.role === 'admin' ? '/admin/dashboard' : '/student/dashboard';
+      
+      // 권한별 기본 페이지 설정
+      let defaultPage = '/student/home'; // 기본값
+      
+      if (user.role === 'admin') {
+        defaultPage = '/admin/home';
+      } else if (user.role === 'teacher') {
+        defaultPage = '/teacher/home';
+      } else if (user.role === 'staff') {
+        defaultPage = '/staff/home';
+      } else if (user.role === 'student') {
+        defaultPage = '/student/home';
+      }
+      
       console.log('리다이렉션할 페이지:', defaultPage);
       
       // 약간의 지연을 두고 리다이렉션
@@ -120,7 +133,16 @@ export default function LoginPage() {
       console.log('로그인 시도:', email);
       await login(email, password);
       console.log('로그인 성공, 사용자 상태 대기 중...');
-      // useEffect에서 사용자 상태 변경을 감지하여 리다이렉션 처리
+      
+      // 즉시 리다이렉션 시도 (백업)
+      setTimeout(() => {
+        if (user) {
+          console.log('백업 리다이렉션 실행');
+          const defaultPage = user.role === 'admin' ? '/admin/home' : '/student/home';
+          router.push(defaultPage);
+        }
+      }, 500);
+      
     } catch (error: unknown) {
       console.error('로그인 실패:', error);
       const errorMessage = error instanceof Error ? error.message : t.loginFailed;
@@ -329,6 +351,11 @@ export default function LoginPage() {
                 {t.noAccount}{' '}
                 <Link href="/auth/register" className="font-medium text-blue-600 hover:text-blue-500">
                   {t.signUp}
+                </Link>
+              </p>
+              <p className="text-sm text-gray-500 mt-2">
+                <Link href="/" className="font-medium text-gray-600 hover:text-gray-500">
+                  ← 메인 페이지로 돌아가기
                 </Link>
               </p>
             </div>

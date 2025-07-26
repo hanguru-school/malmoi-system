@@ -23,18 +23,58 @@ export interface StudentIdentifierHistory {
 
 export interface StudentIdentifierData {
   studentId: string;
-  identifierCode: string;
   studentName: string;
   studentEmail: string;
   department: string;
   currentLevel: string;
   points: number;
+  completedClasses: number;
+  identifierCode: string;
+  createdAt: Date;
+}
+
+export interface StudentProfile {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  level: string;
+  points: number;
   totalClasses: number;
   completedClasses: number;
+  remainingHours: number;
+  joinDate: string;
+  lastLogin: string;
+  avatar?: string;
+}
+
+export interface StudentStats {
+  totalClasses: number;
+  completedClasses: number;
+  upcomingClasses: number;
+  currentLevel: string;
+  points: number;
   studyStreak: number;
   averageScore: number;
-  lastPaymentDate?: Date;
-  lastPaymentAmount?: number;
-  createdAt: Date;
-  version: string;
+  remainingTime: {
+    total: number;
+    available: number;
+  };
+}
+
+export interface RecentReservation {
+  id: string;
+  date: string;
+  time: string;
+  teacher: string;
+  subject: string;
+  status: 'upcoming' | 'completed' | 'cancelled';
+}
+
+export interface RecentNote {
+  id: string;
+  title: string;
+  date: string;
+  hasAudio: boolean;
+  duration: string;
 } 

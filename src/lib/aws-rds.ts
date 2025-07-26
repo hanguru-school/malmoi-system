@@ -2,10 +2,10 @@ import { Pool, PoolClient } from 'pg';
 
 // AWS RDS 설정
 const rdsConfig = {
-  host: process.env.AWS_RDS_HOST || '',
+  host: process.env.AWS_RDS_HOST || 'localhost',
   port: parseInt(process.env.AWS_RDS_PORT || '5432'),
   database: process.env.AWS_RDS_DATABASE || 'malmoi_system',
-  user: process.env.AWS_RDS_USERNAME || '',
+  user: process.env.AWS_RDS_USERNAME || 'postgres',
   password: process.env.AWS_RDS_PASSWORD || '',
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
   max: 20, // 최대 연결 수
@@ -15,27 +15,46 @@ const rdsConfig = {
 
 // PostgreSQL 연결 풀
 let pool: Pool | null = null;
+let isInitialized = false;
 
 // 데이터베이스 연결 풀 초기화
 export function initializeDatabase() {
-  if (!pool) {
-    pool = new Pool(rdsConfig);
-    
-    // 연결 테스트
-    pool.on('connect', (client: any) => {
-      console.log('✅ PostgreSQL 데이터베이스에 연결되었습니다.');
-    });
-    
-    pool.on('error', (err: any) => {
-      console.error('❌ PostgreSQL 연결 오류:', err);
-    });
+  if (!pool && !isInitialized) {
+    try {
+      // 환경 변수 체크
+      if (!process.env.AWS_RDS_HOST && process.env.NODE_ENV === 'production') {
+        console.warn('⚠️ AWS_RDS_HOST 환경 변수가 설정되지 않았습니다. 데이터베이스 연결을 건너뜁니다.');
+        isInitialized = true;
+        return null;
+      }
+      
+      pool = new Pool(rdsConfig);
+      
+      // 연결 테스트
+      pool.on('connect', (client: any) => {
+        console.log('✅ PostgreSQL 데이터베이스에 연결되었습니다.');
+      });
+      
+      pool.on('error', (err: any) => {
+        console.error('❌ PostgreSQL 연결 오류:', err);
+        // 연결 오류 시 풀 재설정
+        pool = null;
+        isInitialized = false;
+      });
+      
+      isInitialized = true;
+    } catch (error) {
+      console.error('❌ 데이터베이스 초기화 오류:', error);
+      isInitialized = true;
+      return null;
+    }
   }
   return pool;
 }
 
 // 데이터베이스 서비스 클래스
 export class DatabaseService {
-  private pool: Pool;
+  private pool: Pool | null;
 
   constructor() {
     this.pool = initializeDatabase();
@@ -43,6 +62,10 @@ export class DatabaseService {
 
   // 쿼리 실행
   async query(text: string, params?: any[]) {
+    if (!this.pool) {
+      throw new Error('데이터베이스 연결이 초기화되지 않았습니다.');
+    }
+    
     const client = await this.pool.connect();
     try {
       const result = await client.query(text, params);
@@ -54,6 +77,10 @@ export class DatabaseService {
 
   // 트랜잭션 실행
   async transaction(callback: (client: PoolClient) => Promise<any>) {
+    if (!this.pool) {
+      throw new Error('데이터베이스 연결이 초기화되지 않았습니다.');
+    }
+    
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');

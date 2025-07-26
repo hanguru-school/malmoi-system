@@ -2,42 +2,28 @@
 
 import { useState, useEffect } from 'react';
 import { 
+  Home, 
   Users, 
   Calendar, 
+  BookOpen, 
+  CreditCard, 
+  Star, 
   TrendingUp, 
-  DollarSign, 
-  AlertCircle, 
-  CheckCircle, 
-  Clock, 
+  Bell, 
+  User, 
+  MessageSquare, 
+  Settings, 
   ChevronRight,
-  User,
-  LogOut,
-  Home,
+  Globe,
+  CheckCircle,
+  AlertCircle,
   XCircle,
   Eye,
-  GraduationCap,
-  BookOpen,
   Activity,
-  FileText,
-  Zap,
-  Settings,
-  BarChart3,
-  MessageSquare,
-  Bell,
-  Star,
-  Volume2,
-  CreditCard,
-  Award,
-  Layers,
-  TestTube,
-  Shield,
-  Building,
-  UserCheck,
-  PieChart,
-  Target
+  DollarSign,
+  GraduationCap
 } from 'lucide-react';
 import Link from 'next/link';
-import { useTranslation, Language } from '@/lib/translations';
 
 interface ParentStats {
   totalChildren: number;
@@ -71,13 +57,12 @@ interface QuickAction {
 }
 
 export default function ParentHome() {
-  const [currentLanguage, setCurrentLanguage] = useState<Language>(() => {
+  const [currentLanguage, setCurrentLanguage] = useState<string>(() => {
     if (typeof window !== 'undefined') {
-      return (localStorage.getItem('language') as Language) || 'ko';
+      return localStorage.getItem('language') || 'ko';
     }
     return 'ko';
   });
-  const t = useTranslation(currentLanguage);
 
   const [stats, setStats] = useState<ParentStats>({
     totalChildren: 0,

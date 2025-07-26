@@ -21,16 +21,29 @@ const isFirebaseConfigValid = () => {
          firebaseConfig.projectId !== 'booking-system-dev';
 };
 
-// Firebase 앱 초기화
-export const app = initializeApp(firebaseConfig);
+// Firebase 앱 초기화 (안전한 초기화)
+let app: any = null;
+let auth: any = null;
+let db: any = null;
+let storage: any = null;
 
-// Firebase 서비스들 초기화
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-export const storage = getStorage(app);
+try {
+  if (isFirebaseConfigValid()) {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+    storage = getStorage(app);
+    console.log('✅ Firebase가 성공적으로 초기화되었습니다.');
+  } else {
+    console.warn('⚠️ Firebase 설정이 유효하지 않습니다. Firebase 기능이 비활성화됩니다.');
+  }
+} catch (error) {
+  console.error('❌ Firebase 초기화 오류:', error);
+  console.warn('⚠️ Firebase 기능이 비활성화됩니다.');
+}
 
-// Firebase 설정 유효성 검사 함수 export
-export { isFirebaseConfigValid };
+// Firebase 서비스들 export (안전한 export)
+export { app, auth, db, storage };
 
 // LINE 로그인 제공업체
 export const lineProvider = new OAuthProvider('oidc.line');
