@@ -1,16 +1,9 @@
-# Booking System
+# 🏫 Malmöi Classroom Booking System
 
-<!-- Last updated: 2024-07-24 -->
-<!-- Environment variables configured -->
-<!-- Simple auth system implemented -->
+## 🚀 Deployed System
+**Live URL:** https://malmoi-system.vercel.app
 
-A comprehensive classroom booking system built with Next.js, AWS Cognito, RDS, and S3.
-
-## 🚀 배포된 시스템
-
-**현재 배포 상태:** ✅ **완료**
-- **URL:** https://malmoi-system.vercel.app
-- **GitHub:** https://github.com/hanguru-school/malmoi-system
+**Last Updated:** 2025-01-26 (배포 테스트용 업데이트)
 
 ## 🏗️ 시스템 아키텍처
 
