@@ -1,27 +1,27 @@
-<svg width="192" height="192" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
   <!-- 배경 그라데이션 -->
-  <rect width="192" height="192" rx="32" fill="url(#backgroundGradient)"/>
+  <rect width="96" height="96" rx="16" fill="url(#backgroundGradient)"/>
   
   <!-- 책 모양 (한국어 학습 상징) -->
-  <path d="M48 64 L144 64 L144 128 L48 128 Z" fill="url(#bookGradient)" stroke="white" stroke-width="2"/>
-  <path d="M52 68 L140 68 L140 124 L52 124 Z" fill="white" opacity="0.9"/>
+  <path d="M24 32 L72 32 L72 64 L24 64 Z" fill="url(#bookGradient)" stroke="white" stroke-width="1.5"/>
+  <path d="M26 34 L70 34 L70 62 L26 62 Z" fill="white" opacity="0.9"/>
   
   <!-- 책 페이지 라인들 -->
-  <line x1="60" y1="80" x2="132" y2="80" stroke="#3B82F6" stroke-width="1.5" opacity="0.7"/>
-  <line x1="60" y1="90" x2="132" y2="90" stroke="#3B82F6" stroke-width="1.5" opacity="0.7"/>
-  <line x1="60" y1="100" x2="132" y2="100" stroke="#3B82F6" stroke-width="1.5" opacity="0.7"/>
-  <line x1="60" y1="110" x2="120" y2="110" stroke="#3B82F6" stroke-width="1.5" opacity="0.7"/>
+  <line x1="30" y1="40" x2="66" y2="40" stroke="#3B82F6" stroke-width="1" opacity="0.7"/>
+  <line x1="30" y1="46" x2="66" y2="46" stroke="#3B82F6" stroke-width="1" opacity="0.7"/>
+  <line x1="30" y1="52" x2="64" y2="52" stroke="#3B82F6" stroke-width="1" opacity="0.7"/>
+  <line x1="30" y1="58" x2="60" y2="58" stroke="#3B82F6" stroke-width="1" opacity="0.7"/>
   
   <!-- 한국어 문자 "한" -->
-  <text x="96" y="140" font-family="Arial, sans-serif" font-size="24" font-weight="bold" text-anchor="middle" fill="white">한</text>
+  <text x="48" y="78" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="white">한</text>
   
   <!-- 언어 교환 아이콘 -->
-  <circle cx="140" cy="52" r="12" fill="url(#accentGradient)" stroke="white" stroke-width="1.5"/>
-  <path d="M135 52 L145 52 M140 47 L140 57" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="70" cy="26" r="6" fill="url(#accentGradient)" stroke="white" stroke-width="1"/>
+  <path d="M66 26 L74 26 M70 22 L70 30" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
   
   <!-- 학습 진행 표시 -->
-  <circle cx="52" cy="52" r="8" fill="url(#progressGradient)" stroke="white" stroke-width="1.5"/>
-  <path d="M48 52 L56 52 M52 48 L52 56" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+  <circle cx="26" cy="26" r="4" fill="url(#progressGradient)" stroke="white" stroke-width="1"/>
+  <path d="M24 26 L28 26 M26 24 L26 28" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
   
   <!-- 그라데이션 정의 -->
   <defs>
