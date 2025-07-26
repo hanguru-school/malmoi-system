@@ -45,6 +45,30 @@
           "sizes": "192x192"
         }
       ]
+    },
+    {
+      "name": "예약하기",
+      "short_name": "예약",
+      "description": "수업 예약하기",
+      "url": "/student/reservations/new",
+      "icons": [
+        {
+          "src": "/icon-192x192.svg",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "출석하기",
+      "short_name": "출석",
+      "description": "출석 태깅하기",
+      "url": "/tagging/student",
+      "icons": [
+        {
+          "src": "/icon-192x192.svg",
+          "sizes": "192x192"
+        }
+      ]
     }
   ],
   "related_applications": [],

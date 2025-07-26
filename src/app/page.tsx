@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 
 import { useDevice } from '@/hooks/useDevice';
+import PWAInstallButton from '@/components/common/PWAInstallButton';
 
 export default function Home() {
   const [language, setLanguage] = useState<'ja' | 'ko'>('ja');
@@ -131,9 +132,22 @@ export default function Home() {
             console.log('PWA 설치가 승인되었습니다.');
             // 설치 완료 후 안내
             setTimeout(() => {
-              alert(language === 'ja' 
-                ? 'MalMoi가 성공적으로 설치되었습니다! 홈 화면에서 앱을 찾을 수 있습니다.' 
-                : 'MalMoi가 성공적으로 설치되었습니다! 홈 화면에서 앱을 찾을 수 있습니다.');
+              const platform = navigator.platform;
+              let message = '';
+              if (platform.includes('Win')) {
+                message = language === 'ja' 
+                  ? 'MalMoiが正常にインストールされました！Windowsのスタートメニューから起動できます。' 
+                  : 'MalMoi가 성공적으로 설치되었습니다! Windows 시작 메뉴에서 실행할 수 있습니다.';
+              } else if (platform.includes('Mac')) {
+                message = language === 'ja' 
+                  ? 'MalMoiが正常にインストールされました！MacのDockから起動できます。' 
+                  : 'MalMoi가 성공적으로 설치되었습니다! Mac Dock에서 실행할 수 있습니다.';
+              } else {
+                message = language === 'ja' 
+                  ? 'MalMoiがホーム画面に正常にインストールされました！' 
+                  : 'MalMoi가 홈 화면에 성공적으로 설치되었습니다!';
+              }
+              alert(message);
             }, 1000);
           } else {
             console.log('PWA 설치가 거부되었습니다.');
@@ -178,10 +192,22 @@ export default function Home() {
             const registration = await navigator.serviceWorker.getRegistration();
             if (registration) {
               console.log('Service Worker 등록됨:', registration);
-              // 설치 프롬프트가 나올 때까지 대기
-                      alert(language === 'ja' 
-          ? 'インストールプロンプトがまもなく表示されます。「インストール」をクリックしてください。'
-          : 'インストールプロンプトがまもなく表示されます。「インストール」をクリックしてください。');
+              
+              // Windows/Mac 특화 설치 안내
+              const platform = navigator.platform;
+              if (platform.includes('Win')) {
+                alert(language === 'ja' 
+                  ? 'WindowsでMalMoiをインストールします。ブラウザの右上に表示される「インストール」ボタンをクリックしてください。' 
+                  : 'Windows에서 MalMoi를 설치합니다. 브라우저 우상단에 나타나는 "설치" 버튼을 클릭해주세요.');
+              } else if (platform.includes('Mac')) {
+                alert(language === 'ja' 
+                  ? 'MacでMalMoiをインストールします。ブラウザの右上に表示される「インストール」ボタンをクリックしてください。' 
+                  : 'Mac에서 MalMoi를 설치합니다. 브라우저 우상단에 나타나는 "설치" 버튼을 클릭해주세요.');
+              } else {
+                alert(language === 'ja' 
+                  ? 'インストールプロンプトがまもなく表示されます。「インストール」をクリックしてください。'
+                  : '설치 프롬프트가 곧 나타날 것입니다. "설치"를 클릭해주세요.');
+              }
               return;
             }
           }
@@ -568,20 +594,7 @@ export default function Home() {
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4">
               {/* PWA 설치 버튼 - 모든 디바이스에서 표시 */}
-              <div className="relative group">
-                <button
-                  onClick={handleAddToHomeScreen}
-                  className="p-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl"
-                  title={t.addToHomeScreenTooltip}
-                >
-                  <Download className="w-4 h-4 sm:w-5 sm:h-5" />
-                </button>
-                {/* 툴팁 */}
-                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap z-50">
-                  {t.addToHomeScreenTooltip}
-                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent border-b-gray-900"></div>
-                </div>
-              </div>
+              <PWAInstallButton language={language} />
               <div className="relative group">
                 <button
                   onClick={toggleLanguage}
