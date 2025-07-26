@@ -128,11 +128,18 @@ export default function PWAInstallButton({ language = 'ja', className = '' }: PW
   // 이미 설치된 경우
   if (isInstalled) {
     return (
-      <div className={`flex items-center gap-2 px-4 py-2 bg-green-100 text-green-800 rounded-lg ${className}`}>
-        <CheckCircle className="w-5 h-5" />
-        <span className="text-sm font-medium">
+      <div className="relative group">
+        <button
+          className="p-2 rounded-full bg-gradient-to-r from-green-100 to-green-200 text-green-800 hover:from-green-200 hover:to-green-300 transition-all duration-300 shadow-md hover:shadow-lg"
+          title={language === 'ja' ? 'インストール済み' : '설치됨'}
+        >
+          <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+        </button>
+        {/* 툴팁 */}
+        <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap z-50">
           {language === 'ja' ? 'インストール済み' : '설치됨'}
-        </span>
+          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent border-b-gray-900"></div>
+        </div>
       </div>
     );
   }
@@ -141,27 +148,25 @@ export default function PWAInstallButton({ language = 'ja', className = '' }: PW
   if (isInstallable) {
     return (
       <>
-        <button
-          onClick={handleInstall}
-          disabled={isInstalling}
-          className={`flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${className}`}
-        >
-          {isInstalling ? (
-            <>
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              <span className="text-sm font-medium">
-                {language === 'ja' ? 'インストール中...' : '설치 중...'}
-              </span>
-            </>
-          ) : (
-            <>
-              <Download className="w-5 h-5" />
-              <span className="text-sm font-medium">
-                {language === 'ja' ? '追加하기' : '추가하기'}
-              </span>
-            </>
-          )}
-        </button>
+        <div className="relative group">
+          <button
+            onClick={handleInstall}
+            disabled={isInstalling}
+            className="p-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+            title={language === 'ja' ? 'ホーム画面に追加' : '홈 화면에 추가'}
+          >
+            {isInstalling ? (
+              <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Download className="w-4 h-4 sm:w-5 sm:h-5" />
+            )}
+          </button>
+          {/* 툴팁 */}
+          <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap z-50">
+            {language === 'ja' ? 'ホーム画面に追加' : '홈 화면에 추가'}
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent border-b-gray-900"></div>
+          </div>
+        </div>
 
         {/* 설치 가이드 모달 */}
         {showInstallGuide && (
@@ -195,14 +200,19 @@ export default function PWAInstallButton({ language = 'ja', className = '' }: PW
 
   // 설치 불가능한 경우
   return (
-    <button
-      onClick={showInstallGuideModal}
-      className={`flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors ${className}`}
-    >
-      <Smartphone className="w-5 h-5" />
-      <span className="text-sm font-medium">
+    <div className="relative group">
+      <button
+        onClick={showInstallGuideModal}
+        className="p-2 rounded-full bg-gradient-to-r from-gray-100 to-gray-200 text-gray-600 hover:from-gray-200 hover:to-gray-300 transition-all duration-300 shadow-md hover:shadow-lg"
+        title={language === 'ja' ? 'インストール方法' : '설치 방법'}
+      >
+        <Smartphone className="w-4 h-4 sm:w-5 sm:h-5" />
+      </button>
+      {/* 툴팁 */}
+      <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap z-50">
         {language === 'ja' ? 'インストール方法' : '설치 방법'}
-      </span>
-    </button>
+        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent border-b-gray-900"></div>
+      </div>
+    </div>
   );
 } 
