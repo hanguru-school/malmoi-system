@@ -3,7 +3,9 @@
 ## 🚀 Deployed System
 **Live URL:** https://malmoi-system.vercel.app
 
-**Last Updated:** 2025-01-26 (배포 테스트용 업데이트)
+**Last Updated:** 2025-01-26 (배포 문제 해결용)
+
+**Deployment Status:** 🔄 **재배포 필요**
 
 ## 🏗️ 시스템 아키텍처
 
