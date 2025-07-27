@@ -5,28 +5,27 @@ import { authenticateUser } from '@/lib/database';
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('로그인 요청 시작');
+    
     const { email, password } = await request.json();
+    console.log('받은 데이터:', { email, password: password ? '***' : 'undefined' });
 
     // 입력 검증
     if (!email || !password) {
+      console.log('입력 검증 실패:', { email: !!email, password: !!password });
       return NextResponse.json(
         { error: '이메일과 비밀번호를 입력해주세요.' },
         { status: 400 }
       );
     }
 
+    console.log('사용자 인증 시작');
     // 사용자 인증
     const user = await authenticateUser(email, password);
+    console.log('인증 결과:', user ? '성공' : '실패');
 
     if (!user) {
-      return NextResponse.json(
-        { error: '이메일 또는 비밀번호가 올바르지 않습니다.' },
-        { status: 401 }
-      );
-    }
-
-    // 비밀번호 검증 (이미 authenticateUser에서 처리됨)
-    if (!user) {
+      console.log('인증 실패');
       return NextResponse.json(
         { error: '이메일 또는 비밀번호가 올바르지 않습니다.' },
         { status: 401 }

@@ -45,6 +45,16 @@ pool.on('error', (err) => {
   console.error('❌ PostgreSQL 연결 오류:', err);
 });
 
+// 연결 풀 상태 확인
+console.log('데이터베이스 설정:', {
+  host: getDatabaseConfig().host,
+  port: getDatabaseConfig().port,
+  database: getDatabaseConfig().database,
+  user: getDatabaseConfig().user,
+  hasPassword: !!getDatabaseConfig().password,
+  ssl: getDatabaseConfig().ssl
+});
+
 // 사용자 인증 함수
 export async function authenticateUser(email: string, password: string) {
   try {
