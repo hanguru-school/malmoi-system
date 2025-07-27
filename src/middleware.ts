@@ -2,8 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const hostname = request.headers.get('host') || '';
   
-  // 1. 브라우저 User-Agent 체크 (비정상 접근 차단)
+  // 1. 도메인별 라우팅 처리
+  if (hostname === 'app.hanguru.school') {
+    // app.hanguru.school 도메인으로 접속 시 booking-system 관리 시스템으로 리다이렉트
+    if (pathname === '/') {
+      return NextResponse.redirect(new URL('/admin/home', request.url));
+    }
+  }
+  
+  // 2. 브라우저 User-Agent 체크 (비정상 접근 차단)
   const userAgent = request.headers.get('user-agent') || '';
   const isBrowser = /Mozilla|Chrome|Safari|Edge|Opera|Firefox/i.test(userAgent);
   
