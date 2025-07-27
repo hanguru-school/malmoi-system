@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { simpleAuthService } from '@/lib/simple-auth';
+import jwt from 'jsonwebtoken';
+import { getUserById } from '@/lib/database';
+
+// Node.js 런타임 명시
+export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,18 +16,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify token with simple auth service
-    const result = await simpleAuthService.verifyToken(token);
+    // JWT 토큰 검증
+    const decoded = jwt.verify(token, process.env.NEXTAUTH_SECRET || 'fallback-secret') as any;
     
-    if (!result.success) {
+    if (!decoded || !decoded.userId) {
       return NextResponse.json(
-        { error: result.message },
+        { error: 'Invalid token' },
+        { status: 401 }
+      );
+    }
+
+    // 사용자 정보 조회
+    const user = await getUserById(decoded.userId);
+    
+    if (!user) {
+      return NextResponse.json(
+        { error: 'User not found' },
         { status: 401 }
       );
     }
 
     return NextResponse.json({
-      user: result.user
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role
+      }
     });
 
   } catch (error) {

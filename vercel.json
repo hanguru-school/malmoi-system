@@ -15,6 +15,7 @@
     "AWS_RDS_PASSWORD": "malmoi_admin_password_2024",
     "NEXTAUTH_SECRET": "malmoi-secret-key-2024-very-secure",
     "NEXTAUTH_URL": "https://app.hanguru.school",
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "DATABASE_URL": "postgresql://malmoi_admin:malmoi_admin_password_2024@malmoi-system-db.cp4q8o4akkqg.ap-northeast-2.rds.amazonaws.com:5432/malmoi_system?sslmode=require"
   }
 } 

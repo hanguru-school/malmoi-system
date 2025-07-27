@@ -16,6 +16,10 @@ const getDatabaseConfig = () => {
         user: url.username,
         password: url.password,
         ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+        // 연결 풀 설정 추가
+        max: 20,
+        idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 2000,
       };
     } catch (error) {
       console.error('DATABASE_URL 파싱 오류:', error);
@@ -30,34 +34,50 @@ const getDatabaseConfig = () => {
     user: process.env.AWS_RDS_USERNAME || 'postgres',
     password: process.env.AWS_RDS_PASSWORD || '',
     ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    // 연결 풀 설정 추가
+    max: 20,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 2000,
   };
 };
 
 // 데이터베이스 연결 풀 생성
-const pool = new Pool(getDatabaseConfig());
+let pool: Pool | null = null;
 
-// 연결 테스트
-pool.on('connect', () => {
-  console.log('✅ PostgreSQL 데이터베이스에 연결되었습니다.');
-});
+const createPool = () => {
+  if (!pool) {
+    const config = getDatabaseConfig();
+    console.log('데이터베이스 연결 설정:', {
+      host: config.host,
+      port: config.port,
+      database: config.database,
+      user: config.user,
+      hasPassword: !!config.password,
+      ssl: config.ssl,
+      nodeEnv: process.env.NODE_ENV
+    });
+    
+    pool = new Pool(config);
+    
+    // 연결 테스트
+    pool.on('connect', () => {
+      console.log('✅ PostgreSQL 데이터베이스에 연결되었습니다.');
+    });
 
-pool.on('error', (err) => {
-  console.error('❌ PostgreSQL 연결 오류:', err);
-});
-
-// 연결 풀 상태 확인
-console.log('데이터베이스 설정:', {
-  host: getDatabaseConfig().host,
-  port: getDatabaseConfig().port,
-  database: getDatabaseConfig().database,
-  user: getDatabaseConfig().user,
-  hasPassword: !!getDatabaseConfig().password,
-  ssl: getDatabaseConfig().ssl
-});
+    pool.on('error', (err) => {
+      console.error('❌ PostgreSQL 연결 오류:', err);
+    });
+  }
+  return pool;
+};
 
 // 사용자 인증 함수
 export async function authenticateUser(email: string, password: string) {
+  const pool = createPool();
+  
   try {
+    console.log('사용자 인증 시도:', email);
+    
     const query = `
       SELECT 
         u.id,
@@ -74,6 +94,7 @@ export async function authenticateUser(email: string, password: string) {
     const result = await pool.query(query, [email]);
     
     if (result.rows.length === 0) {
+      console.log('사용자를 찾을 수 없음:', email);
       return null;
     }
     
@@ -83,11 +104,13 @@ export async function authenticateUser(email: string, password: string) {
     const isPasswordValid = await bcrypt.compare(password, user.password);
     
     if (!isPasswordValid) {
+      console.log('비밀번호 불일치:', email);
       return null;
     }
     
     // 비밀번호 제거 후 반환
     const { password: _, ...userWithoutPassword } = user;
+    console.log('인증 성공:', user.email, user.role);
     return userWithoutPassword;
   } catch (error) {
     console.error('사용자 인증 오류:', error);
@@ -102,6 +125,7 @@ export async function createUser(userData: {
   password: string;
   role: string;
 }) {
+  const pool = createPool();
   try {
     const query = `
       INSERT INTO users (email, name, password, role, created_at, updated_at)
@@ -125,6 +149,7 @@ export async function createUser(userData: {
 
 // 사용자 조회 함수
 export async function getUserById(id: string) {
+  const pool = createPool();
   try {
     const query = `
       SELECT 
@@ -153,7 +178,11 @@ export async function getUserById(id: string) {
 
 // 데이터베이스 연결 종료
 export async function closeDatabase() {
-  await pool.end();
+  if (pool) {
+    await pool.end();
+    pool = null; // 연결 풀 초기화
+    console.log('데이터베이스 연결 종료');
+  }
 }
 
 export default pool; 

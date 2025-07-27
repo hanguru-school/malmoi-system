@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 
+// Node.js 런타임 명시
+export const runtime = 'nodejs';
+
 export async function GET() {
   try {
     const healthCheck = {

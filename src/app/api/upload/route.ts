@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import AWS from 'aws-sdk';
 
+// Node.js 런타임 명시
+export const runtime = 'nodejs';
+
 // Configure AWS
 AWS.config.update({
   region: process.env.AWS_REGION || 'ap-northeast-2',

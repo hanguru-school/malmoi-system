@@ -1,13 +1,53 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { databaseService } from '@/lib/aws-rds';
+import { Pool } from 'pg';
 import jwt from 'jsonwebtoken';
 
+// Node.js 런타임 명시
+export const runtime = 'nodejs';
+
+// 데이터베이스 연결 설정
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+});
+
+// JWT 토큰 검증 함수
 function verifyToken(token: string) {
   try {
-    return jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as any;
+    return jwt.verify(token, process.env.NEXTAUTH_SECRET || 'fallback-secret') as any;
   } catch (error) {
     throw new Error('Invalid token');
   }
+}
+
+// 사용자 예약 조회 함수
+async function getUserReservations(userId: string, startDate?: Date, endDate?: Date) {
+  let query = `
+    SELECT r.*, rm.name as room_name
+    FROM reservations r
+    JOIN rooms rm ON r.room_id = rm.id
+    WHERE r.user_id = $1
+  `;
+  
+  const params: any[] = [userId];
+  let paramIndex = 2;
+  
+  if (startDate) {
+    query += ` AND r.start_time >= $${paramIndex}`;
+    params.push(startDate);
+    paramIndex++;
+  }
+  
+  if (endDate) {
+    query += ` AND r.end_time <= $${paramIndex}`;
+    params.push(endDate);
+    paramIndex++;
+  }
+  
+  query += ` ORDER BY r.start_time DESC`;
+  
+  const result = await pool.query(query, params);
+  return result.rows;
 }
 
 export async function GET(request: NextRequest) {
@@ -28,7 +68,7 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status');
 
     // Get user reservations
-    const reservations = await databaseService.getUserReservations(
+    const reservations = await getUserReservations(
       decoded.userId,
       startDate ? new Date(startDate) : undefined,
       endDate ? new Date(endDate) : undefined
@@ -46,6 +86,7 @@ export async function GET(request: NextRequest) {
         title: reservation.title,
         description: reservation.description,
         roomId: reservation.room_id,
+        roomName: reservation.room_name,
         startTime: reservation.start_time,
         endTime: reservation.end_time,
         status: reservation.status,

@@ -3,6 +3,9 @@ import bcrypt from 'bcryptjs';
 import { sign } from 'jsonwebtoken';
 import { authenticateUser } from '@/lib/database';
 
+// Node.js 런타임 명시
+export const runtime = 'nodejs';
+
 export async function POST(request: NextRequest) {
   try {
     console.log('로그인 요청 시작');
