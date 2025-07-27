@@ -59,7 +59,8 @@ export default function LoginPage() {
       cardAuthCountdown: '초 후 다시 시도',
       authenticate: '인증하기',
       authenticating: '인증 중...',
-      authenticationFailed: '인증에 실패했습니다'
+      authenticationFailed: '인증에 실패했습니다',
+      backToMain: '메인 페이지로 돌아가기'
     },
     ja: {
       title: 'ログイン',
@@ -88,7 +89,8 @@ export default function LoginPage() {
       cardAuthCountdown: '秒後に再試行',
       authenticate: '認証する',
       authenticating: '認証中...',
-      authenticationFailed: '認証に失敗しました'
+      authenticationFailed: '認証に失敗しました',
+      backToMain: 'メインページに戻る'
     }
   };
 
@@ -152,9 +154,21 @@ export default function LoginPage() {
     }
   };
 
-  // LINE 로그인 (임시 비활성화)
+  // LINE 로그인
   const handleLineLogin = async () => {
-    setError('LINE 로그인은 현재 지원되지 않습니다.');
+    setLoading(true);
+    setError('');
+    
+    try {
+      // LINE 로그인 URL로 리다이렉션
+      const lineLoginUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${process.env.NEXT_PUBLIC_LINE_CLIENT_ID}&redirect_uri=${encodeURIComponent(process.env.NEXT_PUBLIC_LINE_REDIRECT_URI || '')}&state=${Math.random().toString(36).substring(7)}&scope=profile%20openid`;
+      
+      window.location.href = lineLoginUrl;
+    } catch (error) {
+      console.error('LINE 로그인 오류:', error);
+      setError(t.lineLoginFailed);
+      setLoading(false);
+    }
   };
 
   // 카드 인증 시뮬레이션
@@ -218,20 +232,18 @@ export default function LoginPage() {
       
       <div className="max-w-md w-full space-y-8">
         <div>
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                {t.title}
-              </h2>
-              <p className="mt-2 text-center text-sm text-gray-600">
-                {t.subtitle}
-              </p>
-            </div>
+          <div className="relative">
+            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+              {t.title}
+            </h2>
+            <p className="mt-2 text-center text-sm text-gray-600">
+              {t.subtitle}
+            </p>
             
-            {/* 언어 전환 버튼 */}
+            {/* 언어 전환 버튼 - 절대 위치로 우상단에 배치 */}
             <button
               onClick={toggleLanguage}
-              className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+              className="absolute top-0 right-0 flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
               title={currentLanguage === 'ko' ? '日本語に切り替え' : '한국어로 전환'}
             >
               <Globe className="w-4 h-4" />
@@ -240,8 +252,6 @@ export default function LoginPage() {
               </span>
             </button>
           </div>
-          
-
         </div>
 
         {/* 로그인 방법 선택 */}
@@ -355,7 +365,7 @@ export default function LoginPage() {
               </p>
               <p className="text-sm text-gray-500 mt-2">
                 <Link href="/" className="font-medium text-gray-600 hover:text-gray-500">
-                  ← 메인 페이지로 돌아가기
+                  ← {t.backToMain}
                 </Link>
               </p>
             </div>

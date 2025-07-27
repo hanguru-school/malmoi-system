@@ -381,7 +381,7 @@ export default function Home() {
       heroHighlight: '韓国語学習',
       heroSubtitle: 'を始めましょう',
       heroDescription: 'MalMoiなら、あなたの韓国語学習が劇的に変わります。体系的なカリキュラムと専門講師の指導で、確実に上達を実感できる学習体験を提供します。',
-      startButton: '시작하기',
+      startButton: '始める',
       whyChooseTitle: 'MalMoiが選ばれる理由',
       whyChooseSubtitle: 'あなたの韓国語学習を変える特別な体験',
       features: [
