@@ -2,19 +2,28 @@ import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { sign } from 'jsonwebtoken';
 
-// 동적 import로 Prisma 로드
-let prisma: any;
-
-async function getPrisma() {
-  if (!prisma) {
-    const { prisma: PrismaClient } = await import('@/lib/prisma');
-    prisma = PrismaClient;
-  }
-  return prisma;
-}
+// Prisma 클라이언트 직접 import
+import { prisma } from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
   try {
+    // 환경변수 확인
+    if (!process.env.DATABASE_URL) {
+      console.error('DATABASE_URL 환경변수가 설정되지 않았습니다.');
+      return NextResponse.json(
+        { error: '데이터베이스 연결 설정이 누락되었습니다.' },
+        { status: 503 }
+      );
+    }
+
+    if (!process.env.NEXTAUTH_SECRET) {
+      console.error('NEXTAUTH_SECRET 환경변수가 설정되지 않았습니다.');
+      return NextResponse.json(
+        { error: '인증 설정이 누락되었습니다.' },
+        { status: 500 }
+      );
+    }
+
     const { email, password } = await request.json();
 
     // 입력 검증
@@ -25,11 +34,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Prisma 클라이언트 가져오기
-    const db = await getPrisma();
-
     // 사용자 조회
-    const user = await db.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { email },
       include: {
         student: true,
@@ -87,9 +93,27 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('로그인 오류:', error);
+    
+    // 더 구체적인 에러 메시지
+    let errorMessage = '로그인 중 오류가 발생했습니다.';
+    let statusCode = 500;
+    
+    if (error instanceof Error) {
+      if (error.message.includes('DATABASE_URL')) {
+        errorMessage = '데이터베이스 연결 오류입니다.';
+        statusCode = 503;
+      } else if (error.message.includes('prisma')) {
+        errorMessage = '데이터베이스 오류입니다.';
+        statusCode = 503;
+      } else if (error.message.includes('NEXTAUTH_SECRET')) {
+        errorMessage = '인증 설정 오류입니다.';
+        statusCode = 500;
+      }
+    }
+    
     return NextResponse.json(
-      { error: '로그인 중 오류가 발생했습니다.' },
-      { status: 500 }
+      { error: errorMessage },
+      { status: statusCode }
     );
   }
 } 
