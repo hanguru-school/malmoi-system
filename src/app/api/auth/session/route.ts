@@ -1,43 +1,13 @@
 import { NextResponse } from 'next/server';
-import { 
-  createSuccessResponse, 
-  handleApiError, 
-  checkDatabaseConnection 
-} from '@/lib/api-utils';
-
-export const runtime = 'nodejs';
+import prisma from '@/lib/db';
+import { handleApiError } from '@/lib/api-utils';
 
 export async function GET() {
   try {
-    console.log('Session API called');
-    
-    // 데이터베이스 연결 확인
-    const dbCheck = await checkDatabaseConnection();
-    if (!dbCheck.success) {
-      console.error('Database connection failed:', dbCheck.error);
-      return NextResponse.json({
-        success: false,
-        message: '데이터베이스 연결에 실패했습니다. 잠시 후 다시 시도해주세요.',
-        timestamp: new Date().toISOString()
-      }, { status: 500 });
-    }
-
-    // 세션 정보 생성 (실제 구현에서는 JWT 토큰에서 추출)
-    const session = {
-      loggedIn: true,
-      user: {
-        id: 'session-user-id',
-        email: 'user@example.com',
-        name: '사용자',
-        role: 'STUDENT'
-      },
-      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24시간 후
-    };
-
-    console.log('Session created successfully');
-    return createSuccessResponse(session, '세션 정보를 성공적으로 가져왔습니다.');
-
+    // 예시: DB 연결 확인 및 세션 정보 확인
+    const userCount = await prisma.user.count();
+    return NextResponse.json({ success: true, message: '세션 정상', userCount });
   } catch (error) {
-    return handleApiError(error, 'Session API');
+    return handleApiError(error, 'GET /api/auth/session');
   }
 } 
