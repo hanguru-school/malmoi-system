@@ -24,6 +24,27 @@ export async function GET() {
       ssl: dbConfig.ssl
     });
     
+    // 필수 환경변수 확인
+    if (!dbConfig.host || !dbConfig.user || !dbConfig.password) {
+      return NextResponse.json({
+        status: 'error',
+        message: '필수 환경변수가 누락되었습니다',
+        missing: {
+          host: !dbConfig.host,
+          user: !dbConfig.user,
+          password: !dbConfig.password
+        },
+        config: {
+          host: dbConfig.host,
+          port: dbConfig.port,
+          database: dbConfig.database,
+          user: dbConfig.user,
+          hasPassword: !!dbConfig.password,
+          ssl: dbConfig.ssl
+        }
+      }, { status: 400 });
+    }
+    
     // 연결 테스트
     const pool = new Pool(dbConfig);
     
@@ -35,6 +56,10 @@ export async function GET() {
       const usersResult = await pool.query('SELECT COUNT(*) as user_count FROM users');
       console.log('사용자 수:', usersResult.rows[0]);
       
+      // 관리자 계정 확인
+      const adminUser = await pool.query('SELECT email, role FROM users WHERE email = $1', ['admin@hanguru.school']);
+      console.log('관리자 계정:', adminUser.rows[0] || '없음');
+      
       await pool.end();
       
       return NextResponse.json({
@@ -43,7 +68,8 @@ export async function GET() {
         data: {
           currentTime: result.rows[0].current_time,
           dbVersion: result.rows[0].db_version,
-          userCount: usersResult.rows[0].user_count
+          userCount: usersResult.rows[0].user_count,
+          adminUser: adminUser.rows[0] || null
         }
       });
       

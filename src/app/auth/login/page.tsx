@@ -159,20 +159,9 @@ export default function LoginPage() {
           </h2>
           <button
             onClick={toggleLanguage}
-            className="absolute right-8 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow relative"
+            className="absolute right-0 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow"
           >
             <Globe className="w-5 h-5 text-gray-600" />
-            <div className="absolute -bottom-1 -right-1 w-3 h-3 rounded-full overflow-hidden">
-              {currentLanguage === 'ko' ? (
-                <div className="w-full h-full bg-red-500 flex items-center justify-center">
-                  <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
-                </div>
-              ) : (
-                <div className="w-full h-full bg-red-500 flex items-center justify-center">
-                  <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
-                </div>
-              )}
-            </div>
           </button>
         </div>
         <p className="mt-2 text-center text-sm text-gray-600">

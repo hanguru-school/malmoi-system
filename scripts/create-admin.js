@@ -3,12 +3,12 @@ const { Pool } = require('pg');
 
 // 데이터베이스 연결 설정
 const pool = new Pool({
-  host: process.env.AWS_RDS_HOST || 'localhost',
+  host: process.env.AWS_RDS_HOST || 'malmoi-system-db.cp4q8o4akkqg.ap-northeast-2.rds.amazonaws.com',
   port: parseInt(process.env.AWS_RDS_PORT || '5432'),
   database: process.env.AWS_RDS_DATABASE || 'malmoi_system',
-  user: process.env.AWS_RDS_USERNAME || 'postgres',
-  password: process.env.AWS_RDS_PASSWORD || '',
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  user: process.env.AWS_RDS_USERNAME || 'malmoi_admin',
+  password: process.env.AWS_RDS_PASSWORD || 'malmoi_admin_password_2024',
+  ssl: { rejectUnauthorized: false },
 });
 
 async function createAdminUser() {
