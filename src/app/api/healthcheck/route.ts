@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { 
   createSuccessResponse, 
-  createErrorResponse 
+  handleApiError 
 } from '@/lib/api-utils';
 import prisma from '@/lib/db';
 import AWS from 'aws-sdk';
@@ -48,11 +48,12 @@ async function testAwsConnection() {
     }
 
     return { status: 'connected', message: 'AWS S3 연결 성공' };
-  } catch (error: any) {
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return { 
       status: 'failed', 
-      message: `AWS 연결 실패: ${error.message}`,
-      error: error.code || 'UNKNOWN_ERROR'
+      message: `AWS 연결 실패: ${errorMessage}`,
+      error: error instanceof Error ? error.message : 'UNKNOWN_ERROR'
     };
   }
 }
@@ -86,11 +87,12 @@ async function testJwtToken() {
         decoded: decoded
       }
     };
-  } catch (error: any) {
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return { 
       status: 'failed', 
-      message: `JWT 테스트 실패: ${error.message}`,
-      error: error.name || 'UNKNOWN_ERROR'
+      message: `JWT 테스트 실패: ${errorMessage}`,
+      error: error instanceof Error ? error.message : 'UNKNOWN_ERROR'
     };
   }
 }
@@ -125,12 +127,7 @@ export async function GET() {
     console.log('Healthcheck completed successfully');
     return createSuccessResponse(healthData, '시스템 상태 확인이 완료되었습니다.');
 
-  } catch (error: any) {
-    console.error('Healthcheck API error:', error);
-    return createErrorResponse(
-      '시스템 상태 확인 중 오류가 발생했습니다.',
-      500,
-      error.message || 'HEALTHCHECK_ERROR'
-    );
+  } catch (error) {
+    return handleApiError(error, 'Healthcheck API');
   }
 } 

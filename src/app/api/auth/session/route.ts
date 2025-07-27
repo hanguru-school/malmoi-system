@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { 
   createSuccessResponse, 
-  createErrorResponse, 
+  handleApiError, 
   checkDatabaseConnection 
 } from '@/lib/api-utils';
 
@@ -15,11 +15,11 @@ export async function GET() {
     const dbCheck = await checkDatabaseConnection();
     if (!dbCheck.success) {
       console.error('Database connection failed:', dbCheck.error);
-      return createErrorResponse(
-        '데이터베이스 연결에 실패했습니다. 잠시 후 다시 시도해주세요.',
-        500,
-        dbCheck.error
-      );
+      return NextResponse.json({
+        success: false,
+        message: '데이터베이스 연결에 실패했습니다. 잠시 후 다시 시도해주세요.',
+        timestamp: new Date().toISOString()
+      }, { status: 500 });
     }
 
     // 세션 정보 생성 (실제 구현에서는 JWT 토큰에서 추출)
@@ -37,12 +37,7 @@ export async function GET() {
     console.log('Session created successfully');
     return createSuccessResponse(session, '세션 정보를 성공적으로 가져왔습니다.');
 
-  } catch (error: any) {
-    console.error('Session API error:', error);
-    return createErrorResponse(
-      '세션 정보를 가져오는 중 오류가 발생했습니다.',
-      500,
-      error.message || 'SESSION_ERROR'
-    );
+  } catch (error) {
+    return handleApiError(error, 'Session API');
   }
 } 

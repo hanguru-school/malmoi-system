@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createErrorResponse, createSuccessResponse } from '@/lib/api-utils';
+import { createSuccessResponse, handleApiError } from '@/lib/api-utils';
 
 export const runtime = 'nodejs';
 
@@ -27,19 +27,14 @@ export async function GET(request: Request) {
 
     const message = errorMessages[errorType] || errorMessage;
 
-    return createErrorResponse(
+    return NextResponse.json({
+      success: false,
       message,
-      400,
-      errorType.toUpperCase()
-    );
+      timestamp: new Date().toISOString()
+    }, { status: 400 });
 
-  } catch (error: any) {
-    console.error('Auth error API error:', error);
-    return createErrorResponse(
-      '오류 처리 중 문제가 발생했습니다.',
-      500,
-      error.message || 'ERROR_API_ERROR'
-    );
+  } catch (error) {
+    return handleApiError(error, 'Auth Error API');
   }
 }
 
@@ -70,18 +65,13 @@ export async function POST(request: Request) {
 
     console.error('Auth error logged:', errorLog);
 
-    return createErrorResponse(
+    return NextResponse.json({
+      success: false,
       message,
-      400,
-      errorType.toUpperCase()
-    );
+      timestamp: new Date().toISOString()
+    }, { status: 400 });
 
-  } catch (error: any) {
-    console.error('Auth error POST API error:', error);
-    return createErrorResponse(
-      '오류 처리 중 문제가 발생했습니다.',
-      500,
-      error.message || 'ERROR_API_POST_ERROR'
-    );
+  } catch (error) {
+    return handleApiError(error, 'Auth Error POST API');
   }
 } 

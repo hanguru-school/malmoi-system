@@ -10,6 +10,20 @@ export interface ApiResponse<T = any> {
   timestamp: string;
 }
 
+// 간단한 에러 핸들러
+export function handleApiError(error: unknown, context: string) {
+  console.error(`[${context}]`, error);
+
+  return NextResponse.json(
+    {
+      success: false,
+      message: error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.',
+      timestamp: new Date().toISOString()
+    },
+    { status: 500 }
+  );
+}
+
 // 성공 응답 함수
 export function createSuccessResponse<T>(data: T, message: string = 'Success'): NextResponse<ApiResponse<T>> {
   const response: ApiResponse<T> = {
@@ -33,16 +47,6 @@ export function createErrorResponse(message: string, status: number = 500, error
   };
   
   return NextResponse.json(response, { status });
-}
-
-// 기존 handleApiError 함수 개선
-export function handleApiError(error: any, status: number = 500) {
-  console.error('API Error:', error);
-  
-  const message = error?.message || '서버 오류가 발생했습니다.';
-  const errorDetails = error?.stack || error?.code || 'UNKNOWN_ERROR';
-  
-  return createErrorResponse(message, status, errorDetails);
 }
 
 // 환경변수 검증 함수
@@ -73,13 +77,14 @@ export function validateEnvironmentVariables() {
 // API 래퍼 함수 (에러 핸들링 포함)
 export async function withErrorHandling<T>(
   handler: () => Promise<T>,
-  successMessage: string = 'Operation completed successfully'
+  successMessage: string = 'Operation completed successfully',
+  context: string = 'API'
 ): Promise<NextResponse<ApiResponse<T>>> {
   try {
     const result = await handler();
     return createSuccessResponse(result, successMessage);
-  } catch (error: any) {
-    return handleApiError(error, 500);
+  } catch (error) {
+    return handleApiError(error, context);
   }
 }
 
@@ -95,12 +100,12 @@ export async function checkDatabaseConnection() {
       success: true,
       message: '데이터베이스 연결이 정상입니다.'
     };
-  } catch (error: any) {
+  } catch (error) {
     console.error('Database connection check failed:', error);
     return {
       success: false,
       message: '데이터베이스 연결에 실패했습니다.',
-      error: error.message || 'DB_CONNECTION_FAILED'
+      error: error instanceof Error ? error.message : 'DB_CONNECTION_FAILED'
     };
   }
 } 

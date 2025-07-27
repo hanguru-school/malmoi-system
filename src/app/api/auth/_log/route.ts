@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { 
   createSuccessResponse, 
-  createErrorResponse, 
+  handleApiError, 
   checkDatabaseConnection 
 } from '@/lib/api-utils';
 
@@ -15,11 +15,11 @@ export async function GET() {
     const dbCheck = await checkDatabaseConnection();
     if (!dbCheck.success) {
       console.error('Database connection failed:', dbCheck.error);
-      return createErrorResponse(
-        '데이터베이스 연결에 실패했습니다. 잠시 후 다시 시도해주세요.',
-        500,
-        dbCheck.error
-      );
+      return NextResponse.json({
+        success: false,
+        message: '데이터베이스 연결에 실패했습니다. 잠시 후 다시 시도해주세요.',
+        timestamp: new Date().toISOString()
+      }, { status: 500 });
     }
 
     // 로그 정보 생성
@@ -33,13 +33,8 @@ export async function GET() {
     console.log('Auth log created successfully');
     return createSuccessResponse(log, '인증 로그를 성공적으로 가져왔습니다.');
 
-  } catch (error: any) {
-    console.error('Auth log API error:', error);
-    return createErrorResponse(
-      '인증 로그를 가져오는 중 오류가 발생했습니다.',
-      500,
-      error.message || 'AUTH_LOG_ERROR'
-    );
+  } catch (error) {
+    return handleApiError(error, 'Auth Log API');
   }
 }
 
@@ -62,11 +57,11 @@ export async function POST(req: Request) {
     const dbCheck = await checkDatabaseConnection();
     if (!dbCheck.success) {
       console.error('Database connection failed:', dbCheck.error);
-      return createErrorResponse(
-        '데이터베이스 연결에 실패했습니다. 잠시 후 다시 시도해주세요.',
-        500,
-        dbCheck.error
-      );
+      return NextResponse.json({
+        success: false,
+        message: '데이터베이스 연결에 실패했습니다. 잠시 후 다시 시도해주세요.',
+        timestamp: new Date().toISOString()
+      }, { status: 500 });
     }
 
     // 로그 데이터 처리 (실제 구현에서는 데이터베이스에 저장)
@@ -79,12 +74,7 @@ export async function POST(req: Request) {
     console.log('Log data processed successfully');
     return createSuccessResponse(processedLog, '로그 데이터를 성공적으로 처리했습니다.');
 
-  } catch (error: any) {
-    console.error('Auth log POST API error:', error);
-    return createErrorResponse(
-      '로그 데이터 처리 중 오류가 발생했습니다.',
-      500,
-      error.message || 'AUTH_LOG_POST_ERROR'
-    );
+  } catch (error) {
+    return handleApiError(error, 'Auth Log POST API');
   }
 } 
