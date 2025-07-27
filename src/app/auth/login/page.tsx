@@ -3,94 +3,68 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Globe, ArrowLeft, CheckCircle, XCircle, Loader2 } from 'lucide-react';
-
-interface Translations {
-  title: string;
-  subtitle: string;
-  emailLabel: string;
-  passwordLabel: string;
-  loginButton: string;
-  registerLink: string;
-  backToMain: string;
-  successMessage: string;
-  errorMessage: string;
-  loadingMessage: string;
-  lineLoginButton: string;
-  lineRegisterLink: string;
-}
+import { Globe, ArrowLeft } from 'lucide-react';
 
 export default function LoginPage() {
-  const [currentLanguage, setCurrentLanguage] = useState<'ko' | 'ja'>('ko');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentLanguage, setCurrentLanguage] = useState('ko');
   const router = useRouter();
 
-  // 번역 텍스트
-  const translations: Record<'ko' | 'ja', Translations> = {
-    ko: {
-      title: '로그인',
-      subtitle: 'MalMoi 한국어 교실에 오신 것을 환영합니다',
-      emailLabel: '이메일',
-      passwordLabel: '비밀번호',
-      loginButton: '로그인',
-      registerLink: '계정이 없으신가요? 회원가입',
-      backToMain: '메인 페이지로 돌아가기',
-      successMessage: '로그인에 성공했습니다!',
-      errorMessage: '로그인에 실패했습니다.',
-      loadingMessage: '로그인 중...',
-      lineLoginButton: 'LINE으로 로그인',
-      lineRegisterLink: 'LINE으로 회원가입하기'
-    },
-    ja: {
-      title: 'ログイン',
-      subtitle: 'MalMoi韓国語教室へようこそ',
-      emailLabel: 'メールアドレス',
-      passwordLabel: 'パスワード',
-      loginButton: 'ログイン',
-      registerLink: 'アカウントをお持ちでない方はこちら',
-      backToMain: 'メインページに戻る',
-      successMessage: 'ログインに成功しました！',
-      errorMessage: 'ログインに失敗しました。',
-      loadingMessage: 'ログイン中...',
-      lineLoginButton: 'LINEでログイン',
-      lineRegisterLink: 'LINEで新規登録'
-    }
-  };
-
-  const t = translations[currentLanguage];
-
-  // 언어 전환 함수
-  const toggleLanguage = () => {
-    setCurrentLanguage(currentLanguage === 'ko' ? 'ja' : 'ko');
-  };
-
-  // URL 파라미터에서 메시지 확인
+  // 강제로 입력란 스타일 적용
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const success = urlParams.get('success');
-    const message = urlParams.get('message');
-    const error = urlParams.get('error');
+    const forceInputStyles = () => {
+      const inputs = document.querySelectorAll('input[type="email"], input[type="password"]');
+      inputs.forEach((input: any) => {
+        input.style.color = '#000000';
+        input.style.webkitTextFillColor = '#000000';
+        input.style.caretColor = '#000000';
+        input.style.fontWeight = 'bold';
+      });
+    };
 
-    if (success && message) {
-      setSuccessMessage(decodeURIComponent(message));
-      setTimeout(() => setSuccessMessage(''), 5000);
-    }
+    // 초기 적용
+    forceInputStyles();
 
-    if (error && message) {
-      setErrorMessage(decodeURIComponent(message));
-      setTimeout(() => setErrorMessage(''), 5000);
-    }
+    // 주기적으로 적용 (모바일 브라우저 대응)
+    const interval = setInterval(forceInputStyles, 1000);
+
+    // 포커스 이벤트 리스너
+    const handleFocus = (e: any) => {
+      e.target.style.color = '#000000';
+      e.target.style.webkitTextFillColor = '#000000';
+      e.target.style.caretColor = '#000000';
+      e.target.style.fontWeight = 'bold';
+    };
+
+    const handleInput = (e: any) => {
+      e.target.style.color = '#000000';
+      e.target.style.webkitTextFillColor = '#000000';
+      e.target.style.caretColor = '#000000';
+      e.target.style.fontWeight = 'bold';
+    };
+
+    const inputs = document.querySelectorAll('input[type="email"], input[type="password"]');
+    inputs.forEach((input) => {
+      input.addEventListener('focus', handleFocus);
+      input.addEventListener('input', handleInput);
+    });
+
+    return () => {
+      clearInterval(interval);
+      inputs.forEach((input) => {
+        input.removeEventListener('focus', handleFocus);
+        input.removeEventListener('input', handleInput);
+      });
+    };
   }, []);
 
-  // 로그인 처리
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setErrorMessage('');
+    setIsLoading(true);
+    setError('');
 
     try {
       const response = await fetch('/api/auth/login', {
@@ -104,195 +78,219 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (response.ok) {
-        setSuccessMessage(t.successMessage);
-        setTimeout(() => {
-          // 역할에 따라 리다이렉션
-          if (data.user.role === 'ADMIN' || data.user.role === 'MASTER') {
-            router.push('/admin');
-          } else if (data.user.role === 'TEACHER') {
-            router.push('/teacher');
-          } else if (data.user.role === 'STAFF') {
-            router.push('/staff');
-          } else {
-            router.push('/student');
-          }
-        }, 1000);
+        // 역할에 따라 리다이렉션
+        if (data.user.role === 'ADMIN' || data.user.role === 'MASTER') {
+          router.push('/admin');
+        } else if (data.user.role === 'TEACHER') {
+          router.push('/teacher');
+        } else if (data.user.role === 'STAFF') {
+          router.push('/staff');
+        } else {
+          router.push('/student');
+        }
       } else {
-        setErrorMessage(data.error || t.errorMessage);
+        setError(data.error || '로그인에 실패했습니다.');
       }
     } catch (error) {
       console.error('로그인 오류:', error);
-      setErrorMessage(t.errorMessage);
+      setError('로그인 중 오류가 발생했습니다.');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  // LINE 로그인 처리
-  const handleLineLogin = () => {
-    const clientId = process.env.NEXT_PUBLIC_LINE_CLIENT_ID;
-    const redirectUri = process.env.NEXT_PUBLIC_LINE_REDIRECT_URI;
-
-    if (!clientId || !redirectUri) {
-      setErrorMessage('LINE 로그인 설정이 완료되지 않았습니다.');
-      return;
-    }
-
-    const state = `login_${Date.now()}`;
-    const scope = 'profile openid';
-    const lineAuthUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}&scope=${scope}`;
-
-    window.location.href = lineAuthUrl;
+  const toggleLanguage = () => {
+    setCurrentLanguage(currentLanguage === 'ko' ? 'ja' : 'ko');
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      {/* 언어 전환 버튼 */}
-      <button
-        onClick={toggleLanguage}
-        className="absolute top-4 right-4 p-2 rounded-full bg-white shadow-lg hover:shadow-xl transition-shadow"
-        aria-label="언어 전환"
-      >
-        <Globe className="w-5 h-5 text-gray-600" />
-      </button>
-
-      <div className="max-w-md w-full space-y-8">
-        {/* 헤더 */}
-        <div className="text-center">
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-            {t.title}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            {currentLanguage === 'ko' ? '로그인' : 'ログイン'}
           </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            {t.subtitle}
-          </p>
+          <button
+            onClick={toggleLanguage}
+            className="p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow"
+          >
+            <Globe className="w-5 h-5 text-gray-600" />
+          </button>
         </div>
+        <p className="mt-2 text-center text-sm text-gray-600">
+          {currentLanguage === 'ko' 
+            ? 'MalMoi 한국어 교실에 오신 것을 환영합니다' 
+            : 'MalMoi韓国語教室へようこそ'}
+        </p>
+      </div>
 
-        {/* 로그인 폼 */}
-        <form className="mt-8 space-y-6" onSubmit={handleLogin}>
-          <div className="space-y-4">
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white py-8 px-4 shadow-xl rounded-xl sm:px-10">
+          <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                {t.emailLabel}
+                {currentLanguage === 'ko' ? '이메일' : 'メールアドレス'}
               </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-black"
-                placeholder={currentLanguage === 'ko' ? 'example@email.com' : 'example@email.com'}
-                style={{ 
-                  color: '#000000', 
-                  WebkitTextFillColor: '#000000',
-                  caretColor: '#000000'
-                }}
-                onFocus={(e) => {
-                  e.target.style.color = '#000000';
-                  e.target.style.webkitTextFillColor = '#000000';
-                }}
-                onBlur={(e) => {
-                  e.target.style.color = '#000000';
-                  e.target.style.webkitTextFillColor = '#000000';
-                }}
-              />
+              <div className="mt-1">
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-black font-bold"
+                  placeholder={currentLanguage === 'ko' ? 'example@email.com' : 'example@email.com'}
+                  style={{ 
+                    color: '#000000', 
+                    WebkitTextFillColor: '#000000',
+                    caretColor: '#000000',
+                    fontWeight: 'bold',
+                    fontSize: '16px'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.color = '#000000';
+                    e.target.style.webkitTextFillColor = '#000000';
+                    e.target.style.caretColor = '#000000';
+                    e.target.style.fontWeight = 'bold';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.color = '#000000';
+                    e.target.style.webkitTextFillColor = '#000000';
+                    e.target.style.caretColor = '#000000';
+                    e.target.style.fontWeight = 'bold';
+                  }}
+                  onInput={(e) => {
+                    const target = e.target as HTMLInputElement;
+                    target.style.color = '#000000';
+                    target.style.webkitTextFillColor = '#000000';
+                    target.style.caretColor = '#000000';
+                    target.style.fontWeight = 'bold';
+                  }}
+                />
+              </div>
             </div>
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                {t.passwordLabel}
+                {currentLanguage === 'ko' ? '비밀번호' : 'パスワード'}
               </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-black"
-                placeholder={currentLanguage === 'ko' ? '비밀번호를 입력하세요' : 'パスワードを入力してください'}
-                style={{ 
-                  color: '#000000', 
-                  WebkitTextFillColor: '#000000',
-                  caretColor: '#000000'
-                }}
-                onFocus={(e) => {
-                  e.target.style.color = '#000000';
-                  e.target.style.webkitTextFillColor = '#000000';
-                }}
-                onBlur={(e) => {
-                  e.target.style.color = '#000000';
-                  e.target.style.webkitTextFillColor = '#000000';
-                }}
-              />
+              <div className="mt-1">
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-black font-bold"
+                  placeholder={currentLanguage === 'ko' ? '비밀번호를 입력하세요' : 'パスワードを入力してください'}
+                  style={{ 
+                    color: '#000000', 
+                    WebkitTextFillColor: '#000000',
+                    caretColor: '#000000',
+                    fontWeight: 'bold',
+                    fontSize: '16px'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.color = '#000000';
+                    e.target.style.webkitTextFillColor = '#000000';
+                    e.target.style.caretColor = '#000000';
+                    e.target.style.fontWeight = 'bold';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.color = '#000000';
+                    e.target.style.webkitTextFillColor = '#000000';
+                    e.target.style.caretColor = '#000000';
+                    e.target.style.fontWeight = 'bold';
+                  }}
+                  onInput={(e) => {
+                    const target = e.target as HTMLInputElement;
+                    target.style.color = '#000000';
+                    target.style.webkitTextFillColor = '#000000';
+                    target.style.caretColor = '#000000';
+                    target.style.fontWeight = 'bold';
+                  }}
+                />
+              </div>
+            </div>
+
+            <div>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading 
+                  ? (currentLanguage === 'ko' ? '로그인 중...' : 'ログイン中...')
+                  : (currentLanguage === 'ko' ? '로그인' : 'ログイン')
+                }
+              </button>
+            </div>
+
+            <div>
+              <button
+                type="button"
+                className="w-full flex justify-center py-2 px-4 border border-green-300 rounded-md shadow-sm text-sm font-medium text-green-700 bg-white hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+              >
+                {currentLanguage === 'ko' ? 'LINE으로 로그인' : 'LINEでログイン'}
+              </button>
+            </div>
+          </form>
+
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">
+                  {currentLanguage === 'ko' ? '또는' : 'または'}
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-6 grid grid-cols-1 gap-3">
+              <Link
+                href="/auth/register"
+                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+              >
+                {currentLanguage === 'ko' ? '계정이 없으신가요? 회원가입' : 'アカウントをお持ちでない方はこちら'}
+              </Link>
+              <Link
+                href="/auth/line-register"
+                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+              >
+                {currentLanguage === 'ko' ? 'LINE으로 회원가입하기' : 'LINEで新規登録'}
+              </Link>
             </div>
           </div>
 
-          {/* 로그인 버튼 */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              t.loginButton
-            )}
-          </button>
+          {error && (
+            <div className="mt-4 bg-red-50 border border-red-200 rounded-md p-4">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-red-800">{error}</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
 
-          {/* LINE 로그인 버튼 */}
-          <button
-            type="button"
-            onClick={handleLineLogin}
-            className="group relative w-full flex justify-center py-2 px-4 border border-green-500 text-sm font-medium rounded-md text-green-600 bg-white hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-          >
-            {t.lineLoginButton}
-          </button>
-
-          {/* 회원가입 링크 */}
-          <div className="text-center">
-            <p className="text-sm text-gray-600">
-              <Link href="/auth/register" className="font-medium text-blue-600 hover:text-blue-500">
-                {t.registerLink}
-              </Link>
-            </p>
-            
-            {/* LINE 회원가입 링크 */}
-            <p className="text-sm text-gray-500 mt-2">
-              <Link href="/auth/line-register" className="font-medium text-green-600 hover:text-green-500">
-                {t.lineRegisterLink}
-              </Link>
-            </p>
-          </div>
-        </form>
-
-        {/* 메시지 표시 */}
-        {successMessage && (
-          <div className="flex items-center p-4 bg-green-50 border border-green-200 rounded-md">
-            <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
-            <span className="text-green-700">{successMessage}</span>
-          </div>
-        )}
-
-        {errorMessage && (
-          <div className="flex items-center p-4 bg-red-50 border border-red-200 rounded-md">
-            <XCircle className="w-5 h-5 text-red-500 mr-2" />
-            <span className="text-red-700">{errorMessage}</span>
-          </div>
-        )}
-
-        {/* 메인 페이지로 돌아가기 */}
-        <div className="text-center">
+        <div className="mt-6 text-center">
           <Link
             href="/"
-            className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
+            className="inline-flex items-center text-sm text-blue-600 hover:text-blue-500"
           >
             <ArrowLeft className="w-4 h-4 mr-1" />
-            {t.backToMain}
+            {currentLanguage === 'ko' ? '메인 페이지로 돌아가기' : 'メインページに戻る'}
           </Link>
         </div>
       </div>
