@@ -1,5 +1,6 @@
 'use client';
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useSession, signOut } from 'next-auth/react';
 
 interface User {
   id: string;
@@ -134,9 +135,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
+  const { data: session, status } = useSession();
+  
+  return {
+    user: session?.user || null,
+    loading: status === 'loading',
+    logout: () => signOut(),
+    isAuthenticated: !!session?.user
+  };
 } 
