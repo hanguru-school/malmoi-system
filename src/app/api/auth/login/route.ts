@@ -5,23 +5,6 @@ import { authenticateUser } from '@/lib/database';
 
 export async function POST(request: NextRequest) {
   try {
-    // 환경변수 확인
-    if (!process.env.DATABASE_URL) {
-      console.error('DATABASE_URL 환경변수가 설정되지 않았습니다.');
-      return NextResponse.json(
-        { error: '데이터베이스 연결 설정이 누락되었습니다.' },
-        { status: 503 }
-      );
-    }
-
-    if (!process.env.NEXTAUTH_SECRET) {
-      console.error('NEXTAUTH_SECRET 환경변수가 설정되지 않았습니다.');
-      return NextResponse.json(
-        { error: '인증 설정이 누락되었습니다.' },
-        { status: 500 }
-      );
-    }
-
     const { email, password } = await request.json();
 
     // 입력 검증

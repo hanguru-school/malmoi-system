@@ -5,17 +5,21 @@ import bcrypt from 'bcryptjs';
 const getDatabaseConfig = () => {
   const databaseUrl = process.env.DATABASE_URL;
   
-  if (databaseUrl) {
-    // DATABASE_URL 형식: postgresql://username:password@host:port/database
-    const url = new URL(databaseUrl);
-    return {
-      host: url.hostname,
-      port: parseInt(url.port) || 5432,
-      database: url.pathname.slice(1), // 첫 번째 '/' 제거
-      user: url.username,
-      password: url.password,
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-    };
+  if (databaseUrl && databaseUrl.startsWith('postgresql://')) {
+    try {
+      // DATABASE_URL 형식: postgresql://username:password@host:port/database
+      const url = new URL(databaseUrl);
+      return {
+        host: url.hostname,
+        port: parseInt(url.port) || 5432,
+        database: url.pathname.slice(1), // 첫 번째 '/' 제거
+        user: url.username,
+        password: url.password,
+        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+      };
+    } catch (error) {
+      console.error('DATABASE_URL 파싱 오류:', error);
+    }
   }
   
   // 개별 환경변수 사용
