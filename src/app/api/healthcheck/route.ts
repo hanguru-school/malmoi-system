@@ -3,11 +3,23 @@ import {
   createSuccessResponse, 
   createErrorResponse 
 } from '@/lib/api-utils';
-import prisma, { checkDbConnection } from '@/lib/db';
+import prisma from '@/lib/db';
 import AWS from 'aws-sdk';
 import jwt from 'jsonwebtoken';
 
 export const runtime = 'nodejs';
+
+// 데이터베이스 연결 확인 함수
+async function checkDbConnection(): Promise<boolean> {
+  try {
+    await prisma.$connect();
+    await prisma.$queryRaw`SELECT 1`;
+    return true;
+  } catch (error) {
+    console.error('Database connection check failed:', error);
+    return false;
+  }
+}
 
 // AWS Cognito 연결 테스트
 async function testAwsConnection() {

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import prisma from '@/lib/db';
 
 // 표준화된 API 응답 인터페이스
 export interface ApiResponse<T = any> {
@@ -85,26 +86,21 @@ export async function withErrorHandling<T>(
 // 데이터베이스 연결 확인 함수
 export async function checkDatabaseConnection() {
   try {
-    const { checkDbConnection } = await import('@/lib/db');
-    const isConnected = await checkDbConnection();
+    await prisma.$connect();
     
-    if (!isConnected) {
-      return {
-        success: false,
-        message: '데이터베이스 연결에 실패했습니다.',
-        error: 'DB_CONNECTION_FAILED'
-      };
-    }
+    // 간단한 쿼리로 연결 테스트
+    await prisma.$queryRaw`SELECT 1`;
     
     return {
       success: true,
       message: '데이터베이스 연결이 정상입니다.'
     };
   } catch (error: any) {
+    console.error('Database connection check failed:', error);
     return {
       success: false,
-      message: '데이터베이스 연결 확인 중 오류가 발생했습니다.',
-      error: error.message || 'DB_CHECK_ERROR'
+      message: '데이터베이스 연결에 실패했습니다.',
+      error: error.message || 'DB_CONNECTION_FAILED'
     };
   }
 } 
