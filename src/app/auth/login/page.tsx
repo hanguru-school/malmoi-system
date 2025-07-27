@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { signIn, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { Globe, ArrowLeft } from 'lucide-react';
 
@@ -12,6 +13,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState('ko');
   const router = useRouter();
+  const { data: session, status } = useSession();
 
   // 강제로 입력란 스타일 적용 및 키보드 언어 관리
   useEffect(() => {
@@ -112,29 +114,29 @@ export default function LoginPage() {
     setError('');
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
+      console.log('NextAuth 로그인 시작:', email);
+      
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
       });
 
-      const data = await response.json();
+      console.log('NextAuth 로그인 결과:', result);
 
-      if (response.ok) {
+      if (result?.error) {
+        setError(result.error);
+      } else if (result?.ok) {
         // 역할에 따라 리다이렉션
-        if (data.user.role === 'ADMIN' || data.user.role === 'MASTER') {
+        if (session?.user?.role === 'ADMIN' || session?.user?.role === 'MASTER') {
           router.push('/admin');
-        } else if (data.user.role === 'TEACHER') {
+        } else if (session?.user?.role === 'TEACHER') {
           router.push('/teacher');
-        } else if (data.user.role === 'STAFF') {
+        } else if (session?.user?.role === 'STAFF') {
           router.push('/staff');
         } else {
           router.push('/student');
         }
-      } else {
-        setError(data.error || '로그인에 실패했습니다.');
       }
     } catch (error) {
       console.error('로그인 오류:', error);
@@ -157,17 +159,20 @@ export default function LoginPage() {
           </h2>
           <button
             onClick={toggleLanguage}
-            className="absolute right-0 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow"
+            className="absolute right-8 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow relative"
           >
-            {currentLanguage === 'ko' ? (
-              <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
-                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-              </div>
-            ) : (
-              <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
-                <div className="w-3 h-3 bg-white rounded-full"></div>
-              </div>
-            )}
+            <Globe className="w-5 h-5 text-gray-600" />
+            <div className="absolute -bottom-1 -right-1 w-3 h-3 rounded-full overflow-hidden">
+              {currentLanguage === 'ko' ? (
+                <div className="w-full h-full bg-red-500 flex items-center justify-center">
+                  <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                </div>
+              ) : (
+                <div className="w-full h-full bg-red-500 flex items-center justify-center">
+                  <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                </div>
+              )}
+            </div>
           </button>
         </div>
         <p className="mt-2 text-center text-sm text-gray-600">

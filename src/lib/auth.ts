@@ -44,22 +44,23 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          return null;
-        }
-
-        // 빌드 시에는 인증을 건너뜀
-        if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
+          console.log('인증 실패: 이메일 또는 비밀번호 누락');
           return null;
         }
 
         try {
+          console.log('NextAuth 인증 시작:', credentials.email);
+          
           // pg 데이터베이스 사용
           const { authenticateUser } = await import('./database');
           const user = await authenticateUser(credentials.email, credentials.password);
 
           if (!user) {
+            console.log('NextAuth 인증 실패: 사용자 없음');
             return null;
           }
+
+          console.log('NextAuth 인증 성공:', user.email, user.role);
 
           return {
             id: user.id,
@@ -68,7 +69,7 @@ export const authOptions: NextAuthOptions = {
             role: user.role
           };
         } catch (error) {
-          console.error('Auth error:', error);
+          console.error('NextAuth 인증 오류:', error);
           return null;
         }
       }
