@@ -4,12 +4,23 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const hostname = request.headers.get('host') || '';
   
-  // 1. 도메인별 라우팅 처리
+  // 1. 도메인별 라우팅 처리 - app.hanguru.school만 처리
   if (hostname === 'app.hanguru.school') {
     // app.hanguru.school 도메인으로 접속 시 booking-system 관리 시스템으로 리다이렉트
     if (pathname === '/') {
       return NextResponse.redirect(new URL('/admin/home', request.url));
     }
+  }
+  
+  // hanguru.school은 Vercel에서 처리하지 않도록 함
+  if (hostname === 'hanguru.school' || hostname === 'www.hanguru.school') {
+    // hanguru.school은 워드프레스 호스팅에서 처리하도록 404 반환
+    return new NextResponse('Domain not configured on this platform', { 
+      status: 404,
+      headers: {
+        'Content-Type': 'text/plain',
+      }
+    });
   }
   
   // 2. 브라우저 User-Agent 체크 (비정상 접근 차단)
