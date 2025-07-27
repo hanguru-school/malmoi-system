@@ -154,14 +154,26 @@ export default function LoginPage() {
     }
   };
 
-  // LINE 로그인
+  // LINE 로그인 (환경변수 설정 필요)
   const handleLineLogin = async () => {
     setLoading(true);
     setError('');
     
     try {
+      // 환경변수 확인
+      const clientId = process.env.NEXT_PUBLIC_LINE_CLIENT_ID;
+      const redirectUri = process.env.NEXT_PUBLIC_LINE_REDIRECT_URI;
+      
+      if (!clientId || !redirectUri) {
+        setError(currentLanguage === 'ko' 
+          ? 'LINE 로그인 설정이 완료되지 않았습니다. 관리자에게 문의해주세요.' 
+          : 'LINEログインの設定が完了していません。管理者にお問い合わせください。');
+        setLoading(false);
+        return;
+      }
+      
       // LINE 로그인 URL로 리다이렉션
-      const lineLoginUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${process.env.NEXT_PUBLIC_LINE_CLIENT_ID}&redirect_uri=${encodeURIComponent(process.env.NEXT_PUBLIC_LINE_REDIRECT_URI || '')}&state=${Math.random().toString(36).substring(7)}&scope=profile%20openid`;
+      const lineLoginUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${Math.random().toString(36).substring(7)}&scope=profile%20openid`;
       
       window.location.href = lineLoginUrl;
     } catch (error) {
