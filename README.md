@@ -98,6 +98,41 @@ CREATE TABLE payments (
 
 **Vercel 대시보드 → Settings → Environment Variables**에서 다음 변수들을 설정해야 합니다:
 
+### **기본 환경 변수**
+```env
+# AWS Configuration
+AWS_REGION=ap-northeast-2
+AWS_ACCESS_KEY_ID=your_aws_access_key
+AWS_SECRET_ACCESS_KEY=your_aws_secret_key
+
+# Database
+DATABASE_URL=postgresql://malmoi_admin:password@malmoi-system-db.cp4q8o4akkqg.ap-northeast-2.rds.amazonaws.com:5432/malmoi_system
+
+# AWS Cognito
+COGNITO_USER_POOL_ID=ap-northeast-2_gnMo24nfg
+COGNITO_CLIENT_ID=597vkd6rjamd92p6s3bvk39p21
+COGNITO_CLIENT_SECRET=your_cognito_client_secret
+
+# AWS S3
+S3_BUCKET_NAME=malmoi-system-files
+S3_REGION=ap-northeast-2
+
+# NextAuth
+NEXTAUTH_SECRET=your_nextauth_secret_here
+NEXTAUTH_URL=https://hanguru.school
+```
+
+### **LINE 연동 환경 변수**
+```env
+# LINE Login Configuration
+NEXT_PUBLIC_LINE_CLIENT_ID=your_line_channel_id_here
+NEXT_PUBLIC_LINE_REDIRECT_URI=https://hanguru.school/auth/line/callback
+
+# LINE Messaging API (Optional)
+LINE_CHANNEL_ACCESS_TOKEN=your_line_channel_access_token_here
+LINE_CHANNEL_SECRET=your_line_channel_secret_here
+```
+
 ### **필수 환경 변수:**
 ```
 AWS_ACCESS_KEY_ID=your_access_key

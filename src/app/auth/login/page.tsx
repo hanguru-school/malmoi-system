@@ -12,6 +12,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [copyMessage, setCopyMessage] = useState('');
   
   // 언어 설정 (학생 메인 페이지와 동일한 형식)
@@ -24,6 +25,24 @@ export default function LoginPage() {
 
   const { login, user, loading: authLoading } = useAuth();
   const router = useRouter();
+
+  // URL 파라미터에서 메시지 확인
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const errorParam = urlParams.get('error');
+    const successParam = urlParams.get('success');
+    const messageParam = urlParams.get('message');
+
+    if (errorParam && messageParam) {
+      setError(decodeURIComponent(messageParam));
+    }
+
+    if (successParam && messageParam) {
+      setSuccessMessage(decodeURIComponent(messageParam));
+      // 3초 후 성공 메시지 제거
+      setTimeout(() => setSuccessMessage(''), 3000);
+    }
+  }, []);
 
   // 언어 전환 함수 (학생 메인 페이지와 동일한 형식)
   const toggleLanguage = () => {
@@ -239,6 +258,13 @@ export default function LoginPage() {
       {copyMessage && (
         <div className="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 transform transition-all duration-300 ease-in-out">
           {copyMessage}
+        </div>
+      )}
+      
+      {/* 성공 메시지 */}
+      {successMessage && (
+        <div className="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 transform transition-all duration-300 ease-in-out">
+          {successMessage}
         </div>
       )}
       
