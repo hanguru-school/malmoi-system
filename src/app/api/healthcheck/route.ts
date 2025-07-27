@@ -1,14 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import AWS from 'aws-sdk';
 import { 
   handleApiError, 
   validateEnvironmentVariables
 } from '@/lib/api-utils';
-
-// Prisma 인스턴스 생성
-const prisma = new PrismaClient();
+import { checkDbConnection } from '@/lib/db';
 
 // Node.js 런타임 명시
 export const runtime = 'nodejs';
@@ -67,19 +64,27 @@ export async function GET(request: NextRequest) {
 
     // 2. 데이터베이스 연결 체크
     try {
-      await prisma.$connect();
-      const usersCount = await prisma.user.count();
-      await prisma.$disconnect();
+      const isConnected = await checkDbConnection();
       
-      healthReport.checks.database = {
-        status: 'healthy',
-        message: `Database connection successful (${usersCount} users found)`,
-        details: {
-          connection: 'active',
-          userCount: usersCount
-        }
-      };
-      healthReport.summary.passedChecks++;
+      if (isConnected) {
+        healthReport.checks.database = {
+          status: 'healthy',
+          message: 'Database connection successful',
+          details: {
+            connection: 'active'
+          }
+        };
+        healthReport.summary.passedChecks++;
+      } else {
+        healthReport.checks.database = {
+          status: 'unhealthy',
+          message: 'Database connection failed',
+          details: {
+            connection: 'failed'
+          }
+        };
+        healthReport.summary.failedChecks++;
+      }
     } catch (error) {
       healthReport.checks.database = {
         status: 'unhealthy',

@@ -1,10 +1,7 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import AWS from 'aws-sdk';
-
-// Prisma 인스턴스 생성
-const prisma = new PrismaClient();
+import { checkDbConnection } from '@/lib/db';
 
 export const runtime = 'nodejs'; // App Router에서 Node.js 런타임 강제
 
@@ -18,13 +15,14 @@ export async function GET() {
 
   // 1) DB 연결 테스트
   try {
-    await prisma.$connect();
-    const usersCount = await prisma.user.count();
-    report.database = `✅ DB 연결 성공 (${usersCount}명의 유저 존재)`;
+    const isConnected = await checkDbConnection();
+    if (isConnected) {
+      report.database = `✅ DB 연결 성공`;
+    } else {
+      report.database = `❌ DB 연결 실패`;
+    }
   } catch (err: any) {
     report.database = `❌ DB 연결 실패: ${err.message}`;
-  } finally {
-    await prisma.$disconnect();
   }
 
   // 2) AWS Cognito (혹은 S3 등) 테스트
