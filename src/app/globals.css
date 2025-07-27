@@ -137,6 +137,7 @@ input::placeholder {
   color: #6b7280 !important;
   opacity: 1 !important;
   -webkit-text-fill-color: #6b7280 !important;
+  font-weight: 300 !important;
 }
 
 /* 9. 플레이스홀더 강제 적용 (모바일 대응) */
@@ -150,6 +151,7 @@ input[type="number"]::placeholder {
   color: #6b7280 !important;
   opacity: 1 !important;
   -webkit-text-fill-color: #6b7280 !important;
+  font-weight: 300 !important;
 }
 
 /* 9. 모든 상태에서 강제 적용 */
