@@ -1,5 +1,17 @@
 import { NextResponse } from 'next/server';
 
+export function handleApiError(error: any, status: number = 500) {
+  console.error('API Error:', error);
+
+  return NextResponse.json(
+    {
+      error: error?.message || '서버 오류가 발생했습니다.',
+      details: error?.stack || null,
+    },
+    { status }
+  );
+}
+
 // 환경변수 검증 함수
 export function validateEnvironmentVariables() {
   const missingVars: string[] = [];
@@ -25,23 +37,6 @@ export function validateEnvironmentVariables() {
   };
 }
 
-// 표준화된 에러 응답 함수
-export function createErrorResponse(
-  message: string, 
-  status: number = 500, 
-  details?: any
-) {
-  return NextResponse.json(
-    {
-      error: message,
-      status,
-      timestamp: new Date().toISOString(),
-      ...(details && { details })
-    },
-    { status }
-  );
-}
-
 // 성공 응답 함수
 export function createSuccessResponse(data: any, status: number = 200) {
   return NextResponse.json(
@@ -63,55 +58,6 @@ export async function withErrorHandling<T>(
     const result = await handler();
     return createSuccessResponse(result);
   } catch (error) {
-    console.error(`${errorMessage}:`, error);
-    
-    // 데이터베이스 연결 오류 체크
-    if (error instanceof Error) {
-      if (error.message.includes('ECONNREFUSED') || 
-          error.message.includes('ENOTFOUND') ||
-          error.message.includes('timeout')) {
-        return createErrorResponse(
-          'Database connection failed',
-          503,
-          { originalError: error.message }
-        );
-      }
-      
-      if (error.message.includes('AWS') || 
-          error.message.includes('Cognito') ||
-          error.message.includes('S3')) {
-        return createErrorResponse(
-          'AWS service connection failed',
-          503,
-          { originalError: error.message }
-        );
-      }
-    }
-    
-    return createErrorResponse(errorMessage, 500, {
-      originalError: error instanceof Error ? error.message : 'Unknown error'
-    });
+    return handleApiError(error, 500);
   }
-}
-
-// 인증 관련 에러 응답
-export function createAuthErrorResponse(
-  message: string = 'Authentication failed',
-  status: number = 401
-) {
-  return createErrorResponse(message, status, {
-    type: 'authentication_error',
-    timestamp: new Date().toISOString()
-  });
-}
-
-// 권한 관련 에러 응답
-export function createPermissionErrorResponse(
-  message: string = 'Permission denied',
-  status: number = 403
-) {
-  return createErrorResponse(message, status, {
-    type: 'permission_error',
-    timestamp: new Date().toISOString()
-  });
 } 

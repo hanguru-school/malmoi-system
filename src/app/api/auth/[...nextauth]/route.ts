@@ -2,7 +2,7 @@ import NextAuth from 'next-auth';
 import { NextResponse } from 'next/server';
 import { 
   validateEnvironmentVariables, 
-  createErrorResponse, 
+  handleApiError, 
   withErrorHandling 
 } from '@/lib/api-utils';
 
@@ -28,37 +28,35 @@ async function getAuthOptions() {
 }
 
 export async function GET(request: Request) {
-  return withErrorHandling(
-    async () => {
-      const authOptions = await getAuthOptions();
-      const response = await NextAuth(authOptions)(request);
-      
-      // NextAuth 응답이 이미 NextResponse인 경우 그대로 반환
-      if (response instanceof NextResponse) {
-        return response;
-      }
-      
-      // 일반 응답인 경우 JSON으로 변환
-      return NextResponse.json(response);
-    },
-    'NextAuth GET request failed'
-  );
+  try {
+    const authOptions = await getAuthOptions();
+    const response = await NextAuth(authOptions)(request);
+    
+    // NextAuth 응답이 이미 NextResponse인 경우 그대로 반환
+    if (response instanceof NextResponse) {
+      return response;
+    }
+    
+    // 일반 응답인 경우 JSON으로 변환
+    return NextResponse.json(response);
+  } catch (error) {
+    return handleApiError(error, 500);
+  }
 }
 
 export async function POST(request: Request) {
-  return withErrorHandling(
-    async () => {
-      const authOptions = await getAuthOptions();
-      const response = await NextAuth(authOptions)(request);
-      
-      // NextAuth 응답이 이미 NextResponse인 경우 그대로 반환
-      if (response instanceof NextResponse) {
-        return response;
-      }
-      
-      // 일반 응답인 경우 JSON으로 변환
-      return NextResponse.json(response);
-    },
-    'NextAuth POST request failed'
-  );
+  try {
+    const authOptions = await getAuthOptions();
+    const response = await NextAuth(authOptions)(request);
+    
+    // NextAuth 응답이 이미 NextResponse인 경우 그대로 반환
+    if (response instanceof NextResponse) {
+      return response;
+    }
+    
+    // 일반 응답인 경우 JSON으로 변환
+    return NextResponse.json(response);
+  } catch (error) {
+    return handleApiError(error, 500);
+  }
 } 
