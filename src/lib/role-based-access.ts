@@ -6,7 +6,7 @@
 export interface UserRole {
   id: string;
   name: string;
-  type: 'master' | 'teacher' | 'staff' | 'student';
+  type: 'master' | 'admin' | 'teacher' | 'staff' | 'student';
   permissions: RolePermissions;
   createdAt: Date;
   updatedAt: Date;
@@ -88,6 +88,42 @@ class RoleBasedAccessControl {
       id: 'master',
       name: '마스터',
       type: 'master',
+      permissions: {
+        pages: {
+          '*': { read: true, write: true, delete: true, admin: true }
+        },
+        functions: {
+          '*': true
+        },
+        dataAccess: {
+          own: true,
+          students: true,
+          teachers: true,
+          staff: true,
+          system: true,
+          curriculum: true,
+          analytics: true,
+          automation: true
+        },
+        specialPermissions: {
+          canCreateUsers: true,
+          canDeleteUsers: true,
+          canManageRoles: true,
+          canViewSystemLogs: true,
+          canManageDevices: true,
+          canExportData: true,
+          canManageSettings: true
+        }
+      },
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    // 관리자 역할 (마스터와 동일한 권한)
+    const adminRole: UserRole = {
+      id: 'admin',
+      name: '관리자',
+      type: 'admin',
       permissions: {
         pages: {
           '*': { read: true, write: true, delete: true, admin: true }
@@ -256,6 +292,7 @@ class RoleBasedAccessControl {
     };
 
     this.roles.set('master', masterRole);
+    this.roles.set('admin', adminRole);
     this.roles.set('teacher', teacherRole);
     this.roles.set('staff', staffRole);
     this.roles.set('student', studentRole);
@@ -487,8 +524,8 @@ class RoleBasedAccessControl {
     const role = this.roles.get(roleType);
     if (!role) return false;
 
-    // 마스터는 모든 페이지에 접근 가능
-    if (roleType === 'master') return true;
+    // 마스터와 관리자는 모든 페이지에 접근 가능
+    if (roleType === 'master' || roleType === 'admin') return true;
 
     const pagePermission = role.permissions.pages[pagePath] || role.permissions.pages['*'];
     if (!pagePermission) return false;
@@ -503,8 +540,8 @@ class RoleBasedAccessControl {
     const role = this.roles.get(roleType);
     if (!role) return false;
 
-    // 마스터는 모든 기능 사용 가능
-    if (roleType === 'master') return true;
+    // 마스터와 관리자는 모든 기능 사용 가능
+    if (roleType === 'master' || roleType === 'admin') return true;
 
     return role.permissions.functions[functionName] || role.permissions.functions['*'] || false;
   }

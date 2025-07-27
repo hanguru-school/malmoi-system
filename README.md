@@ -3,9 +3,36 @@
 ## 🚀 Deployed System
 **Live URL:** https://malmoi-system.vercel.app
 
-**Last Updated:** 2025-01-26 (배포 문제 해결용)
+**Last Updated:** 2025-01-26 (Prisma 빌드 문제 해결)
 
 **Deployment Status:** 🔄 **재배포 필요**
+
+## 🔧 Build Process
+
+### **Local Development**
+```bash
+# Install dependencies
+npm install
+
+# Generate Prisma client
+npx prisma generate
+
+# Run development server
+npm run dev
+```
+
+### **Production Build**
+```bash
+# The build process now automatically generates Prisma client
+npm run build
+```
+
+### **Vercel Deployment**
+The deployment process now includes:
+1. **Prisma Client Generation** - `prisma generate`
+2. **Next.js Build** - `next build`
+
+This ensures the Prisma client is available during the build process.
 
 ## 🏗️ 시스템 아키텍처
 

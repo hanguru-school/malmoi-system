@@ -71,6 +71,16 @@ interface QuickAction {
   bgColor: string;
 }
 
+interface RoleNavigation {
+  id: string;
+  title: string;
+  description: string;
+  href: string;
+  icon: any;
+  color: string;
+  bgColor: string;
+}
+
 export default function AdminHome() {
 
   
@@ -338,6 +348,60 @@ export default function AdminHome() {
                 </div>
               );
             })}
+          </div>
+        </div>
+
+        {/* 역할별 페이지 접근 */}
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+          <h2 className="text-xl font-semibold text-gray-900 mb-6">역할별 페이지 접근</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Link href="/student/home" className="group">
+              <div className="p-6 border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-md transition-all">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <GraduationCap className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <h3 className="font-semibold text-gray-900">학생 페이지</h3>
+                </div>
+                <p className="text-sm text-gray-600">학생용 대시보드 및 기능</p>
+              </div>
+            </Link>
+            
+            <Link href="/teacher/home" className="group">
+              <div className="p-6 border border-gray-200 rounded-lg hover:border-green-300 hover:shadow-md transition-all">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-green-100 rounded-lg">
+                    <User className="w-6 h-6 text-green-600" />
+                  </div>
+                  <h3 className="font-semibold text-gray-900">선생님 페이지</h3>
+                </div>
+                <p className="text-sm text-gray-600">선생님용 대시보드 및 기능</p>
+              </div>
+            </Link>
+            
+            <Link href="/staff/home" className="group">
+              <div className="p-6 border border-gray-200 rounded-lg hover:border-purple-300 hover:shadow-md transition-all">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-purple-100 rounded-lg">
+                    <Building className="w-6 h-6 text-purple-600" />
+                  </div>
+                  <h3 className="font-semibold text-gray-900">직원 페이지</h3>
+                </div>
+                <p className="text-sm text-gray-600">직원용 대시보드 및 기능</p>
+              </div>
+            </Link>
+            
+            <Link href="/parent/home" className="group">
+              <div className="p-6 border border-gray-200 rounded-lg hover:border-orange-300 hover:shadow-md transition-all">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-orange-100 rounded-lg">
+                    <Users className="w-6 h-6 text-orange-600" />
+                  </div>
+                  <h3 className="font-semibold text-gray-900">학부모 페이지</h3>
+                </div>
+                <p className="text-sm text-gray-600">학부모용 대시보드 및 기능</p>
+              </div>
+            </Link>
           </div>
         </div>
 

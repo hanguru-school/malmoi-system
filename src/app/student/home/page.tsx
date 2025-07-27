@@ -80,6 +80,9 @@ export default function StudentHomePage() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authFailed, setAuthFailed] = useState(false);
   
+  // 관리자 권한 체크
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'MASTER';
+  
   const [stats, setStats] = useState<StudentStats | null>(null);
   const [recentReservations, setRecentReservations] = useState<RecentReservation[]>([]);
   const [recentNotes, setRecentNotes] = useState<RecentNote[]>([]);
@@ -352,8 +355,8 @@ export default function StudentHomePage() {
     );
   }
 
-  // 학생 권한 확인
-  if (user.role !== 'student') {
+  // 학생 권한 확인 (관리자 제외)
+  if (user.role !== 'student' && !isAdmin) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-50 via-pink-50 to-red-50 flex items-center justify-center p-6">
         <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-8 text-center">
@@ -395,6 +398,43 @@ export default function StudentHomePage() {
 
   return (
     <div className="max-w-7xl mx-auto p-4">
+      {/* 관리자 네비게이션 */}
+      {isAdmin && (
+        <div className="mb-6 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-xl p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                <User className="w-4 h-4 text-purple-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-purple-900">관리자 모드</h3>
+                <p className="text-sm text-purple-700">다른 역할의 페이지로 이동할 수 있습니다</p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Link
+                href="/admin/home"
+                className="px-3 py-1 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
+              >
+                관리자
+              </Link>
+              <Link
+                href="/teacher/home"
+                className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+              >
+                선생님
+              </Link>
+              <Link
+                href="/staff/home"
+                className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+              >
+                직원
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 환영 메시지 */}
       <div className="mb-8">
         <div className="flex flex-col lg:flex-row justify-between items-start gap-4">
