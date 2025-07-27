@@ -19,4 +19,15 @@ export async function GET() {
   } catch (error) {
     return handleApiError(error);
   }
+}
+
+export async function POST(req: Request) {
+  try {
+    const body = await req.json().catch(() => ({}));
+
+    console.log('로그 데이터:', body);
+    return NextResponse.json({ status: 'ok', received: body });
+  } catch (error) {
+    return handleApiError(error);
+  }
 } 
