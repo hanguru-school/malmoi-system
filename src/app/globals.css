@@ -25,63 +25,126 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* 모바일 입력란 글자색 강제 설정 - 모든 브라우저 대응 */
-input:-webkit-autofill,
-input:-webkit-autofill:focus,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:active {
-  -webkit-text-fill-color: #000 !important;
-  color: #000 !important;
-  transition: background-color 9999s ease-in-out 0s;
-}
+/* ===== 모바일 입력란 글자색 완전 해결 ===== */
 
-/* 모든 입력란 글자색 강제 설정 */
+/* 1. 기본 입력란 스타일 */
 input[type="email"],
 input[type="password"],
 input[type="text"],
 input[type="search"],
 input[type="tel"],
-input[type="url"] {
-  color: #000 !important;
-  -webkit-text-fill-color: #000 !important;
+input[type="url"],
+input[type="number"] {
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000 !important;
   -webkit-text-security: none !important;
+  caret-color: #000000 !important;
 }
 
-/* iOS Safari 특별 처리 */
+/* 2. 자동완성 스타일 강제 적용 */
+input:-webkit-autofill,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:active {
+  -webkit-text-fill-color: #000000 !important;
+  color: #000000 !important;
+  -webkit-box-shadow: 0 0 0 1000px white inset !important;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+/* 3. iOS Safari 전용 처리 */
 @supports (-webkit-touch-callout: none) {
   input[type="email"],
   input[type="password"],
   input[type="text"],
   input[type="search"],
   input[type="tel"],
-  input[type="url"] {
-    color: #000 !important;
-    -webkit-text-fill-color: #000 !important;
+  input[type="url"],
+  input[type="number"] {
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
     -webkit-text-security: none !important;
+    caret-color: #000000 !important;
+  }
+  
+  input:-webkit-autofill,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:active {
+    -webkit-text-fill-color: #000000 !important;
+    color: #000000 !important;
+    -webkit-box-shadow: 0 0 0 1000px white inset !important;
   }
 }
 
-/* Android Chrome 특별 처리 */
+/* 4. Android Chrome 전용 처리 */
 @supports (-webkit-appearance: none) and (not (overflow: -webkit-marquee)) {
   input[type="email"],
   input[type="password"],
   input[type="text"],
   input[type="search"],
   input[type="tel"],
-  input[type="url"] {
-    color: #000 !important;
-    -webkit-text-fill-color: #000 !important;
+  input[type="url"],
+  input[type="number"] {
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+    caret-color: #000000 !important;
   }
 }
 
-/* Firefox 특별 처리 */
+/* 5. Firefox 전용 처리 */
 @supports (-moz-appearance: none) {
   input[type="email"],
   input[type="password"],
   input[type="text"],
   input[type="search"],
   input[type="tel"],
-  input[type="url"] {
-    color: #000 !important;
+  input[type="url"],
+  input[type="number"] {
+    color: #000000 !important;
+    caret-color: #000000 !important;
   }
+}
+
+/* 6. Edge 전용 처리 */
+@supports (-ms-ime-align: auto) {
+  input[type="email"],
+  input[type="password"],
+  input[type="text"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="number"] {
+    color: #000000 !important;
+  }
+}
+
+/* 7. 포커스 상태 강제 적용 */
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="text"]:focus,
+input[type="search"]:focus,
+input[type="tel"]:focus,
+input[type="url"]:focus,
+input[type="number"]:focus {
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000 !important;
+  caret-color: #000000 !important;
+}
+
+/* 8. 플레이스홀더 스타일 */
+input::placeholder {
+  color: #6b7280 !important;
+  opacity: 1 !important;
+}
+
+/* 9. 모든 상태에서 강제 적용 */
+input[type="email"] *,
+input[type="password"] *,
+input[type="text"] *,
+input[type="search"] *,
+input[type="tel"] *,
+input[type="url"] *,
+input[type="number"] * {
+  color: #000000 !important;
 }

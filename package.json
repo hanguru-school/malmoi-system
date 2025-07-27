@@ -4,13 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
-    "vercel-build": "prisma generate && next build",
+    "build": "next build",
+    "vercel-build": "next build",
     "start": "next start",
     "lint": "next lint",
     "optimize": "node scripts/optimize.js",
     "type-check": "tsc --noEmit",
-    "analyze": "npm run build -- --analyze"
+    "analyze": "npm run build -- --analyze",
+    "postinstall": "echo 'Post-install script completed'"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.10.0",
