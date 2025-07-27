@@ -45,6 +45,19 @@ Value: [Messaging API 채널의 Channel Secret]
 Environment: Production, Preview, Development
 ```
 
+#### **2.3 LINE Business Center 환경변수 (교실용)**
+```
+Name: LINE_BUSINESS_CHANNEL_ID
+Value: [Business Center 채널의 Channel ID]
+Environment: Production, Preview, Development
+```
+
+```
+Name: LINE_BUSINESS_CHANNEL_SECRET
+Value: [Business Center 채널의 Channel Secret]
+Environment: Production, Preview, Development
+```
+
 ### **3. 기타 필수 환경변수**
 
 #### **3.1 NextAuth 설정**

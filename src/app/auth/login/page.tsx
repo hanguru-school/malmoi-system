@@ -406,6 +406,13 @@ export default function LoginPage() {
                   ← {t.backToMain}
                 </Link>
               </p>
+              
+              {/* LINE 회원가입 링크 */}
+              <p className="text-sm text-gray-500 mt-2">
+                <Link href="/auth/line-register" className="font-medium text-green-600 hover:text-green-500">
+                  LINE으로 회원가입하기
+                </Link>
+              </p>
             </div>
 
 

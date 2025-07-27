@@ -5,6 +5,9 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get('code');
   const state = searchParams.get('state');
   const error = searchParams.get('error');
+  
+  // 회원가입/로그인 모드 구분
+  const isRegisterMode = state?.startsWith('register_');
 
   if (error) {
     console.error('LINE login error:', error);
@@ -63,14 +66,20 @@ export async function GET(request: NextRequest) {
 
     console.log('LINE profile data:', profileData);
 
-    // 사용자 정보 처리 및 로그인
+    // 사용자 정보 처리 및 로그인/회원가입
     // TODO: 데이터베이스에 사용자 정보 저장/업데이트
     // TODO: JWT 토큰 생성 및 세션 설정
     
-    // 임시로 성공 페이지로 리다이렉션
-    return NextResponse.redirect(
-      new URL(`/auth/login?success=line_login&message=${encodeURIComponent('LINE 로그인이 성공했습니다!')}`, request.url)
-    );
+    // 회원가입 모드인지 로그인 모드인지에 따라 다른 리다이렉션
+    if (isRegisterMode) {
+      return NextResponse.redirect(
+        new URL(`/auth/line-register?success=line_register&message=${encodeURIComponent('LINE 회원가입이 성공했습니다!')}`, request.url)
+      );
+    } else {
+      return NextResponse.redirect(
+        new URL(`/auth/login?success=line_login&message=${encodeURIComponent('LINE 로그인이 성공했습니다!')}`, request.url)
+      );
+    }
 
   } catch (error) {
     console.error('LINE login callback error:', error);
