@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { signIn, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { Globe, ArrowLeft } from 'lucide-react';
 
@@ -13,7 +12,6 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState('ko');
   const router = useRouter();
-  const { data: session, status } = useSession();
 
   // 강제로 입력란 스타일 적용 및 키보드 언어 관리
   useEffect(() => {
@@ -108,36 +106,40 @@ export default function LoginPage() {
     };
   }, []);
 
+  // 사용자가 제공한 로그인 핸들러
+  async function handleLogin(email: string, password: string) {
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!data.success) {
+        alert(data.message || '로그인에 실패했습니다.');
+        return;
+      }
+
+      // 로그인 성공 → 토큰 저장 및 리다이렉트
+      localStorage.setItem('auth_token', data.token);
+      window.location.href = '/dashboard';
+    } catch (error) {
+      alert('서버 오류가 발생했습니다. 잠시 후 다시 시도하세요.');
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
 
     try {
-      console.log('NextAuth 로그인 시작:', email);
+      console.log('로그인 시작:', email);
       
-      const result = await signIn('credentials', {
-        email,
-        password,
-        redirect: false,
-      });
-
-      console.log('NextAuth 로그인 결과:', result);
-
-      if (result?.error) {
-        setError(result.error);
-      } else if (result?.ok) {
-        // 역할에 따라 리다이렉션
-        if (session?.user?.role === 'ADMIN' || session?.user?.role === 'MASTER') {
-          router.push('/admin');
-        } else if (session?.user?.role === 'TEACHER') {
-          router.push('/teacher');
-        } else if (session?.user?.role === 'STAFF') {
-          router.push('/staff');
-        } else {
-          router.push('/student');
-        }
-      }
+      await handleLogin(email, password);
+      
     } catch (error) {
       console.error('로그인 오류:', error);
       setError('로그인 중 오류가 발생했습니다.');
