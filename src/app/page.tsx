@@ -38,7 +38,6 @@ export default function Home() {
   useEffect(() => {
     const hostname = window.location.hostname;
     if (hostname === 'app.hanguru.school') {
-      // app.hanguru.school 도메인으로 접속 시 관리 시스템으로 리다이렉트
       window.location.href = '/admin/home';
     }
   }, []);

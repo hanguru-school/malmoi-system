@@ -1,5 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { s3Service } from '@/lib/aws-s3';
+import AWS from 'aws-sdk';
+
+// Configure AWS
+AWS.config.update({
+  region: process.env.AWS_REGION || 'ap-northeast-2',
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+});
+
+const s3 = new AWS.S3();
+const bucketName = process.env.S3_BUCKET_NAME || 'malmoi-system-files';
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,15 +32,23 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(await file.arrayBuffer());
 
     // Upload to S3
-    const fileUrl = await s3Service.uploadFile(
-      buffer,
-      key,
-      file.type
-    );
+    const params = {
+      Bucket: bucketName,
+      Key: key,
+      Body: buffer,
+      ContentType: file.type,
+      ACL: 'public-read',
+      Metadata: {
+        'upload-date': new Date().toISOString(),
+        'original-name': file.name || 'unknown'
+      }
+    };
+
+    const result = await s3.upload(params).promise();
 
     return NextResponse.json({
       success: true,
-      fileUrl,
+      fileUrl: result.Location,
       key,
       fileName: file.name,
       size: file.size,
@@ -56,7 +74,12 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    await s3Service.deleteFile(key);
+    const params = {
+      Bucket: bucketName,
+      Key: key,
+    };
+
+    await s3.deleteObject(params).promise();
 
     return NextResponse.json({
       success: true,
