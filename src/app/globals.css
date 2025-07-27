@@ -27,19 +27,20 @@ body {
 
 /* ===== 모바일 입력란 글자색 완전 해결 ===== */
 
-/* 1. 기본 입력란 스타일 */
-input[type="email"],
-input[type="password"],
-input[type="text"],
-input[type="search"],
-input[type="tel"],
-input[type="url"],
-input[type="number"] {
-  color: #000000 !important;
-  -webkit-text-fill-color: #000000 !important;
-  -webkit-text-security: none !important;
-  caret-color: #000000 !important;
-}
+       /* 1. 기본 입력란 스타일 */
+       input[type="email"],
+       input[type="password"],
+       input[type="text"],
+       input[type="search"],
+       input[type="tel"],
+       input[type="url"],
+       input[type="number"] {
+         color: #000000 !important;
+         -webkit-text-fill-color: #000000 !important;
+         -webkit-text-security: none !important;
+         caret-color: #000000 !important;
+         font-weight: 300 !important;
+       }
 
 /* 2. 자동완성 스타일 강제 적용 */
 input:-webkit-autofill,

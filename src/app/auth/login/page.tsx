@@ -151,15 +151,23 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 flex-1 text-center">
+        <div className="flex justify-center items-center mb-8 relative">
+          <h2 className="text-center text-3xl font-extrabold text-gray-900">
             {currentLanguage === 'ko' ? '로그인' : 'ログイン'}
           </h2>
           <button
             onClick={toggleLanguage}
-            className="p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow"
+            className="absolute right-0 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow"
           >
-            <Globe className="w-5 h-5 text-gray-600" />
+            {currentLanguage === 'ko' ? (
+              <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
+                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+              </div>
+            ) : (
+              <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
+                <div className="w-3 h-3 bg-white rounded-full"></div>
+              </div>
+            )}
           </button>
         </div>
         <p className="mt-2 text-center text-sm text-gray-600">
@@ -185,13 +193,13 @@ export default function LoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-black font-bold"
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-black font-light"
                   placeholder={currentLanguage === 'ko' ? 'example@email.com' : 'example@email.com'}
                   style={{ 
                     color: '#000000', 
                     WebkitTextFillColor: '#000000',
                     caretColor: '#000000',
-                    fontWeight: 'bold',
+                    fontWeight: '300',
                     fontSize: '16px'
                   }}
                   onFocus={(e) => {
@@ -230,13 +238,13 @@ export default function LoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-black font-bold"
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-black font-light"
                   placeholder={currentLanguage === 'ko' ? '비밀번호를 입력하세요' : 'パスワードを入力してください'}
                   style={{ 
                     color: '#000000', 
                     WebkitTextFillColor: '#000000',
                     caretColor: '#000000',
-                    fontWeight: 'bold',
+                    fontWeight: '300',
                     fontSize: '16px'
                   }}
                   onFocus={(e) => {
@@ -249,7 +257,7 @@ export default function LoginPage() {
                     e.target.style.color = '#000000';
                     e.target.style.webkitTextFillColor = '#000000';
                     e.target.style.caretColor = '#000000';
-                    e.target.style.fontWeight = 'bold';
+                    e.target.style.fontWeight = '300';
                     
                     // 비밀번호 입력란에서 벗어날 때 키보드 언어 복원
                     setTimeout(() => {
@@ -264,14 +272,27 @@ export default function LoginPage() {
                           metaLang.setAttribute('content', 'ko');
                         }
                         
-                        // 언어 변경 이벤트 발생
-                        window.dispatchEvent(new Event('languagechange'));
+                        // 추가적인 언어 복원 방법들
+                        if (typeof window !== 'undefined' && window.navigator) {
+                          // 브라우저 언어 설정 강제 변경
+                          Object.defineProperty(navigator, 'language', {
+                            value: 'ko',
+                            writable: false
+                          });
+                          
+                          // 언어 변경 이벤트 발생
+                          window.dispatchEvent(new Event('languagechange'));
+                          
+                          // 추가 이벤트 발생
+                          window.dispatchEvent(new Event('input'));
+                          window.dispatchEvent(new Event('change'));
+                        }
                         
                         console.log('키보드 언어 복원 완료');
                       } catch (error) {
                         console.log('키보드 언어 복원 오류:', error);
                       }
-                    }, 200);
+                    }, 300);
                   }}
                   onInput={(e) => {
                     const target = e.target as HTMLInputElement;
