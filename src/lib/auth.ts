@@ -54,7 +54,14 @@ export const authOptions: NextAuthOptions = {
 
         try {
           // 동적 import로 Prisma 로드
-          const { prisma } = await import('./prisma');
+          let prisma: any;
+          try {
+            const { prisma: PrismaClient } = await import('./prisma');
+            prisma = PrismaClient;
+          } catch (error) {
+            console.error('Prisma 클라이언트 로드 실패:', error);
+            return null;
+          }
           
           const user = await prisma.user.findUnique({
             where: { email: credentials.email },

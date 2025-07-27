@@ -25,7 +25,7 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* 모바일 입력란 글자색 강제 설정 */
+/* 모바일 입력란 글자색 강제 설정 - 모든 브라우저 대응 */
 input:-webkit-autofill,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:hover,
@@ -38,17 +38,50 @@ input:-webkit-autofill:active {
 /* 모든 입력란 글자색 강제 설정 */
 input[type="email"],
 input[type="password"],
-input[type="text"] {
+input[type="text"],
+input[type="search"],
+input[type="tel"],
+input[type="url"] {
   color: #000 !important;
   -webkit-text-fill-color: #000 !important;
+  -webkit-text-security: none !important;
 }
 
 /* iOS Safari 특별 처리 */
 @supports (-webkit-touch-callout: none) {
   input[type="email"],
   input[type="password"],
-  input[type="text"] {
+  input[type="text"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"] {
     color: #000 !important;
     -webkit-text-fill-color: #000 !important;
+    -webkit-text-security: none !important;
+  }
+}
+
+/* Android Chrome 특별 처리 */
+@supports (-webkit-appearance: none) and (not (overflow: -webkit-marquee)) {
+  input[type="email"],
+  input[type="password"],
+  input[type="text"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"] {
+    color: #000 !important;
+    -webkit-text-fill-color: #000 !important;
+  }
+}
+
+/* Firefox 특별 처리 */
+@supports (-moz-appearance: none) {
+  input[type="email"],
+  input[type="password"],
+  input[type="text"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"] {
+    color: #000 !important;
   }
 }

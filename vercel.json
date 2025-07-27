@@ -2,6 +2,7 @@
   "buildCommand": "npm run vercel-build",
   "outputDirectory": ".next",
   "framework": "nextjs",
+  "installCommand": "npm install && npx prisma generate",
   "env": {
     "AWS_REGION": "ap-northeast-2",
     "AWS_S3_BUCKET": "malmoi-system-files",

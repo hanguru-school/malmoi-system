@@ -2,8 +2,21 @@ import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { sign } from 'jsonwebtoken';
 
-// Prisma 클라이언트 직접 import
-import { prisma } from '@/lib/prisma';
+// 동적 import로 Prisma 로드 (빌드 시점 오류 방지)
+let prisma: any;
+
+async function getPrisma() {
+  if (!prisma) {
+    try {
+      const { prisma: PrismaClient } = await import('@/lib/prisma');
+      prisma = PrismaClient;
+    } catch (error) {
+      console.error('Prisma 클라이언트 로드 실패:', error);
+      throw new Error('데이터베이스 연결 실패');
+    }
+  }
+  return prisma;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -34,8 +47,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Prisma 클라이언트 가져오기
+    const db = await getPrisma();
+
     // 사용자 조회
-    const user = await prisma.user.findUnique({
+    const user = await db.user.findUnique({
       where: { email },
       include: {
         student: true,
