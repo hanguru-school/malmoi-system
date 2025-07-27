@@ -136,6 +136,20 @@ input[type="number"]:focus {
 input::placeholder {
   color: #6b7280 !important;
   opacity: 1 !important;
+  -webkit-text-fill-color: #6b7280 !important;
+}
+
+/* 9. 플레이스홀더 강제 적용 (모바일 대응) */
+input[type="email"]::placeholder,
+input[type="password"]::placeholder,
+input[type="text"]::placeholder,
+input[type="search"]::placeholder,
+input[type="tel"]::placeholder,
+input[type="url"]::placeholder,
+input[type="number"]::placeholder {
+  color: #6b7280 !important;
+  opacity: 1 !important;
+  -webkit-text-fill-color: #6b7280 !important;
 }
 
 /* 9. 모든 상태에서 강제 적용 */

@@ -13,8 +13,11 @@ export default function LoginPage() {
   const [currentLanguage, setCurrentLanguage] = useState('ko');
   const router = useRouter();
 
-  // 강제로 입력란 스타일 적용
+  // 강제로 입력란 스타일 적용 및 키보드 언어 관리
   useEffect(() => {
+    let previousLang = '';
+    let isPasswordFocused = false;
+
     const forceInputStyles = () => {
       const inputs = document.querySelectorAll('input[type="email"], input[type="password"]');
       inputs.forEach((input: any) => {
@@ -37,6 +40,14 @@ export default function LoginPage() {
       e.target.style.webkitTextFillColor = '#000000';
       e.target.style.caretColor = '#000000';
       e.target.style.fontWeight = 'bold';
+
+      // 비밀번호 입력란에 포커스될 때 현재 언어 저장
+      if (e.target.type === 'password') {
+        isPasswordFocused = true;
+        // 현재 언어 감지 (navigator.language 또는 document.documentElement.lang)
+        previousLang = navigator.language || document.documentElement.lang || 'ko';
+        console.log('비밀번호 입력 시작, 현재 언어:', previousLang);
+      }
     };
 
     const handleInput = (e: any) => {
@@ -46,10 +57,43 @@ export default function LoginPage() {
       e.target.style.fontWeight = 'bold';
     };
 
+    const handleBlur = (e: any) => {
+      e.target.style.color = '#000000';
+      e.target.style.webkitTextFillColor = '#000000';
+      e.target.style.caretColor = '#000000';
+      e.target.style.fontWeight = 'bold';
+
+      // 비밀번호 입력란에서 벗어날 때 언어 복원
+      if (e.target.type === 'password' && isPasswordFocused) {
+        isPasswordFocused = false;
+        console.log('비밀번호 입력 완료, 언어 복원:', previousLang);
+        
+        // 언어 복원을 위한 지연 처리
+        setTimeout(() => {
+          try {
+            // HTML lang 속성 복원
+            if (previousLang) {
+              document.documentElement.lang = previousLang;
+            }
+            
+            // 추가적인 언어 복원 방법들
+            if (typeof window !== 'undefined' && window.navigator) {
+              // 브라우저 언어 설정 복원 시도
+              const event = new Event('languagechange');
+              window.dispatchEvent(event);
+            }
+          } catch (error) {
+            console.log('언어 복원 중 오류:', error);
+          }
+        }, 100);
+      }
+    };
+
     const inputs = document.querySelectorAll('input[type="email"], input[type="password"]');
     inputs.forEach((input) => {
       input.addEventListener('focus', handleFocus);
       input.addEventListener('input', handleInput);
+      input.addEventListener('blur', handleBlur);
     });
 
     return () => {
@@ -57,6 +101,7 @@ export default function LoginPage() {
       inputs.forEach((input) => {
         input.removeEventListener('focus', handleFocus);
         input.removeEventListener('input', handleInput);
+        input.removeEventListener('blur', handleBlur);
       });
     };
   }, []);
@@ -205,6 +250,28 @@ export default function LoginPage() {
                     e.target.style.webkitTextFillColor = '#000000';
                     e.target.style.caretColor = '#000000';
                     e.target.style.fontWeight = 'bold';
+                    
+                    // 비밀번호 입력란에서 벗어날 때 키보드 언어 복원
+                    setTimeout(() => {
+                      try {
+                        // HTML lang 속성을 한국어로 강제 설정
+                        document.documentElement.lang = 'ko';
+                        document.documentElement.setAttribute('lang', 'ko');
+                        
+                        // 메타 태그 언어 설정
+                        const metaLang = document.querySelector('meta[name="language"]');
+                        if (metaLang) {
+                          metaLang.setAttribute('content', 'ko');
+                        }
+                        
+                        // 언어 변경 이벤트 발생
+                        window.dispatchEvent(new Event('languagechange'));
+                        
+                        console.log('키보드 언어 복원 완료');
+                      } catch (error) {
+                        console.log('키보드 언어 복원 오류:', error);
+                      }
+                    }, 200);
                   }}
                   onInput={(e) => {
                     const target = e.target as HTMLInputElement;
