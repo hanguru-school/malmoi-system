@@ -1,33 +1,90 @@
 import { NextResponse } from 'next/server';
-import prisma, { checkDbConnection } from '@/lib/db';
-import { handleApiError } from '@/lib/api-utils';
+import { 
+  createSuccessResponse, 
+  createErrorResponse, 
+  checkDatabaseConnection 
+} from '@/lib/api-utils';
+
+export const runtime = 'nodejs';
 
 export async function GET() {
   try {
-    const isDbConnected = await checkDbConnection();
-    if (!isDbConnected) {
-      return NextResponse.json({ error: 'DB 연결 실패' }, { status: 500 });
+    console.log('Auth log API called');
+    
+    // 데이터베이스 연결 확인
+    const dbCheck = await checkDatabaseConnection();
+    if (!dbCheck.success) {
+      console.error('Database connection failed:', dbCheck.error);
+      return createErrorResponse(
+        '데이터베이스 연결에 실패했습니다. 잠시 후 다시 시도해주세요.',
+        500,
+        dbCheck.error
+      );
     }
 
-    // 로그 예시
-    const log = { 
-      action: 'auth_log_access', 
+    // 로그 정보 생성
+    const log = {
+      action: 'auth_log_access',
       timestamp: new Date().toISOString(),
-      message: 'Authentication log endpoint accessed'
+      message: 'Authentication log endpoint accessed successfully',
+      status: 'success'
     };
-    return NextResponse.json(log);
-  } catch (error) {
-    return handleApiError(error);
+
+    console.log('Auth log created successfully');
+    return createSuccessResponse(log, '인증 로그를 성공적으로 가져왔습니다.');
+
+  } catch (error: any) {
+    console.error('Auth log API error:', error);
+    return createErrorResponse(
+      '인증 로그를 가져오는 중 오류가 발생했습니다.',
+      500,
+      error.message || 'AUTH_LOG_ERROR'
+    );
   }
 }
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json().catch(() => ({}));
+    console.log('Auth log POST API called');
+    
+    // 요청 본문 파싱
+    let body;
+    try {
+      body = await req.json();
+    } catch (parseError) {
+      console.warn('Failed to parse request body:', parseError);
+      body = {};
+    }
 
-    console.log('로그 데이터:', body);
-    return NextResponse.json({ status: 'ok', received: body });
-  } catch (error) {
-    return handleApiError(error);
+    console.log('Received log data:', body);
+
+    // 데이터베이스 연결 확인
+    const dbCheck = await checkDatabaseConnection();
+    if (!dbCheck.success) {
+      console.error('Database connection failed:', dbCheck.error);
+      return createErrorResponse(
+        '데이터베이스 연결에 실패했습니다. 잠시 후 다시 시도해주세요.',
+        500,
+        dbCheck.error
+      );
+    }
+
+    // 로그 데이터 처리 (실제 구현에서는 데이터베이스에 저장)
+    const processedLog = {
+      ...body,
+      receivedAt: new Date().toISOString(),
+      processed: true
+    };
+
+    console.log('Log data processed successfully');
+    return createSuccessResponse(processedLog, '로그 데이터를 성공적으로 처리했습니다.');
+
+  } catch (error: any) {
+    console.error('Auth log POST API error:', error);
+    return createErrorResponse(
+      '로그 데이터 처리 중 오류가 발생했습니다.',
+      500,
+      error.message || 'AUTH_LOG_POST_ERROR'
+    );
   }
 } 

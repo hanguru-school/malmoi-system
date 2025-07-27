@@ -1,7 +1,13 @@
 import { NextResponse } from 'next/server';
+import { 
+  createSuccessResponse, 
+  createErrorResponse 
+} from '@/lib/api-utils';
 import prisma, { checkDbConnection } from '@/lib/db';
 import AWS from 'aws-sdk';
 import jwt from 'jsonwebtoken';
+
+export const runtime = 'nodejs';
 
 // AWS Cognito 연결 테스트
 async function testAwsConnection() {
@@ -79,6 +85,8 @@ async function testJwtToken() {
 
 export async function GET() {
   try {
+    console.log('Healthcheck API called');
+    
     // 데이터베이스 연결 테스트
     const dbOk = await checkDbConnection();
     const dbStatus = dbOk ? 'connected' : 'failed';
@@ -89,7 +97,7 @@ export async function GET() {
     // JWT 토큰 테스트
     const jwtResult = await testJwtToken();
 
-    return NextResponse.json({
+    const healthData = {
       timestamp: new Date().toISOString(),
       db: dbStatus,
       aws: awsResult.status,
@@ -100,15 +108,17 @@ export async function GET() {
         aws_error: awsResult.error || null,
         jwt_error: jwtResult.error || null
       }
-    });
+    };
+
+    console.log('Healthcheck completed successfully');
+    return createSuccessResponse(healthData, '시스템 상태 확인이 완료되었습니다.');
+
   } catch (error: any) {
-    return NextResponse.json({
-      timestamp: new Date().toISOString(),
-      error: '헬스체크 실행 중 오류 발생',
-      message: error.message,
-      db: 'unknown',
-      aws: 'unknown',
-      jwt: 'unknown'
-    }, { status: 500 });
+    console.error('Healthcheck API error:', error);
+    return createErrorResponse(
+      '시스템 상태 확인 중 오류가 발생했습니다.',
+      500,
+      error.message || 'HEALTHCHECK_ERROR'
+    );
   }
 } 
