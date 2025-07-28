@@ -10,42 +10,15 @@ export interface ApiResponse<T = any> {
   timestamp: string;
 }
 
-// 개선된 에러 핸들러 - 항상 JSON 응답 보장
-export function handleApiError(error: unknown, context: string) {
-  console.error(`[${context}]`, error);
-
-  // 에러 타입에 따른 적절한 메시지 생성
-  let errorMessage = '알 수 없는 오류가 발생했습니다.';
-  let statusCode = 500;
-
-  if (error instanceof Error) {
-    errorMessage = error.message;
-    
-    // 특정 에러 타입에 따른 상태 코드 설정
-    if (error.message.includes('Forbidden') || error.message.includes('403')) {
-      statusCode = 403;
-      errorMessage = '접근 권한이 없습니다.';
-    } else if (error.message.includes('Unauthorized') || error.message.includes('401')) {
-      statusCode = 401;
-      errorMessage = '인증이 필요합니다.';
-    } else if (error.message.includes('Not Found') || error.message.includes('404')) {
-      statusCode = 404;
-      errorMessage = '요청한 리소스를 찾을 수 없습니다.';
-    } else if (error.message.includes('Bad Request') || error.message.includes('400')) {
-      statusCode = 400;
-      errorMessage = '잘못된 요청입니다.';
-    }
-  }
-
-  return NextResponse.json(
-    {
-      success: false,
-      message: errorMessage,
-      error: error instanceof Error ? error.message : 'UNKNOWN_ERROR',
-      timestamp: new Date().toISOString()
-    },
-    { status: statusCode }
-  );
+// 간단한 에러 핸들러 (User provided, adapted to ApiResponse interface)
+export function handleApiError(error: unknown, message = '서버 오류가 발생했습니다.') {
+  console.error('[API ERROR]', error);
+  return NextResponse.json({ 
+    success: false,
+    message,
+    error: error instanceof Error ? error.message : 'UNKNOWN_ERROR',
+    timestamp: new Date().toISOString()
+  }, { status: 500 });
 }
 
 // 성공 응답 함수
