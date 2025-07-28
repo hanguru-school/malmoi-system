@@ -1,79 +1,72 @@
 import { NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
-import AWS from 'aws-sdk';
-import { checkDbConnection } from '@/lib/db';
+import { handleApiError, createSuccessResponse, checkDatabaseConnection, checkCognitoConnection, validateEnvironmentVariables } from '@/lib/api-utils';
 
-export const runtime = 'nodejs'; // App Router에서 Node.js 런타임 강제
+export const runtime = 'nodejs';
 
 export async function GET() {
-  const report: any = {
-    database: null,
-    aws: null,
-    jwt: null,
-    timestamp: new Date().toISOString(),
-  };
-
-  // 1) DB 연결 테스트
   try {
-    const isConnected = await checkDbConnection();
-    if (isConnected) {
-      report.database = `✅ DB 연결 성공`;
-    } else {
-      report.database = `❌ DB 연결 실패`;
+    console.log('Test API called');
+
+    const report: any = {
+      timestamp: new Date().toISOString(),
+      environment: null,
+      database: null,
+      cognito: null,
+      jwt: null
+    };
+
+    // 1) 환경변수 검증
+    const envValidation = validateEnvironmentVariables();
+    report.environment = envValidation.isValid 
+      ? `✅ 환경변수 설정 완료` 
+      : `❌ 환경변수 누락: ${envValidation.missingVars.join(', ')}`;
+
+    // 2) DB 연결 테스트
+    const dbCheck = await checkDatabaseConnection();
+    report.database = dbCheck.success 
+      ? `✅ DB 연결 성공` 
+      : `❌ DB 연결 실패: ${dbCheck.error}`;
+
+    // 3) AWS Cognito 연결 테스트
+    const cognitoCheck = await checkCognitoConnection();
+    report.cognito = cognitoCheck.success 
+      ? `✅ AWS Cognito 연결 성공` 
+      : `❌ AWS Cognito 연결 실패: ${cognitoCheck.error}`;
+
+    // 4) JWT 테스트
+    try {
+      const jwt = await import('jsonwebtoken');
+      const testPayload = { test: 'ok', timestamp: Date.now() };
+      const token = jwt.sign(testPayload, process.env.JWT_SECRET || 'fallback', { expiresIn: '1m' });
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback');
+      report.jwt = `✅ JWT 생성/검증 성공 (${JSON.stringify(decoded)})`;
+    } catch (err: any) {
+      report.jwt = `❌ JWT 실패: ${err.message}`;
     }
-  } catch (err: any) {
-    report.database = `❌ DB 연결 실패: ${err.message}`;
-  }
 
-  // 2) AWS Cognito (혹은 S3 등) 테스트
-  try {
-    AWS.config.update({
-      region: process.env.AWS_REGION,
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    });
-    const s3 = new AWS.S3();
-    await s3.listBuckets().promise(); // 접근 가능한지 확인
-    report.aws = `✅ AWS 자격 증명 및 연결 성공`;
-  } catch (err: any) {
-    report.aws = `❌ AWS 연결 실패: ${err.message}`;
-  }
+    console.log('Test API completed successfully');
+    return createSuccessResponse(report, '시스템 테스트가 완료되었습니다.');
 
-  // 3) JWT 생성/검증 테스트
-  try {
-    const token = jwt.sign({ test: 'ok' }, process.env.NEXTAUTH_SECRET || 'fallback', {
-      expiresIn: '1m',
-    });
-    const decoded = jwt.verify(token, process.env.NEXTAUTH_SECRET || 'fallback');
-    report.jwt = `✅ JWT 발급 및 검증 성공 (${JSON.stringify(decoded)})`;
-  } catch (err: any) {
-    report.jwt = `❌ JWT 실패: ${err.message}`;
+  } catch (error) {
+    console.error('Test API error:', error);
+    return handleApiError(error, 'GET /api/test');
   }
-
-  return NextResponse.json(report, { status: 200 });
 }
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    console.log('Test API POST called');
+
+    const body = await request.json().catch(() => ({}));
     
-    return NextResponse.json({
-      success: true,
-      message: 'POST request received',
-      data: body,
+    return createSuccessResponse({
+      received: body,
       timestamp: new Date().toISOString(),
-      runtime: 'nodejs'
-    });
+      message: 'POST 요청이 성공적으로 처리되었습니다.'
+    }, '테스트 POST 요청이 성공했습니다.');
 
   } catch (error) {
-    console.error('Test POST error:', error);
-    return NextResponse.json(
-      { 
-        success: false,
-        error: 'Test POST failed',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      },
-      { status: 500 }
-    );
+    console.error('Test API POST error:', error);
+    return handleApiError(error, 'POST /api/test');
   }
 } 

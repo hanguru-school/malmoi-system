@@ -1,23 +1,20 @@
 import { NextResponse } from 'next/server';
-import { 
-  createSuccessResponse, 
-  handleApiError, 
-  checkDatabaseConnection 
-} from '@/lib/api-utils';
+import { handleApiError, createSuccessResponse, checkDatabaseConnection } from '@/lib/api-utils';
 
 export const runtime = 'nodejs';
 
 export async function GET() {
   try {
     console.log('Auth log API called');
-    
+
     // 데이터베이스 연결 확인
     const dbCheck = await checkDatabaseConnection();
     if (!dbCheck.success) {
       console.error('Database connection failed:', dbCheck.error);
       return NextResponse.json({
         success: false,
-        message: '데이터베이스 연결에 실패했습니다. 잠시 후 다시 시도해주세요.',
+        message: '데이터베이스 연결에 실패했습니다.',
+        error: dbCheck.error,
         timestamp: new Date().toISOString()
       }, { status: 500 });
     }
@@ -27,21 +24,23 @@ export async function GET() {
       action: 'auth_log_access',
       timestamp: new Date().toISOString(),
       message: 'Authentication log endpoint accessed successfully',
-      status: 'success'
+      status: 'success',
+      dbStatus: 'connected'
     };
 
     console.log('Auth log created successfully');
     return createSuccessResponse(log, '인증 로그를 성공적으로 가져왔습니다.');
 
   } catch (error) {
-    return handleApiError(error, 'Auth Log API');
+    console.error('Auth log API error:', error);
+    return handleApiError(error, 'GET /api/auth/_log');
   }
 }
 
 export async function POST(req: Request) {
   try {
     console.log('Auth log POST API called');
-    
+
     // 요청 본문 파싱
     let body;
     try {
@@ -59,7 +58,8 @@ export async function POST(req: Request) {
       console.error('Database connection failed:', dbCheck.error);
       return NextResponse.json({
         success: false,
-        message: '데이터베이스 연결에 실패했습니다. 잠시 후 다시 시도해주세요.',
+        message: '데이터베이스 연결에 실패했습니다.',
+        error: dbCheck.error,
         timestamp: new Date().toISOString()
       }, { status: 500 });
     }
@@ -68,13 +68,15 @@ export async function POST(req: Request) {
     const processedLog = {
       ...body,
       receivedAt: new Date().toISOString(),
-      processed: true
+      processed: true,
+      dbStatus: 'connected'
     };
 
     console.log('Log data processed successfully');
     return createSuccessResponse(processedLog, '로그 데이터를 성공적으로 처리했습니다.');
 
   } catch (error) {
-    return handleApiError(error, 'Auth Log POST API');
+    console.error('Auth log POST API error:', error);
+    return handleApiError(error, 'POST /api/auth/_log');
   }
 } 
