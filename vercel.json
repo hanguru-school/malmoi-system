@@ -11,8 +11,6 @@
     "COGNITO_USER_POOL_ID": "ap-northeast-1_5R7g8tN40",
     "COGNITO_DOMAIN": "https://malmoi-system-pool.auth.ap-northeast-1.amazoncognito.com",
     "JWT_SECRET": "4822d5d02c9ec4fd183db70c1645ec1e",
-    "NEXTAUTH_SECRET": "malmoi-secret-key-2024-very-secure",
-    "NEXTAUTH_URL": "https://app.hanguru.school",
     "NODE_ENV": "production",
     "NEXT_PUBLIC_COGNITO_CALLBACK_URL": "https://app.hanguru.school/api/auth/callback/cognito",
     "NEXT_PUBLIC_COGNITO_SIGNOUT_URL": "https://app.hanguru.school",

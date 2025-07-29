@@ -11,7 +11,6 @@ export async function GET() {
       environment: {
         nodeEnv: process.env.NODE_ENV,
         hasDatabaseUrl: !!process.env.DATABASE_URL,
-        hasNextAuthSecret: !!process.env.NEXTAUTH_SECRET,
         hasAwsRegion: !!process.env.AWS_REGION,
         hasAwsRdsHost: !!process.env.AWS_RDS_HOST,
       },
