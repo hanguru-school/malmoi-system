@@ -121,10 +121,10 @@ function CognitoLoginContent() {
           <p><strong>참고:</strong></p>
           <ul className="list-disc list-inside space-y-1">
             <li>Cognito User Pool: malmoi-system-pool</li>
-            <li>Cognito User Pool ID: ap-northeast-2_5R7g8tN40</li>
+            <li>Cognito User Pool ID: ap-northeast-1_5R7g8tN40</li>
             <li>Cognito App Client: malmoi-system</li>
             <li>Cognito Client ID: 66f1hn1q3c8b4fri0o3feifmpd</li>
-            <li>Region: ap-northeast-2 (Seoul)</li>
+            <li>Region: ap-northeast-1 (Tokyo)</li>
             <li>OAuth Callback URL: https://app.hanguru.school/api/auth/callback/cognito</li>
             <li>OAuth Scopes: email openid phone</li>
           </ul>

@@ -1,6 +1,6 @@
 import { CognitoUserPool, CognitoUser, AuthenticationDetails, CognitoUserAttribute } from 'amazon-cognito-identity-js';
 
-// Cognito Provider 설정
+// Cognito Provider 설정 (도쿄 리전)
 export const cognitoProviderConfig = {
   clientId: process.env.COGNITO_CLIENT_ID!,
   clientSecret: process.env.COGNITO_CLIENT_SECRET!,
@@ -9,7 +9,7 @@ export const cognitoProviderConfig = {
   userPoolId: process.env.COGNITO_USER_POOL_ID!,
 };
 
-// Cognito User Pool 설정
+// Cognito User Pool 설정 (도쿄 리전)
 export const poolData = {
   UserPoolId: cognitoProviderConfig.userPoolId,
   ClientId: cognitoProviderConfig.clientId,
@@ -241,7 +241,7 @@ export const cognitoAuth = {
   },
 };
 
-// OAuth URL 생성
+// OAuth URL 생성 (도쿄 리전)
 export const createOAuthUrl = (redirectUri: string, state?: string): string => {
   const url = new URL(`${cognitoProviderConfig.domain}/oauth2/authorize`);
   url.searchParams.set('response_type', 'code');
