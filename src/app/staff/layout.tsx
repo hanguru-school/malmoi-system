@@ -21,6 +21,7 @@ import {
   QrCode
 } from 'lucide-react';
 
+
 interface StaffPermissions {
   canViewReservations: boolean;
   canEditReservations: boolean;
@@ -160,11 +161,18 @@ export default function StaffLayout({
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  const handleLogout = () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('staffToken');
-      sessionStorage.clear();
-      window.location.href = '/login';
+  const handleLogout = async () => {
+    try {
+      // 쿠키 삭제
+      document.cookie = 'user-session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      // 로컬 스토리지 삭제
+      localStorage.removeItem('authToken');
+      // 로그인 페이지로 리다이렉트
+      window.location.href = '/auth/login';
+    } catch (error) {
+      console.error('로그아웃 오류:', error);
+      // 오류 발생 시 강제로 로그인 페이지로 이동
+      window.location.href = '/auth/login';
     }
   };
 

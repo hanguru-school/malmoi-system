@@ -4,41 +4,70 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
-  Home,
-  Users,
-  Calendar,
-  BookOpen,
-  Settings,
-  BarChart3,
-  MessageSquare,
-  CreditCard,
-  FileText,
-  Award,
-  TrendingUp,
-  Shield,
-  Menu,
+  Home, 
+  Users, 
+  Calendar, 
+  Settings, 
+  BarChart3, 
+  FileText, 
+  Bell, 
+  Menu, 
   X,
   LogOut,
-  QrCode,
-  Bell,
-  ChevronDown,
+  User,
+  BookOpen,
   GraduationCap,
-  Layers
+  DollarSign,
+  Shield,
+  MessageSquare,
+  Activity,
+  Award,
+  Target,
+  PieChart,
+  Layers,
+  Building,
+  UserCheck,
+  CreditCard,
+  Volume2,
+  TestTube,
+  Star,
+  Zap,
+  Settings as SettingsIcon,
+  BarChart3 as BarChart3Icon,
+  FileText as FileTextIcon,
+  Bell as BellIcon,
+  Menu as MenuIcon,
+  X as XIcon,
+  LogOut as LogOutIcon,
+  User as UserIcon,
+  BookOpen as BookOpenIcon,
+  GraduationCap as GraduationCapIcon,
+  DollarSign as DollarSignIcon,
+  Shield as ShieldIcon,
+  MessageSquare as MessageSquareIcon,
+  Activity as ActivityIcon,
+  Award as AwardIcon,
+  Target as TargetIcon,
+  PieChart as PieChartIcon,
+  Layers as LayersIcon,
+  Building as BuildingIcon,
+  UserCheck as UserCheckIcon,
+  CreditCard as CreditCardIcon,
+  Volume2 as Volume2Icon,
+  TestTube as TestTubeIcon,
+  Star as StarIcon,
+  Zap as ZapIcon
 } from 'lucide-react';
+
 
 const navigation = [
   { name: '대시보드', href: '/admin/home', icon: Home },
-  { name: '예약 관리', href: '/admin/reservations', icon: Calendar },
   { name: '학생 관리', href: '/admin/students', icon: Users },
-  { name: '수업 관리', href: '/admin/classes', icon: BookOpen },
-  { name: '결제 관리', href: '/admin/payments', icon: CreditCard },
-  { name: '직원 관리', href: '/admin/employees', icon: GraduationCap },
-  { name: '코스/커리큘럼 관리', href: '/admin/courses-curriculum', icon: Layers },
-  { name: '리포트 관리', href: '/admin/reports', icon: FileText },
-  { name: '메시지 관리', href: '/admin/messages', icon: MessageSquare },
-  { name: '통계/매출 분석', href: '/admin/statistics', icon: BarChart3 },
-  { name: 'QR코드 표시', href: '/admin/qr-display', icon: QrCode },
-  { name: '시스템', href: '/admin/settings', icon: Settings },
+  { name: '강사 관리', href: '/admin/teachers', icon: GraduationCap },
+  { name: '수업 관리', href: '/admin/classes', icon: Calendar },
+  { name: '결제 관리', href: '/admin/payments', icon: DollarSign },
+  { name: '통계', href: '/admin/analytics', icon: BarChart3 },
+  { name: '설정', href: '/admin/settings', icon: Settings },
 ];
 
 export default function AdminLayout({
@@ -50,14 +79,18 @@ export default function AdminLayout({
   const [notificationOpen, setNotificationOpen] = useState(false);
   const pathname = usePathname();
 
-  const handleLogout = () => {
-    // 로그아웃 로직
-    if (typeof window !== 'undefined') {
-      // 세션 클리어
-      localStorage.removeItem('adminToken');
-      sessionStorage.clear();
+  const handleLogout = async () => {
+    try {
+      // 쿠키 삭제
+      document.cookie = 'user-session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      // 로컬 스토리지 삭제
+      localStorage.removeItem('authToken');
       // 로그인 페이지로 리다이렉트
-      window.location.href = '/login';
+      window.location.href = '/auth/login';
+    } catch (error) {
+      console.error('로그아웃 오류:', error);
+      // 오류 발생 시 강제로 로그인 페이지로 이동
+      window.location.href = '/auth/login';
     }
   };
 

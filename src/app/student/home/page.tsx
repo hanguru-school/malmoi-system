@@ -356,7 +356,7 @@ export default function StudentHomePage() {
   }
 
   // 학생 권한 확인 (관리자 제외)
-  if (user.role !== 'student' && !isAdmin) {
+  if (user.role !== 'STUDENT' && !isAdmin) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-50 via-pink-50 to-red-50 flex items-center justify-center p-6">
         <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-8 text-center">
@@ -367,7 +367,7 @@ export default function StudentHomePage() {
           <p className="text-gray-600 mb-6">
             학생 대시보드에 접근할 권한이 없습니다.
             <br />
-            현재 권한: {user.role === 'admin' ? '관리자' : user.role === 'teacher' ? '강사' : user.role === 'staff' ? '직원' : user.role}
+            현재 권한: {user.role === 'ADMIN' ? '관리자' : user.role === 'TEACHER' ? '강사' : user.role === 'STAFF' ? '직원' : user.role}
           </p>
           <div className="space-y-3">
             <Link

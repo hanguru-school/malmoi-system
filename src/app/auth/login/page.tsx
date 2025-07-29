@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Globe, ArrowLeft } from 'lucide-react';
+import { Globe, ArrowLeft, Loader2 } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -12,123 +13,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState('ko');
   const router = useRouter();
-
-  // 강제로 입력란 스타일 적용 및 키보드 언어 관리
-  useEffect(() => {
-    let previousLang = '';
-    let isPasswordFocused = false;
-
-    const forceInputStyles = () => {
-      const inputs = document.querySelectorAll('input[type="email"], input[type="password"]');
-      inputs.forEach((input: any) => {
-        input.style.color = '#000000';
-        input.style.webkitTextFillColor = '#000000';
-        input.style.caretColor = '#000000';
-        input.style.fontWeight = 'bold';
-      });
-    };
-
-    // 초기 적용
-    forceInputStyles();
-
-    // 주기적으로 적용 (모바일 브라우저 대응)
-    const interval = setInterval(forceInputStyles, 1000);
-
-    // 포커스 이벤트 리스너
-    const handleFocus = (e: any) => {
-      e.target.style.color = '#000000';
-      e.target.style.webkitTextFillColor = '#000000';
-      e.target.style.caretColor = '#000000';
-      e.target.style.fontWeight = 'bold';
-
-      // 비밀번호 입력란에 포커스될 때 현재 언어 저장
-      if (e.target.type === 'password') {
-        isPasswordFocused = true;
-        // 현재 언어 감지 (navigator.language 또는 document.documentElement.lang)
-        previousLang = navigator.language || document.documentElement.lang || 'ko';
-        console.log('비밀번호 입력 시작, 현재 언어:', previousLang);
-      }
-    };
-
-    const handleInput = (e: any) => {
-      e.target.style.color = '#000000';
-      e.target.style.webkitTextFillColor = '#000000';
-      e.target.style.caretColor = '#000000';
-      e.target.style.fontWeight = 'bold';
-    };
-
-    const handleBlur = (e: any) => {
-      e.target.style.color = '#000000';
-      e.target.style.webkitTextFillColor = '#000000';
-      e.target.style.caretColor = '#000000';
-      e.target.style.fontWeight = 'bold';
-
-      // 비밀번호 입력란에서 벗어날 때 언어 복원
-      if (e.target.type === 'password' && isPasswordFocused) {
-        isPasswordFocused = false;
-        console.log('비밀번호 입력 완료, 언어 복원:', previousLang);
-        
-        // 언어 복원을 위한 지연 처리
-        setTimeout(() => {
-          try {
-            // HTML lang 속성 복원
-            if (previousLang) {
-              document.documentElement.lang = previousLang;
-            }
-            
-            // 추가적인 언어 복원 방법들
-            if (typeof window !== 'undefined' && window.navigator) {
-              // 브라우저 언어 설정 복원 시도
-              const event = new Event('languagechange');
-              window.dispatchEvent(event);
-            }
-          } catch (error) {
-            console.log('언어 복원 중 오류:', error);
-          }
-        }, 100);
-      }
-    };
-
-    const inputs = document.querySelectorAll('input[type="email"], input[type="password"]');
-    inputs.forEach((input) => {
-      input.addEventListener('focus', handleFocus);
-      input.addEventListener('input', handleInput);
-      input.addEventListener('blur', handleBlur);
-    });
-
-    return () => {
-      clearInterval(interval);
-      inputs.forEach((input) => {
-        input.removeEventListener('focus', handleFocus);
-        input.removeEventListener('input', handleInput);
-        input.removeEventListener('blur', handleBlur);
-      });
-    };
-  }, []);
-
-  // 사용자가 제공한 로그인 핸들러
-  async function handleLogin(email: string, password: string) {
-    try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await res.json();
-
-      if (!data.success) {
-        alert(data.message || '로그인에 실패했습니다.');
-        return;
-      }
-
-      // 로그인 성공 → 토큰 저장 및 리다이렉트
-      localStorage.setItem('auth_token', data.token);
-      window.location.href = '/dashboard';
-    } catch (error) {
-      alert('서버 오류가 발생했습니다. 잠시 후 다시 시도하세요.');
-    }
-  }
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -136,13 +21,58 @@ export default function LoginPage() {
     setError('');
 
     try {
-      console.log('로그인 시작:', email);
+      console.log('로그인 시도:', { email, password });
       
-      await handleLogin(email, password);
-      
-    } catch (error) {
+      const response = await fetch('/api/auth/login/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      console.log('응답 상태:', response.status);
+      const data = await response.json();
+      console.log('응답 데이터:', data);
+
+      if (response.ok && data.success) {
+        console.log('로그인 성공, 사용자 역할:', data.user.role);
+        
+        // 로그인 성공 시 역할에 맞는 페이지로 리다이렉트
+        const userRole = data.user.role;
+        
+        switch (userRole) {
+          case 'STUDENT':
+            console.log('학생 페이지로 리다이렉트');
+            window.location.href = '/student/home';
+            break;
+          case 'PARENT':
+            console.log('학부모 페이지로 리다이렉트');
+            window.location.href = '/parent/home';
+            break;
+          case 'TEACHER':
+            console.log('선생님 페이지로 리다이렉트');
+            window.location.href = '/teacher/home';
+            break;
+          case 'STAFF':
+            console.log('직원 페이지로 리다이렉트');
+            window.location.href = '/staff/home';
+            break;
+          case 'ADMIN':
+            console.log('관리자 페이지로 리다이렉트');
+            window.location.href = '/admin/home';
+            break;
+          default:
+            console.log('기본 페이지로 리다이렉트');
+            window.location.href = '/student/home'; // 기본값
+        }
+      } else {
+        console.log('로그인 실패:', data.message);
+        setError(data.message || '로그인에 실패했습니다.');
+      }
+    } catch (error: any) {
       console.error('로그인 오류:', error);
-      setError('로그인 중 오류가 발생했습니다.');
+      setError(error.message || '로그인 중 오류가 발생했습니다.');
     } finally {
       setIsLoading(false);
     }
@@ -198,25 +128,6 @@ export default function LoginPage() {
                     fontWeight: '300',
                     fontSize: '16px'
                   }}
-                  onFocus={(e) => {
-                    e.target.style.color = '#000000';
-                    e.target.style.webkitTextFillColor = '#000000';
-                    e.target.style.caretColor = '#000000';
-                    e.target.style.fontWeight = 'bold';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.color = '#000000';
-                    e.target.style.webkitTextFillColor = '#000000';
-                    e.target.style.caretColor = '#000000';
-                    e.target.style.fontWeight = 'bold';
-                  }}
-                  onInput={(e) => {
-                    const target = e.target as HTMLInputElement;
-                    target.style.color = '#000000';
-                    target.style.webkitTextFillColor = '#000000';
-                    target.style.caretColor = '#000000';
-                    target.style.fontWeight = 'bold';
-                  }}
                 />
               </div>
             </div>
@@ -243,60 +154,6 @@ export default function LoginPage() {
                     fontWeight: '300',
                     fontSize: '16px'
                   }}
-                  onFocus={(e) => {
-                    e.target.style.color = '#000000';
-                    e.target.style.webkitTextFillColor = '#000000';
-                    e.target.style.caretColor = '#000000';
-                    e.target.style.fontWeight = 'bold';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.color = '#000000';
-                    e.target.style.webkitTextFillColor = '#000000';
-                    e.target.style.caretColor = '#000000';
-                    e.target.style.fontWeight = '300';
-                    
-                    // 비밀번호 입력란에서 벗어날 때 키보드 언어 복원
-                    setTimeout(() => {
-                      try {
-                        // HTML lang 속성을 한국어로 강제 설정
-                        document.documentElement.lang = 'ko';
-                        document.documentElement.setAttribute('lang', 'ko');
-                        
-                        // 메타 태그 언어 설정
-                        const metaLang = document.querySelector('meta[name="language"]');
-                        if (metaLang) {
-                          metaLang.setAttribute('content', 'ko');
-                        }
-                        
-                        // 추가적인 언어 복원 방법들
-                        if (typeof window !== 'undefined' && window.navigator) {
-                          // 브라우저 언어 설정 강제 변경
-                          Object.defineProperty(navigator, 'language', {
-                            value: 'ko',
-                            writable: false
-                          });
-                          
-                          // 언어 변경 이벤트 발생
-                          window.dispatchEvent(new Event('languagechange'));
-                          
-                          // 추가 이벤트 발생
-                          window.dispatchEvent(new Event('input'));
-                          window.dispatchEvent(new Event('change'));
-                        }
-                        
-                        console.log('키보드 언어 복원 완료');
-                      } catch (error) {
-                        console.log('키보드 언어 복원 오류:', error);
-                      }
-                    }, 300);
-                  }}
-                  onInput={(e) => {
-                    const target = e.target as HTMLInputElement;
-                    target.style.color = '#000000';
-                    target.style.webkitTextFillColor = '#000000';
-                    target.style.caretColor = '#000000';
-                    target.style.fontWeight = 'bold';
-                  }}
                 />
               </div>
             </div>
@@ -307,10 +164,11 @@ export default function LoginPage() {
                 disabled={isLoading}
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isLoading 
-                  ? (currentLanguage === 'ko' ? '로그인 중...' : 'ログイン中...')
-                  : (currentLanguage === 'ko' ? '로그인' : 'ログイン')
-                }
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  currentLanguage === 'ko' ? '로그인' : 'ログイン'
+                )}
               </button>
             </div>
 
@@ -369,13 +227,25 @@ export default function LoginPage() {
         </div>
 
         <div className="mt-6 text-center">
-          <Link
-            href="/"
-            className="inline-flex items-center text-sm text-blue-600 hover:text-blue-500"
+          <p className="text-sm text-gray-600">
+            계정이 없으신가요?{' '}
+            <button
+              onClick={() => router.push('/auth/register')}
+              className="font-medium text-blue-600 hover:text-blue-500"
+            >
+              회원가입
+            </button>
+          </p>
+        </div>
+
+        <div className="mt-4 text-center">
+          <p className="text-sm text-gray-600 mb-2">다른 로그인 방법:</p>
+          <button
+            onClick={() => router.push('/auth/cognito-login')}
+            className="text-sm font-medium text-blue-600 hover:text-blue-500"
           >
-            <ArrowLeft className="w-4 h-4 mr-1" />
-            {currentLanguage === 'ko' ? '메인 페이지로 돌아가기' : 'メインページに戻る'}
-          </Link>
+            AWS Cognito로 로그인
+          </button>
         </div>
       </div>
     </div>

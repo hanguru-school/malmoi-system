@@ -1,37 +1,55 @@
-import { NextResponse } from 'next/server';
-import prisma from '@/lib/db';
-import { handleApiError, createSuccessResponse, checkDatabaseConnection } from '@/lib/api-utils';
+import { NextRequest, NextResponse } from 'next/server';
 
-export const runtime = 'nodejs';
-
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    console.log('Session API called');
-
-    // 데이터베이스 연결 확인
-    const dbCheck = await checkDatabaseConnection();
-    if (!dbCheck.success) {
-      console.error('Database connection failed:', dbCheck.error);
+    console.log('=== 세션 확인 API 호출됨 ===');
+    
+    // 쿠키에서 사용자 세션 정보 읽기
+    const userSessionCookie = request.cookies.get('user-session');
+    
+    if (!userSessionCookie) {
+      console.log('사용자 세션 쿠키가 없습니다.');
       return NextResponse.json({
         success: false,
-        message: '데이터베이스 연결에 실패했습니다.',
-        error: dbCheck.error,
-        timestamp: new Date().toISOString()
-      }, { status: 500 });
+        message: '로그인이 필요합니다.',
+        data: {
+          authenticated: false
+        }
+      }, { status: 401 });
     }
 
-    // 사용자 수 조회
-    const userCount = await prisma.user.count();
+    try {
+      const userData = JSON.parse(userSessionCookie.value);
+      console.log('사용자 세션 데이터:', userData);
+      
+      return NextResponse.json({
+        success: true,
+        message: '세션 정보를 성공적으로 조회했습니다.',
+        data: {
+          authenticated: true,
+          user: userData
+        }
+      });
 
-    return createSuccessResponse({
-      loggedIn: true,
-      userCount,
-      timestamp: new Date().toISOString(),
-      dbStatus: 'connected'
-    }, '세션 정보를 성공적으로 가져왔습니다.');
+    } catch (parseError) {
+      console.error('세션 쿠키 파싱 오류:', parseError);
+      return NextResponse.json({
+        success: false,
+        message: '세션 정보가 유효하지 않습니다.',
+        data: {
+          authenticated: false
+        }
+      }, { status: 401 });
+    }
 
   } catch (error) {
-    console.error('Session API error:', error);
-    return handleApiError(error, 'GET /api/auth/session');
+    console.error('세션 조회 오류:', error);
+    return NextResponse.json({
+      success: false,
+      message: '세션 조회 중 오류가 발생했습니다.',
+      data: {
+        authenticated: false
+      }
+    }, { status: 500 });
   }
 } 

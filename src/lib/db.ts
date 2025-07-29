@@ -5,10 +5,38 @@ declare global {
   var prisma: PrismaClient | undefined;
 }
 
-const prisma = globalThis.prisma || new PrismaClient();
+// Singleton 패턴으로 Prisma 클라이언트 관리
+const createPrismaClient = () => {
+  return new PrismaClient({
+    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+    datasources: {
+      db: {
+        url: process.env.DATABASE_URL
+      }
+    }
+  });
+};
+
+const prisma = globalThis.prisma || createPrismaClient();
 
 if (process.env.NODE_ENV !== 'production') {
   globalThis.prisma = prisma;
+}
+
+// 연결 상태 확인 함수
+export async function checkPrismaConnection() {
+  try {
+    await prisma.$connect();
+    await prisma.$queryRaw`SELECT 1`;
+    return { success: true, message: 'Database connection successful' };
+  } catch (error) {
+    console.error('Prisma connection failed:', error);
+    return { 
+      success: false, 
+      message: 'Database connection failed',
+      error: error instanceof Error ? error.message : 'UNKNOWN_ERROR'
+    };
+  }
 }
 
 export default prisma; 

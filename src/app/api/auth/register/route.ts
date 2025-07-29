@@ -14,12 +14,21 @@ async function getPrisma() {
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, name, password, role = 'STUDENT' } = await request.json();
+    const { 
+      email, 
+      kanjiName, 
+      yomigana, 
+      koreanName, 
+      phone, 
+      password, 
+      role = 'STUDENT',
+      studentEmail 
+    } = await request.json();
 
     // 입력 검증
-    if (!email || !name || !password) {
+    if (!email || !kanjiName || !yomigana || !phone || !password) {
       return NextResponse.json(
-        { error: '이메일, 이름, 비밀번호는 필수입니다.' },
+        { error: '이메일, 한자이름, 요미가나, 연락처, 비밀번호는 필수입니다.' },
         { status: 400 }
       );
     }
@@ -29,6 +38,15 @@ export async function POST(request: NextRequest) {
     if (!emailRegex.test(email)) {
       return NextResponse.json(
         { error: '올바른 이메일 형식이 아닙니다.' },
+        { status: 400 }
+      );
+    }
+
+    // 연락처 형식 검증
+    const phoneRegex = /^[0-9-+\s()]+$/;
+    if (!phoneRegex.test(phone) || phone.length < 10) {
+      return NextResponse.json(
+        { error: '올바른 연락처 형식이 아닙니다.' },
         { status: 400 }
       );
     }
@@ -56,29 +74,97 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 학부모인 경우 학생 이메일 검증
+    if (role === 'PARENT') {
+      if (!studentEmail) {
+        return NextResponse.json(
+          { error: '학부모 가입 시 학생 이메일이 필요합니다.' },
+          { status: 400 }
+        );
+      }
+
+      if (!emailRegex.test(studentEmail)) {
+        return NextResponse.json(
+          { error: '올바른 학생 이메일 형식이 아닙니다.' },
+          { status: 400 }
+        );
+      }
+
+      // 학생 계정 존재 확인
+      const studentUser = await db.user.findUnique({
+        where: { email: studentEmail },
+        include: { student: true }
+      });
+
+      if (!studentUser || !studentUser.student) {
+        return NextResponse.json(
+          { error: '해당 이메일의 학생을 찾을 수 없습니다.' },
+          { status: 404 }
+        );
+      }
+
+      // 이미 해당 학생과 연동된 학부모가 있는지 확인
+      const existingParent = await db.user.findFirst({
+        where: {
+          role: 'PARENT',
+          parent: {
+            studentId: studentUser.student.id
+          }
+        }
+      });
+
+      if (existingParent) {
+        return NextResponse.json(
+          { error: '해당 학생은 이미 학부모와 연동되어 있습니다.' },
+          { status: 409 }
+        );
+      }
+    }
+
     // 비밀번호 해싱
     const hashedPassword = await bcrypt.hash(password, 12);
+
+    // 이름 조합 (한자이름 + 요미가나 + 한글이름)
+    const fullName = `${kanjiName} (${yomigana})${koreanName ? ` / ${koreanName}` : ''}`;
 
     // 사용자 생성
     const user = await db.user.create({
       data: {
         email,
-        name,
+        name: fullName,
         password: hashedPassword,
         role,
+        phone,
         ...(role === 'STUDENT' && {
           student: {
             create: {
-              name,
+              name: fullName,
+              kanjiName,
+              yomigana,
+              koreanName,
               level: '초급 A',
               points: 0
+            }
+          }
+        }),
+        ...(role === 'PARENT' && {
+          parent: {
+            create: {
+              name: fullName,
+              kanjiName,
+              yomigana,
+              koreanName,
+              studentId: null // 나중에 업데이트
             }
           }
         }),
         ...(role === 'TEACHER' && {
           teacher: {
             create: {
-              name,
+              name: fullName,
+              kanjiName,
+              yomigana,
+              koreanName,
               subjects: ['한국어'],
               hourlyRate: 30000
             }
@@ -87,19 +173,51 @@ export async function POST(request: NextRequest) {
         ...(role === 'STAFF' && {
           staff: {
             create: {
-              name,
+              name: fullName,
+              kanjiName,
+              yomigana,
+              koreanName,
               position: '사무직원',
               permissions: {}
+            }
+          }
+        }),
+        ...(role === 'ADMIN' && {
+          admin: {
+            create: {
+              name: fullName,
+              kanjiName,
+              yomigana,
+              koreanName,
+              permissions: {},
+              isApproved: false // 마스터 관리자 승인 필요
             }
           }
         })
       },
       include: {
         student: true,
+        parent: true,
         teacher: true,
-        staff: true
+        staff: true,
+        admin: true
       }
     });
+
+    // 학부모인 경우 학생과 연동
+    if (role === 'PARENT' && studentEmail) {
+      const studentUser = await db.user.findUnique({
+        where: { email: studentEmail },
+        include: { student: true }
+      });
+
+      if (studentUser && studentUser.student) {
+        await db.parent.update({
+          where: { userId: user.id },
+          data: { studentId: studentUser.student.id }
+        });
+      }
+    }
 
     // 비밀번호 제거 후 응답
     const { password: _, ...userWithoutPassword } = user;

@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
   output   = "../node_modules/.prisma/client"
@@ -12,99 +9,98 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String
-  uid       String?  @unique
-  password  String
-  role      UserRole @default(STUDENT)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  student Student?
-  teacher Teacher?
-  staff   Staff?
-
-  // Tagging logs
-  taggingLogs TaggingLog[]
-
-  // Notifications
+  id               String            @id @default(cuid())
+  email            String            @unique
+  name             String
+  uid              String?           @unique
+  password         String
+  phone            String?
+  role             UserRole          @default(STUDENT)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  UIDDevice        UIDDevice[]
+  UIDTag           UIDTag[]
   notificationLogs NotificationLog[]
-
-  // Payments
-  payments  Payment[]
-  UIDTag    UIDTag[]
-  UIDDevice UIDDevice[]
+  payments         Payment[]
+  staff            Staff?
+  student          Student?
+  parent           Parent?
+  admin            Admin?
+  taggingLogs      TaggingLog[]
+  teacher          Teacher?
 
   @@map("users")
 }
 
 model Student {
-  id        String   @id @default(cuid())
-  userId    String   @unique
-  name      String
-  phone     String?
-  level     String   @default("초급 A")
-  points    Int      @default(0)
-  joinDate  DateTime @default(now())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  user                  User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                    String                  @id @default(cuid())
+  userId                String                  @unique
+  name                  String
+  kanjiName             String
+  yomigana              String
+  koreanName            String?
+  phone                 String?
+  level                 String                  @default("초급 A")
+  points                Int                     @default(0)
+  joinDate              DateTime                @default(now())
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  LearningStat          LearningStat[]
+  MemoSummary           MemoSummary[]
+  StudentBadge          StudentBadge[]
+  StudentGrammarHistory StudentGrammarHistory[]
+  StudentMemo           StudentMemo[]
+  StudentRecording      StudentRecording[]
+  StudentUsageHistory   StudentUsageHistory[]
+  StudentVocabHistory   StudentVocabHistory[]
+  WordStat              WordStat[]
+  WritingTest           WritingTest[]
+  curriculumProgress    CurriculumProgress[]
+  homework              Homework[]
+  lessonNotes           LessonNote[]
   reservations          Reservation[]
   reviews               Review[]
-  homework              Homework[]
-  curriculumProgress    CurriculumProgress[]
-  lessonNotes           LessonNote[]
-  StudentRecording      StudentRecording[]
-  WritingTest           WritingTest[]
-  StudentGrammarHistory StudentGrammarHistory[]
-  StudentVocabHistory   StudentVocabHistory[]
-  StudentUsageHistory   StudentUsageHistory[]
-  StudentBadge          StudentBadge[]
-  StudentMemo           StudentMemo[]
-  MemoSummary           MemoSummary[]
-  WordStat              WordStat[]
-  LearningStat          LearningStat[]
+  parents               Parent[]
+  user                  User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("students")
 }
 
 model Teacher {
-  id         String   @id @default(cuid())
-  userId     String   @unique
-  name       String
-  phone      String?
-  subjects   String[]
-  hourlyRate Int      @default(30000)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  // Relations
-  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String              @id @default(cuid())
+  userId       String              @unique
+  name         String
+  kanjiName    String
+  yomigana     String
+  koreanName   String?
+  phone        String?
+  subjects     String[]
+  hourlyRate   Int                 @default(30000)
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  notes        LessonNote[]
   reservations Reservation[]
   attendances  TeacherAttendance[]
-  notes        LessonNote[]
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("teachers")
 }
 
 model Staff {
-  id          String   @id @default(cuid())
-  userId      String   @unique
+  id          String         @id @default(cuid())
+  userId      String         @unique
   name        String
+  kanjiName   String
+  yomigana    String
+  koreanName  String?
   phone       String?
   position    String
-  permissions Json     @default("{}")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relations
-  user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  workLogs StaffWorkLog[]
-  Payroll  Payroll[]
+  permissions Json           @default("{}")
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  Payroll     Payroll[]
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workLogs    StaffWorkLog[]
 
   @@map("staff")
 }
@@ -121,12 +117,10 @@ model Reservation {
   notes     String?
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
-
-  // Relations
-  student  Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  teacher  Teacher   @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-  reviews  Review[]
-  payments Payment[]
+  payments  Payment[]
+  student   Student           @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  teacher   Teacher           @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  reviews   Review[]
 
   @@map("reservations")
 }
@@ -138,9 +132,7 @@ model TaggingLog {
   location  String
   timestamp DateTime
   createdAt DateTime    @default(now())
-
-  // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("tagging_logs")
 }
@@ -156,9 +148,7 @@ model TeacherAttendance {
   notes        String?
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
-
-  // Relations
-  teacher Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  teacher      Teacher          @relation(fields: [teacherId], references: [id], onDelete: Cascade)
 
   @@map("teacher_attendances")
 }
@@ -174,40 +164,36 @@ model StaffWorkLog {
   workType    WorkType  @default(OTHER)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-
-  // Relations
-  staff Staff @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  staff       Staff     @relation(fields: [staffId], references: [id], onDelete: Cascade)
 
   @@map("staff_work_logs")
 }
 
 model LessonNote {
-  id            String   @id @default(cuid())
-  teacherId     String
-  studentId     String
-  reservationId String?
-  title         String
-  content       String
-  audioUrl      String?
-  attachments   String[]
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  // Relations
-  teacher               Teacher                 @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-  student               Student                 @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  id                    String                  @id @default(cuid())
+  teacherId             String
+  studentId             String
+  reservationId         String?
+  title                 String
+  content               String
+  audioUrl              String?
+  attachments           String[]
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
   AudioFile             AudioFile[]
-  StudentRecording      StudentRecording[]
-  WritingTest           WritingTest[]
   StudentGrammarHistory StudentGrammarHistory[]
-  StudentVocabHistory   StudentVocabHistory[]
+  StudentRecording      StudentRecording[]
   StudentUsageHistory   StudentUsageHistory[]
+  StudentVocabHistory   StudentVocabHistory[]
+  WritingTest           WritingTest[]
+  student               Student                 @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  teacher               Teacher                 @relation(fields: [teacherId], references: [id], onDelete: Cascade)
 
   @@map("lesson_notes")
 }
 
 model Review {
-  id              String    @id @default(cuid())
+  id              String       @id @default(cuid())
   studentId       String
   teacherId       String
   reservationId   String?
@@ -215,14 +201,12 @@ model Review {
   content         String
   teacherResponse String?
   responseDate    DateTime?
-  isPublic        Boolean   @default(false)
+  isPublic        Boolean      @default(false)
   tags            String[]
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-
-  // Relations
-  student     Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  reservation Reservation? @relation(fields: [reservationId], references: [id], onDelete: SetNull)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  reservation     Reservation? @relation(fields: [reservationId], references: [id])
+  student         Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@map("reviews")
 }
@@ -244,49 +228,43 @@ model Homework {
   wrongAnswerRate Float?
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
-
-  // Relations
-  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  student         Student        @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@map("homework")
 }
 
 model Curriculum {
-  id                String   @id @default(cuid())
-  level             String   @unique
+  id                String               @id @default(cuid())
+  level             String               @unique
   name              String
   description       String
   mainGoals         String[]
   requiredSentences String[]
   requiredWords     String[]
-  isActive          Boolean  @default(true)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  // Relations
-  items    CurriculumItem[]
-  progress CurriculumProgress[]
+  isActive          Boolean              @default(true)
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  items             CurriculumItem[]
+  progress          CurriculumProgress[]
 
   @@map("curriculum")
 }
 
 model CurriculumItem {
-  id            String   @id @default(cuid())
+  id            String               @id @default(cuid())
   curriculumId  String
   category      String
   title         String
   description   String
   tags          String[]
   estimatedTime Int
-  isRequired    Boolean  @default(true)
+  isRequired    Boolean              @default(true)
   order         Int
-  isActive      Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  // Relations
-  curriculum Curriculum           @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
-  progress   CurriculumProgress[]
+  isActive      Boolean              @default(true)
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  curriculum    Curriculum           @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
+  progress      CurriculumProgress[]
 
   @@map("curriculum_items")
 }
@@ -303,11 +281,9 @@ model CurriculumProgress {
   notes            String?
   createdAt        DateTime             @default(now())
   updatedAt        DateTime             @updatedAt
-
-  // Relations
-  student    Student        @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  curriculum Curriculum     @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
-  item       CurriculumItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  curriculum       Curriculum           @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
+  item             CurriculumItem       @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  student          Student              @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@unique([studentId, itemId])
   @@map("curriculum_progress")
@@ -328,16 +304,335 @@ model NotificationLog {
   metadata        Json                 @default("{}")
   createdAt       DateTime             @default(now())
   updatedAt       DateTime             @updatedAt
-
-  // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user            User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notification_logs")
 }
 
-// Enums
+model Payment {
+  id            String        @id @default(cuid())
+  userId        String
+  amount        Int
+  currency      String        @default("KRW")
+  paymentMethod String
+  description   String
+  reservationId String?
+  serviceId     String?
+  status        PaymentStatus @default(PENDING)
+  transactionId String?
+  failureReason String?
+  metadata      Json          @default("{}")
+  createdAt     DateTime      @default(now())
+  completedAt   DateTime?
+  failedAt      DateTime?
+  reservation   Reservation?  @relation(fields: [reservationId], references: [id])
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}
+
+model AudioFile {
+  id           String      @id @default(cuid())
+  url          String
+  uploadedBy   String
+  uploadedAt   DateTime    @default(now())
+  lessonNoteId String?
+  position     Int?
+  lessonNote   LessonNote? @relation(fields: [lessonNoteId], references: [id])
+}
+
+model StudentRecording {
+  id           String      @id @default(cuid())
+  studentId    String
+  fileUrl      String
+  createdAt    DateTime    @default(now())
+  lessonNoteId String?
+  lessonNote   LessonNote? @relation(fields: [lessonNoteId], references: [id])
+  student      Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model WritingTest {
+  id           String      @id @default(cuid())
+  studentId    String
+  content      String
+  score        Int?
+  feedback     String?
+  createdAt    DateTime    @default(now())
+  lessonNoteId String?
+  lessonNote   LessonNote? @relation(fields: [lessonNoteId], references: [id])
+  student      Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model GrammarItem {
+  id        String                  @id @default(cuid())
+  content   String
+  level     String
+  category  String?
+  createdAt DateTime                @default(now())
+  histories StudentGrammarHistory[]
+}
+
+model VocabItem {
+  id        String                @id @default(cuid())
+  word      String
+  pos       String
+  level     String
+  createdAt DateTime              @default(now())
+  histories StudentVocabHistory[]
+}
+
+model UsageItem {
+  id         String                @id @default(cuid())
+  expression String
+  level      String
+  createdAt  DateTime              @default(now())
+  histories  StudentUsageHistory[]
+}
+
+model StudentGrammarHistory {
+  id           String      @id @default(cuid())
+  studentId    String
+  grammarId    String
+  explainedAt  DateTime
+  status       String
+  lessonNoteId String?
+  grammar      GrammarItem @relation(fields: [grammarId], references: [id], onDelete: Cascade)
+  lessonNote   LessonNote? @relation(fields: [lessonNoteId], references: [id])
+  student      Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model StudentVocabHistory {
+  id           String      @id @default(cuid())
+  studentId    String
+  vocabId      String
+  explainedAt  DateTime
+  status       String
+  lessonNoteId String?
+  lessonNote   LessonNote? @relation(fields: [lessonNoteId], references: [id])
+  student      Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  vocab        VocabItem   @relation(fields: [vocabId], references: [id], onDelete: Cascade)
+}
+
+model StudentUsageHistory {
+  id           String      @id @default(cuid())
+  studentId    String
+  usageId      String
+  explainedAt  DateTime
+  status       String
+  lessonNoteId String?
+  lessonNote   LessonNote? @relation(fields: [lessonNoteId], references: [id])
+  student      Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  usage        UsageItem   @relation(fields: [usageId], references: [id], onDelete: Cascade)
+}
+
+model Payroll {
+  id          String        @id @default(cuid())
+  staffId     String
+  month       String
+  baseSalary  Int
+  classPay    Int
+  transport   Int
+  points      Int
+  status      PayrollStatus @default(PENDING)
+  confirmedAt DateTime?
+  createdAt   DateTime      @default(now())
+  staff       Staff         @relation(fields: [staffId], references: [id], onDelete: Cascade)
+}
+
+model AttendanceEditLog {
+  id           String   @id @default(cuid())
+  attendanceId String
+  editorId     String
+  editType     String
+  reason       String
+  editedAt     DateTime @default(now())
+}
+
+model CommunityPost {
+  id        String             @id @default(cuid())
+  authorId  String
+  type      String
+  content   String
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  comments  CommunityComment[]
+  likes     Like[]
+  reports   Report[]
+}
+
+model CommunityComment {
+  id        String        @id @default(cuid())
+  postId    String
+  authorId  String
+  content   String
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  post      CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  likes     Like[]
+  reports   Report[]
+}
+
+model Like {
+  id                 String            @id @default(cuid())
+  userId             String
+  postId             String?
+  commentId          String?
+  createdAt          DateTime          @default(now())
+  communityPostId    String?
+  communityCommentId String?
+  CommunityComment   CommunityComment? @relation(fields: [communityCommentId], references: [id])
+  CommunityPost      CommunityPost?    @relation(fields: [communityPostId], references: [id])
+}
+
+model Report {
+  id                 String            @id @default(cuid())
+  userId             String
+  postId             String?
+  commentId          String?
+  reason             String
+  createdAt          DateTime          @default(now())
+  communityPostId    String?
+  communityCommentId String?
+  CommunityComment   CommunityComment? @relation(fields: [communityCommentId], references: [id])
+  CommunityPost      CommunityPost?    @relation(fields: [communityPostId], references: [id])
+}
+
+model PointLog {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  amount    Int
+  createdAt DateTime @default(now())
+}
+
+model Badge {
+  id        String         @id @default(cuid())
+  name      String
+  icon      String
+  minPoints Int
+  createdAt DateTime       @default(now())
+  students  StudentBadge[]
+}
+
+model StudentBadge {
+  id        String   @id @default(cuid())
+  studentId String
+  badgeId   String
+  earnedAt  DateTime @default(now())
+  badge     Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model CheerMessage {
+  id        String     @id @default(cuid())
+  content   String
+  type      String
+  createdAt DateTime   @default(now())
+  logs      CheerLog[]
+}
+
+model CheerLog {
+  id        String       @id @default(cuid())
+  messageId String
+  userId    String
+  sentAt    DateTime     @default(now())
+  message   CheerMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+}
+
+model UIDTag {
+  id       String     @id @default(cuid())
+  userId   String
+  uid      String
+  tagType  String
+  taggedAt DateTime   @default(now())
+  deviceId String?
+  device   UIDDevice? @relation(fields: [deviceId], references: [id])
+  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UIDDevice {
+  id           String   @id @default(cuid())
+  userId       String
+  uid          String
+  deviceType   String
+  registeredAt DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  UIDTag       UIDTag[]
+}
+
+model StudentMemo {
+  id        String   @id @default(cuid())
+  studentId String
+  lessonId  String?
+  authorId  String
+  content   String
+  createdAt DateTime @default(now())
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model MemoSummary {
+  id        String   @id @default(cuid())
+  studentId String
+  summary   String
+  updatedAt DateTime @updatedAt
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model WordStat {
+  id        String   @id @default(cuid())
+  studentId String
+  pos       String
+  count     Int
+  updatedAt DateTime @updatedAt
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model LearningStat {
+  id         String   @id @default(cuid())
+  studentId  String
+  totalWords Int
+  totalTime  Int
+  updatedAt  DateTime @updatedAt
+  student    Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model Parent {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  name       String
+  kanjiName  String
+  yomigana   String
+  koreanName String?
+  phone      String?
+  studentId  String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  student    Student? @relation(fields: [studentId], references: [id])
+
+  @@map("parents")
+}
+
+model Admin {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  name        String
+  kanjiName   String
+  yomigana    String
+  koreanName  String?
+  phone       String?
+  permissions Json     @default("{}")
+  isApproved  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("admins")
+}
+
 enum UserRole {
   STUDENT
+  PARENT
   TEACHER
   STAFF
   ADMIN
@@ -412,30 +707,6 @@ enum NotificationStatus {
   CANCELLED
 }
 
-model Payment {
-  id            String        @id @default(cuid())
-  userId        String
-  amount        Int
-  currency      String        @default("KRW")
-  paymentMethod String
-  description   String
-  reservationId String?
-  serviceId     String?
-  status        PaymentStatus @default(PENDING)
-  transactionId String?
-  failureReason String?
-  metadata      Json          @default("{}")
-  createdAt     DateTime      @default(now())
-  completedAt   DateTime?
-  failedAt      DateTime?
-
-  // Relations
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  reservation Reservation? @relation(fields: [reservationId], references: [id], onDelete: SetNull)
-
-  @@map("payments")
-}
-
 enum PaymentStatus {
   PENDING
   COMPLETED
@@ -444,289 +715,8 @@ enum PaymentStatus {
   REFUNDED
 }
 
-// 1. AudioFile: 레슨노트 음성파일 첨부
-model AudioFile {
-  id           String      @id @default(cuid())
-  url          String
-  uploadedBy   String
-  uploadedAt   DateTime    @default(now())
-  lessonNote   LessonNote? @relation(fields: [lessonNoteId], references: [id])
-  lessonNoteId String?
-  position     Int?
-  // 관리자만 업로드/위치 변경
-}
-
-// 2. StudentRecording: 학생별 녹음 기록
-model StudentRecording {
-  id           String      @id @default(cuid())
-  studentId    String
-  fileUrl      String
-  createdAt    DateTime    @default(now())
-  lessonNoteId String?
-  // Relations
-  student      Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  lessonNote   LessonNote? @relation(fields: [lessonNoteId], references: [id])
-}
-
-// 3. WritingTest: 학생별 작문/시험 기록
-model WritingTest {
-  id           String      @id @default(cuid())
-  studentId    String
-  content      String
-  score        Int?
-  feedback     String?
-  createdAt    DateTime    @default(now())
-  lessonNoteId String?
-  // Relations
-  student      Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  lessonNote   LessonNote? @relation(fields: [lessonNoteId], references: [id])
-}
-
-// 4. GrammarItem, VocabItem, UsageItem: 문법/단어/용법 마스터
-model GrammarItem {
-  id        String                  @id @default(cuid())
-  content   String
-  level     String
-  category  String?
-  createdAt DateTime                @default(now())
-  histories StudentGrammarHistory[]
-}
-
-model VocabItem {
-  id        String                @id @default(cuid())
-  word      String
-  pos       String // 품사
-  level     String
-  createdAt DateTime              @default(now())
-  histories StudentVocabHistory[]
-}
-
-model UsageItem {
-  id         String                @id @default(cuid())
-  expression String
-  level      String
-  createdAt  DateTime              @default(now())
-  histories  StudentUsageHistory[]
-}
-
-// 5. 학생별 설명/학습 이력
-model StudentGrammarHistory {
-  id           String      @id @default(cuid())
-  studentId    String
-  grammarId    String
-  explainedAt  DateTime
-  status       String // explained, frequent, unexplained 등
-  lessonNoteId String?
-  student      Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  grammar      GrammarItem @relation(fields: [grammarId], references: [id], onDelete: Cascade)
-  lessonNote   LessonNote? @relation(fields: [lessonNoteId], references: [id])
-}
-
-model StudentVocabHistory {
-  id           String      @id @default(cuid())
-  studentId    String
-  vocabId      String
-  explainedAt  DateTime
-  status       String
-  lessonNoteId String?
-  student      Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  vocab        VocabItem   @relation(fields: [vocabId], references: [id], onDelete: Cascade)
-  lessonNote   LessonNote? @relation(fields: [lessonNoteId], references: [id])
-}
-
-model StudentUsageHistory {
-  id           String      @id @default(cuid())
-  studentId    String
-  usageId      String
-  explainedAt  DateTime
-  status       String
-  lessonNoteId String?
-  student      Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  usage        UsageItem   @relation(fields: [usageId], references: [id], onDelete: Cascade)
-  lessonNote   LessonNote? @relation(fields: [lessonNoteId], references: [id])
-}
-
-// 6. Payroll: 급여/정산 내역
-model Payroll {
-  id          String        @id @default(cuid())
-  staffId     String
-  month       String // YYYY-MM
-  baseSalary  Int
-  classPay    Int
-  transport   Int
-  points      Int
-  status      PayrollStatus @default(PENDING)
-  confirmedAt DateTime?
-  createdAt   DateTime      @default(now())
-  staff       Staff         @relation(fields: [staffId], references: [id], onDelete: Cascade)
-}
-
 enum PayrollStatus {
   PENDING
   CONFIRMED
   PAID
-}
-
-// 7. AttendanceEditLog: 근태 수정 이력
-model AttendanceEditLog {
-  id           String   @id @default(cuid())
-  attendanceId String
-  editorId     String
-  editType     String // checkin, checkout, etc
-  reason       String
-  editedAt     DateTime @default(now())
-}
-
-// 8. 커뮤니티/댓글/좋아요/신고
-model CommunityPost {
-  id        String             @id @default(cuid())
-  authorId  String
-  type      String // intro, daily, question, share, notice
-  content   String
-  createdAt DateTime           @default(now())
-  updatedAt DateTime           @updatedAt
-  comments  CommunityComment[]
-  likes     Like[]
-  reports   Report[]
-}
-
-model CommunityComment {
-  id        String        @id @default(cuid())
-  postId    String
-  authorId  String
-  content   String
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
-  post      CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
-  likes     Like[]
-  reports   Report[]
-}
-
-model Like {
-  id                 String            @id @default(cuid())
-  userId             String
-  postId             String?
-  commentId          String?
-  createdAt          DateTime          @default(now())
-  CommunityPost      CommunityPost?    @relation(fields: [communityPostId], references: [id])
-  communityPostId    String?
-  CommunityComment   CommunityComment? @relation(fields: [communityCommentId], references: [id])
-  communityCommentId String?
-}
-
-model Report {
-  id                 String            @id @default(cuid())
-  userId             String
-  postId             String?
-  commentId          String?
-  reason             String
-  createdAt          DateTime          @default(now())
-  CommunityPost      CommunityPost?    @relation(fields: [communityPostId], references: [id])
-  communityPostId    String?
-  CommunityComment   CommunityComment? @relation(fields: [communityCommentId], references: [id])
-  communityCommentId String?
-}
-
-// 9. 포인트/배지 시스템
-model PointLog {
-  id        String   @id @default(cuid())
-  userId    String
-  type      String // 출석, 숙제, 커뮤니티 등
-  amount    Int
-  createdAt DateTime @default(now())
-}
-
-model Badge {
-  id        String         @id @default(cuid())
-  name      String
-  icon      String
-  minPoints Int
-  createdAt DateTime       @default(now())
-  students  StudentBadge[]
-}
-
-model StudentBadge {
-  id        String   @id @default(cuid())
-  studentId String
-  badgeId   String
-  earnedAt  DateTime @default(now())
-  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  badge     Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
-}
-
-// 10. CheerMessage, CheerLog: 응원 메시지/발송 이력
-model CheerMessage {
-  id        String     @id @default(cuid())
-  content   String
-  type      String // 출석, 숙제, 레벨업 등
-  createdAt DateTime   @default(now())
-  logs      CheerLog[]
-}
-
-model CheerLog {
-  id        String       @id @default(cuid())
-  messageId String
-  userId    String
-  sentAt    DateTime     @default(now())
-  message   CheerMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
-}
-
-// 11. UID 태깅/기기 관리
-model UIDTag {
-  id       String     @id @default(cuid())
-  userId   String
-  uid      String
-  tagType  String // 출석, 결제, 방문 등
-  taggedAt DateTime   @default(now())
-  deviceId String?
-  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  device   UIDDevice? @relation(fields: [deviceId], references: [id])
-}
-
-model UIDDevice {
-  id           String   @id @default(cuid())
-  userId       String
-  uid          String
-  deviceType   String // 카드, 폰 등
-  registeredAt DateTime @default(now())
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  UIDTag       UIDTag[]
-}
-
-// 12. 학생 메모/학습경향 요약
-model StudentMemo {
-  id        String   @id @default(cuid())
-  studentId String
-  lessonId  String?
-  authorId  String
-  content   String
-  createdAt DateTime @default(now())
-  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
-}
-
-model MemoSummary {
-  id        String   @id @default(cuid())
-  studentId String
-  summary   String
-  updatedAt DateTime @updatedAt
-  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
-}
-
-// 13. 단어/학습 통계
-model WordStat {
-  id        String   @id @default(cuid())
-  studentId String
-  pos       String // 품사
-  count     Int
-  updatedAt DateTime @updatedAt
-  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
-}
-
-model LearningStat {
-  id         String   @id @default(cuid())
-  studentId  String
-  totalWords Int
-  totalTime  Int
-  updatedAt  DateTime @updatedAt
-  student    Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
 }

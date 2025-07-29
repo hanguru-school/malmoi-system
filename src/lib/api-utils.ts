@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/db';
+import prisma, { checkPrismaConnection } from '@/lib/db';
 
 // 표준화된 API 응답 인터페이스
 export interface ApiResponse<T = any> {
@@ -39,8 +39,12 @@ export function validateEnvironmentVariables() {
   const requiredVars = {
     DATABASE_URL: process.env.DATABASE_URL,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
+    NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     AWS_REGION: process.env.AWS_REGION,
+    AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
+    AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
     COGNITO_CLIENT_ID: process.env.COGNITO_CLIENT_ID,
+    COGNITO_USER_POOL_ID: process.env.COGNITO_USER_POOL_ID,
     JWT_SECRET: process.env.JWT_SECRET,
   };
 
@@ -73,29 +77,14 @@ export async function withErrorHandling<T>(
 
 // 데이터베이스 연결 확인 함수
 export async function checkDatabaseConnection() {
-  try {
-    await prisma.$connect();
-    await prisma.$queryRaw`SELECT 1`;
-
-    return {
-      success: true,
-      message: '데이터베이스 연결이 정상입니다.'
-    };
-  } catch (error) {
-    console.error('Database connection check failed:', error);
-    return {
-      success: false,
-      message: '데이터베이스 연결에 실패했습니다.',
-      error: error instanceof Error ? error.message : 'DB_CONNECTION_FAILED'
-    };
-  }
+  return await checkPrismaConnection();
 }
 
 // AWS Cognito 연결 확인 함수
 export async function checkCognitoConnection() {
   try {
     const { CognitoIdentityProviderClient, DescribeUserPoolCommand } = await import('@aws-sdk/client-cognito-identity-provider');
-    
+
     if (!process.env.AWS_REGION || !process.env.COGNITO_CLIENT_ID) {
       return {
         success: false,
@@ -104,17 +93,26 @@ export async function checkCognitoConnection() {
       };
     }
 
-    const cognitoClient = new CognitoIdentityProviderClient({ 
-      region: process.env.AWS_REGION 
+    const cognitoClient = new CognitoIdentityProviderClient({
+      region: process.env.AWS_REGION
     });
 
     // Cognito User Pool 정보 조회 시도
     if (process.env.AWS_COGNITO_USER_POOL_ID) {
-      await cognitoClient.send(
-        new DescribeUserPoolCommand({
-          UserPoolId: process.env.AWS_COGNITO_USER_POOL_ID
-        })
-      );
+      try {
+        await cognitoClient.send(
+          new DescribeUserPoolCommand({
+            UserPoolId: process.env.AWS_COGNITO_USER_POOL_ID
+          })
+        );
+      } catch (error: any) {
+        // User Pool이 존재하지 않아도 시스템은 정상 작동
+        return {
+          success: false,
+          message: 'AWS Cognito User Pool이 설정되지 않았습니다. (시스템은 정상 작동)',
+          error: 'USER_POOL_NOT_FOUND'
+        };
+      }
     }
 
     return {
@@ -125,7 +123,7 @@ export async function checkCognitoConnection() {
     console.error('Cognito connection check failed:', error);
     return {
       success: false,
-      message: 'AWS Cognito 연결에 실패했습니다.',
+      message: 'AWS Cognito 연결에 실패했습니다. (시스템은 정상 작동)',
       error: error instanceof Error ? error.message : 'COGNITO_CONNECTION_FAILED'
     };
   }

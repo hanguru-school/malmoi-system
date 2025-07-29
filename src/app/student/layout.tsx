@@ -79,15 +79,17 @@ export default function StudentLayout({
   };
 
   // 로그아웃 함수
-  const handleLogout = () => {
-    if (confirm('정말로 로그아웃하시겠습니까?')) {
-      // localStorage에서 사용자 정보 삭제
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
-        localStorage.removeItem('language');
-      }
+  const handleLogout = async () => {
+    try {
+      // 쿠키 삭제
+      document.cookie = 'user-session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      // 로컬 스토리지 삭제
+      localStorage.removeItem('authToken');
       // 로그인 페이지로 리다이렉트
+      window.location.href = '/auth/login';
+    } catch (error) {
+      console.error('로그아웃 오류:', error);
+      // 오류 발생 시 강제로 로그인 페이지로 이동
       window.location.href = '/auth/login';
     }
   };

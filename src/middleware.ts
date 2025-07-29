@@ -4,11 +4,6 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const hostname = request.headers.get('host') || '';
   
-  // 1. 도메인별 라우팅 처리
-  if (hostname === 'app.hanguru.school' && pathname === '/') {
-    return NextResponse.redirect(new URL('/admin/home', request.url));
-  }
-  
   // hanguru.school은 워드프레스 호스팅에서 처리
   if (hostname === 'hanguru.school' || hostname === 'www.hanguru.school') {
     return new NextResponse('Domain not configured on this platform', { 
@@ -32,9 +27,10 @@ export function middleware(request: NextRequest) {
 
   // 3. 공개 경로 정의
   const publicPaths = [
-    '/auth/login', '/auth/register', '/tagging', '/rc-s380-test',
+    '/auth/login', '/auth/register', '/auth/cognito-login', '/tagging', '/rc-s380-test',
     '/reservation/japanese', '/reservation/japanese/login', '/reservation/japanese/register',
-    '/api/auth/login', '/api/auth/register', '/api/auth/simple-login', '/api/auth/verify',
+    '/api/auth/login', '/api/auth/register', '/api/auth/session', '/api/auth/verify',
+    '/api/auth/cognito-login', '/api/auth/callback/cognito',
     '/api/reservation/japanese/login', '/api/reservation/japanese/register',
     '/_next', '/favicon.ico', '/public'
   ];

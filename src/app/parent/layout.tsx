@@ -19,7 +19,6 @@ import {
   Star,
   BarChart3
 } from 'lucide-react';
-
 const navigation = [
   { name: '대시보드', href: '/parent/home', icon: Home },
   { name: '아이 관리', href: '/parent/children', icon: Users },
@@ -52,6 +51,21 @@ export default function ParentLayout({
     // localStorage에 언어 설정 저장
     if (typeof window !== 'undefined') {
       localStorage.setItem('language', newLanguage);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      // 쿠키 삭제
+      document.cookie = 'user-session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      // 로컬 스토리지 삭제
+      localStorage.removeItem('authToken');
+      // 로그인 페이지로 리다이렉트
+      window.location.href = '/auth/login';
+    } catch (error) {
+      console.error('로그아웃 오류:', error);
+      // 오류 발생 시 강제로 로그인 페이지로 이동
+      window.location.href = '/auth/login';
     }
   };
 
@@ -119,12 +133,7 @@ export default function ParentLayout({
           {/* 로그아웃 버튼 */}
           <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-blue-800">
             <button 
-              onClick={() => {
-                // Here you would typically handle logout logic
-                console.log('Logging out...');
-                // Redirect to login page or clear session
-                window.location.href = '/login';
-              }}
+              onClick={handleLogout}
               className="flex items-center w-full px-3 py-2 text-sm font-medium text-blue-300 rounded-md hover:bg-blue-700 hover:text-white transition-colors"
             >
               <LogOut className="w-5 h-5 mr-3" />

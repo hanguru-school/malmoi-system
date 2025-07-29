@@ -1,6 +1,5 @@
 'use client';
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useSession, signOut } from 'next-auth/react';
 
 interface User {
   id: string;
@@ -61,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await fetch('/api/auth/simple-login', {
+      const response = await fetch('/api/auth/login/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -69,18 +68,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ email, password }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Login failed');
+        throw new Error(data.message || 'Login failed');
       }
 
-      const data = await response.json();
-      
-      // localStorage와 쿠키 모두에 토큰 저장
-      localStorage.setItem('authToken', data.token);
-      document.cookie = `auth_token=${data.token}; path=/; max-age=86400; SameSite=Strict`;
-      
-      setUser(data.user);
+      if (data.success) {
+        // localStorage와 쿠키 모두에 토큰 저장
+        const token = `token-${Date.now()}`; // 임시 토큰 생성
+        localStorage.setItem('authToken', token);
+        document.cookie = `auth_token=${token}; path=/; max-age=86400; SameSite=Strict`;
+        
+        setUser(data.user);
+      } else {
+        throw new Error(data.message || 'Login failed');
+      }
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -135,12 +138,76 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 }
 
 export function useAuth() {
-  const { data: session, status } = useSession();
-  
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // 세션 확인
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const response = await fetch('/api/auth/session/');
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data.authenticated) {
+            setUser(data.data.user);
+          } else {
+            setUser(null);
+          }
+        } else {
+          setUser(null);
+        }
+      } catch (error) {
+        console.error('세션 확인 오류:', error);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkSession();
+  }, []);
+
+  const login = async (email: string, password: string) => {
+    try {
+      const response = await fetch('/api/auth/login/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Login failed');
+      }
+
+      if (data.success) {
+        setUser(data.user);
+        return data.user;
+      } else {
+        throw new Error(data.message || 'Login failed');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
+    }
+  };
+
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem('authToken');
+    document.cookie = 'auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    window.location.href = '/auth/login';
+  };
+
   return {
-    user: session?.user || null,
-    loading: status === 'loading',
-    logout: () => signOut(),
-    isAuthenticated: !!session?.user
+    user,
+    loading,
+    login,
+    logout,
+    isAuthenticated: !!user
   };
 } 

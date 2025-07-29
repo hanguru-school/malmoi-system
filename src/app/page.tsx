@@ -33,13 +33,45 @@ export default function Home() {
   const { deviceType, isMobile, isTablet, isDesktop, screenWidth, userAgent } = useDevice();
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isInstallable, setIsInstallable] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // app.hanguru.school 도메인 체크 및 리다이렉트
+  // 로그인 상태 확인
   useEffect(() => {
-    const hostname = window.location.hostname;
-    if (hostname === 'app.hanguru.school') {
-      window.location.href = '/admin/home';
-    }
+    const checkLoginStatus = async () => {
+      try {
+        const response = await fetch('/api/auth/session');
+        
+        if (!response.ok) {
+          // 401 Unauthorized는 정상적인 상황 (로그인하지 않은 사용자)
+          if (response.status === 401) {
+            setIsLoggedIn(false);
+            setUserRole(null);
+            return;
+          }
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success && data.data.authenticated) {
+          setIsLoggedIn(true);
+          setUserRole(data.data.user.role);
+        } else {
+          setIsLoggedIn(false);
+          setUserRole(null);
+        }
+      } catch (error) {
+        console.error('로그인 상태 확인 중 오류:', error);
+        setIsLoggedIn(false);
+        setUserRole(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkLoginStatus();
   }, []);
 
   // PWA 설치 가능 여부 확인 및 beforeinstallprompt 이벤트 처리
@@ -382,6 +414,42 @@ export default function Home() {
     }
   };
 
+  // 역할에 따른 대시보드 링크 생성
+  const getDashboardLink = () => {
+    if (!userRole) return '/auth/login';
+    
+    switch (userRole) {
+      case 'admin':
+        return '/admin/home';
+      case 'teacher':
+        return '/teacher/home';
+      case 'student':
+        return '/student/home';
+      case 'staff':
+        return '/staff/home';
+      default:
+        return '/auth/login';
+    }
+  };
+
+  // 역할에 따른 대시보드 텍스트 생성
+  const getDashboardText = () => {
+    if (!userRole) return language === 'ja' ? 'ログイン' : '로그인';
+    
+    switch (userRole) {
+      case 'admin':
+        return language === 'ja' ? '管理画面' : '관리 화면';
+      case 'teacher':
+        return language === 'ja' ? '講師画面' : '강사 화면';
+      case 'student':
+        return language === 'ja' ? '学習画面' : '학습 화면';
+      case 'staff':
+        return language === 'ja' ? 'スタッフ画面' : '스태프 화면';
+      default:
+        return language === 'ja' ? 'ログイン' : '로그인';
+    }
+  };
+
   const translations = {
     ja: {
       title: '韓国語教室 MalMoi',
@@ -618,10 +686,37 @@ export default function Home() {
                 </div>
               </div>
               <nav className="hidden md:flex space-x-8">
-                <Link href="/auth/login" className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors">
-                  {t.login}
-                </Link>
+                {!isLoading && (
+                  isLoggedIn ? (
+                    <Link href={getDashboardLink()} className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                      {getDashboardText()}
+                    </Link>
+                  ) : (
+                    <>
+                      <Link href="/auth/login" className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                        {t.login}
+                      </Link>
+                      <Link href="/auth/register" className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                        {t.register}
+                      </Link>
+                    </>
+                  )
+                )}
               </nav>
+              {/* 모바일 메뉴 버튼 */}
+              <div className="md:hidden">
+                {!isLoading && (
+                  isLoggedIn ? (
+                    <Link href={getDashboardLink()} className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                      {getDashboardText()}
+                    </Link>
+                  ) : (
+                    <Link href="/auth/login" className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                      {t.login}
+                    </Link>
+                  )
+                )}
+              </div>
             </div>
           </div>
         </div>
