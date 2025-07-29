@@ -6,8 +6,8 @@
   "env": {
     "AWS_REGION": "ap-northeast-1",
     "AWS_S3_BUCKET": "malmoi-system-files",
-    "COGNITO_CLIENT_ID": "66f1hn1q3c8b4fri0o3feifmpd",
-    "COGNITO_CLIENT_SECRET": "5e1pbvp62h6nr9hs0ek7ris0qpdh0j4mq540iktbh8hct9ccqlj",
+    "COGNITO_CLIENT_ID": "4bdn0n9r92huqpcs21e0th1nve",
+    "COGNITO_CLIENT_SECRET": "9ko7sn73f63en08gqh8uhhmvaagmt2o1vn9gnffjcgoecjskf8e",
     "COGNITO_USER_POOL_ID": "ap-northeast-1_5R7g8tN40",
     "COGNITO_DOMAIN": "https://malmoi-system-pool.auth.ap-northeast-1.amazoncognito.com",
     "JWT_SECRET": "4822d5d02c9ec4fd183db70c1645ec1e",
