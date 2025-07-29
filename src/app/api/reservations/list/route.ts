@@ -13,11 +13,7 @@ const pool = new Pool({
 
 // JWT 토큰 검증 함수
 function verifyToken(token: string) {
-  try {
-    return jwt.verify(token, process.env.NEXTAUTH_SECRET || 'fallback-secret') as any;
-  } catch (error) {
-    throw new Error('Invalid token');
-  }
+  return jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret') as any;
 }
 
 // 사용자 예약 조회 함수

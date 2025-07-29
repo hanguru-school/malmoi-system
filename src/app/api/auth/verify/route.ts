@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
 
     // JWT 토큰 검증
     const jwt = require('jsonwebtoken');
-    const decoded = jwt.verify(token, process.env.NEXTAUTH_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
 
     // 사용자 정보 가져오기
     const { getUserById } = await import('@/lib/database');
