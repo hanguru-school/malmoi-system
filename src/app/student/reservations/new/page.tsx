@@ -11,7 +11,10 @@ import {
   CheckCircle,
   AlertCircle,
   Loader2,
-  X
+  X,
+  User,
+  BookOpen,
+  FileText
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -27,6 +30,23 @@ interface ExistingReservation {
   status: string;
 }
 
+interface Course {
+  id: string;
+  name: string;
+  description: string;
+  duration: number;
+  price: number;
+  level: string;
+}
+
+interface Teacher {
+  id: string;
+  name: string;
+  subjects: string[];
+  rating: number;
+  totalStudents: number;
+}
+
 export default function NewReservationPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -35,19 +55,79 @@ export default function NewReservationPage() {
   const [success, setSuccess] = useState(false);
 
   // 폼 데이터
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<string>('');
   const [selectedDuration, setSelectedDuration] = useState<number>(0);
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
+  const [classroom, setClassroom] = useState<string>('');
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   // 모달 상태
   const [showTimeConfirmModal, setShowTimeConfirmModal] = useState(false);
+  const [showFinalConfirmModal, setShowFinalConfirmModal] = useState(false);
   const [tempSelectedTime, setTempSelectedTime] = useState<string>('');
 
   // 데이터
   const [availableTimeSlots, setAvailableTimeSlots] = useState<TimeSlot[]>([]);
   const [existingReservations, setExistingReservations] = useState<ExistingReservation[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
+
+  // 코스 데이터
+  const courseOptions: Course[] = [
+    {
+      id: 'basic-japanese',
+      name: '기초 일본어',
+      description: '일본어 기초 문법과 회화',
+      duration: 60,
+      price: 30000,
+      level: '초급'
+    },
+    {
+      id: 'conversation-japanese',
+      name: '일본어 회화',
+      description: '실전 일본어 회화 연습',
+      duration: 90,
+      price: 45000,
+      level: '중급'
+    },
+    {
+      id: 'advanced-japanese',
+      name: '고급 일본어',
+      description: '고급 문법과 비즈니스 일본어',
+      duration: 120,
+      price: 60000,
+      level: '고급'
+    }
+  ];
+
+  // 선생님 데이터
+  const teacherOptions: Teacher[] = [
+    {
+      id: 'teacher-1',
+      name: '김선생님',
+      subjects: ['일본어'],
+      rating: 4.8,
+      totalStudents: 45
+    },
+    {
+      id: 'teacher-2',
+      name: '이선생님',
+      subjects: ['일본어'],
+      rating: 4.9,
+      totalStudents: 38
+    },
+    {
+      id: 'teacher-3',
+      name: '박선생님',
+      subjects: ['일본어'],
+      rating: 4.7,
+      totalStudents: 52
+    }
+  ];
 
   // 수업 시간 옵션 (간소화)
   const durationOptions = [
@@ -93,6 +173,10 @@ export default function NewReservationPage() {
         }));
         setExistingReservations(formattedReservations);
       }
+
+      // 코스와 선생님 데이터 설정
+      setCourses(courseOptions);
+      setTeachers(teacherOptions);
 
       await loadAvailableTimeSlots();
       
@@ -184,19 +268,21 @@ export default function NewReservationPage() {
     setTempSelectedTime('');
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!selectedDate || !selectedTime || !selectedDuration || !selectedLocation) {
-      setError('모든 필수 항목을 선택해주세요.');
+  // 최종 확인 모달 표시
+  const handleFinalConfirm = () => {
+    if (!agreedToTerms) {
+      setError('예약 규정에 동의해주세요.');
       return;
     }
+    setShowFinalConfirmModal(true);
+  };
 
+  // 최종 예약 확정
+  const handleFinalSubmit = async () => {
     try {
       setSubmitting(true);
       setError(null);
 
-      // 실제 API 호출
       const response = await fetch('/api/reservations/create', {
         method: 'POST',
         headers: {
@@ -207,7 +293,10 @@ export default function NewReservationPage() {
           time: selectedTime,
           duration: selectedDuration,
           location: selectedLocation,
-          notes: notes.trim() || undefined
+          notes: notes.trim() || undefined,
+          classroom: classroom.trim() || undefined,
+          courseId: selectedCourse?.id,
+          teacherId: selectedTeacher?.id
         })
       });
 
@@ -221,8 +310,11 @@ export default function NewReservationPage() {
 
       // 성공 처리
       setSuccess(true);
+      setShowFinalConfirmModal(false);
+      
+      // 예약 완료 페이지로 이동
       setTimeout(() => {
-        router.push('/student/reservations');
+        router.push(`/student/reservations/complete/${data.reservation.id}`);
       }, 2000);
 
     } catch (error) {
@@ -321,7 +413,7 @@ export default function NewReservationPage() {
             <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
             <h1 className="text-3xl font-bold text-gray-900 mb-4">예약이 완료되었습니다!</h1>
             <p className="text-lg text-gray-600 mb-8">
-              예약이 성공적으로 등록되었습니다. 예약 관리 페이지로 이동합니다.
+              예약이 성공적으로 등록되었습니다. 예약 완료 페이지로 이동합니다.
             </p>
             <div className="animate-pulse">
               <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto" />
@@ -340,7 +432,7 @@ export default function NewReservationPage() {
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">새 예약하기</h1>
             <p className="text-lg text-gray-600">
-              수업 방식, 시간, 날짜를 선택하여 수업을 예약하세요
+              코스, 선생님, 수업 방식, 시간을 선택하여 수업을 예약하세요
             </p>
           </div>
           <Link
@@ -363,9 +455,77 @@ export default function NewReservationPage() {
         )}
 
         {/* 예약 폼 */}
-        <form onSubmit={handleSubmit} className="space-y-8">
-          {/* 온라인/대면 선택 */}
+        <form onSubmit={(e) => { e.preventDefault(); handleFinalConfirm(); }} className="space-y-8">
+          {/* 코스 선택 */}
           {!selectedTime && (
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-blue-600" />
+                코스 선택
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {courses.map((course) => (
+                  <button
+                    key={course.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedCourse(course);
+                      setSelectedDuration(course.duration);
+                    }}
+                    className={`p-6 border-2 rounded-lg text-left transition-all ${
+                      selectedCourse?.id === course.id
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="text-lg font-semibold text-gray-900 mb-2">{course.name}</div>
+                    <div className="text-sm text-gray-600 mb-2">{course.description}</div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">{course.level}</span>
+                      <span className="text-lg font-semibold text-blue-600">{course.price.toLocaleString()}원</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 선생님 선택 */}
+          {selectedCourse && !selectedTime && (
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <User className="w-5 h-5 text-green-600" />
+                선생님 선택
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {teachers.map((teacher) => (
+                  <button
+                    key={teacher.id}
+                    type="button"
+                    onClick={() => setSelectedTeacher(teacher)}
+                    className={`p-6 border-2 rounded-lg text-left transition-all ${
+                      selectedTeacher?.id === teacher.id
+                        ? 'border-green-500 bg-green-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="text-lg font-semibold text-gray-900 mb-2">{teacher.name}</div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-yellow-500">★</span>
+                      <span className="text-sm text-gray-600">{teacher.rating}</span>
+                      <span className="text-sm text-gray-500">({teacher.totalStudents}명)</span>
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      {teacher.subjects.join(', ')}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 온라인/대면 선택 */}
+          {selectedTeacher && !selectedTime && (
             <div className="bg-white rounded-xl shadow-lg p-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <MapPin className="w-5 h-5 text-blue-600" />
@@ -393,37 +553,8 @@ export default function NewReservationPage() {
             </div>
           )}
 
-          {/* 수업 시간 선택 */}
-          {selectedLocation && !selectedTime && (
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <Clock className="w-5 h-5 text-green-600" />
-                수업 시간 선택
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {durationOptions.map((option) => (
-                  <button
-                    key={option.duration}
-                    type="button"
-                    onClick={() => setSelectedDuration(option.duration)}
-                    className={`p-4 border-2 rounded-lg text-center transition-all ${
-                      selectedDuration === option.duration
-                        ? 'border-green-500 bg-green-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <div className="text-lg font-semibold text-gray-900">{option.duration}분</div>
-                    <div className="text-sm text-gray-600">
-                      {option.description}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* 날짜 선택 */}
-          {selectedDuration > 0 && !selectedTime && (
+          {selectedLocation && !selectedTime && (
             <div className="bg-white rounded-xl shadow-lg p-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-purple-600" />
@@ -463,7 +594,7 @@ export default function NewReservationPage() {
             </div>
           )}
 
-          {/* 메모 */}
+          {/* 추가 정보 */}
           {selectedTime && (
             <div className="bg-white rounded-xl shadow-lg p-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
@@ -471,18 +602,47 @@ export default function NewReservationPage() {
                 추가 정보
               </h2>
               
-              {/* 메모 */}
-              <div>
+              {/* 수업 장소 */}
+              <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  메모 (선택사항)
+                  수업 장소 (선택사항)
+                </label>
+                <input
+                  type="text"
+                  value={classroom}
+                  onChange={(e) => setClassroom(e.target.value)}
+                  placeholder="예: 1층 교실, 온라인 회의실 등"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                />
+              </div>
+
+              {/* 메모 */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  추가 메모 (선택사항)
                 </label>
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="수업에 대한 특별한 요청사항이나 질문이 있으시면 입력해주세요."
+                  placeholder="선생님에게 전달할 요청사항이나 질문이 있으시면 입력해주세요."
                   rows={3}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                 />
+              </div>
+
+              {/* 규정 동의 */}
+              <div className="mb-4">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={agreedToTerms}
+                    onChange={(e) => setAgreedToTerms(e.target.checked)}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-sm text-gray-700">
+                    예약 규정 및 취소 정책에 동의합니다.
+                  </span>
+                </label>
               </div>
             </div>
           )}
@@ -491,6 +651,14 @@ export default function NewReservationPage() {
           <div className="bg-gray-50 rounded-lg p-4 mb-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-3">예약 요약</h3>
             <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">코스:</span>
+                <span className="font-medium text-gray-900">{selectedCourse?.name || '선택되지 않음'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">선생님:</span>
+                <span className="font-medium text-gray-900">{selectedTeacher?.name || '선택되지 않음'}</span>
+              </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">날짜:</span>
                 <span className="font-medium text-gray-900">{selectedDate || '선택되지 않음'}</span>
@@ -507,6 +675,12 @@ export default function NewReservationPage() {
                 <span className="text-gray-600">수업 방식:</span>
                 <span className="font-medium text-gray-900">{selectedLocation || '선택되지 않음'}</span>
               </div>
+              {classroom && (
+                <div className="flex justify-between">
+                  <span className="text-gray-600">수업 장소:</span>
+                  <span className="font-medium text-gray-900">{classroom}</span>
+                </div>
+              )}
               {notes && (
                 <div className="flex justify-between">
                   <span className="text-gray-600">메모:</span>
@@ -517,7 +691,7 @@ export default function NewReservationPage() {
           </div>
 
           {/* 제출 버튼 */}
-          {selectedLocation && selectedDuration > 0 && selectedDate && selectedTime && (
+          {selectedCourse && selectedTeacher && selectedLocation && selectedDate && selectedTime && (
             <div className="flex justify-end gap-4">
               <Link
                 href="/student/reservations"
@@ -527,7 +701,7 @@ export default function NewReservationPage() {
               </Link>
               <button
                 type="submit"
-                disabled={submitting}
+                disabled={submitting || !agreedToTerms}
                 className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
               >
                 {submitting ? (
@@ -598,6 +772,95 @@ export default function NewReservationPage() {
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   확인
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 최종 확인 모달 */}
+        {showFinalConfirmModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl shadow-xl p-6 max-w-lg w-full mx-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">예약 최종 확인</h3>
+                <button
+                  onClick={() => setShowFinalConfirmModal(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              
+              <div className="mb-6">
+                <p className="text-gray-600 mb-4">
+                  아래 정보로 예약을 확정하시겠습니까?
+                </p>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">코스:</span>
+                      <span className="font-medium">{selectedCourse?.name}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">선생님:</span>
+                      <span className="font-medium">{selectedTeacher?.name}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">날짜:</span>
+                      <span className="font-medium">{selectedDate} ({getDayOfWeek(selectedDate)})</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">시간:</span>
+                      <span className="font-medium">
+                        {selectedTime} ~ {getEndTime(selectedTime, selectedDuration)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">수업 방식:</span>
+                      <span className="font-medium">{selectedLocation}</span>
+                    </div>
+                    {classroom && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">수업 장소:</span>
+                        <span className="font-medium">{classroom}</span>
+                      </div>
+                    )}
+                    {notes && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">메모:</span>
+                        <span className="font-medium">{notes}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowFinalConfirmModal(false)}
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  돌아가기
+                </button>
+                <button
+                  type="button"
+                  onClick={handleFinalSubmit}
+                  disabled={submitting}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center gap-2"
+                >
+                  {submitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      예약 중...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="w-4 h-4" />
+                      예약 확정
+                    </>
+                  )}
                 </button>
               </div>
             </div>
