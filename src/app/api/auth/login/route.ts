@@ -159,22 +159,36 @@ export async function POST(request: NextRequest) {
 
     console.log('반환할 사용자 데이터:', userData);
 
-    // 세션 쿠키 설정
+    // 세션 데이터 생성
+    const sessionData = {
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role
+      },
+      accessToken: 'temp-token', // 임시 토큰
+      idToken: 'temp-id-token', // 임시 ID 토큰
+      expiresAt: Date.now() + (7 * 24 * 60 * 60 * 1000) // 7일
+    };
+
+    // 로그인 성공 응답 생성
     const response = NextResponse.json({
       success: true,
       message: '로그인에 성공했습니다.',
-      user: userData
-    });
+      user: userData,
+      redirectUrl: '/student/home'
+    }, { status: 200 });
 
-    // 세션 쿠키 설정 (실제로는 JWT나 세션 관리 시스템 사용 권장)
-    response.cookies.set('user-session', JSON.stringify(userData), {
+    // 세션 쿠키 설정
+    response.cookies.set('auth-session', JSON.stringify(sessionData), {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7 // 7일
+      maxAge: 60 * 60 * 24 * 7, // 7일
+      path: '/'
     });
 
-    console.log('로그인 API 응답 완료');
     return response;
 
   } catch (error) {

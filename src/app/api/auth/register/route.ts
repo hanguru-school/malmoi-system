@@ -1,16 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-
-// 동적 import로 Prisma 로드
-let prisma: any;
-
-async function getPrisma() {
-  if (!prisma) {
-    const { prisma: PrismaClient } = await import('@/lib/prisma');
-    prisma = PrismaClient;
-  }
-  return prisma;
-}
+import { prisma } from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
   try {
@@ -59,8 +49,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Prisma 클라이언트 가져오기
-    const db = await getPrisma();
+    // Prisma 클라이언트 사용
+    const db = prisma;
 
     // 이메일 중복 확인
     const existingUser = await db.user.findUnique({
@@ -82,27 +72,23 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
-
       if (!emailRegex.test(studentEmail)) {
         return NextResponse.json(
           { error: '올바른 학생 이메일 형식이 아닙니다.' },
           { status: 400 }
         );
       }
-
       // 학생 계정 존재 확인
       const studentUser = await db.user.findUnique({
         where: { email: studentEmail },
         include: { student: true }
       });
-
       if (!studentUser || !studentUser.student) {
         return NextResponse.json(
           { error: '해당 이메일의 학생을 찾을 수 없습니다.' },
           { status: 404 }
         );
       }
-
       // 이미 해당 학생과 연동된 학부모가 있는지 확인
       const existingParent = await db.user.findFirst({
         where: {
@@ -112,7 +98,6 @@ export async function POST(request: NextRequest) {
           }
         }
       });
-
       if (existingParent) {
         return NextResponse.json(
           { error: '해당 학생은 이미 학부모와 연동되어 있습니다.' },
@@ -124,7 +109,7 @@ export async function POST(request: NextRequest) {
     // 비밀번호 해싱
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // 이름 조합 (한자이름 + 요미가나 + 한글이름)
+    // 이름 조합 (한자 + 요미가나 + 한글)
     const fullName = `${kanjiName} (${yomigana})${koreanName ? ` / ${koreanName}` : ''}`;
 
     // 사용자 생성
@@ -141,7 +126,7 @@ export async function POST(request: NextRequest) {
               name: fullName,
               kanjiName,
               yomigana,
-              koreanName,
+              koreanName: koreanName || '',
               level: '초급 A',
               points: 0
             }
@@ -153,7 +138,7 @@ export async function POST(request: NextRequest) {
               name: fullName,
               kanjiName,
               yomigana,
-              koreanName,
+              koreanName: koreanName || '',
               studentId: null // 나중에 업데이트
             }
           }
@@ -164,7 +149,7 @@ export async function POST(request: NextRequest) {
               name: fullName,
               kanjiName,
               yomigana,
-              koreanName,
+              koreanName: koreanName || '',
               subjects: ['한국어'],
               hourlyRate: 30000
             }
@@ -176,7 +161,7 @@ export async function POST(request: NextRequest) {
               name: fullName,
               kanjiName,
               yomigana,
-              koreanName,
+              koreanName: koreanName || '',
               position: '사무직원',
               permissions: {}
             }
@@ -188,7 +173,7 @@ export async function POST(request: NextRequest) {
               name: fullName,
               kanjiName,
               yomigana,
-              koreanName,
+              koreanName: koreanName || '',
               permissions: {},
               isApproved: false // 마스터 관리자 승인 필요
             }
@@ -210,7 +195,6 @@ export async function POST(request: NextRequest) {
         where: { email: studentEmail },
         include: { student: true }
       });
-
       if (studentUser && studentUser.student) {
         await db.parent.update({
           where: { userId: user.id },
@@ -222,10 +206,35 @@ export async function POST(request: NextRequest) {
     // 비밀번호 제거 후 응답
     const { password: _, ...userWithoutPassword } = user;
 
-    return NextResponse.json({
+    // === 자동 로그인(세션 쿠키 발급) ===
+    const response = NextResponse.json({
       message: '회원가입이 완료되었습니다.',
       user: userWithoutPassword
     }, { status: 201 });
+
+    // 세션 데이터 생성 (auth-utils와 일치)
+    const sessionData = {
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role
+      },
+      accessToken: 'temp-token', // 임시 토큰
+      idToken: 'temp-id-token', // 임시 ID 토큰
+      expiresAt: Date.now() + (7 * 24 * 60 * 60 * 1000) // 7일
+    };
+
+    // auth-session 쿠키 설정 (auth-utils와 일치)
+    response.cookies.set('auth-session', JSON.stringify(sessionData), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7, // 7일
+      path: '/'
+    });
+
+    return response;
 
   } catch (error) {
     console.error('회원가입 오류:', error);

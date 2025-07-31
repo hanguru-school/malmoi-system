@@ -39,7 +39,15 @@ export default function TermsModal({ isOpen, onClose, onAgree, role, language }:
   const t = termsContent[language];
 
   const handleAgree = () => {
-    if (hasAgreed) {
+    setHasAgreed(true);
+    onAgree();
+    onClose();
+  };
+
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setHasAgreed(e.target.checked);
+    if (e.target.checked) {
+      // 체크박스가 체크되면 즉시 동의 처리
       onAgree();
       onClose();
     }
@@ -75,7 +83,7 @@ export default function TermsModal({ isOpen, onClose, onAgree, role, language }:
               type="checkbox"
               id="agree-terms"
               checked={hasAgreed}
-              onChange={(e) => setHasAgreed(e.target.checked)}
+              onChange={handleCheckboxChange}
               className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
             />
             <label htmlFor="agree-terms" className="ml-2 text-sm text-gray-700">

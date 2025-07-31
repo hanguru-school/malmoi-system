@@ -32,8 +32,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         if (response.ok) {
           const data = await response.json();
-          if (data.success && data.data.authenticated) {
-            setUser(data.data.user);
+          if (data.user) {
+            setUser(data.user);
           } else {
             setUser(null);
           }
@@ -64,13 +64,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
+        throw new Error(data.error || 'Login failed');
       }
 
-      if (data.success) {
+      if (data.user) {
         setUser(data.user);
       } else {
-        throw new Error(data.message || 'Login failed');
+        throw new Error(data.error || 'Login failed');
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -91,13 +91,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Registration failed');
+        throw new Error(data.error || 'Registration failed');
       }
 
-      if (data.success) {
+      if (data.user) {
         setUser(data.user);
       } else {
-        throw new Error(data.message || 'Registration failed');
+        throw new Error(data.error || 'Registration failed');
       }
     } catch (error) {
       console.error('Registration error:', error);

@@ -1,99 +1,77 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { exchangeCodeForToken } from '@/lib/cognito-provider';
+import { handleCognitoCallback, createAuthSuccessResponse, createAuthErrorResponse } from '@/lib/auth-utils';
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('=== Cognito OAuth 콜백 처리 ===');
+    console.log('=== Cognito Callback API 호출됨 ===');
+    
     const { searchParams } = new URL(request.url);
     const code = searchParams.get('code');
-    const error = searchParams.get('error');
     const state = searchParams.get('state');
-
+    const error = searchParams.get('error');
+    const errorDescription = searchParams.get('error_description');
+    
+    console.log('Callback Parameters:', {
+      code: code ? '***' : null,
+      state: state ? '***' : null,
+      error,
+      errorDescription
+    });
+    
+    // 오류 확인
     if (error) {
-      console.error('OAuth 오류:', error);
-      return NextResponse.redirect(new URL('/auth/login?error=oauth_error', request.url));
+      console.error('Cognito callback error:', { error, errorDescription });
+      return NextResponse.redirect(new URL(`/auth/login?error=${error}&error_description=${errorDescription}`, request.url));
     }
-
+    
+    // Authorization code 확인
     if (!code) {
-      console.error('인증 코드가 없습니다.');
+      console.error('No authorization code provided');
       return NextResponse.redirect(new URL('/auth/login?error=no_code', request.url));
     }
-
-    console.log('인증 코드 받음:', code);
-    console.log('상태:', state);
-
-    try {
-      // Authorization Code를 Access Token으로 교환
-      const redirectUri = process.env.NEXT_PUBLIC_COGNITO_CALLBACK_URL || 'https://app.hanguru.school/api/auth/callback/cognito';
-      const tokenResult = await exchangeCodeForToken(code, redirectUri);
-
-      if (!tokenResult.success) {
-        console.error('토큰 교환 실패:', tokenResult.error);
-        return NextResponse.redirect(new URL('/auth/login?error=token_error', request.url));
-      }
-
-      console.log('토큰 교환 성공');
-      const { accessToken, idToken } = tokenResult;
-
-      // ID 토큰에서 사용자 정보 추출
-      const tokenPayload = JSON.parse(Buffer.from(idToken.split('.')[1], 'base64').toString());
-      console.log('토큰 페이로드:', tokenPayload);
-
-      // 사용자 역할 결정 (기본값: STUDENT)
-      const userRole = tokenPayload['custom:role'] || 'STUDENT';
-      console.log('사용자 역할:', userRole);
-
-      // 역할별 리다이렉트 URL 결정
-      let redirectUrl = '/student/home';
-      switch (userRole) {
-        case 'STUDENT':
-          redirectUrl = '/student/home';
-          break;
-        case 'PARENT':
-          redirectUrl = '/parent/home';
-          break;
-        case 'TEACHER':
-          redirectUrl = '/teacher/home';
-          break;
-        case 'STAFF':
-          redirectUrl = '/staff/home';
-          break;
-        case 'ADMIN':
-          redirectUrl = '/admin/dashboard';
-          break;
-        default:
-          redirectUrl = '/student/home';
-      }
-
-      console.log('리다이렉트 URL:', redirectUrl);
-
-      // 세션 쿠키 설정 (선택사항)
-      const response = NextResponse.redirect(new URL(redirectUrl, request.url));
-      
-      // 토큰을 쿠키에 저장 (보안을 위해 httpOnly 사용 권장)
-      response.cookies.set('cognito-access-token', accessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 3600, // 1시간
-      });
-
-      response.cookies.set('cognito-id-token', idToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 3600, // 1시간
-      });
-
-      return response;
-
-    } catch (tokenError: any) {
-      console.error('토큰 교환 중 오류:', tokenError);
-      return NextResponse.redirect(new URL('/auth/login?error=token_error', request.url));
+    
+    // Cognito 콜백 처리
+    const result = await handleCognitoCallback(code, state || undefined);
+    
+    if ('code' in result) {
+      // 오류 발생
+      console.error('Cognito callback processing error:', result);
+      return NextResponse.redirect(new URL(`/auth/login?error=${result.code}&error_description=${result.message}`, request.url));
     }
-
+    
+    // 성공 시 세션 설정
+    console.log('Authentication successful for user:', result.user.email);
+    
+    const response = createAuthSuccessResponse(result);
+    
+    // 성공 페이지로 리다이렉트
+    const redirectUrl = new URL('/auth/success', request.url);
+    redirectUrl.searchParams.set('user', result.user.email);
+    
+    const redirectResponse = NextResponse.redirect(redirectUrl);
+    
+    // 세션 쿠키 복사
+    const sessionCookie = response.cookies.get('auth-session');
+    if (sessionCookie) {
+      redirectResponse.cookies.set('auth-session', sessionCookie.value, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 7, // 7 days
+        path: '/'
+      });
+    }
+    
+    // 보안 헤더 설정
+    redirectResponse.headers.set('X-Frame-Options', 'DENY');
+    redirectResponse.headers.set('X-Content-Type-Options', 'nosniff');
+    redirectResponse.headers.set('X-XSS-Protection', '1; mode=block');
+    redirectResponse.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+    
+    return redirectResponse;
+    
   } catch (error: any) {
-    console.error('콜백 처리 중 오류:', error);
-    return NextResponse.redirect(new URL('/auth/login?error=callback_error', request.url));
+    console.error('Cognito callback API 오류:', error);
+    return NextResponse.redirect(new URL(`/auth/login?error=callback_error&error_description=${encodeURIComponent(error.message)}`, request.url));
   }
 } 

@@ -44,6 +44,13 @@ interface TimeSlot {
   teacherId?: string;
 }
 
+interface ExistingReservation {
+  date: string;
+  time: string;
+  duration: number;
+  status: string;
+}
+
 export default function NewReservationPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -67,6 +74,7 @@ export default function NewReservationPage() {
 
   // 데이터
   const [availableTimeSlots, setAvailableTimeSlots] = useState<TimeSlot[]>([]);
+  const [existingReservations, setExistingReservations] = useState<ExistingReservation[]>([]);
 
   // 수업 시간 옵션
   const durationOptions = [
@@ -79,13 +87,13 @@ export default function NewReservationPage() {
   ];
 
   // 기존 예약 데이터 (실제로는 API에서 가져와야 함)
-  const existingReservations = [
-    { date: '2024-01-15', time: '10:00', duration: 90 },
-    { date: '2024-01-15', time: '14:00', duration: 120 },
-    { date: '2024-01-15', time: '16:30', duration: 60 },
-    { date: '2024-01-16', time: '09:00', duration: 150 },
-    { date: '2024-01-16', time: '13:00', duration: 90 },
-  ];
+  // const existingReservations = [
+  //   { date: '2024-01-15', time: '10:00', duration: 90 },
+  //   { date: '2024-01-15', time: '14:00', duration: 120 },
+  //   { date: '2024-01-15', time: '16:30', duration: 60 },
+  //   { date: '2024-01-16', time: '09:00', duration: 150 },
+  //   { date: '2024-01-16', time: '13:00', duration: 90 },
+  // ];
 
   // 날짜 관련
   const [minDate, setMinDate] = useState<string>('');
@@ -112,12 +120,25 @@ export default function NewReservationPage() {
     try {
       setLoading(true);
       
-      // 실제 API 호출로 대체
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // 실제 예약 데이터 가져오기
+      const reservationsResponse = await fetch('/api/reservations/list');
+      if (reservationsResponse.ok) {
+        const reservationsData = await reservationsResponse.json();
+        const formattedReservations = reservationsData.reservations.map((reservation: any) => ({
+          date: reservation.date,
+          time: reservation.startTime,
+          duration: 60, // 기본값
+          status: reservation.status
+        }));
+        setExistingReservations(formattedReservations);
+      }
 
-      setLoading(false);
+      // 기존 데이터 로드 로직...
+      await loadAvailableTimeSlots();
+      
     } catch (error) {
-      console.error('데이터 로드 오류:', error);
+      console.error('초기 데이터 로드 오류:', error);
+    } finally {
       setLoading(false);
     }
   };
@@ -136,11 +157,29 @@ export default function NewReservationPage() {
       // 실제 API 호출로 대체
       await new Promise(resolve => setTimeout(resolve, 500));
 
+      // 현재 시간 확인
+      const now = new Date();
+      const selectedDateObj = new Date(selectedDate);
+      const isToday = selectedDateObj.toDateString() === now.toDateString();
+      const currentHour = now.getHours();
+      const currentMinute = now.getMinutes();
+
       // 5분 단위로 시간대 생성 (09:00 ~ 21:00)
       const slots: TimeSlot[] = [];
       for (let hour = 9; hour <= 21; hour++) {
         for (let minute = 0; minute < 60; minute += 5) {
           const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+          
+          // 오늘 날짜인 경우 현재 시간 이전은 예약 불가
+          let isPastTime = false;
+          if (isToday) {
+            const timeHour = parseInt(time.split(':')[0]);
+            const timeMinute = parseInt(time.split(':')[1]);
+            
+            if (timeHour < currentHour || (timeHour === currentHour && timeMinute <= currentMinute)) {
+              isPastTime = true;
+            }
+          }
           
           // 해당 날짜의 기존 예약 확인
           const dayReservations = existingReservations.filter(r => r.date === selectedDate);
@@ -157,7 +196,7 @@ export default function NewReservationPage() {
           
           slots.push({
             time,
-            available: !isConflicting
+            available: !isConflicting && !isPastTime
           });
         }
       }
@@ -268,19 +307,28 @@ export default function NewReservationPage() {
       setSubmitting(true);
       setError(null);
 
-      // 실제 API 호출로 대체
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // 실제 API 호출
+      const response = await fetch('/api/reservations/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          date: selectedDate,
+          time: selectedTime,
+          duration: selectedDuration,
+          location: selectedLocation,
+          notes: notes.trim() || undefined
+        })
+      });
 
-      const reservationData = {
-        date: selectedDate,
-        time: selectedTime,
-        location: selectedLocation,
-        notes: notes.trim() || undefined,
-        duration: selectedDuration,
-        price: selectedDuration * 10000 // 예시 가격 (10분당 10000원)
-      };
+      const data = await response.json();
 
-      console.log('예약 데이터:', reservationData);
+      if (!response.ok) {
+        throw new Error(data.error || '예약 생성에 실패했습니다.');
+      }
+
+      console.log('예약 성공:', data);
 
       // 성공 처리
       setSuccess(true);
@@ -290,7 +338,7 @@ export default function NewReservationPage() {
 
     } catch (error) {
       console.error('예약 실패:', error);
-      setError('예약 중 오류가 발생했습니다. 다시 시도해주세요.');
+      setError(error instanceof Error ? error.message : '예약 중 오류가 발생했습니다. 다시 시도해주세요.');
     } finally {
       setSubmitting(false);
     }
@@ -305,6 +353,64 @@ export default function NewReservationPage() {
     const start = new Date(`2024-01-15 ${startTime}`);
     const end = new Date(start.getTime() + (duration + 10) * 60000); // +10분 준비시간
     return end.toTimeString().slice(0, 5);
+  };
+
+  // 시간대 렌더링
+  const renderTimeSlots = () => {
+    if (!selectedDate) return null;
+
+    const timeSlots = [];
+    const startHour = 9; // 오전 9시부터
+    const endHour = 21; // 오후 9시까지
+    const currentTime = new Date();
+    const selectedDateObj = new Date(selectedDate);
+
+    for (let hour = startHour; hour < endHour; hour++) {
+      for (let minute = 0; minute < 60; minute += 5) { // 5분 단위로 변경
+        const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+        const slotTime = new Date(selectedDateObj);
+        slotTime.setHours(hour, minute, 0, 0);
+
+        // 과거 시간이거나 현재 시간 이전인지 확인
+        const isPast = selectedDateObj.toDateString() === currentTime.toDateString() && 
+                      slotTime <= currentTime;
+        
+        // 실제 예약된 시간인지 확인
+        const isBooked = existingReservations.some(reservation => 
+          reservation.date === selectedDate && 
+          reservation.time === timeString && // timeString으로 변경
+          ['CONFIRMED', 'PENDING'].includes(reservation.status) // status 필드 추가
+        );
+
+        const isAvailable = !isPast && !isBooked;
+
+        timeSlots.push(
+          <button
+            key={timeString}
+            onClick={() => isAvailable && handleTimeSelect(timeString)}
+            disabled={!isAvailable}
+            className={`
+              p-2 rounded-lg text-xs font-medium transition-all duration-200
+              ${isAvailable 
+                ? 'bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200' 
+                : 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed'
+              }
+              ${selectedTime === timeString ? 'bg-blue-600 text-white border-blue-600' : ''}
+              hover:${isAvailable ? 'bg-orange-100 border-orange-300' : ''}
+              w-full sm:w-auto min-w-[60px] sm:min-w-[70px]
+            `}
+          >
+            {timeString}
+          </button>
+        );
+      }
+    }
+
+    return (
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+        {timeSlots}
+      </div>
+    );
   };
 
   if (loading) {
@@ -459,51 +565,7 @@ export default function NewReservationPage() {
                 <Clock className="w-5 h-5 text-orange-600" />
                 시간 선택
               </h2>
-              <div className="grid grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2">
-                {availableTimeSlots.map((slot) => {
-                  const status = getTimeSlotStatus(slot.time);
-                  const isInConflictingRange = isTimeInConflictingRange(slot.time);
-                  const isInHoveredRange = isTimeInHoveredRange(slot.time);
-
-                  const getButtonClasses = () => {
-                    const baseClasses = "p-2 text-sm rounded transition-all duration-200 relative";
-
-                    switch (status) {
-                      case 'available':
-                        return `${baseClasses} bg-white border border-gray-200 hover:bg-blue-50 hover:border-blue-300 text-gray-700`;
-                      case 'available-hover':
-                        return `${baseClasses} bg-blue-100 border border-blue-400 text-blue-800`;
-                      case 'conflicting':
-                        return `${baseClasses} bg-gray-100 border border-gray-300 text-gray-400 cursor-not-allowed`;
-                      case 'conflicting-hover':
-                        return `${baseClasses} bg-orange-100 border border-orange-400 text-orange-800`;
-                      case 'selected':
-                        return `${baseClasses} bg-blue-500 text-white border-blue-500 font-medium`;
-                      default:
-                        return `${baseClasses} bg-gray-50 border border-gray-200 text-gray-400 cursor-not-allowed`;
-                    }
-                  };
-
-                  return (
-                    <button
-                      key={slot.time}
-                      type="button"
-                      disabled={!slot.available}
-                      onClick={() => slot.available && handleTimeSelect(slot.time)}
-                      onMouseEnter={() => setHoveredTime(slot.time)}
-                      onMouseLeave={() => setHoveredTime('')}
-                      className={getButtonClasses()}
-                    >
-                      {slot.time}
-                      {isInHoveredRange && isInConflictingRange && status !== 'selected' && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="w-full h-0.5 bg-red-500 transform rotate-45"></div>
-                        </div>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
+              {renderTimeSlots()}
               {availableTimeSlots.every(slot => !slot.available) && (
                 <p className="text-sm text-gray-500 mt-4">
                   선택하신 날짜에는 가능한 시간이 없습니다. 다른 날짜를 선택해주세요.
@@ -537,49 +599,33 @@ export default function NewReservationPage() {
           )}
 
           {/* 예약 요약 */}
-          {selectedLocation && selectedDuration > 0 && selectedDate && selectedTime && (
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-                  <CheckCircle className="w-5 h-5 text-blue-600" />
-                  예약 요약
-                </h2>
-                <button
-                  type="button"
-                  onClick={() => setSelectedTime('')}
-                  className="text-sm text-blue-600 hover:text-blue-700 underline"
-                >
-                  시간 다시 선택
-                </button>
+          <div className="bg-gray-50 rounded-lg p-4 mb-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">예약 요약</h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">날짜:</span>
+                <span className="font-medium text-gray-900">{selectedDate || '선택되지 않음'}</span>
               </div>
-              <div className="space-y-4">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">수업 방식:</span>
-                  <span className="font-medium">{selectedLocation}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">수업 시간:</span>
-                  <span className="font-medium">{selectedDuration}분 (준비시간 10분 포함)</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">날짜:</span>
-                  <span className="font-medium">{selectedDate} ({getDayOfWeek(selectedDate)})</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">시간:</span>
-                  <span className="font-medium">
-                    {selectedTime} ~ {getEndTime(selectedTime, selectedDuration)}
-                  </span>
-                </div>
-                {notes && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">메모:</span>
-                    <span className="font-medium">{notes}</span>
-                  </div>
-                )}
+              <div className="flex justify-between">
+                <span className="text-gray-600">시간:</span>
+                <span className="font-medium text-gray-900">{selectedTime || '선택되지 않음'}</span>
               </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">수업 시간:</span>
+                <span className="font-medium text-gray-900">{selectedDuration}분</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">수업 방식:</span>
+                <span className="font-medium text-gray-900">{selectedLocation || '선택되지 않음'}</span>
+              </div>
+              {notes && (
+                <div className="flex justify-between">
+                  <span className="text-gray-600">메모:</span>
+                  <span className="font-medium text-gray-900">{notes}</span>
+                </div>
+              )}
             </div>
-          )}
+          </div>
 
           {/* 제출 버튼 */}
           {selectedLocation && selectedDuration > 0 && selectedDate && selectedTime && (

@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import prisma from '@/lib/db';
+import jwt from 'jsonwebtoken';
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -67,19 +69,70 @@ export async function GET(request: NextRequest) {
     console.log('LINE profile data:', profileData);
 
     // 사용자 정보 처리 및 로그인/회원가입
-    // TODO: 데이터베이스에 사용자 정보 저장/업데이트
-    // TODO: JWT 토큰 생성 및 세션 설정
-    
-    // 회원가입 모드인지 로그인 모드인지에 따라 다른 리다이렉션
-    if (isRegisterMode) {
-      return NextResponse.redirect(
-        new URL(`/auth/line-register?success=line_register&message=${encodeURIComponent('LINE 회원가입이 성공했습니다!')}`, request.url)
-      );
+    const lineUserId = profileData.userId;
+    const displayName = profileData.displayName;
+    const pictureUrl = profileData.pictureUrl;
+
+    // 기존 사용자 확인
+    let user = await prisma.user.findFirst({
+      where: {
+        email: `${lineUserId}@line.user`
+      }
+    });
+
+    if (!user) {
+      // 새 사용자 생성
+      user = await prisma.user.create({
+        data: {
+          email: `${lineUserId}@line.user`,
+          name: displayName,
+          password: '', // LINE 로그인은 비밀번호 없음
+          role: 'STUDENT', // 기본 역할
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }
+      });
     } else {
-      return NextResponse.redirect(
-        new URL(`/auth/login?success=line_login&message=${encodeURIComponent('LINE 로그인이 성공했습니다!')}`, request.url)
-      );
+      // 기존 사용자 정보 업데이트
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          name: displayName,
+          updatedAt: new Date()
+        }
+      });
     }
+
+    // JWT 토큰 생성
+    const token = jwt.sign(
+      { 
+        userId: user.id, 
+        email: user.email, 
+        role: user.role 
+      },
+      process.env.JWT_SECRET || 'fallback-secret',
+      { expiresIn: '7d' }
+    );
+
+    // 세션 쿠키 설정
+    const response = NextResponse.redirect(
+      new URL(
+        isRegisterMode 
+          ? `/auth/line-register?success=line_register&message=${encodeURIComponent('LINE 회원가입이 성공했습니다!')}`
+          : `/auth/login?success=line_login&message=${encodeURIComponent('LINE 로그인이 성공했습니다!')}`,
+        request.url
+      )
+    );
+
+    // JWT 토큰을 쿠키에 설정
+    response.cookies.set('auth-token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 // 7일
+    });
+
+    return response;
 
   } catch (error) {
     console.error('LINE login callback error:', error);

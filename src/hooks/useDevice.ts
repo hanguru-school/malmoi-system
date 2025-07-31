@@ -9,11 +9,19 @@ export function useDevice() {
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
   const [isDesktop, setIsDesktop] = useState(true);
+  const [screenWidth, setScreenWidth] = useState(0);
+  const [screenHeight, setScreenHeight] = useState(0);
+  const [userAgent, setUserAgent] = useState('');
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    // 클라이언트 사이드임을 표시
+    setIsClient(true);
+    
     const detectDevice = () => {
       const userAgent = navigator.userAgent.toLowerCase();
-      const screenWidth = window.innerWidth;
+      const currentScreenWidth = window.innerWidth;
+      const currentScreenHeight = window.innerHeight;
 
       // 모바일 디바이스 감지 (더 정확한 키워드)
       const mobileKeywords = [
@@ -47,9 +55,9 @@ export function useDevice() {
         detectedType = 'tablet';
       } else {
         // User Agent가 데스크톱이면 화면 크기와 터치 지원 여부로 판단
-        if (screenWidth < 768) {
+        if (currentScreenWidth < 768) {
           detectedType = hasTouchSupport ? 'mobile' : 'desktop';
-        } else if (screenWidth >= 768 && screenWidth < 1024) {
+        } else if (currentScreenWidth >= 768 && currentScreenWidth < 1024) {
           detectedType = hasTouchSupport ? 'tablet' : 'desktop';
         } else {
           detectedType = 'desktop';
@@ -60,6 +68,9 @@ export function useDevice() {
       setIsMobile(detectedType === 'mobile');
       setIsTablet(detectedType === 'tablet');
       setIsDesktop(detectedType === 'desktop');
+      setScreenWidth(currentScreenWidth);
+      setScreenHeight(currentScreenHeight);
+      setUserAgent(navigator.userAgent);
     };
 
     // 초기 감지
@@ -78,8 +89,9 @@ export function useDevice() {
     isMobile,
     isTablet,
     isDesktop,
-    screenWidth: typeof window !== 'undefined' ? window.innerWidth : 0,
-    screenHeight: typeof window !== 'undefined' ? window.innerHeight : 0,
-    userAgent: typeof window !== 'undefined' ? navigator.userAgent : ''
+    screenWidth: isClient ? screenWidth : 0,
+    screenHeight: isClient ? screenHeight : 0,
+    userAgent: isClient ? userAgent : '',
+    isClient
   };
 } 

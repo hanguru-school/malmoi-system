@@ -7,14 +7,15 @@ import Link from 'next/link';
 interface Reservation {
   id: string;
   date: string;
-  time: string;
-  teacher: string;
-  teacherAssigned: boolean; // 선생님이 지정되었는지 여부
-  subject: string;
-  status: 'upcoming' | 'completed' | 'cancelled';
-  duration: number;
+  startTime: string;
+  endTime: string;
   location: string;
+  status: string;
   notes?: string;
+  teacherName?: string;
+  studentName?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export default function StudentReservationsPage() {
@@ -85,154 +86,40 @@ export default function StudentReservationsPage() {
   const t = texts[currentLanguage];
 
   useEffect(() => {
-    // 실제 API 호출로 대체
-    setTimeout(() => {
-      const mockReservations: Reservation[] = [
-        {
-          id: '1',
-          date: '2024-01-15',
-          time: '14:00',
-          teacher: '김선생님',
-          teacherAssigned: true,
-          subject: '영어 회화',
-          status: 'upcoming',
-          duration: 60,
-          location: '온라인',
-          notes: '일상 대화 연습'
-        },
-        {
-          id: '2',
-          date: '2024-01-12',
-          time: '16:00',
-          teacher: '이선생님',
-          teacherAssigned: true,
-          subject: '문법',
-          status: 'completed',
-          duration: 60,
-          location: '오프라인',
-          notes: '현재완료 시제'
-        },
-        {
-          id: '3',
-          date: '2024-01-10',
-          time: '10:00',
-          teacher: '박선생님',
-          teacherAssigned: true,
-          subject: '리스닝',
-          status: 'completed',
-          duration: 45,
-          location: '온라인'
-        },
-        {
-          id: '4',
-          date: '2024-01-08',
-          time: '15:30',
-          teacher: '최선생님',
-          teacherAssigned: false,
-          subject: '작문',
-          status: 'cancelled',
-          duration: 60,
-          location: '오프라인',
-          notes: '개인 사정으로 취소'
-        },
-        {
-          id: '5',
-          date: '2024-01-18',
-          time: '09:00',
-          teacher: '',
-          teacherAssigned: false,
-          subject: '토익 준비',
-          status: 'upcoming',
-          duration: 90,
-          location: '온라인',
-          notes: 'RC 집중 연습'
-        },
-        {
-          id: '6',
-          date: '2024-01-20',
-          time: '13:00',
-          teacher: '',
-          teacherAssigned: false,
-          subject: '일본어 회화',
-          status: 'upcoming',
-          duration: 60,
-          location: '오프라인'
-        },
-        {
-          id: '7',
-          date: '2024-01-22',
-          time: '11:00',
-          teacher: '정선생님',
-          teacherAssigned: true,
-          subject: '중국어 기초',
-          status: 'upcoming',
-          duration: 60,
-          location: '온라인',
-          notes: '성조 연습'
-        },
-        {
-          id: '8',
-          date: '2024-01-25',
-          time: '14:30',
-          teacher: '',
-          teacherAssigned: false,
-          subject: '스페인어 회화',
-          status: 'upcoming',
-          duration: 60,
-          location: '오프라인'
-        },
-        {
-          id: '9',
-          date: '2024-01-05',
-          time: '10:00',
-          teacher: '김선생님',
-          teacherAssigned: true,
-          subject: '한국어 회화',
-          status: 'completed',
-          duration: 90,
-          location: '온라인',
-          notes: '일상 대화 연습 완료'
-        },
-        {
-          id: '10',
-          date: '2024-01-03',
-          time: '15:00',
-          teacher: '박선생님',
-          teacherAssigned: true,
-          subject: '문법',
-          status: 'completed',
-          duration: 60,
-          location: '오프라인',
-          notes: '조사와 어미 학습'
-        },
-        {
-          id: '11',
-          date: '2024-01-01',
-          time: '13:30',
-          teacher: '이선생님',
-          teacherAssigned: true,
-          subject: '작문',
-          status: 'completed',
-          duration: 120,
-          location: '온라인',
-          notes: '에세이 작성 연습'
+    const fetchReservations = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/reservations/list');
+        
+        if (response.ok) {
+          const data = await response.json();
+          setReservations(data.reservations || []);
+        } else {
+          console.error('예약 목록을 불러올 수 없습니다.');
+          setReservations([]);
         }
-      ];
+      } catch (error) {
+        console.error('예약 목록 조회 오류:', error);
+        setReservations([]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      setReservations(mockReservations);
-      setTotalPages(Math.ceil(mockReservations.length / itemsPerPage));
-      setLoading(false);
-    }, 1000);
+    fetchReservations();
   }, []);
 
   // 필터링 및 검색
   const filteredReservations = reservations.filter(reservation => {
     const matchesSearch = 
-      reservation.teacher.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      reservation.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      reservation.teacherName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      reservation.studentName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       reservation.location.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesStatus = statusFilter === 'all' || reservation.status === statusFilter;
+    const matchesStatus = statusFilter === 'all' || 
+      (statusFilter === 'upcoming' && reservation.status === 'CONFIRMED') ||
+      (statusFilter === 'completed' && reservation.status === 'ATTENDED') ||
+      (statusFilter === 'cancelled' && reservation.status === 'CANCELLED');
     
     return matchesSearch && matchesStatus;
   });
@@ -388,19 +275,19 @@ export default function StudentReservationsPage() {
                           {new Date(reservation.date).toLocaleDateString('ko-KR')}
                         </div>
                         <div className="text-sm text-gray-500">
-                          {reservation.time} ({reservation.duration}{t.duration})
+                          {reservation.startTime} - {reservation.endTime}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <User className="w-4 h-4 text-gray-400 mr-2" />
-                          <span className={`text-sm ${reservation.teacherAssigned ? 'text-gray-900 font-bold' : 'text-gray-500'}`}>
-                            {reservation.teacherAssigned ? reservation.teacher : '미확정'}
+                          <span className={`text-sm ${reservation.teacherName ? 'text-gray-900 font-bold' : 'text-gray-500'}`}>
+                            {reservation.teacherName || '미확정'}
                           </span>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-sm text-gray-900">{reservation.subject}</span>
+                        <span className="text-sm text-gray-900">{reservation.studentName}</span>
                         {reservation.notes && (
                           <div className="text-xs text-gray-500 mt-1">{reservation.notes}</div>
                         )}

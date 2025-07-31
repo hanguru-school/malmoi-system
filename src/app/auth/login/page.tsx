@@ -10,6 +10,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState('ko');
   const router = useRouter();
@@ -23,56 +24,18 @@ export default function LoginPage() {
     try {
       console.log('로그인 시도:', { email, password });
       
-      const response = await fetch('/api/auth/login/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      console.log('응답 상태:', response.status);
-      const data = await response.json();
-      console.log('응답 데이터:', data);
-
-      if (response.ok && data.success) {
-        console.log('로그인 성공, 사용자 역할:', data.user.role);
-        
-        // 로그인 성공 시 역할에 맞는 페이지로 리다이렉트
-        const userRole = data.user.role;
-        
-        switch (userRole) {
-          case 'STUDENT':
-            console.log('학생 페이지로 리다이렉트');
-            window.location.href = '/student/home';
-            break;
-          case 'PARENT':
-            console.log('학부모 페이지로 리다이렉트');
-            window.location.href = '/parent/home';
-            break;
-          case 'TEACHER':
-            console.log('선생님 페이지로 리다이렉트');
-            window.location.href = '/teacher/home';
-            break;
-          case 'STAFF':
-            console.log('직원 페이지로 리다이렉트');
-            window.location.href = '/staff/home';
-            break;
-          case 'ADMIN':
-            console.log('관리자 페이지로 리다이렉트');
-            window.location.href = '/admin/home';
-            break;
-          default:
-            console.log('기본 페이지로 리다이렉트');
-            window.location.href = '/student/home'; // 기본값
-        }
-      } else {
-        console.log('로그인 실패:', data.message);
-        setError(data.message || '로그인에 실패했습니다.');
-      }
+      // useAuth 훅의 login 함수 사용
+      await login(email, password);
+      
+      setMessage('로그인에 성공했습니다.');
+      setError('');
+      
+      // 로딩 페이지로 이동하여 세션 확인
+      router.push('/student/loading');
     } catch (error: any) {
       console.error('로그인 오류:', error);
       setError(error.message || '로그인 중 오류가 발생했습니다.');
+      setMessage('');
     } finally {
       setIsLoading(false);
     }
@@ -85,16 +48,10 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex justify-center items-center mb-8 relative">
+        <div className="flex justify-center items-center mb-8">
           <h2 className="text-center text-3xl font-extrabold text-gray-900">
             {currentLanguage === 'ko' ? '로그인' : 'ログイン'}
           </h2>
-          <button
-            onClick={toggleLanguage}
-            className="absolute right-0 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow"
-          >
-            <Globe className="w-5 h-5 text-gray-600" />
-          </button>
         </div>
         <p className="mt-2 text-center text-sm text-gray-600">
           {currentLanguage === 'ko' 
@@ -103,8 +60,14 @@ export default function LoginPage() {
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow-xl rounded-xl sm:px-10">
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-sm px-4">
+        <div className="bg-white py-8 px-6 shadow-xl rounded-xl sm:px-8 relative">
+          <button
+            onClick={toggleLanguage}
+            className="absolute top-4 right-4 p-2 bg-gray-50 rounded-full shadow-sm hover:shadow-md transition-shadow"
+          >
+            <Globe className="w-5 h-5 text-gray-600" />
+          </button>
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
@@ -224,28 +187,6 @@ export default function LoginPage() {
               </div>
             </div>
           )}
-        </div>
-
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
-            계정이 없으신가요?{' '}
-            <button
-              onClick={() => router.push('/auth/register')}
-              className="font-medium text-blue-600 hover:text-blue-500"
-            >
-              회원가입
-            </button>
-          </p>
-        </div>
-
-        <div className="mt-4 text-center">
-          <p className="text-sm text-gray-600 mb-2">다른 로그인 방법:</p>
-          <button
-            onClick={() => router.push('/auth/cognito-login')}
-            className="text-sm font-medium text-blue-600 hover:text-blue-500"
-          >
-            AWS Cognito로 로그인
-          </button>
         </div>
       </div>
     </div>

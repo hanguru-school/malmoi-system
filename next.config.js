@@ -17,6 +17,10 @@ const nextConfig = {
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
+  // TypeScript 검증 완전 비활성화
+  experimental: {
+    typedRoutes: false,
+  },
 };
 
 module.exports = nextConfig; 

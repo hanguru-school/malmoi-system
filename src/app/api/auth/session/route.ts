@@ -1,55 +1,53 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('=== 세션 확인 API 호출됨 ===');
-    
-    // 쿠키에서 사용자 세션 정보 읽기
-    const userSessionCookie = request.cookies.get('user-session');
-    
-    if (!userSessionCookie) {
-      console.log('사용자 세션 쿠키가 없습니다.');
-      return NextResponse.json({
-        success: false,
-        message: '로그인이 필요합니다.',
-        data: {
-          authenticated: false
-        }
-      }, { status: 401 });
+    // 세션 쿠키에서 사용자 정보 추출
+    const session = request.cookies.get('auth-session');
+    if (!session) {
+      return NextResponse.json({ user: null });
     }
 
+    let sessionData;
     try {
-      const userData = JSON.parse(userSessionCookie.value);
-      console.log('사용자 세션 데이터:', userData);
-      
-      return NextResponse.json({
-        success: true,
-        message: '세션 정보를 성공적으로 조회했습니다.',
-        data: {
-          authenticated: true,
-          user: userData
-        }
-      });
-
-    } catch (parseError) {
-      console.error('세션 쿠키 파싱 오류:', parseError);
-      return NextResponse.json({
-        success: false,
-        message: '세션 정보가 유효하지 않습니다.',
-        data: {
-          authenticated: false
-        }
-      }, { status: 401 });
+      sessionData = JSON.parse(session.value);
+    } catch {
+      return NextResponse.json({ user: null });
     }
+
+    if (!sessionData?.user?.id) {
+      return NextResponse.json({ user: null });
+    }
+
+    // 세션 만료 확인
+    if (sessionData.expiresAt && Date.now() > sessionData.expiresAt) {
+      return NextResponse.json({ user: null });
+    }
+
+    // DB에서 최신 사용자 정보 가져오기
+    const dbUser = await prisma.user.findUnique({
+      where: { id: sessionData.user.id },
+      include: {
+        student: true,
+        parent: true,
+        teacher: true,
+        staff: true,
+        admin: true
+      }
+    });
+
+    if (!dbUser) {
+      return NextResponse.json({ user: null });
+    }
+
+    // 비밀번호 제거
+    const { password: _, ...userWithoutPassword } = dbUser;
+
+    return NextResponse.json({ user: userWithoutPassword });
 
   } catch (error) {
     console.error('세션 조회 오류:', error);
-    return NextResponse.json({
-      success: false,
-      message: '세션 조회 중 오류가 발생했습니다.',
-      data: {
-        authenticated: false
-      }
-    }, { status: 500 });
+    return NextResponse.json({ user: null });
   }
 } 

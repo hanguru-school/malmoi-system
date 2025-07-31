@@ -56,12 +56,14 @@ import {
   Volume2 as Volume2Icon,
   TestTube as TestTubeIcon,
   Star as StarIcon,
-  Zap as ZapIcon
+  Zap as ZapIcon,
+  Monitor
 } from 'lucide-react';
 
 
 const navigation = [
   { name: '대시보드', href: '/admin/home', icon: Home },
+  { name: '시스템 대시보드', href: '/admin/system-dashboard', icon: Monitor },
   { name: '학생 관리', href: '/admin/students', icon: Users },
   { name: '강사 관리', href: '/admin/teachers', icon: GraduationCap },
   { name: '수업 관리', href: '/admin/classes', icon: Calendar },

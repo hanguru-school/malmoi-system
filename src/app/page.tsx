@@ -30,12 +30,18 @@ import PWAInstallButton from '@/components/common/PWAInstallButton';
 
 export default function Home() {
   const [language, setLanguage] = useState<'ja' | 'ko'>('ja');
-  const { deviceType, isMobile, isTablet, isDesktop, screenWidth, userAgent } = useDevice();
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const { deviceType, isMobile, isTablet, isDesktop, screenWidth, userAgent, isClient } = useDevice();
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstallable, setIsInstallable] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // BeforeInstallPromptEvent 타입 정의
+  interface BeforeInstallPromptEvent extends Event {
+    prompt(): Promise<void>;
+    userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+  }
 
   // 로그인 상태 확인
   useEffect(() => {
@@ -76,12 +82,12 @@ export default function Home() {
 
   // PWA 설치 가능 여부 확인 및 beforeinstallprompt 이벤트 처리
   useEffect(() => {
-    const handleBeforeInstallPrompt = (e: any) => {
+    const handleBeforeInstallPrompt = (e: Event) => {
       console.log('beforeinstallprompt 이벤트 감지됨!');
       // 기본 설치 프롬프트 방지
       e.preventDefault();
       // 설치 프롬프트 저장
-      setDeferredPrompt(e);
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
       setIsInstallable(true);
       console.log('설치 프롬프트가 저장되었습니다:', e);
     };
@@ -91,7 +97,7 @@ export default function Home() {
       setDeferredPrompt(null);
       setIsInstallable(false);
       // 설치 완료 메시지
-              alert(language === 'ja' ? 'MalMoiがホーム画面に正常にインストールされました！' : 'MalMoiがホーム画面に正常にインストールされました！');
+      alert(language === 'ja' ? 'MalMoiがホーム画面に正常にインストールされました！' : 'MalMoiがホーム画面に正常にインストールされました！');
     };
 
     // 이미 설치 가능한 상태인지 확인
@@ -108,7 +114,7 @@ export default function Home() {
 
         // PWA 설치 조건 확인
         if ('getInstalledRelatedApps' in navigator) {
-          const relatedApps = await (navigator as any).getInstalledRelatedApps();
+          const relatedApps = await (navigator as Navigator & { getInstalledRelatedApps(): Promise<unknown[]> }).getInstalledRelatedApps();
           console.log('설치된 관련 앱:', relatedApps);
         }
 
@@ -223,7 +229,7 @@ export default function Home() {
         try {
           // Chrome/Edge의 자동 설치 API 시도
           if ('getInstalledRelatedApps' in navigator) {
-            const relatedApps = await (navigator as any).getInstalledRelatedApps();
+            const relatedApps = await (navigator as Navigator & { getInstalledRelatedApps(): Promise<unknown[]> }).getInstalledRelatedApps();
             console.log('설치된 관련 앱:', relatedApps);
           }
           
@@ -293,7 +299,7 @@ export default function Home() {
                 try {
                   // PWA 설치 조건을 만족시키기 위한 추가 시도
                   if ('getInstalledRelatedApps' in navigator) {
-                    await (navigator as any).getInstalledRelatedApps();
+                    await (navigator as Navigator & { getInstalledRelatedApps(): Promise<unknown[]> }).getInstalledRelatedApps();
                   }
                   
                   // 설치 프롬프트가 나타날 때까지 잠시 대기
@@ -725,7 +731,7 @@ export default function Home() {
       {/* 메인 콘텐츠 */}
       <main>
         {/* 디바이스 정보 표시 (개발용) */}
-        {process.env.NODE_ENV === 'development' && (
+        {process.env.NODE_ENV === 'development' && isClient && (
           <div className="fixed top-4 left-4 bg-black bg-opacity-75 text-white p-3 rounded-lg text-xs z-50">
             <div>디바이스: {deviceType}</div>
             <div>모바일: {isMobile ? '예' : '아니오'}</div>

@@ -81,7 +81,7 @@ export default function RegisterPage() {
       registerButton: '회원가입',
       loginLink: '이미 계정이 있으신가요? 로그인',
       backToMain: '메인 페이지로 돌아가기',
-      successMessage: '회원가입이 완료되었습니다!',
+      successMessage: '회원가입이 완료되었습니다! 로그인 페이지로 이동합니다.',
       errorMessage: '회원가입에 실패했습니다.',
       loadingMessage: '회원가입 중...',
       studentRole: '학생',
@@ -119,7 +119,7 @@ export default function RegisterPage() {
       registerButton: '登録',
       loginLink: 'すでにアカウントをお持ちの方はこちら',
       backToMain: 'メインページに戻る',
-      successMessage: '登録が完了しました！',
+      successMessage: '登録が完了しました！ログインページに移動します。',
       errorMessage: '登録に失敗しました。',
       loadingMessage: '登録中...',
       studentRole: '学生',
@@ -260,8 +260,9 @@ export default function RegisterPage() {
 
       if (response.ok) {
         setSuccessMessage(t.successMessage);
+        // 자동 로그인이 되었으므로 역할에 따라 대시보드로 이동
         setTimeout(() => {
-          router.push('/auth/login?success=register&message=' + encodeURIComponent('회원가입이 완료되었습니다. 로그인해주세요.'));
+          router.push('/auth/login');
         }, 2000);
       } else {
         setErrorMessage(data.error || t.errorMessage);
@@ -507,7 +508,13 @@ export default function RegisterPage() {
                   type="checkbox"
                   id="terms-agreement"
                   checked={hasAgreedToTerms}
-                  onChange={(e) => setHasAgreedToTerms(e.target.checked)}
+                  onChange={(e) => {
+                    if (e.target.checked && !hasAgreedToTerms) {
+                      // 처음 체크할 때만 약관 모달 열기
+                      setShowTermsModal(true);
+                    }
+                    setHasAgreedToTerms(e.target.checked);
+                  }}
                   className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
                 <label htmlFor="terms-agreement" className="ml-2 text-sm text-gray-700">

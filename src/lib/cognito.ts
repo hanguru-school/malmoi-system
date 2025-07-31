@@ -1,5 +1,11 @@
 import { CognitoUserPool, CognitoUser, AuthenticationDetails } from 'amazon-cognito-identity-js';
-import { cognitoProviderConfig, poolData } from './cognito-provider';
+import { cognitoConfig } from './cognito-provider';
+
+// Cognito User Pool 설정
+const poolData = {
+  UserPoolId: cognitoConfig.userPoolId,
+  ClientId: cognitoConfig.clientId,
+};
 
 // Cognito User Pool 인스턴스 (기존 호환성을 위해 유지)
 export const userPool = new CognitoUserPool(poolData);
@@ -119,56 +125,14 @@ export const cognitoAuth = {
   signOut,
 };
 
-// OAuth URL 생성 (새로운 설정 사용)
-export const createOAuthUrl = (redirectUri: string, state?: string): string => {
-  const url = new URL(`${cognitoProviderConfig.domain}/oauth2/authorize`);
-  url.searchParams.set('response_type', 'code');
-  url.searchParams.set('client_id', cognitoProviderConfig.clientId);
-  url.searchParams.set('redirect_uri', redirectUri);
-  url.searchParams.set('scope', 'email openid phone');
-  if (state) {
-    url.searchParams.set('state', state);
-  }
-  return url.toString();
-};
-
-// 토큰 교환 (Authorization Code를 Access Token으로)
-export const exchangeCodeForToken = async (code: string, redirectUri: string): Promise<any> => {
-  const tokenUrl = `${cognitoProviderConfig.domain}/oauth2/token`;
-  
-  const params = new URLSearchParams();
-  params.append('grant_type', 'authorization_code');
-  params.append('client_id', cognitoProviderConfig.clientId);
-  params.append('code', code);
-  params.append('redirect_uri', redirectUri);
-
-  try {
-    const response = await fetch(tokenUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: params.toString(),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Token exchange failed: ${response.statusText}`);
-    }
-
-    const tokenData = await response.json();
-    return {
-      success: true,
-      accessToken: tokenData.access_token,
-      idToken: tokenData.id_token,
-      refreshToken: tokenData.refresh_token,
-      expiresIn: tokenData.expires_in,
-    };
-  } catch (error: any) {
-    return {
-      success: false,
-      error: error.message || '토큰 교환에 실패했습니다.',
-    };
-  }
-};
+// 새로운 Cognito Provider에서 함수들을 다시 export
+export { 
+  createOAuthUrl, 
+  exchangeCodeForToken, 
+  parseIdToken, 
+  getRedirectUrlByRole,
+  validateCognitoConfig,
+  cognitoConfig
+} from './cognito-provider';
 
 export default cognitoAuth; 
