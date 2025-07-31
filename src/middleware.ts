@@ -49,30 +49,46 @@ export function middleware(request: NextRequest) {
       return NextResponse.redirect(loginUrl);
     }
 
-    // 관리자는 모든 페이지에 접근 가능
-    if (hasRole(request, 'ADMIN')) {
+    // 사용자 역할 확인
+    const userRole = getSessionFromCookies(request)?.user?.role;
+
+    // 7. 역할별 메인 페이지 리다이렉트
+    if (pathname === '/') {
+      if (userRole === 'ADMIN') {
+        return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+      } else if (userRole === 'STUDENT') {
+        return NextResponse.redirect(new URL('/student/dashboard', request.url));
+      } else if (userRole === 'TEACHER') {
+        return NextResponse.redirect(new URL('/teacher/dashboard', request.url));
+      } else if (userRole === 'STAFF') {
+        return NextResponse.redirect(new URL('/staff/home', request.url));
+      }
+    }
+
+    // 8. 관리자는 모든 페이지에 접근 가능
+    if (userRole === 'ADMIN') {
       return NextResponse.next();
     }
 
-    // 역할 기반 접근 제어 (관리자 제외)
-    if (pathname.startsWith('/admin') && !hasRole(request, 'ADMIN')) {
+    // 9. 역할 기반 접근 제어 (관리자 제외)
+    if (pathname.startsWith('/admin') && userRole !== 'ADMIN') {
       return NextResponse.redirect(new URL('/auth/unauthorized', request.url));
     }
 
-    if (pathname.startsWith('/teacher') && !hasRole(request, 'TEACHER')) {
+    if (pathname.startsWith('/teacher') && userRole !== 'TEACHER') {
       return NextResponse.redirect(new URL('/auth/unauthorized', request.url));
     }
 
-    if (pathname.startsWith('/staff') && !hasRole(request, 'STAFF')) {
+    if (pathname.startsWith('/staff') && userRole !== 'STAFF') {
       return NextResponse.redirect(new URL('/auth/unauthorized', request.url));
     }
 
-    if (pathname.startsWith('/student') && !hasRole(request, 'STUDENT')) {
+    if (pathname.startsWith('/student') && userRole !== 'STUDENT') {
       return NextResponse.redirect(new URL('/auth/unauthorized', request.url));
     }
   }
 
-  // 7. 보안 헤더 추가
+  // 10. 보안 헤더 추가
   const response = NextResponse.next();
   
   response.headers.set('X-XSS-Protection', '1; mode=block');
@@ -81,6 +97,17 @@ export function middleware(request: NextRequest) {
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
 
   return response;
+}
+
+// 세션에서 사용자 정보를 가져오는 헬퍼 함수
+function getSessionFromCookies(request: NextRequest) {
+  try {
+    const session = request.cookies.get('auth-session');
+    if (!session) return null;
+    return JSON.parse(session.value);
+  } catch {
+    return null;
+  }
 }
 
 export const config = {

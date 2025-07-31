@@ -1,294 +1,204 @@
 'use client';
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+
+import React from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  Users, 
-  Calendar, 
-  DollarSign, 
-  TrendingUp, 
-  AlertCircle, 
-  CheckCircle, 
-  Clock, 
-  BarChart3, 
-  Activity, 
-  Settings, 
-  FileText, 
-  Shield,
-  Plus,
-  Search,
-  Filter
-} from 'lucide-react';
-
-interface DashboardStats {
-  totalUsers: number;
-  totalReservations: number;
-  totalRevenue: number;
-  activeRooms: number;
-  pendingReservations: number;
-  completedReservations: number;
-}
-
-interface RecentActivity {
-  id: string;
-  type: 'reservation' | 'payment' | 'user';
-  title: string;
-  description: string;
-  timestamp: string;
-  status: 'success' | 'warning' | 'error';
-}
 
 export default function AdminDashboard() {
-  const { user, logout } = useAuth();
   const router = useRouter();
-  const [stats, setStats] = useState<DashboardStats>({
-    totalUsers: 0,
-    totalReservations: 0,
-    totalRevenue: 0,
-    activeRooms: 0,
-    pendingReservations: 0,
-    completedReservations: 0
-  });
-  const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!user || user.role !== 'admin') {
-      router.push('/auth/login');
-      return;
+  const rolePages = [
+    {
+      title: '학생 대시보드',
+      description: '학생 페이지로 이동하여 학생 기능을 확인합니다',
+      path: '/student/dashboard',
+      color: 'bg-blue-500 hover:bg-blue-600',
+      icon: '👨‍🎓'
+    },
+    {
+      title: '선생님 대시보드',
+      description: '선생님 페이지로 이동하여 선생님 기능을 확인합니다',
+      path: '/teacher/dashboard',
+      color: 'bg-green-500 hover:bg-green-600',
+      icon: '👨‍🏫'
+    },
+    {
+      title: '직원 대시보드',
+      description: '직원 페이지로 이동하여 직원 기능을 확인합니다',
+      path: '/staff/home',
+      color: 'bg-purple-500 hover:bg-purple-600',
+      icon: '👨‍💼'
     }
-    fetchDashboardData();
-  }, [user, router]);
-
-  const fetchDashboardData = async () => {
-    try {
-      // 실제 API 호출로 대체 예정
-      setStats({
-        totalUsers: 25,
-        totalReservations: 156,
-        totalRevenue: 2500000,
-        activeRooms: 5,
-        pendingReservations: 8,
-        completedReservations: 148
-      });
-
-      setRecentActivities([
-        {
-          id: '1',
-          type: 'reservation',
-          title: '새 예약 생성',
-          description: 'A101 강의실 - 2024년 1월 15일 14:00-16:00',
-          timestamp: '2분 전',
-          status: 'success'
-        },
-        {
-          id: '2',
-          type: 'payment',
-          title: '결제 완료',
-          description: '김학생님 - 50,000원',
-          timestamp: '5분 전',
-          status: 'success'
-        },
-        {
-          id: '3',
-          type: 'user',
-          title: '새 사용자 등록',
-          description: '이선생님 (teacher)',
-          timestamp: '10분 전',
-          status: 'success'
-        }
-      ]);
-    } catch (error) {
-      console.error('Dashboard data fetch error:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleLogout = () => {
-    logout();
-    router.push('/auth/login');
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">로딩 중...</p>
-        </div>
-      </div>
-    );
-  }
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-gray-900">관리자 대시보드</h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">
-                {user?.name} ({user?.email})
-              </span>
-              <button
-                onClick={handleLogout}
-                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
-              >
-                로그아웃
-              </button>
-            </div>
-          </div>
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* 헤더 */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            관리자 대시보드
+          </h1>
+          <p className="text-gray-600">
+            시스템 전체를 관리하고 각 역할별 페이지에 접근할 수 있습니다.
+          </p>
         </div>
-      </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Users className="h-6 w-6 text-blue-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">총 사용자</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalUsers}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <Calendar className="h-6 w-6 text-green-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">총 예약</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalReservations}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <DollarSign className="h-6 w-6 text-yellow-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">총 수익</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {stats.totalRevenue.toLocaleString()}원
+        {/* 역할별 페이지 접근 섹션 */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+            역할별 페이지 접근
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {rolePages.map((page, index) => (
+              <div
+                key={index}
+                className="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition-shadow"
+              >
+                <div className="flex items-center mb-4">
+                  <span className="text-3xl mr-3">{page.icon}</span>
+                  <h3 className="text-xl font-semibold text-gray-800">
+                    {page.title}
+                  </h3>
+                </div>
+                <p className="text-gray-600 mb-4">
+                  {page.description}
                 </p>
+                <button
+                  onClick={() => router.push(page.path)}
+                  className={`w-full ${page.color} text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200`}
+                >
+                  페이지로 이동
+                </button>
               </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <Activity className="h-6 w-6 text-purple-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">활성 강의실</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.activeRooms}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-orange-100 rounded-lg">
-                <Clock className="h-6 w-6 text-orange-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">대기 예약</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.pendingReservations}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-indigo-100 rounded-lg">
-                <CheckCircle className="h-6 w-6 text-indigo-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">완료 예약</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.completedReservations}</p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="bg-white rounded-lg shadow mb-8">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-medium text-gray-900">빠른 작업</h2>
-          </div>
-          <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* 관리 기능 섹션 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* 학생 관리 */}
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">
+              학생 관리
+            </h3>
+            <div className="space-y-3">
               <button
-                onClick={() => router.push('/admin/users')}
-                className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                onClick={() => router.push('/admin/students')}
+                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
               >
-                <Users className="h-5 w-5 text-gray-600 mr-3" />
-                <span className="text-sm font-medium text-gray-900">사용자 관리</span>
+                학생 목록
               </button>
-              
+              <button
+                onClick={() => router.push('/admin/student-management')}
+                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+              >
+                학생 관리
+              </button>
+            </div>
+          </div>
+
+          {/* 선생님 관리 */}
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">
+              선생님 관리
+            </h3>
+            <div className="space-y-3">
+              <button
+                onClick={() => router.push('/admin/teachers')}
+                className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+              >
+                선생님 목록
+              </button>
+              <button
+                onClick={() => router.push('/admin/teacher-management')}
+                className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+              >
+                선생님 관리
+              </button>
+            </div>
+          </div>
+
+          {/* 시스템 관리 */}
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">
+              시스템 관리
+            </h3>
+            <div className="space-y-3">
+              <button
+                onClick={() => router.push('/admin/settings')}
+                className="w-full bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+              >
+                시스템 설정
+              </button>
+              <button
+                onClick={() => router.push('/admin/analytics')}
+                className="w-full bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+              >
+                분석 대시보드
+              </button>
+            </div>
+          </div>
+
+          {/* 예약 관리 */}
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">
+              예약 관리
+            </h3>
+            <div className="space-y-3">
               <button
                 onClick={() => router.push('/admin/reservations')}
-                className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                className="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
               >
-                <Calendar className="h-5 w-5 text-gray-600 mr-3" />
-                <span className="text-sm font-medium text-gray-900">예약 관리</span>
+                예약 목록
               </button>
-              
               <button
-                onClick={() => router.push('/admin/rooms')}
-                className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                onClick={() => router.push('/admin/calendar')}
+                className="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
               >
-                <Activity className="h-5 w-5 text-gray-600 mr-3" />
-                <span className="text-sm font-medium text-gray-900">강의실 관리</span>
-              </button>
-              
-              <button
-                onClick={() => router.push('/admin/payments')}
-                className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <DollarSign className="h-5 w-5 text-gray-600 mr-3" />
-                <span className="text-sm font-medium text-gray-900">결제 관리</span>
+                캘린더 보기
               </button>
             </div>
           </div>
-        </div>
 
-        {/* Recent Activities */}
-        <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-medium text-gray-900">최근 활동</h2>
+          {/* 커리큘럼 관리 */}
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">
+              커리큘럼 관리
+            </h3>
+            <div className="space-y-3">
+              <button
+                onClick={() => router.push('/admin/courses')}
+                className="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+              >
+                과정 관리
+              </button>
+              <button
+                onClick={() => router.push('/admin/curriculum')}
+                className="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+              >
+                커리큘럼 관리
+              </button>
+            </div>
           </div>
-          <div className="p-6">
-            <div className="space-y-4">
-              {recentActivities.map((activity) => (
-                <div key={activity.id} className="flex items-center p-4 border border-gray-200 rounded-lg">
-                  <div className={`p-2 rounded-lg mr-4 ${
-                    activity.status === 'success' ? 'bg-green-100' :
-                    activity.status === 'warning' ? 'bg-yellow-100' : 'bg-red-100'
-                  }`}>
-                    {activity.type === 'reservation' && <Calendar className="h-4 w-4 text-gray-600" />}
-                    {activity.type === 'payment' && <DollarSign className="h-4 w-4 text-gray-600" />}
-                    {activity.type === 'user' && <Users className="h-4 w-4 text-gray-600" />}
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">{activity.title}</p>
-                    <p className="text-sm text-gray-600">{activity.description}</p>
-                  </div>
-                  <span className="text-xs text-gray-500">{activity.timestamp}</span>
-                </div>
-              ))}
+
+          {/* 결제 관리 */}
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">
+              결제 관리
+            </h3>
+            <div className="space-y-3">
+              <button
+                onClick={() => router.push('/admin/payments')}
+                className="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+              >
+                결제 내역
+              </button>
+              <button
+                onClick={() => router.push('/admin/sales')}
+                className="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+              >
+                매출 관리
+              </button>
             </div>
           </div>
         </div>
