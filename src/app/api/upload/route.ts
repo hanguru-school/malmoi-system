@@ -6,7 +6,7 @@ export const runtime = 'nodejs';
 
 // Configure AWS S3 Client
 const s3Client = new S3Client({
-  region: process.env.AWS_REGION || 'ap-northeast-2',
+  region: process.env.AWS_REGION || 'ap-northeast-1',
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
@@ -89,11 +89,11 @@ export async function POST(request: NextRequest) {
 
     const result = await s3Client.send(uploadCommand);
 
-    console.log('S3 업로드 성공:', result.Location);
+    console.log('S3 업로드 성공:', key);
 
     return NextResponse.json({
       success: true,
-      fileUrl: `https://${bucketName}.s3.${process.env.AWS_REGION || 'ap-northeast-2'}.amazonaws.com/${key}`,
+      fileUrl: `https://${bucketName}.s3.${process.env.AWS_REGION || 'ap-northeast-1'}.amazonaws.com/${key}`,
       key,
       fileName: file.name,
       size: file.size,

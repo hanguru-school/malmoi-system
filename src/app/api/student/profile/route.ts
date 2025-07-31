@@ -25,7 +25,8 @@ export async function GET(request: NextRequest) {
         user: {
           select: {
             email: true,
-            phone: true
+            phone: true,
+            name: true
           }
         }
       }
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
       success: true,
       student: {
         id: student.id,
-        name: student.name,
+        name: student.name || student.user.name,
         kanjiName: student.kanjiName,
         yomigana: student.yomigana,
         koreanName: student.koreanName,

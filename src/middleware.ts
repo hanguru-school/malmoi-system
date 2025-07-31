@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { isAuthenticated, hasRole } from '@/lib/auth-utils';
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -34,7 +35,44 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // 5. 보안 헤더 추가
+  // 5. 인증이 필요한 경로인지 확인
+  const requiresAuth = !pathname.startsWith('/_next') && !pathname.startsWith('/favicon.ico');
+
+  // 6. 인증 확인
+  if (requiresAuth) {
+    const isAuth = isAuthenticated(request);
+    
+    if (!isAuth) {
+      // 인증되지 않은 사용자는 로그인 페이지로 리다이렉트
+      const loginUrl = new URL('/auth/login', request.url);
+      loginUrl.searchParams.set('redirect', pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+
+    // 관리자는 모든 페이지에 접근 가능
+    if (hasRole(request, 'ADMIN')) {
+      return NextResponse.next();
+    }
+
+    // 역할 기반 접근 제어 (관리자 제외)
+    if (pathname.startsWith('/admin') && !hasRole(request, 'ADMIN')) {
+      return NextResponse.redirect(new URL('/auth/unauthorized', request.url));
+    }
+
+    if (pathname.startsWith('/teacher') && !hasRole(request, 'TEACHER')) {
+      return NextResponse.redirect(new URL('/auth/unauthorized', request.url));
+    }
+
+    if (pathname.startsWith('/staff') && !hasRole(request, 'STAFF')) {
+      return NextResponse.redirect(new URL('/auth/unauthorized', request.url));
+    }
+
+    if (pathname.startsWith('/student') && !hasRole(request, 'STUDENT')) {
+      return NextResponse.redirect(new URL('/auth/unauthorized', request.url));
+    }
+  }
+
+  // 7. 보안 헤더 추가
   const response = NextResponse.next();
   
   response.headers.set('X-XSS-Protection', '1; mode=block');

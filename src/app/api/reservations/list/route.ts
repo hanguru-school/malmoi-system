@@ -1,108 +1,134 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import prisma from '@/lib/db';
+import { getSessionFromCookies } from '@/lib/auth-utils';
 
 export async function GET(request: NextRequest) {
   try {
-    // 세션에서 사용자 정보 가져오기
-    const session = request.cookies.get('auth-session');
+    // 인증 확인
+    const session = getSessionFromCookies(request);
     if (!session) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    let sessionData;
-    try {
-      sessionData = JSON.parse(session.value);
-    } catch {
-      return NextResponse.json(
-        { error: 'Invalid session' },
-        { status: 401 }
-      );
-    }
+    const userId = session.user.id;
+    const userRole = session.user.role;
 
-    if (!sessionData?.user?.id) {
-      return NextResponse.json(
-        { error: 'Invalid session data' },
-        { status: 401 }
-      );
-    }
+    // 사용자 역할에 따른 예약 조회
+    let reservations;
 
-    const { searchParams } = new URL(request.url);
-    const startDate = searchParams.get('startDate');
-    const endDate = searchParams.get('endDate');
-    const status = searchParams.get('status');
-
-    // 사용자 정보 가져오기
-    const user = await prisma.user.findUnique({
-      where: { id: sessionData.user.id },
-      include: { student: true }
-    });
-
-    if (!user || !user.student) {
-      return NextResponse.json(
-        { error: 'Student profile not found' },
-        { status: 404 }
-      );
-    }
-
-    // 예약 조회 조건 설정
-    const whereClause: any = {
-      studentId: user.student.id
-    };
-
-    if (startDate && endDate) {
-      whereClause.date = {
-        gte: new Date(startDate),
-        lte: new Date(endDate)
-      };
-    }
-
-    if (status) {
-      whereClause.status = status;
-    }
-
-    // 예약 조회
-    const reservations = await prisma.reservation.findMany({
-      where: whereClause,
-      include: {
-        teacher: true,
-        student: {
-          include: {
-            user: true
+    if (userRole === 'ADMIN') {
+      // 관리자는 모든 예약 조회
+      reservations = await prisma.reservation.findMany({
+        include: {
+          student: {
+            include: {
+              user: {
+                select: {
+                  name: true,
+                  email: true
+                }
+              }
+            }
+          },
+          teacher: {
+            include: {
+              user: {
+                select: {
+                  name: true,
+                  email: true
+                }
+              }
+            }
           }
+        },
+        orderBy: {
+          date: 'desc'
         }
-      },
-      orderBy: {
-        date: 'desc'
-      }
-    });
+      });
+    } else if (userRole === 'STUDENT') {
+      // 학생은 자신의 예약만 조회
+      const student = await prisma.student.findUnique({
+        where: { userId: userId }
+      });
 
-    // 응답 데이터 포맷팅
-    const formattedReservations = reservations.map(reservation => ({
-      id: reservation.id,
-      date: reservation.date.toISOString().split('T')[0],
-      startTime: reservation.startTime,
-      endTime: reservation.endTime,
-      location: reservation.location,
-      status: reservation.status,
-      notes: reservation.notes,
-      teacherName: reservation.teacher?.name || '미배정',
-      studentName: reservation.student.user.name,
-      createdAt: reservation.createdAt,
-      updatedAt: reservation.updatedAt
-    }));
+      if (!student) {
+        return NextResponse.json({ error: 'Student not found' }, { status: 404 });
+      }
+
+      reservations = await prisma.reservation.findMany({
+        where: {
+          studentId: student.id
+        },
+        include: {
+          teacher: {
+            include: {
+              user: {
+                select: {
+                  name: true,
+                  email: true
+                }
+              }
+            }
+          }
+        },
+        orderBy: {
+          date: 'desc'
+        }
+      });
+    } else if (userRole === 'TEACHER') {
+      // 선생님은 자신의 예약만 조회
+      const teacher = await prisma.teacher.findUnique({
+        where: { userId: userId }
+      });
+
+      if (!teacher) {
+        return NextResponse.json({ error: 'Teacher not found' }, { status: 404 });
+      }
+
+      reservations = await prisma.reservation.findMany({
+        where: {
+          teacherId: teacher.id
+        },
+        include: {
+          student: {
+            include: {
+              user: {
+                select: {
+                  name: true,
+                  email: true
+                }
+              }
+            }
+          }
+        },
+        orderBy: {
+          date: 'desc'
+        }
+      });
+    } else {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
 
     return NextResponse.json({
-      reservations: formattedReservations,
-      total: formattedReservations.length
+      success: true,
+      reservations: reservations.map(reservation => ({
+        id: reservation.id,
+        date: reservation.date,
+        startTime: reservation.startTime,
+        endTime: reservation.endTime,
+        status: reservation.status,
+        location: reservation.location,
+        notes: reservation.notes,
+        studentName: reservation.student?.user?.name || reservation.student?.name,
+        teacherName: reservation.teacher?.user?.name || reservation.teacher?.name,
+        createdAt: reservation.createdAt
+      }))
     });
 
   } catch (error) {
     console.error('예약 목록 조회 오류:', error);
     return NextResponse.json(
-      { error: '예약 목록을 불러오는 중 오류가 발생했습니다.' },
+      { error: 'Failed to fetch reservations' },
       { status: 500 }
     );
   }
