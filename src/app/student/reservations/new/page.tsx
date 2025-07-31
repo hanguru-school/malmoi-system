@@ -5,8 +5,6 @@ import { useRouter } from 'next/navigation';
 import { 
   Calendar, 
   Clock, 
-  User, 
-  BookOpen, 
   MapPin, 
   MessageSquare, 
   ArrowLeft, 
@@ -17,31 +15,9 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
-interface Teacher {
-  id: string;
-  name: string;
-  subjects: string[];
-  availableDays: string[];
-  availableTimes: string[];
-  location: string;
-  rating: number;
-  totalStudents: number;
-}
-
-interface Subject {
-  id: string;
-  name: string;
-  description: string;
-  duration: number;
-  price: number;
-  level: string;
-  availableTimes: string[];
-}
-
 interface TimeSlot {
   time: string;
   available: boolean;
-  teacherId?: string;
 }
 
 interface ExistingReservation {
@@ -69,31 +45,16 @@ export default function NewReservationPage() {
   const [showTimeConfirmModal, setShowTimeConfirmModal] = useState(false);
   const [tempSelectedTime, setTempSelectedTime] = useState<string>('');
 
-  // 호버 상태 관리
-  const [hoveredTime, setHoveredTime] = useState<string>('');
-
   // 데이터
   const [availableTimeSlots, setAvailableTimeSlots] = useState<TimeSlot[]>([]);
   const [existingReservations, setExistingReservations] = useState<ExistingReservation[]>([]);
 
-  // 수업 시간 옵션
+  // 수업 시간 옵션 (간소화)
   const durationOptions = [
-    { duration: 60, description: '가장 기본적인 시간입니다. 초급 학생에게 적절합니다.' },
-    { duration: 90, description: '회화 레슨에 가장 적절한 수업 시간입니다. 초급부터 상급까지 빠른 레벨업에 적절합니다.' },
-    { duration: 120, description: '중급 이상의 학생에게 적절하며 다양한 실전회화를 연습할 수 있습니다.' },
-    { duration: 150, description: '특별한 목적을 가진 전문적인 수업에 적합합니다. 중급 이상에게 적절합니다.' },
-    { duration: 180, description: '특별한 목적을 가진 전문적인 수업에 적합합니다. 중급 이상에게 적절합니다.' },
-    { duration: 80, description: '기본보다 조금 더 깊이 있는 수업이 가능합니다. 초급이나 발음 등의 집중레슨에 적절합니다.' }
+    { duration: 60, description: '기본 수업 (60분)' },
+    { duration: 90, description: '표준 수업 (90분)' },
+    { duration: 120, description: '심화 수업 (120분)' }
   ];
-
-  // 기존 예약 데이터 (실제로는 API에서 가져와야 함)
-  // const existingReservations = [
-  //   { date: '2024-01-15', time: '10:00', duration: 90 },
-  //   { date: '2024-01-15', time: '14:00', duration: 120 },
-  //   { date: '2024-01-15', time: '16:30', duration: 60 },
-  //   { date: '2024-01-16', time: '09:00', duration: 150 },
-  //   { date: '2024-01-16', time: '13:00', duration: 90 },
-  // ];
 
   // 날짜 관련
   const [minDate, setMinDate] = useState<string>('');
@@ -133,7 +94,6 @@ export default function NewReservationPage() {
         setExistingReservations(formattedReservations);
       }
 
-      // 기존 데이터 로드 로직...
       await loadAvailableTimeSlots();
       
     } catch (error) {
@@ -154,9 +114,6 @@ export default function NewReservationPage() {
     try {
       if (!selectedDuration) return;
       
-      // 실제 API 호출로 대체
-      await new Promise(resolve => setTimeout(resolve, 500));
-
       // 현재 시간 확인
       const now = new Date();
       const selectedDateObj = new Date(selectedDate);
@@ -164,10 +121,10 @@ export default function NewReservationPage() {
       const currentHour = now.getHours();
       const currentMinute = now.getMinutes();
 
-      // 5분 단위로 시간대 생성 (09:00 ~ 21:00)
+      // 30분 단위로 시간대 생성 (09:00 ~ 21:00)
       const slots: TimeSlot[] = [];
       for (let hour = 9; hour <= 21; hour++) {
-        for (let minute = 0; minute < 60; minute += 5) {
+        for (let minute = 0; minute < 60; minute += 30) {
           const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
           
           // 오늘 날짜인 경우 현재 시간 이전은 예약 불가
@@ -187,9 +144,9 @@ export default function NewReservationPage() {
           // 현재 시간대와 겹치는 예약이 있는지 확인
           const isConflicting = dayReservations.some(reservation => {
             const reservationStart = new Date(`2024-01-15 ${reservation.time}`);
-            const reservationEnd = new Date(reservationStart.getTime() + (reservation.duration + 10) * 60000); // +10분 준비시간
+            const reservationEnd = new Date(reservationStart.getTime() + (reservation.duration + 10) * 60000);
             const currentStart = new Date(`2024-01-15 ${time}`);
-            const currentEnd = new Date(currentStart.getTime() + (selectedDuration + 10) * 60000); // +10분 준비시간
+            const currentEnd = new Date(currentStart.getTime() + (selectedDuration + 10) * 60000);
             
             return currentStart < reservationEnd && currentEnd > reservationStart;
           });
@@ -227,78 +184,10 @@ export default function NewReservationPage() {
     setTempSelectedTime('');
   };
 
-  // 시간대가 겹치는지 확인하는 함수
-  const isTimeConflicting = (time: string) => {
-    if (!selectedDuration) return false;
-    
-    const dayReservations = existingReservations.filter(r => r.date === selectedDate);
-    const currentStart = new Date(`2024-01-15 ${time}`);
-    const currentEnd = new Date(currentStart.getTime() + (selectedDuration + 10) * 60000);
-    
-    return dayReservations.some(reservation => {
-      const reservationStart = new Date(`2024-01-15 ${reservation.time}`);
-      const reservationEnd = new Date(reservationStart.getTime() + (reservation.duration + 10) * 60000);
-      return currentStart < reservationEnd && currentEnd > reservationStart;
-    });
-  };
-
-  // 시간이 선택된 범위에 포함되는지 확인하는 함수
-  const isTimeInSelectedRange = (time: string) => {
-    if (!selectedTime || !selectedDuration) return false;
-    
-    const selectedStart = new Date(`2024-01-15 ${selectedTime}`);
-    const selectedEnd = new Date(selectedStart.getTime() + (selectedDuration + 10) * 60000);
-    const currentTime = new Date(`2024-01-15 ${time}`);
-    
-    return currentTime >= selectedStart && currentTime < selectedEnd;
-  };
-
-  // 시간이 호버된 범위에 포함되는지 확인하는 함수
-  const isTimeInHoveredRange = (time: string) => {
-    if (!hoveredTime || !selectedDuration) return false;
-    
-    const hoverStart = new Date(`2024-01-15 ${hoveredTime}`);
-    const hoverEnd = new Date(hoverStart.getTime() + (selectedDuration + 10) * 60000);
-    const currentTime = new Date(`2024-01-15 ${time}`);
-    
-    return currentTime >= hoverStart && currentTime < hoverEnd;
-  };
-
-  // 시간대가 중복된 범위에 포함되는지 확인하는 함수
-  const isTimeInConflictingRange = (time: string) => {
-    if (!selectedDuration) return false;
-    
-    const dayReservations = existingReservations.filter(r => r.date === selectedDate);
-    const currentTime = new Date(`2024-01-15 ${time}`);
-    
-    return dayReservations.some(reservation => {
-      const reservationStart = new Date(`2024-01-15 ${reservation.time}`);
-      const reservationEnd = new Date(reservationStart.getTime() + (reservation.duration + 10) * 60000);
-      return currentTime >= reservationStart && currentTime < reservationEnd;
-    });
-  };
-
-  // 시간대의 상태를 결정하는 함수
-  const getTimeSlotStatus = (time: string) => {
-    if (!selectedDuration) return 'disabled';
-    
-    const isConflicting = isTimeConflicting(time);
-    const isHovered = isTimeInHoveredRange(time);
-    const isSelected = isTimeInSelectedRange(time);
-    
-    if (isSelected) {
-      return 'selected';
-    } else if (isConflicting) {
-      return isHovered ? 'conflicting-hover' : 'conflicting';
-    } else {
-      return isHovered ? 'available-hover' : 'available';
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!selectedDate || !selectedTime) {
+    if (!selectedDate || !selectedTime || !selectedDuration || !selectedLocation) {
       setError('모든 필수 항목을 선택해주세요.');
       return;
     }
@@ -351,7 +240,7 @@ export default function NewReservationPage() {
   // 선택된 시간의 종료 시간 계산
   const getEndTime = (startTime: string, duration: number) => {
     const start = new Date(`2024-01-15 ${startTime}`);
-    const end = new Date(start.getTime() + (duration + 10) * 60000); // +10분 준비시간
+    const end = new Date(start.getTime() + duration * 60000);
     return end.toTimeString().slice(0, 5);
   };
 
@@ -366,7 +255,7 @@ export default function NewReservationPage() {
     const selectedDateObj = new Date(selectedDate);
 
     for (let hour = startHour; hour < endHour; hour++) {
-      for (let minute = 0; minute < 60; minute += 5) { // 5분 단위로 변경
+      for (let minute = 0; minute < 60; minute += 30) { // 30분 단위로 변경
         const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
         const slotTime = new Date(selectedDateObj);
         slotTime.setHours(hour, minute, 0, 0);
@@ -378,8 +267,8 @@ export default function NewReservationPage() {
         // 실제 예약된 시간인지 확인
         const isBooked = existingReservations.some(reservation => 
           reservation.date === selectedDate && 
-          reservation.time === timeString && // timeString으로 변경
-          ['CONFIRMED', 'PENDING'].includes(reservation.status) // status 필드 추가
+          reservation.time === timeString &&
+          ['CONFIRMED', 'PENDING'].includes(reservation.status)
         );
 
         const isAvailable = !isPast && !isBooked;
@@ -390,14 +279,14 @@ export default function NewReservationPage() {
             onClick={() => isAvailable && handleTimeSelect(timeString)}
             disabled={!isAvailable}
             className={`
-              p-2 rounded-lg text-xs font-medium transition-all duration-200
+              p-3 rounded-lg text-sm font-medium transition-all duration-200
               ${isAvailable 
                 ? 'bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200' 
                 : 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed'
               }
               ${selectedTime === timeString ? 'bg-blue-600 text-white border-blue-600' : ''}
               hover:${isAvailable ? 'bg-orange-100 border-orange-300' : ''}
-              w-full sm:w-auto min-w-[60px] sm:min-w-[70px]
+              w-full sm:w-auto min-w-[80px]
             `}
           >
             {timeString}
@@ -407,7 +296,7 @@ export default function NewReservationPage() {
     }
 
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
         {timeSlots}
       </div>
     );
@@ -451,7 +340,7 @@ export default function NewReservationPage() {
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">새 예약하기</h1>
             <p className="text-lg text-gray-600">
-              원하는 선생님과 시간을 선택하여 수업을 예약하세요
+              수업 방식, 시간, 날짜를 선택하여 수업을 예약하세요
             </p>
           </div>
           <Link
@@ -511,7 +400,7 @@ export default function NewReservationPage() {
                 <Clock className="w-5 h-5 text-green-600" />
                 수업 시간 선택
               </h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {durationOptions.map((option) => (
                   <button
                     key={option.duration}

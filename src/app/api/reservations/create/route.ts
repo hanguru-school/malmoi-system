@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     if (!session) {
       console.log('세션 없음 - 401 반환');
       return NextResponse.json(
-        { error: 'Authentication required' },
+        { error: '로그인이 필요합니다.' },
         { status: 401 }
       );
     }
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     if (!date || !time || !duration || !location) {
       console.log('필수 필드 누락:', { date, time, duration, location });
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: '날짜, 시간, 수업시간, 수업방식은 필수입니다.' },
         { status: 400 }
       );
     }
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
     if (reservationDateTime <= now) {
       console.log('과거 시간 예약 시도 - 400 반환');
       return NextResponse.json(
-        { error: 'Cannot book reservations in the past' },
+        { error: '과거 시간에는 예약할 수 없습니다.' },
         { status: 400 }
       );
     }
@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
     if (!user) {
       console.log('사용자 정보 없음 - 404 반환');
       return NextResponse.json(
-        { error: 'User not found' },
+        { error: '사용자 정보를 찾을 수 없습니다.' },
         { status: 404 }
       );
     }
@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
     if (!user.student) {
       console.log('학생 프로필 없음 - 404 반환');
       return NextResponse.json(
-        { error: 'Student profile not found' },
+        { error: '학생 프로필이 없습니다. 회원가입을 완료해주세요.' },
         { status: 404 }
       );
     }
@@ -138,6 +138,7 @@ export async function POST(request: NextRequest) {
       where: {
         date: new Date(date),
         startTime: time,
+        studentId: user.student.id,
         status: {
           in: ['CONFIRMED', 'PENDING']
         }
@@ -147,7 +148,7 @@ export async function POST(request: NextRequest) {
     if (existingReservation) {
       console.log('중복 예약 발견:', existingReservation.id);
       return NextResponse.json(
-        { error: 'This time slot is already booked' },
+        { error: '해당 시간에 이미 예약이 있습니다.' },
         { status: 409 }
       );
     }
@@ -187,7 +188,7 @@ export async function POST(request: NextRequest) {
       } catch (teacherError) {
         console.error('강사 생성 실패:', teacherError);
         return NextResponse.json(
-          { error: 'Failed to create teacher profile' },
+          { error: '강사 정보를 생성할 수 없습니다.' },
           { status: 500 }
         );
       }
@@ -199,7 +200,7 @@ export async function POST(request: NextRequest) {
       date: new Date(date),
       startTime: time,
       endTime: getEndTime(time, duration),
-      location: location,
+      location: location === '온라인' ? 'ONLINE' : 'OFFLINE',
       notes: notes || '',
       status: ReservationStatus.CONFIRMED,
       studentId: user.student.id,
@@ -219,6 +220,7 @@ export async function POST(request: NextRequest) {
     console.log('예약 생성 성공:', reservation.id);
 
     return NextResponse.json({
+      success: true,
       message: '예약이 성공적으로 완료되었습니다.',
       reservation: {
         id: reservation.id,
