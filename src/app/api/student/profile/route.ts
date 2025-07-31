@@ -4,17 +4,23 @@ import { getSessionFromCookies } from '@/lib/auth-utils';
 
 export async function GET(request: NextRequest) {
   try {
+    console.log('=== 학생 프로필 조회 시작 ===');
+    
     // 인증 확인
     const session = getSessionFromCookies(request);
     if (!session) {
+      console.log('세션 없음');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const userId = session.user.id;
     const userRole = session.user.role;
 
+    console.log('사용자 정보:', { userId, userRole });
+
     // 학생 정보 확인
     if (userRole !== 'STUDENT') {
+      console.log('학생이 아님:', userRole);
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
@@ -33,8 +39,11 @@ export async function GET(request: NextRequest) {
     });
 
     if (!student) {
+      console.log('학생 정보 없음');
       return NextResponse.json({ error: 'Student not found' }, { status: 404 });
     }
+
+    console.log('학생 정보 조회 성공:', student.id);
 
     return NextResponse.json({
       success: true,
@@ -48,7 +57,6 @@ export async function GET(request: NextRequest) {
         email: student.user.email,
         level: student.level,
         points: student.points,
-        avatar: student.avatar,
         joinDate: student.joinDate,
         createdAt: student.createdAt,
         updatedAt: student.updatedAt
@@ -66,21 +74,29 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    console.log('=== 학생 프로필 업데이트 시작 ===');
+    
     // 인증 확인
     const session = getSessionFromCookies(request);
     if (!session) {
+      console.log('세션 없음');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const userId = session.user.id;
     const userRole = session.user.role;
 
+    console.log('사용자 정보:', { userId, userRole });
+
     // 학생 정보 확인
     if (userRole !== 'STUDENT') {
+      console.log('학생이 아님:', userRole);
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const body = await request.json();
+    console.log('업데이트 데이터:', body);
+    
     const {
       kanjiName,
       yomigana,
@@ -100,10 +116,11 @@ export async function PUT(request: NextRequest) {
         yomigana: yomigana || undefined,
         koreanName: koreanName || undefined,
         phone: phone || undefined,
-        avatar: avatar || undefined,
         updatedAt: new Date()
       }
     });
+
+    console.log('학생 정보 업데이트 성공:', updatedStudent.id);
 
     // 사용자 정보도 업데이트
     if (email) {
@@ -114,6 +131,7 @@ export async function PUT(request: NextRequest) {
           updatedAt: new Date()
         }
       });
+      console.log('사용자 이메일 업데이트 성공');
     }
 
     return NextResponse.json({
@@ -125,8 +143,7 @@ export async function PUT(request: NextRequest) {
         kanjiName: updatedStudent.kanjiName,
         yomigana: updatedStudent.yomigana,
         koreanName: updatedStudent.koreanName,
-        phone: updatedStudent.phone,
-        avatar: updatedStudent.avatar
+        phone: updatedStudent.phone
       }
     });
 
