@@ -7,6 +7,22 @@ export default function LoadingPage() {
   const router = useRouter();
   const [status, setStatus] = useState<'checking' | 'success' | 'error'>('checking');
 
+  // 사용자 역할에 따른 리디렉션 경로 결정
+  const getRedirectPath = (userRole: string) => {
+    switch (userRole.toLowerCase()) {
+      case 'student':
+        return '/student/dashboard';
+      case 'admin':
+        return '/admin/dashboard';
+      case 'teacher':
+        return '/teacher/dashboard';
+      case 'staff':
+        return '/staff/home';
+      default:
+        return '/student/dashboard'; // 기본값
+    }
+  };
+
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
@@ -17,10 +33,13 @@ export default function LoadingPage() {
           const data = await response.json();
           
           if (data.user && data.user.id) {
-            // 로그인 성공 - 대시보드로 이동
+            // 로그인 성공 - 역할에 따른 대시보드로 이동
             setStatus('success');
+            const redirectPath = getRedirectPath(data.user.role);
+            console.log('사용자 역할:', data.user.role, '리디렉션 경로:', redirectPath);
+            
             setTimeout(() => {
-              router.push('/student/home');
+              router.push(redirectPath);
             }, 1000);
           } else {
             // 로그인 실패 - 로그인 페이지로 이동

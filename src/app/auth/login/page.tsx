@@ -14,7 +14,32 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState('ko');
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, user } = useAuth();
+
+  // 사용자 역할에 따른 리디렉션 경로 결정
+  const getRedirectPath = (userRole: string) => {
+    switch (userRole.toLowerCase()) {
+      case 'student':
+        return '/student/dashboard';
+      case 'admin':
+        return '/admin/dashboard';
+      case 'teacher':
+        return '/teacher/dashboard';
+      case 'staff':
+        return '/staff/home';
+      default:
+        return '/student/dashboard'; // 기본값
+    }
+  };
+
+  // 로그인 성공 후 역할에 따른 리디렉션
+  useEffect(() => {
+    if (user) {
+      const redirectPath = getRedirectPath(user.role);
+      console.log('로그인 성공 - 사용자 역할:', user.role, '리디렉션 경로:', redirectPath);
+      router.push(redirectPath);
+    }
+  }, [user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,8 +55,8 @@ export default function LoginPage() {
       setMessage('로그인에 성공했습니다.');
       setError('');
       
-      // 로딩 페이지로 이동하여 세션 확인
-      router.push('/student/loading');
+      // useAuth의 login 함수가 성공하면 user 상태가 업데이트되고
+      // useEffect에서 자동으로 적절한 대시보드로 리디렉션됩니다.
     } catch (error: any) {
       console.error('로그인 오류:', error);
       setError(error.message || '로그인 중 오류가 발생했습니다.');
