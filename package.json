@@ -4,14 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
-    "vercel-build": "prisma generate && next build --no-lint",
+    "vercel-build": "prisma generate && next build",
     "optimize": "node scripts/optimize.js",
     "type-check": "tsc --noEmit",
     "analyze": "npm run build -- --analyze",
-    "postinstall": "echo 'Post-install script completed'"
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.855.0",
