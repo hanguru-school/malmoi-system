@@ -13,20 +13,7 @@ export function middleware(request: NextRequest) {
     });
   }
   
-  // 2. 브라우저 User-Agent 체크 (개발 모드에서는 우회)
-  if (process.env.NODE_ENV === 'production') {
-    const userAgent = request.headers.get('user-agent') || '';
-    const isBrowser = /Mozilla|Chrome|Safari|Edge|Opera|Firefox/i.test(userAgent);
-    
-    if (!isBrowser) {
-      return new NextResponse('Forbidden: Browser access only', { 
-        status: 403,
-        headers: { 'Content-Type': 'text/plain' }
-      });
-    }
-  }
-
-  // 3. 공개 경로 정의
+  // 2. 공개 경로 정의
   const publicPaths = [
     '/', // 메인 페이지를 공개 경로로 추가
     '/auth/login', '/auth/register', '/auth/cognito-login', '/auth/success',
@@ -40,13 +27,13 @@ export function middleware(request: NextRequest) {
     '/_next', '/favicon.ico', '/public'
   ];
 
-  // 4. 공개 경로인지 확인
+  // 3. 공개 경로인지 확인
   const isPublicPath = publicPaths.some(path => pathname.startsWith(path));
 
-  // 5. 인증이 필요한 경로인지 확인
+  // 4. 인증이 필요한 경로인지 확인
   const requiresAuth = !isPublicPath && !pathname.startsWith('/_next') && !pathname.startsWith('/favicon.ico');
 
-  // 6. 인증 확인
+  // 5. 인증 확인
   if (requiresAuth) {
     const isAuth = isAuthenticated(request);
     
@@ -75,17 +62,13 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // 7. 보안 헤더 추가
+  // 6. 보안 헤더 추가
   const response = NextResponse.next();
   
   response.headers.set('X-XSS-Protection', '1; mode=block');
   response.headers.set('X-Frame-Options', 'SAMEORIGIN');
   response.headers.set('X-Content-Type-Options', 'nosniff');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-  response.headers.set(
-    'Content-Security-Policy',
-    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:;"
-  );
 
   return response;
 }
