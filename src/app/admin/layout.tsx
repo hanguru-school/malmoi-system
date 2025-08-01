@@ -57,19 +57,32 @@ import {
   TestTube as TestTubeIcon,
   Star as StarIcon,
   Zap as ZapIcon,
-  Monitor
+  Monitor,
+  Package,
+  Tag,
+  MessageCircle,
+  History,
+  Download,
+  Eye,
+  Edit3
 } from 'lucide-react';
 
 
 const navigation = [
-  { name: '대시보드', href: '/admin/home', icon: Home },
-  { name: '시스템 대시보드', href: '/admin/system-dashboard', icon: Monitor },
-  { name: '학생 관리', href: '/admin/students', icon: Users },
-  { name: '강사 관리', href: '/admin/teachers', icon: GraduationCap },
-  { name: '수업 관리', href: '/admin/classes', icon: Calendar },
-  { name: '결제 관리', href: '/admin/payments', icon: DollarSign },
+  { name: '대시보드', href: '/admin', icon: Home },
+  { name: '서비스 관리', href: '/admin/service-management', icon: Package },
+  { name: '선생님 관리', href: '/admin/teacher-management', icon: GraduationCap },
+  { name: '고객 관리', href: '/admin/customer-management', icon: Users },
+  { name: '메모 유형 관리', href: '/admin/memo-management', icon: Tag },
+  { name: '관리자 설정', href: '/admin/settings', icon: Shield },
+  { name: '푸시 알림 관리', href: '/admin/push-notification-settings', icon: Bell },
+  { name: '예약 상세정보', href: '/admin/reservations', icon: Calendar },
+  { name: '결제 정보', href: '/admin/payments', icon: DollarSign },
+  { name: '메모 내용', href: '/admin/memo-management', icon: MessageCircle },
+  { name: '송신 메시지', href: '/admin/message-history', icon: MessageSquare },
+  { name: '리뷰 관리', href: '/admin/review-management', icon: Star },
+  { name: '상세정보', href: '/admin/integrated', icon: Eye },
   { name: '통계', href: '/admin/analytics', icon: BarChart3 },
-  { name: '설정', href: '/admin/settings', icon: Settings },
 ];
 
 export default function AdminLayout({
@@ -83,15 +96,27 @@ export default function AdminLayout({
 
   const handleLogout = async () => {
     try {
-      // 쿠키 삭제
-      document.cookie = 'user-session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-      // 로컬 스토리지 삭제
-      localStorage.removeItem('authToken');
-      // 로그인 페이지로 리다이렉트
-      window.location.href = '/auth/login';
+      // API 호출로 로그아웃
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        // 로컬 스토리지 삭제
+        localStorage.removeItem('user-session');
+        // 로그인 페이지로 리다이렉트
+        window.location.href = '/auth/login';
+      } else {
+        throw new Error('로그아웃 실패');
+      }
     } catch (error) {
       console.error('로그아웃 오류:', error);
-      // 오류 발생 시 강제로 로그인 페이지로 이동
+      // 오류 발생 시 강제로 로그아웃 처리
+      document.cookie = 'user-session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      localStorage.removeItem('user-session');
       window.location.href = '/auth/login';
     }
   };

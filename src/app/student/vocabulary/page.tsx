@@ -1,20 +1,33 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
-  BookOpen, 
-  Search, 
-  Filter, 
-  Plus, 
-  Star, 
-  Volume2, 
-  Bookmark,
-  ArrowLeft,
+  BookMarked, 
+  Search,
+  Filter,
+  Play,
+  Volume2,
+  Eye,
+  CalendarDays,
+  GraduationCap,
+  Globe,
+  Monitor,
+  FileText,
+  MessageSquare,
+  Target,
+  TrendingUp,
+  BarChart3,
+  Award,
+  Zap,
   CheckCircle,
   XCircle,
-  RotateCcw,
-  Play,
-  Pause
+  AlertCircle,
+  Heart,
+  Star,
+  Clock,
+  BookOpen,
+  User,
+  Calendar
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -22,482 +35,665 @@ interface Vocabulary {
   id: string;
   word: string;
   meaning: string;
-  pronunciation: string;
+  partOfSpeech: string;
   example: string;
-  category: string;
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
-  learnedDate: string;
+  pronunciation: string;
+  dateAdded: string;
+  lessonId: string;
+  lessonTitle: string;
+  reviewStatus: 'new' | 'learning' | 'reviewed' | 'mastered';
   reviewCount: number;
   lastReviewed?: string;
-  isBookmarked: boolean;
-  isMastered: boolean;
+  difficulty: 'easy' | 'medium' | 'hard';
+  tags: string[];
   audioUrl?: string;
+}
+
+interface VocabularyStats {
+  totalWords: number;
+  masteredWords: number;
+  learningWords: number;
+  newWords: number;
+  averageReviewCount: number;
+  recentProgress: {
+    date: string;
+    wordsLearned: number;
+  }[];
+  partOfSpeechDistribution: {
+    noun: number;
+    verb: number;
+    adjective: number;
+    adverb: number;
+    other: number;
+  };
 }
 
 export default function StudentVocabularyPage() {
   const [vocabulary, setVocabulary] = useState<Vocabulary[]>([]);
+  const [stats, setStats] = useState<VocabularyStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedWord, setSelectedWord] = useState<Vocabulary | null>(null);
+  const [showWordModal, setShowWordModal] = useState(false);
+  
+  // 필터 상태
+  const [partOfSpeechFilter, setPartOfSpeechFilter] = useState('all');
+  const [reviewStatusFilter, setReviewStatusFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('recent');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedDifficulty, setSelectedDifficulty] = useState('all');
-  const [studyMode, setStudyMode] = useState(false);
-  const [currentWordIndex, setCurrentWordIndex] = useState(0);
-  const [showAnswer, setShowAnswer] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
-    // 실제 API 호출로 대체
-    setTimeout(() => {
-      setVocabulary([
-        {
-          id: '1',
-          word: '자기소개',
-          meaning: '자신을 다른 사람에게 소개하는 것',
-          pronunciation: '자기소개',
-          example: '안녕하세요, 자기소개를 하겠습니다.',
-          category: '일상생활',
-          difficulty: 'beginner',
-          learnedDate: '2024-01-15',
-          reviewCount: 3,
-          lastReviewed: '2024-01-17',
-          isBookmarked: true,
-          isMastered: true,
-          audioUrl: '/audio/자기소개.mp3'
-        },
-        {
-          id: '2',
-          word: '취미',
-          meaning: '일상생활에서 즐기는 활동',
-          pronunciation: '취미',
-          example: '제 취미는 독서입니다.',
-          category: '일상생활',
-          difficulty: 'beginner',
-          learnedDate: '2024-01-15',
-          reviewCount: 2,
-          lastReviewed: '2024-01-16',
-          isBookmarked: false,
-          isMastered: true,
-          audioUrl: '/audio/취미.mp3'
-        },
-        {
-          id: '3',
-          word: '회의',
-          meaning: '여러 사람이 모여서 의견을 나누는 것',
-          pronunciation: '회의',
-          example: '오늘 오후에 회의가 있습니다.',
-          category: '비즈니스',
-          difficulty: 'intermediate',
-          learnedDate: '2024-01-12',
-          reviewCount: 1,
-          lastReviewed: '2024-01-14',
-          isBookmarked: true,
-          isMastered: false,
-          audioUrl: '/audio/회의.mp3'
-        },
-        {
-          id: '4',
-          word: '프레젠테이션',
-          meaning: '발표나 설명을 위한 자료',
-          pronunciation: '프레젠테이션',
-          example: '내일 프레젠테이션을 준비해야 합니다.',
-          category: '비즈니스',
-          difficulty: 'intermediate',
-          learnedDate: '2024-01-12',
-          reviewCount: 0,
-          isBookmarked: false,
-          isMastered: false,
-          audioUrl: '/audio/프레젠테이션.mp3'
-        },
-        {
-          id: '5',
-          word: '협력',
-          meaning: '함께 일을 하는 것',
-          pronunciation: '협력',
-          example: '팀원들과 협력해서 프로젝트를 완성했습니다.',
-          category: '비즈니스',
-          difficulty: 'intermediate',
-          learnedDate: '2024-01-10',
-          reviewCount: 2,
-          lastReviewed: '2024-01-13',
-          isBookmarked: false,
-          isMastered: true,
-          audioUrl: '/audio/협력.mp3'
-        },
-        {
-          id: '6',
-          word: '완료',
-          meaning: '일이나 작업이 끝나는 것',
-          pronunciation: '완료',
-          example: '작업이 완료되었습니다.',
-          category: '일반',
-          difficulty: 'beginner',
-          learnedDate: '2024-01-10',
-          reviewCount: 4,
-          lastReviewed: '2024-01-15',
-          isBookmarked: true,
-          isMastered: true,
-          audioUrl: '/audio/완료.mp3'
-        },
-        {
-          id: '7',
-          word: '발음',
-          meaning: '소리를 내는 방법',
-          pronunciation: '발음',
-          example: '한국어 발음을 연습하고 있습니다.',
-          category: '학습',
-          difficulty: 'beginner',
-          learnedDate: '2024-01-08',
-          reviewCount: 5,
-          lastReviewed: '2024-01-16',
-          isBookmarked: true,
-          isMastered: true,
-          audioUrl: '/audio/발음.mp3'
-        },
-        {
-          id: '8',
-          word: '문법',
-          meaning: '언어의 규칙',
-          pronunciation: '문법',
-          example: '한국어 문법을 공부하고 있습니다.',
-          category: '학습',
-          difficulty: 'intermediate',
-          learnedDate: '2024-01-08',
-          reviewCount: 3,
-          lastReviewed: '2024-01-14',
-          isBookmarked: false,
-          isMastered: false,
-          audioUrl: '/audio/문법.mp3'
-        }
-      ]);
-      setLoading(false);
-    }, 1000);
+    const fetchVocabulary = async () => {
+      try {
+        setLoading(true);
+        
+        // 실제 API 호출로 대체
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // 모의 데이터
+        const mockVocabulary: Vocabulary[] = [
+          {
+            id: '1',
+            word: '안녕하세요',
+            meaning: 'Hello (formal)',
+            partOfSpeech: '인사말',
+            example: '안녕하세요, 저는 마리아입니다.',
+            pronunciation: 'annyeonghaseyo',
+            dateAdded: '2024-01-15',
+            lessonId: 'lesson-1',
+            lessonTitle: '기초 인사말',
+            reviewStatus: 'mastered',
+            reviewCount: 5,
+            lastReviewed: '2024-01-20',
+            difficulty: 'easy',
+            tags: ['인사', '기초'],
+            audioUrl: '/audio/annyeonghaseyo.mp3'
+          },
+          {
+            id: '2',
+            word: '감사합니다',
+            meaning: 'Thank you (formal)',
+            partOfSpeech: '인사말',
+            example: '도와주셔서 감사합니다.',
+            pronunciation: 'gamsahamnida',
+            dateAdded: '2024-01-15',
+            lessonId: 'lesson-1',
+            lessonTitle: '기초 인사말',
+            reviewStatus: 'reviewed',
+            reviewCount: 3,
+            lastReviewed: '2024-01-18',
+            difficulty: 'easy',
+            tags: ['인사', '기초'],
+            audioUrl: '/audio/gamsahamnida.mp3'
+          },
+          {
+            id: '3',
+            word: '학생',
+            meaning: 'Student',
+            partOfSpeech: '명사',
+            example: '저는 한국어 학생입니다.',
+            pronunciation: 'haksaeng',
+            dateAdded: '2024-01-10',
+            lessonId: 'lesson-2',
+            lessonTitle: '자기소개',
+            reviewStatus: 'learning',
+            reviewCount: 2,
+            lastReviewed: '2024-01-16',
+            difficulty: 'medium',
+            tags: ['직업', '자기소개']
+          },
+          {
+            id: '4',
+            word: '공부하다',
+            meaning: 'To study',
+            partOfSpeech: '동사',
+            example: '한국어를 공부하고 있습니다.',
+            pronunciation: 'gongbuhada',
+            dateAdded: '2024-01-12',
+            lessonId: 'lesson-3',
+            lessonTitle: '일상 활동',
+            reviewStatus: 'new',
+            reviewCount: 0,
+            difficulty: 'medium',
+            tags: ['학습', '활동']
+          },
+          {
+            id: '5',
+            word: '좋다',
+            meaning: 'Good',
+            partOfSpeech: '형용사',
+            example: '한국어가 좋습니다.',
+            pronunciation: 'jota',
+            dateAdded: '2024-01-14',
+            lessonId: 'lesson-4',
+            lessonTitle: '감정 표현',
+            reviewStatus: 'learning',
+            reviewCount: 1,
+            lastReviewed: '2024-01-17',
+            difficulty: 'easy',
+            tags: ['감정', '기초']
+          }
+        ];
+        
+        setVocabulary(mockVocabulary);
+        
+        // 통계 데이터
+        setStats({
+          totalWords: 5,
+          masteredWords: 1,
+          learningWords: 2,
+          newWords: 1,
+          averageReviewCount: 2.2,
+          recentProgress: [
+            { date: '2024-01-20', wordsLearned: 2 },
+            { date: '2024-01-18', wordsLearned: 1 },
+            { date: '2024-01-16', wordsLearned: 1 }
+          ],
+          partOfSpeechDistribution: {
+            noun: 1,
+            verb: 1,
+            adjective: 1,
+            adverb: 0,
+            other: 2
+          }
+        });
+      } catch (error) {
+        console.error('단어장 로드 오류:', error);
+        setVocabulary([]);
+        setStats(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchVocabulary();
   }, []);
 
-  const filteredVocabulary = vocabulary.filter(vocab => {
-    const matchesSearch = vocab.word.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         vocab.meaning.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         vocab.category.toLowerCase().includes(searchTerm.toLowerCase());
+  // 필터링된 단어 목록
+  const getFilteredVocabulary = () => {
+    let filtered = vocabulary;
     
-    const matchesCategory = selectedCategory === 'all' || vocab.category === selectedCategory;
-    const matchesDifficulty = selectedDifficulty === 'all' || vocab.difficulty === selectedDifficulty;
+    // 품사 필터
+    if (partOfSpeechFilter !== 'all') {
+      filtered = filtered.filter(vocab => vocab.partOfSpeech === partOfSpeechFilter);
+    }
     
-    return matchesSearch && matchesCategory && matchesDifficulty;
-  });
+    // 복습 상태 필터
+    if (reviewStatusFilter !== 'all') {
+      filtered = filtered.filter(vocab => vocab.reviewStatus === reviewStatusFilter);
+    }
+    
+    // 검색어 필터
+    if (searchTerm) {
+      filtered = filtered.filter(vocab => 
+        vocab.word.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        vocab.meaning.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        vocab.example.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    // 정렬
+    switch (sortBy) {
+      case 'recent':
+        return filtered.sort((a, b) => new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime());
+      case 'frequency':
+        return filtered.sort((a, b) => b.reviewCount - a.reviewCount);
+      case 'difficulty':
+        const difficultyOrder = { easy: 0, medium: 1, hard: 2 };
+        return filtered.sort((a, b) => difficultyOrder[a.difficulty] - difficultyOrder[b.difficulty]);
+      case 'alphabetical':
+        return filtered.sort((a, b) => a.word.localeCompare(b.word));
+      default:
+        return filtered;
+    }
+  };
 
-  const categories = ['all', ...Array.from(new Set(vocabulary.map(v => v.category)))];
-  const difficulties = ['all', 'beginner', 'intermediate', 'advanced'];
+  const handleReviewStatusChange = async (wordId: string, newStatus: string) => {
+    try {
+      // 실제 API 호출로 대체
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      setVocabulary(prev => prev.map(word => 
+        word.id === wordId 
+          ? { 
+              ...word, 
+              reviewStatus: newStatus as any,
+              reviewCount: word.reviewCount + 1,
+              lastReviewed: new Date().toISOString()
+            }
+          : word
+      ));
+    } catch (error) {
+      console.error('복습 상태 변경 오류:', error);
+    }
+  };
+
+  const getReviewStatusColor = (status: string) => {
+    switch (status) {
+      case 'mastered': return 'bg-green-100 text-green-800';
+      case 'reviewed': return 'bg-blue-100 text-blue-800';
+      case 'learning': return 'bg-yellow-100 text-yellow-800';
+      case 'new': return 'bg-gray-100 text-gray-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getReviewStatusText = (status: string) => {
+    switch (status) {
+      case 'mastered': return '외웠어요';
+      case 'reviewed': return '복습 완료';
+      case 'learning': return '학습 중';
+      case 'new': return '새로운 단어';
+      default: return '알 수 없음';
+    }
+  };
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'beginner': return 'text-green-600 bg-green-100';
-      case 'intermediate': return 'text-yellow-600 bg-yellow-100';
-      case 'advanced': return 'text-red-600 bg-red-100';
-      default: return 'text-gray-600 bg-gray-100';
+      case 'easy': return 'bg-green-100 text-green-800';
+      case 'medium': return 'bg-yellow-100 text-yellow-800';
+      case 'hard': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
-  };
-
-  const getDifficultyText = (difficulty: string) => {
-    switch (difficulty) {
-      case 'beginner': return '초급';
-      case 'intermediate': return '중급';
-      case 'advanced': return '고급';
-      default: return difficulty;
-    }
-  };
-
-  const handleBookmarkToggle = (id: string) => {
-    setVocabulary(prev => prev.map(v => 
-      v.id === id ? { ...v, isBookmarked: !v.isBookmarked } : v
-    ));
-  };
-
-  const handleMasterToggle = (id: string) => {
-    setVocabulary(prev => prev.map(v => 
-      v.id === id ? { ...v, isMastered: !v.isMastered } : v
-    ));
-  };
-
-  const startStudyMode = () => {
-    if (filteredVocabulary.length > 0) {
-      setStudyMode(true);
-      setCurrentWordIndex(0);
-      setShowAnswer(false);
-    }
-  };
-
-  const exitStudyMode = () => {
-    setStudyMode(false);
-    setShowAnswer(false);
-  };
-
-  const nextWord = () => {
-    if (currentWordIndex < filteredVocabulary.length - 1) {
-      setCurrentWordIndex(currentWordIndex + 1);
-      setShowAnswer(false);
-    } else {
-      exitStudyMode();
-    }
-  };
-
-  const previousWord = () => {
-    if (currentWordIndex > 0) {
-      setCurrentWordIndex(currentWordIndex - 1);
-      setShowAnswer(false);
-    }
-  };
-
-  const playAudio = () => {
-    setIsPlaying(true);
-    // 실제 오디오 재생 로직
-    setTimeout(() => setIsPlaying(false), 2000);
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">어휘를 불러오는 중...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (studyMode && filteredVocabulary.length > 0) {
-    const currentWord = filteredVocabulary[currentWordIndex];
-    
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-4xl mx-auto p-6">
-          {/* 헤더 */}
-          <div className="flex items-center justify-between mb-6">
-            <button
-              onClick={exitStudyMode}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>학습 모드 종료</span>
-            </button>
-            <div className="text-center">
-              <h1 className="text-2xl font-bold text-gray-900">어휘 학습</h1>
-              <p className="text-gray-600">{currentWordIndex + 1} / {filteredVocabulary.length}</p>
-            </div>
-            <div className="w-32"></div>
-          </div>
-
-          {/* 학습 카드 */}
-          <div className="bg-white rounded-xl shadow-sm p-8 mb-6">
-            <div className="text-center mb-8">
-              <h2 className="text-4xl font-bold text-gray-900 mb-4">{currentWord.word}</h2>
-              <div className="flex items-center justify-center gap-4 mb-4">
-                <button
-                  onClick={playAudio}
-                  className="p-2 rounded-full bg-blue-100 hover:bg-blue-200 transition-colors"
-                >
-                  {isPlaying ? <Pause className="w-5 h-5 text-blue-600" /> : <Volume2 className="w-5 h-5 text-blue-600" />}
-                </button>
-                <span className="text-gray-600">{currentWord.pronunciation}</span>
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDifficultyColor(currentWord.difficulty)}`}>
-                  {getDifficultyText(currentWord.difficulty)}
-                </span>
-              </div>
-            </div>
-
-            {!showAnswer ? (
-              <div className="text-center">
-                <button
-                  onClick={() => setShowAnswer(true)}
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  답 보기
-                </button>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                <div className="text-center">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">의미</h3>
-                  <p className="text-gray-700">{currentWord.meaning}</p>
-                </div>
-                
-                <div className="text-center">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">예문</h3>
-                  <p className="text-gray-700 italic">"{currentWord.example}"</p>
-                </div>
-
-                <div className="flex items-center justify-center gap-4">
-                  <button
-                    onClick={() => handleMasterToggle(currentWord.id)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                      currentWord.isMastered 
-                        ? 'bg-green-600 text-white hover:bg-green-700' 
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
-                  >
-                    {currentWord.isMastered ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
-                    <span>{currentWord.isMastered ? '마스터됨' : '마스터 안됨'}</span>
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* 네비게이션 */}
-            <div className="flex items-center justify-between mt-8">
-              <button
-                onClick={previousWord}
-                disabled={currentWordIndex === 0}
-                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                이전
-              </button>
-              <button
-                onClick={nextWord}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                {currentWordIndex === filteredVocabulary.length - 1 ? '완료' : '다음'}
-              </button>
-            </div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           </div>
         </div>
       </div>
     );
   }
+
+  const filteredVocabulary = getFilteredVocabulary();
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto p-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6">
+      <div className="max-w-6xl mx-auto">
         {/* 헤더 */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">어휘</h1>
-            <p className="text-gray-600">학습한 어휘를 관리하고 복습하세요</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={startStudyMode}
-              disabled={filteredVocabulary.length === 0}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <BookOpen className="w-4 h-4" />
-              <span>학습 모드</span>
-            </button>
-            <Link
-              href="/student/home"
-              className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>돌아가기</span>
-            </Link>
-          </div>
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">복습 단어장</h1>
+          <p className="text-lg text-gray-600">
+            학습한 단어들을 정리하고 복습하세요
+          </p>
         </div>
 
-        {/* 검색 및 필터 */}
-        <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                placeholder="어휘 검색..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              {categories.map(category => (
-                <option key={category} value={category}>
-                  {category === 'all' ? '전체 카테고리' : category}
-                </option>
-              ))}
-            </select>
-            <select
-              value={selectedDifficulty}
-              onChange={(e) => setSelectedDifficulty(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              {difficulties.map(difficulty => (
-                <option key={difficulty} value={difficulty}>
-                  {difficulty === 'all' ? '전체 난이도' : getDifficultyText(difficulty)}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* 통계 */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-xl shadow-sm p-4">
-            <div className="text-2xl font-bold text-gray-900">{vocabulary.length}</div>
-            <div className="text-sm text-gray-600">총 어휘</div>
-          </div>
-          <div className="bg-white rounded-xl shadow-sm p-4">
-            <div className="text-2xl font-bold text-green-600">
-              {vocabulary.filter(v => v.isMastered).length}
-            </div>
-            <div className="text-sm text-gray-600">마스터</div>
-          </div>
-          <div className="bg-white rounded-xl shadow-sm p-4">
-            <div className="text-2xl font-bold text-yellow-600">
-              {vocabulary.filter(v => v.isBookmarked).length}
-            </div>
-            <div className="text-sm text-gray-600">북마크</div>
-          </div>
-          <div className="bg-white rounded-xl shadow-sm p-4">
-            <div className="text-2xl font-bold text-blue-600">
-              {Math.round(vocabulary.reduce((sum, v) => sum + v.reviewCount, 0) / vocabulary.length * 10) / 10}
-            </div>
-            <div className="text-sm text-gray-600">평균 복습</div>
-          </div>
-        </div>
-
-        {/* 어휘 목록 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredVocabulary.map((vocab) => (
-            <div key={vocab.id} className="bg-white rounded-xl shadow-sm p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">{vocab.word}</h3>
-                  <p className="text-sm text-gray-600">{vocab.pronunciation}</p>
+        {/* 통계 요약 */}
+        {stats && (
+          <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
+              <BarChart3 className="w-6 h-6 text-blue-600" />
+              단어장 현황
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+              <div className="bg-blue-50 rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <BookMarked className="w-5 h-5 text-blue-600" />
+                  <span className="text-sm text-gray-600">총 단어</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => handleBookmarkToggle(vocab.id)}
-                    className={`p-1 rounded ${vocab.isBookmarked ? 'text-yellow-500' : 'text-gray-400 hover:text-yellow-500'}`}
-                  >
-                    <Bookmark className={`w-4 h-4 ${vocab.isBookmarked ? 'fill-current' : ''}`} />
-                  </button>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDifficultyColor(vocab.difficulty)}`}>
-                    {getDifficultyText(vocab.difficulty)}
-                  </span>
-                </div>
+                <div className="text-2xl font-bold text-blue-600">{stats.totalWords}개</div>
               </div>
 
-              <p className="text-sm text-gray-700 mb-3">{vocab.meaning}</p>
-              <p className="text-xs text-gray-500 italic mb-4">"{vocab.example}"</p>
+              <div className="bg-green-50 rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  <span className="text-sm text-gray-600">외운 단어</span>
+                </div>
+                <div className="text-2xl font-bold text-green-600">{stats.masteredWords}개</div>
+              </div>
 
-              <div className="flex items-center justify-between text-xs text-gray-500">
-                <span>{vocab.category}</span>
-                <div className="flex items-center gap-2">
-                  {vocab.isMastered && <CheckCircle className="w-3 h-3 text-green-500" />}
-                  <span>복습 {vocab.reviewCount}회</span>
+              <div className="bg-yellow-50 rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Clock className="w-5 h-5 text-yellow-600" />
+                  <span className="text-sm text-gray-600">학습 중</span>
+                </div>
+                <div className="text-2xl font-bold text-yellow-600">{stats.learningWords}개</div>
+              </div>
+
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertCircle className="w-5 h-5 text-gray-600" />
+                  <span className="text-sm text-gray-600">새로운 단어</span>
+                </div>
+                <div className="text-2xl font-bold text-gray-600">{stats.newWords}개</div>
+              </div>
+            </div>
+
+            {/* 품사별 분포 */}
+            <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-4">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">품사별 분포</h3>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600 mb-1">{stats.partOfSpeechDistribution.noun}</div>
+                  <div className="text-sm text-gray-600">명사</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600 mb-1">{stats.partOfSpeechDistribution.verb}</div>
+                  <div className="text-sm text-gray-600">동사</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-yellow-600 mb-1">{stats.partOfSpeechDistribution.adjective}</div>
+                  <div className="text-sm text-gray-600">형용사</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-purple-600 mb-1">{stats.partOfSpeechDistribution.adverb}</div>
+                  <div className="text-sm text-gray-600">부사</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-600 mb-1">{stats.partOfSpeechDistribution.other}</div>
+                  <div className="text-sm text-gray-600">기타</div>
                 </div>
               </div>
             </div>
-          ))}
-        </div>
-
-        {filteredVocabulary.length === 0 && (
-          <div className="text-center py-12">
-            <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">어휘가 없습니다</h3>
-            <p className="text-gray-600">검색 조건에 맞는 어휘가 없습니다.</p>
           </div>
         )}
+
+        {/* 필터 및 검색 */}
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+          <div className="flex flex-col lg:flex-row gap-4">
+            {/* 검색 */}
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="단어, 뜻, 예문 검색..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            {/* 필터들 */}
+            <div className="flex flex-wrap gap-4">
+              <select
+                value={partOfSpeechFilter}
+                onChange={(e) => setPartOfSpeechFilter(e.target.value)}
+                className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="all">전체 품사</option>
+                <option value="명사">명사</option>
+                <option value="동사">동사</option>
+                <option value="형용사">형용사</option>
+                <option value="부사">부사</option>
+                <option value="인사말">인사말</option>
+              </select>
+
+              <select
+                value={reviewStatusFilter}
+                onChange={(e) => setReviewStatusFilter(e.target.value)}
+                className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="all">전체 상태</option>
+                <option value="new">새로운 단어</option>
+                <option value="learning">학습 중</option>
+                <option value="reviewed">복습 완료</option>
+                <option value="mastered">외운 단어</option>
+              </select>
+
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="recent">최신순</option>
+                <option value="frequency">복습 빈도순</option>
+                <option value="difficulty">난이도순</option>
+                <option value="alphabetical">가나다순</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* 단어 목록 */}
+        <div className="space-y-6">
+          {filteredVocabulary.length === 0 ? (
+            <div className="bg-white rounded-xl shadow-lg p-12 text-center">
+              <BookMarked className="w-16 h-16 text-gray-400 mx-auto mb-6" />
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+                검색 결과가 없습니다
+              </h2>
+              <p className="text-gray-600">
+                다른 검색어나 필터 조건을 시도해보세요.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredVocabulary.map((word) => (
+                <div key={word.id} className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <h3 className="text-xl font-semibold text-gray-900 mb-2">{word.word}</h3>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDifficultyColor(word.difficulty)}`}>
+                          {word.difficulty === 'easy' ? '쉬움' : 
+                           word.difficulty === 'medium' ? '보통' : '어려움'}
+                        </span>
+                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          {word.partOfSpeech}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {word.audioUrl && (
+                        <button className="flex items-center gap-1 text-blue-600 hover:text-blue-700">
+                          <Volume2 className="w-4 h-4" />
+                          <span className="text-xs">발음</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="mb-4">
+                    <p className="text-gray-700 font-medium mb-2">{word.meaning}</p>
+                    <p className="text-sm text-gray-600 italic">"{word.example}"</p>
+                  </div>
+                  
+                  {/* 복습 상태 */}
+                  <div className="mb-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getReviewStatusColor(word.reviewStatus)}`}>
+                        {getReviewStatusText(word.reviewStatus)}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        복습 {word.reviewCount}회
+                      </span>
+                    </div>
+                    {word.lastReviewed && (
+                      <p className="text-xs text-gray-500">
+                        마지막 복습: {new Date(word.lastReviewed).toLocaleDateString('ko-KR')}
+                      </p>
+                    )}
+                  </div>
+                  
+                  {/* 태그 */}
+                  {word.tags.length > 0 && (
+                    <div className="mb-4">
+                      <div className="flex flex-wrap gap-1">
+                        {word.tags.map((tag, index) => (
+                          <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* 출처 */}
+                  <div className="mb-4 text-xs text-gray-500">
+                    <div className="flex items-center gap-1">
+                      <BookOpen className="w-3 h-3" />
+                      {word.lessonTitle}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Calendar className="w-3 h-3" />
+                      {new Date(word.dateAdded).toLocaleDateString('ko-KR')}
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          setSelectedWord(word);
+                          setShowWordModal(true);
+                        }}
+                        className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm"
+                      >
+                        <Eye className="w-4 h-4" />
+                        상세보기
+                      </button>
+                      {word.audioUrl && (
+                        <button className="flex items-center gap-1 text-green-600 hover:text-green-700 text-sm">
+                          <Play className="w-4 h-4" />
+                          예문 듣기
+                        </button>
+                      )}
+                    </div>
+                    
+                    {/* 복습 상태 변경 버튼 */}
+                    <div className="flex items-center gap-1">
+                      {word.reviewStatus !== 'mastered' && (
+                        <button
+                          onClick={() => handleReviewStatusChange(word.id, 'mastered')}
+                          className="p-1 text-green-600 hover:text-green-700"
+                          title="외웠어요"
+                        >
+                          <CheckCircle className="w-4 h-4" />
+                        </button>
+                      )}
+                      {word.reviewStatus !== 'reviewed' && (
+                        <button
+                          onClick={() => handleReviewStatusChange(word.id, 'reviewed')}
+                          className="p-1 text-blue-600 hover:text-blue-700"
+                          title="복습 완료"
+                        >
+                          <Star className="w-4 h-4" />
+                        </button>
+                      )}
+                      {word.reviewStatus !== 'learning' && (
+                        <button
+                          onClick={() => handleReviewStatusChange(word.id, 'learning')}
+                          className="p-1 text-yellow-600 hover:text-yellow-700"
+                          title="학습 중"
+                        >
+                          <Clock className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* 네비게이션 */}
+        <div className="mt-8 flex flex-wrap gap-4 justify-center">
+          <Link
+            href="/student/mypage"
+            className="flex items-center gap-2 px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+          >
+            <User className="w-5 h-5" />
+            마이페이지
+          </Link>
+          <Link
+            href="/student/lesson-notes"
+            className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <FileText className="w-5 h-5" />
+            레슨노트
+          </Link>
+          <Link
+            href="/student/homework"
+            className="flex items-center gap-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+          >
+            <BookMarked className="w-5 h-5" />
+            숙제
+          </Link>
+        </div>
       </div>
+
+      {/* 단어 상세 모달 */}
+      {showWordModal && selectedWord && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-2xl font-semibold text-gray-900">{selectedWord.word}</h3>
+              <button
+                onClick={() => setShowWordModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <XCircle className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-medium text-gray-900 mb-2">뜻</h4>
+                <p className="text-gray-700">{selectedWord.meaning}</p>
+              </div>
+              
+              <div>
+                <h4 className="font-medium text-gray-900 mb-2">예문</h4>
+                <p className="text-gray-700 italic">"{selectedWord.example}"</p>
+              </div>
+              
+              <div>
+                <h4 className="font-medium text-gray-900 mb-2">발음</h4>
+                <p className="text-gray-700">{selectedWord.pronunciation}</p>
+                {selectedWord.audioUrl && (
+                  <button className="flex items-center gap-2 mt-2 text-blue-600 hover:text-blue-700">
+                    <Play className="w-4 h-4" />
+                    발음 듣기
+                  </button>
+                )}
+              </div>
+              
+              <div>
+                <h4 className="font-medium text-gray-900 mb-2">학습 정보</h4>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-600">품사:</span>
+                    <span className="ml-2">{selectedWord.partOfSpeech}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">난이도:</span>
+                    <span className="ml-2">{selectedWord.difficulty === 'easy' ? '쉬움' : 
+                     selectedWord.difficulty === 'medium' ? '보통' : '어려움'}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">복습 횟수:</span>
+                    <span className="ml-2">{selectedWord.reviewCount}회</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">출처:</span>
+                    <span className="ml-2">{selectedWord.lessonTitle}</span>
+                  </div>
+                </div>
+              </div>
+              
+              {selectedWord.tags.length > 0 && (
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-2">태그</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedWord.tags.map((tag, index) => (
+                      <span key={index} className="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

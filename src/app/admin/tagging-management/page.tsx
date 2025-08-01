@@ -2,8 +2,24 @@
 
 import { CreditCard, Smartphone, BarChart3, Plus, Edit, Trash2, Filter, CheckCircle, XCircle, RefreshCw, Download, Search, Calendar, Clock, Wifi, WifiOff } from 'lucide-react';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { taggingSystem, TaggingLog, UIDRegistration, TaggingDevice } from '@/lib/tagging-system';
+import { taggingSystem, UIDRegistration, TaggingDevice } from '@/lib/tagging-system';
 import TaggingInterface from '@/components/tagging/TaggingInterface';
+
+// API에서 반환하는 실제 로그 타입
+interface ApiTaggingLog {
+  id: string;
+  uid: string;
+  userId: string;
+  userName: string;
+  userRole: string;
+  tagType: string;
+  deviceId: string;
+  deviceName: string;
+  taggedAt: string;
+  studentName?: string;
+  teacherName?: string;
+  staffName?: string;
+}
 
 // 가상화된 리스트 컴포넌트 (성능 최적화)
 const VirtualizedList = ({ items, renderItem, itemHeight = 60 }: {
@@ -42,7 +58,7 @@ const VirtualizedList = ({ items, renderItem, itemHeight = 60 }: {
 
 export default function TaggingManagementPage() {
   const [activeTab, setActiveTab] = useState('overview');
-  const [logs, setLogs] = useState<TaggingLog[]>([]);
+  const [logs, setLogs] = useState<ApiTaggingLog[]>([]);
   const [uidRegistrations, setUIDRegistrations] = useState<UIDRegistration[]>([]);
   const [devices, setDevices] = useState<TaggingDevice[]>([]);
   const [stats, setStats] = useState<Record<string, unknown>>({});
@@ -67,25 +83,58 @@ export default function TaggingManagementPage() {
   const loadData = useCallback(async () => {
     setIsLoading(true);
     try {
-      // 비동기로 데이터 로드
-      const [logsData, registrationsData, devicesData, statsData] = await Promise.all([
-        Promise.resolve(taggingSystem.getLogs()),
-        Promise.resolve(taggingSystem.getUIDRegistrations()),
-        Promise.resolve(taggingSystem.getDevices()),
-        Promise.resolve(taggingSystem.getTaggingStats())
+      // API에서 데이터 로드
+      const [logsResponse, devicesResponse] = await Promise.all([
+        fetch('/api/tagging/logs?' + new URLSearchParams({
+          ...filters,
+          limit: '100',
+          offset: '0'
+        })),
+        fetch('/api/tagging/register')
       ]);
 
-      setLogs(logsData);
-      setUIDRegistrations(registrationsData);
-      setDevices(devicesData);
-      setStats(statsData);
+      if (logsResponse.ok) {
+        const logsData = await logsResponse.json();
+        setLogs(logsData.logs || []);
+        setStats(logsData.stats || {});
+      }
+
+      if (devicesResponse.ok) {
+        const devicesData = await devicesResponse.json();
+        setUIDRegistrations(devicesData.devices || []);
+      }
+
+      // 디바이스 정보는 하드코딩 (실제로는 별도 API 필요)
+      setDevices([
+        {
+          id: 'device_001',
+          name: 'Mac 태깅 리더',
+          type: 'desktop',
+          location: '1층 로비',
+          capabilities: ['felica', 'nfc'],
+          isActive: true,
+          connectionStatus: 'connected',
+          lastSeen: new Date()
+        },
+        {
+          id: 'device_002',
+          name: 'iPad 태깅 리더',
+          type: 'tablet',
+          location: '2층 강의실',
+          capabilities: ['felica', 'nfc', 'qr'],
+          isActive: true,
+          connectionStatus: 'connected',
+          lastSeen: new Date()
+        }
+      ]);
+
       setLastUpdate(new Date());
     } catch (error) {
       console.error('데이터 로드 실패:', error);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [filters]);
 
   useEffect(() => {
     loadData();
@@ -106,12 +155,12 @@ export default function TaggingManagementPage() {
 
     if (filters.startDate) {
       filtered = filtered.filter(log => 
-        log.timestamp >= new Date(filters.startDate)
+        new Date(log.taggedAt) >= new Date(filters.startDate)
       );
     }
     if (filters.endDate) {
       filtered = filtered.filter(log => 
-        log.timestamp <= new Date(filters.endDate)
+        new Date(log.taggedAt) <= new Date(filters.endDate)
       );
     }
     if (filters.userRole) {
@@ -122,17 +171,17 @@ export default function TaggingManagementPage() {
     }
     if (filters.success) {
       filtered = filtered.filter(log => 
-        filters.success === 'true' ? log.success : !log.success
+        filters.success === 'true' // 모든 로그는 성공으로 간주
       );
     }
     if (debouncedSearchTerm) {
       filtered = filtered.filter(log => 
         log.uid.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-        log.userId.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+        log.userName.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
       );
     }
 
-    return filtered.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+    return filtered.sort((a, b) => new Date(b.taggedAt).getTime() - new Date(a.taggedAt).getTime());
   }, [logs, filters, debouncedSearchTerm]);
 
   // 통계 데이터 (메모이제이션)
@@ -348,7 +397,7 @@ export default function TaggingManagementPage() {
                     {filteredLogs.slice(0, 100).map((log) => (
                       <tr key={log.id} className="border-t border-gray-100 hover:bg-gray-50">
                         <td className="py-3 px-4 text-sm font-mono text-gray-900">{log.uid}</td>
-                        <td className="py-3 px-4 text-sm text-gray-900">{log.userId}</td>
+                        <td className="py-3 px-4 text-sm text-gray-900">{log.userName}</td>
                         <td className="py-3 px-4">
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                             log.userRole === 'student' ? 'bg-blue-100 text-blue-800' :
@@ -359,15 +408,11 @@ export default function TaggingManagementPage() {
                             {log.userRole}
                           </span>
                         </td>
-                        <td className="py-3 px-4 text-sm text-gray-600">{log.taggingMethod.toUpperCase()}</td>
-                        <td className="py-3 px-4 text-sm text-gray-600">{formatTime(log.timestamp)}</td>
-                        <td className="py-3 px-4 text-sm text-gray-600">{formatProcessingTime(log.processingTime)}</td>
+                        <td className="py-3 px-4 text-sm text-gray-600">{log.tagType?.toUpperCase() || 'FELICA'}</td>
+                        <td className="py-3 px-4 text-sm text-gray-600">{formatTime(new Date(log.taggedAt))}</td>
+                        <td className="py-3 px-4 text-sm text-gray-600">-</td>
                         <td className="py-3 px-4">
-                          {log.success ? (
-                            <CheckCircle className="w-5 h-5 text-green-600" />
-                          ) : (
-                            <XCircle className="w-5 h-5 text-red-600" />
-                          )}
+                          <CheckCircle className="w-5 h-5 text-green-600" />
                         </td>
                       </tr>
                     ))}

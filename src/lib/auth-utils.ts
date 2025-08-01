@@ -244,3 +244,185 @@ export function createAuthSuccessResponse(session: AuthSession): NextResponse {
   setSessionCookie(response, session);
   return setSecurityHeaders(response);
 } 
+
+/**
+ * 인증 및 권한 관련 유틸리티 함수들
+ */
+
+export interface UserSession {
+  email: string;
+  accountType: string;
+  name: string;
+  role: string;
+  permissions?: string[];
+}
+
+export type UserRole = 'master' | 'admin' | 'teacher' | 'staff' | 'student';
+
+// 역할별 접근 가능한 경로 정의
+const ROLE_ACCESS_PATHS: Record<UserRole, string[]> = {
+  master: ['/admin', '/teacher', '/staff', '/student'],
+  admin: ['/admin'],
+  teacher: ['/teacher'],
+  staff: ['/staff'],
+  student: ['/student']
+};
+
+// 역할별 기본 대시보드 경로
+const ROLE_DASHBOARDS: Record<UserRole, string> = {
+  master: '/admin',
+  admin: '/admin',
+  teacher: '/teacher',
+  staff: '/staff',
+  student: '/student'
+};
+
+/**
+ * 사용자 세션 가져오기
+ */
+export function getUserSession(): UserSession | null {
+  if (typeof window === 'undefined') return null;
+  
+  try {
+    const session = localStorage.getItem('user-session');
+    return session ? JSON.parse(session) : null;
+  } catch (error) {
+    console.error('세션 파싱 오류:', error);
+    return null;
+  }
+}
+
+/**
+ * 사용자 역할 가져오기
+ */
+export function getUserRole(): UserRole | null {
+  const session = getUserSession();
+  if (!session) return null;
+  
+  return (session.accountType || session.role) as UserRole;
+}
+
+/**
+ * 사용자 권한 확인
+ */
+export function hasPermission(permission: string): boolean {
+  const session = getUserSession();
+  if (!session) return false;
+  
+  // 마스터는 모든 권한을 가짐
+  if (session.role === 'master' || session.accountType === 'master') {
+    return true;
+  }
+  
+  return session.permissions?.includes(permission) || false;
+}
+
+/**
+ * 페이지 접근 권한 확인
+ */
+export function canAccessPage(pathname: string): boolean {
+  const userRole = getUserRole();
+  if (!userRole) return false;
+  
+  // 마스터는 모든 페이지에 접근 가능
+  if (userRole === 'master') {
+    return true;
+  }
+  
+  const allowedPaths = ROLE_ACCESS_PATHS[userRole] || [];
+  return allowedPaths.some(path => pathname.startsWith(path));
+}
+
+/**
+ * 역할에 따른 대시보드 경로 가져오기
+ */
+export function getDashboardPath(role: UserRole): string {
+  return ROLE_DASHBOARDS[role] || '/auth/login';
+}
+
+/**
+ * 현재 사용자의 대시보드 경로 가져오기
+ */
+export function getCurrentUserDashboard(): string {
+  const userRole = getUserRole();
+  if (!userRole) return '/auth/login';
+  
+  return getDashboardPath(userRole);
+}
+
+/**
+ * 로그아웃 처리
+ */
+export function logout(): void {
+  if (typeof window === 'undefined') return;
+  
+  localStorage.removeItem('user-session');
+  document.cookie = 'user-session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+  
+  // 로그인 페이지로 리다이렉트
+  window.location.href = '/auth/login';
+}
+
+/**
+ * 권한 기반 컴포넌트 래퍼
+ */
+export function withPermission(
+  WrappedComponent: React.ComponentType<any>,
+  requiredPermission: string
+) {
+  return function PermissionWrapper(props: any) {
+    if (!hasPermission(requiredPermission)) {
+      return (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-red-600 mb-4">접근 권한이 없습니다</h2>
+            <p className="text-gray-600 mb-4">
+              이 페이지에 접근할 권한이 없습니다.
+            </p>
+            <button
+              onClick={() => window.history.back()}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              이전 페이지로 돌아가기
+            </button>
+          </div>
+        </div>
+      );
+    }
+    
+    return <WrappedComponent {...props} />;
+  };
+}
+
+/**
+ * 역할 기반 컴포넌트 래퍼
+ */
+export function withRole(
+  WrappedComponent: React.ComponentType<any>,
+  allowedRoles: UserRole[]
+) {
+  return function RoleWrapper(props: any) {
+    const userRole = getUserRole();
+    
+    if (!userRole || !allowedRoles.includes(userRole)) {
+      return (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-red-600 mb-4">접근 권한이 없습니다</h2>
+            <p className="text-gray-600 mb-4">
+              이 페이지에 접근할 권한이 없습니다.
+            </p>
+            <button
+              onClick={() => window.history.back()}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              이전 페이지로 돌아가기
+            </button>
+          </div>
+        </div>
+      );
+    }
+    
+    return <WrappedComponent {...props} />;
+  };
+} 

@@ -1,516 +1,663 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Star, Search, Filter, Download, MessageSquare, Eye, CheckCircle, AlertCircle, Calendar, User, BookOpen } from 'lucide-react';
-
-interface Student {
-  id: string;
-  name: string;
-  level: string;
-  email: string;
-}
-
-interface Teacher {
-  id: string;
-  name: string;
-  email: string;
-}
-
-interface Lesson {
-  id: string;
-  title: string;
-  teacherId: string;
-  studentId: string;
-  date: Date;
-  duration: number;
-  type: 'online' | 'offline';
-  status: 'completed' | 'cancelled' | 'no-show';
-}
+import { useState, useEffect } from 'react';
+import { 
+  Search, 
+  Filter, 
+  Star, 
+  MessageSquare, 
+  ThumbsUp, 
+  AlertTriangle,
+  User,
+  Calendar,
+  Eye,
+  Edit,
+  Reply,
+  ExternalLink
+} from 'lucide-react';
 
 interface Review {
   id: string;
-  lessonId: string;
-  studentId: string;
-  teacherId: string;
+  authorName: string;
+  authorUid: string;
+  classDate: string;
+  courseName: string;
+  teacherName: string;
+  reviewDate: string;
   rating: number;
-  comment: string;
-  categories: {
-    teaching: number;
-    materials: number;
-    communication: number;
-    overall: number;
-  };
-  isPublic: boolean;
-  isGoogleReview: boolean;
-  createdAt: Date;
-  adminResponse?: string;
-  adminResponseDate?: Date;
-  teacherResponse?: string;
-  teacherResponseDate?: Date;
+  content: string;
+  replyStatus: 'no_reply' | 'replied';
+  adminReply?: string;
+  replyDate?: string;
+  isLiked: boolean;
+  isFlagged: boolean;
+  flaggedReason?: string;
 }
 
-export default function AdminReviewManagementPage() {
+export default function ReviewManagementPage() {
   const [reviews, setReviews] = useState<Review[]>([]);
-  const [students, setStudents] = useState<Student[]>([]);
-  const [teachers, setTeachers] = useState<Teacher[]>([]);
-  const [lessons, setLessons] = useState<Lesson[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTeacher, setSelectedTeacher] = useState<string>('');
-  const [selectedRating, setSelectedRating] = useState<number>(0);
-  const [showResponseModal, setShowResponseModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showReplyModal, setShowReplyModal] = useState(false);
   const [selectedReview, setSelectedReview] = useState<Review | null>(null);
-  const [responseText, setResponseText] = useState('');
+  
+  // 필터 상태
+  const [ratingFilter, setRatingFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [teacherFilter, setTeacherFilter] = useState<string>('all');
+  const [courseFilter, setCourseFilter] = useState<string>('all');
+  const [dateFilter, setDateFilter] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  
+  // 답변 입력
+  const [replyContent, setReplyContent] = useState('');
 
   useEffect(() => {
-    initializeMockData();
+    fetchReviews();
   }, []);
 
-  const initializeMockData = () => {
-    const mockStudents: Student[] = [
-      { id: 'student1', name: '김학생', level: 'A', email: 'student1@example.com' },
-      { id: 'student2', name: '이학생', level: 'B', email: 'student2@example.com' },
-      { id: 'student3', name: '박학생', level: 'C', email: 'student3@example.com' }
-    ];
-
-    const mockTeachers: Teacher[] = [
-      { id: 'teacher1', name: '박선생님', email: 'teacher1@example.com' },
-      { id: 'teacher2', name: '김선생님', email: 'teacher2@example.com' },
-      { id: 'teacher3', name: '이선생님', email: 'teacher3@example.com' }
-    ];
-
-    const mockLessons: Lesson[] = [
-      {
-        id: 'lesson1',
-        title: '중급 회화 수업',
-        teacherId: 'teacher1',
-        studentId: 'student1',
-        date: new Date(Date.now() - 24 * 60 * 60 * 1000),
-        duration: 60,
-        type: 'online',
-        status: 'completed'
-      },
-      {
-        id: 'lesson2',
-        title: '기초 문법 수업',
-        teacherId: 'teacher2',
-        studentId: 'student2',
-        date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-        duration: 60,
-        type: 'offline',
-        status: 'completed'
-      }
-    ];
-
-    const mockReviews: Review[] = [
-      {
-        id: 'review1',
-        lessonId: 'lesson1',
-        studentId: 'student1',
-        teacherId: 'teacher1',
-        rating: 5,
-        comment: '매우 유익한 수업이었습니다. 선생님이 설명을 잘 해주셔서 이해하기 쉬웠어요.',
-        categories: {
-          teaching: 5,
-          materials: 4,
-          communication: 5,
-          overall: 5
+  const fetchReviews = async () => {
+    setIsLoading(true);
+    try {
+      // 실제 API 호출로 대체
+      const mockReviews: Review[] = [
+        {
+          id: '1',
+          authorName: '김학생',
+          authorUid: 'ST001',
+          classDate: '2024-01-15',
+          courseName: '초급 한국어',
+          teacherName: '이선생님',
+          reviewDate: '2024-01-16',
+          rating: 5,
+          content: '매우 만족스러운 수업이었습니다. 선생님이 친절하고 이해하기 쉽게 설명해주셔서 감사합니다. 다음 수업도 기대됩니다!',
+          replyStatus: 'no_reply',
+          isLiked: false,
+          isFlagged: false
         },
-        isPublic: true,
-        isGoogleReview: true,
-        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-        adminResponse: '좋은 피드백 감사합니다. 더 나은 수업을 위해 노력하겠습니다.',
-        adminResponseDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-        teacherResponse: '열심히 공부하시는 모습이 보기 좋았습니다.',
-        teacherResponseDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000)
-      },
-      {
-        id: 'review2',
-        lessonId: 'lesson2',
-        studentId: 'student2',
-        teacherId: 'teacher2',
-        rating: 4,
-        comment: '기초부터 차근차근 설명해주셔서 좋았습니다.',
-        categories: {
-          teaching: 4,
-          materials: 5,
-          communication: 4,
-          overall: 4
+        {
+          id: '2',
+          authorName: '박학생',
+          authorUid: 'ST002',
+          classDate: '2024-01-14',
+          courseName: '중급 한국어',
+          teacherName: '김선생님',
+          reviewDate: '2024-01-15',
+          rating: 4,
+          content: '수업 내용은 좋았지만, 조금 더 천천히 설명해주시면 좋겠습니다. 전반적으로 만족합니다.',
+          replyStatus: 'replied',
+          adminReply: '박학생님, 피드백 감사합니다. 다음 수업부터는 더 천천히 설명하도록 하겠습니다. 꾸준히 함께 공부해요!',
+          replyDate: '2024-01-16',
+          isLiked: true,
+          isFlagged: false
         },
-        isPublic: false,
-        isGoogleReview: false,
-        createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000)
+        {
+          id: '3',
+          authorName: '이학생',
+          authorUid: 'ST003',
+          classDate: '2024-01-13',
+          courseName: '고급 한국어',
+          teacherName: '최선생님',
+          reviewDate: '2024-01-14',
+          rating: 3,
+          content: '수업이 너무 어려웠습니다. 제 수준에 맞지 않는 것 같아요.',
+          replyStatus: 'no_reply',
+          isLiked: false,
+          isFlagged: true,
+          flaggedReason: '부정적인 리뷰'
+        },
+        {
+          id: '4',
+          authorName: '최학생',
+          authorUid: 'ST004',
+          classDate: '2024-01-12',
+          courseName: '초급 한국어',
+          teacherName: '이선생님',
+          reviewDate: '2024-01-13',
+          rating: 5,
+          content: '정말 재미있고 유익한 수업이었습니다. 한국어에 대한 흥미가 더욱 생겼어요!',
+          replyStatus: 'replied',
+          adminReply: '최학생님, 좋은 리뷰 감사합니다! 한국어 학습에 대한 열정이 느껴져서 기쁩니다. 앞으로도 함께 즐겁게 공부해요!',
+          replyDate: '2024-01-14',
+          isLiked: true,
+          isFlagged: false
+        }
+      ];
+      setReviews(mockReviews);
+    } catch (error) {
+      console.error('리뷰 목록 로딩 실패:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleReplySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedReview) return;
+    
+    try {
+      const response = await fetch(`/api/admin/reviews/${selectedReview.id}/reply`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ reply: replyContent }),
+      });
+
+      if (response.ok) {
+        await fetchReviews();
+        setShowReplyModal(false);
+        setSelectedReview(null);
+        setReplyContent('');
+        alert('답변이 등록되었습니다.');
+      } else {
+        alert('답변 등록에 실패했습니다.');
       }
-    ];
-
-    setStudents(mockStudents);
-    setTeachers(mockTeachers);
-    setLessons(mockLessons);
-    setReviews(mockReviews);
+    } catch (error) {
+      alert('답변 등록 중 오류가 발생했습니다.');
+    }
   };
 
-  const getStudentName = (studentId: string) => {
-    return students.find(s => s.id === studentId)?.name || 'Unknown';
+  const handleLikeToggle = async (reviewId: string) => {
+    try {
+      const response = await fetch(`/api/admin/reviews/${reviewId}/like`, {
+        method: 'PUT',
+      });
+
+      if (response.ok) {
+        await fetchReviews();
+      } else {
+        alert('좋아요 상태 변경에 실패했습니다.');
+      }
+    } catch (error) {
+      alert('좋아요 상태 변경 중 오류가 발생했습니다.');
+    }
   };
 
-  const getTeacherName = (teacherId: string) => {
-    return teachers.find(t => t.id === teacherId)?.name || 'Unknown';
+  const handleFlagToggle = async (reviewId: string) => {
+    try {
+      const response = await fetch(`/api/admin/reviews/${reviewId}/flag`, {
+        method: 'PUT',
+      });
+
+      if (response.ok) {
+        await fetchReviews();
+      } else {
+        alert('플래그 상태 변경에 실패했습니다.');
+      }
+    } catch (error) {
+      alert('플래그 상태 변경 중 오류가 발생했습니다.');
+    }
   };
 
-  const getLessonTitle = (lessonId: string) => {
-    return lessons.find(l => l.id === lessonId)?.title || 'Unknown';
+  const getRatingStars = (rating: number) => {
+    return Array.from({ length: 5 }, (_, i) => (
+      <Star
+        key={i}
+        className={`w-4 h-4 ${i < rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
+      />
+    ));
+  };
+
+  const getReplyStatusColor = (status: Review['replyStatus']) => {
+    switch (status) {
+      case 'replied':
+        return 'bg-green-100 text-green-800';
+      case 'no_reply':
+        return 'bg-yellow-100 text-yellow-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getReplyStatusText = (status: Review['replyStatus']) => {
+    switch (status) {
+      case 'replied':
+        return '답변완료';
+      case 'no_reply':
+        return '미답변';
+      default:
+        return '알 수 없음';
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
   };
 
   const filteredReviews = reviews.filter(review => {
-    const lesson = lessons.find(l => l.id === review.lessonId);
-    const student = students.find(s => s.id === review.studentId);
-    const teacher = teachers.find(t => t.id === review.teacherId);
-
-    const matchesSearch = searchTerm === '' || 
-      student?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      teacher?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lesson?.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      review.comment.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesTeacher = selectedTeacher === '' || review.teacherId === selectedTeacher;
-    const matchesRating = selectedRating === 0 || review.rating === selectedRating;
-
-    return matchesSearch && matchesTeacher && matchesRating;
+    const matchesSearch = 
+      review.authorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      review.authorUid.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      review.content.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesRating = ratingFilter === 'all' || review.rating.toString() === ratingFilter;
+    const matchesStatus = statusFilter === 'all' || review.replyStatus === statusFilter;
+    const matchesTeacher = teacherFilter === 'all' || review.teacherName === teacherFilter;
+    const matchesCourse = courseFilter === 'all' || review.courseName === courseFilter;
+    
+    let matchesDate = true;
+    if (dateFilter !== 'all') {
+      const reviewDate = new Date(review.reviewDate);
+      const now = new Date();
+      const diffDays = Math.floor((now.getTime() - reviewDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      switch (dateFilter) {
+        case 'today':
+          matchesDate = diffDays === 0;
+          break;
+        case 'week':
+          matchesDate = diffDays <= 7;
+          break;
+        case 'month':
+          matchesDate = diffDays <= 30;
+          break;
+      }
+    }
+    
+    return matchesSearch && matchesRating && matchesStatus && matchesTeacher && matchesCourse && matchesDate;
   });
 
-  const handleGoogleReviewToggle = (reviewId: string) => {
-    setReviews(prev => prev.map(review => 
-      review.id === reviewId 
-        ? { ...review, isGoogleReview: !review.isGoogleReview }
-        : review
-    ));
-  };
-
-  const handleAdminResponse = async () => {
-    if (!selectedReview || !responseText.trim()) return;
-
-    setLoading(true);
-    
-    // 실제 구현에서는 API 호출
-    setReviews(prev => prev.map(review => 
-      review.id === selectedReview.id 
-        ? { 
-            ...review, 
-            adminResponse: responseText,
-            adminResponseDate: new Date()
-          }
-        : review
-    ));
-
-    setShowResponseModal(false);
-    setSelectedReview(null);
-    setResponseText('');
-    setLoading(false);
-  };
-
-  const renderStars = (rating: number) => {
-    return (
-      <div className="flex space-x-1">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <Star 
-            key={star}
-            className={`w-4 h-4 ${
-              star <= rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
-            }`}
-          />
-        ))}
-      </div>
-    );
-  };
-
-  const getAverageRating = () => {
-    if (reviews.length === 0) return 0;
-    const total = reviews.reduce((sum, review) => sum + review.rating, 0);
-    return (total / reviews.length).toFixed(1);
-  };
-
-  const getReviewStats = () => {
-    const total = reviews.length;
-    const publicReviews = reviews.filter(r => r.isPublic).length;
-    const googleReviews = reviews.filter(r => r.isGoogleReview).length;
-    const respondedReviews = reviews.filter(r => r.adminResponse).length;
-
-    return { total, publicReviews, googleReviews, respondedReviews };
-  };
-
-  const stats = getReviewStats();
+  const teachers = Array.from(new Set(reviews.map(review => review.teacherName)));
+  const courses = Array.from(new Set(reviews.map(review => review.courseName)));
+  const noReplyCount = reviews.filter(r => r.replyStatus === 'no_reply').length;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">리뷰 관리</h1>
-          <p className="text-gray-600">학생들의 수업 피드백을 관리하고 Google 리뷰와 연동합니다</p>
-        </div>
+    <div className="p-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold">리뷰 관리</h1>
+        <p className="text-gray-600">학생 리뷰를 확인하고 답변을 관리합니다.</p>
+      </div>
 
-        {/* Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <MessageSquare className="w-6 h-6 text-blue-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm text-gray-600">총 리뷰</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
-              </div>
+      {/* 통계 */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">총 리뷰</p>
+              <p className="text-2xl font-bold">{reviews.length}</p>
             </div>
-          </div>
-          
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <Star className="w-6 h-6 text-green-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm text-gray-600">평균 평점</p>
-                <p className="text-2xl font-bold text-gray-900">{getAverageRating()}</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <CheckCircle className="w-6 h-6 text-yellow-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm text-gray-600">Google 리뷰</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.googleReviews}</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <User className="w-6 h-6 text-purple-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm text-gray-600">답변 완료</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.respondedReviews}</p>
-              </div>
-            </div>
+            <MessageSquare className="w-8 h-8 text-blue-600" />
           </div>
         </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">미답변</p>
+              <p className="text-2xl font-bold text-yellow-600">{noReplyCount}</p>
+            </div>
+            <AlertTriangle className="w-8 h-8 text-yellow-600" />
+          </div>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">평균 평점</p>
+              <p className="text-2xl font-bold text-green-600">
+                {(reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)}
+              </p>
+            </div>
+            <Star className="w-8 h-8 text-green-600" />
+          </div>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">좋아요</p>
+              <p className="text-2xl font-bold text-purple-600">
+                {reviews.filter(r => r.isLiked).length}
+              </p>
+            </div>
+            <ThumbsUp className="w-8 h-8 text-purple-600" />
+          </div>
+        </div>
+      </div>
 
-        {/* Filters */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="학생명, 선생님명, 수업명으로 검색..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
+      {/* 필터 및 검색 */}
+      <div className="bg-white rounded-lg shadow mb-6">
+        <div className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="작성자, 내용 검색..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
             
             <select
-              value={selectedTeacher}
-              onChange={(e) => setSelectedTeacher(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              value={ratingFilter}
+              onChange={(e) => setRatingFilter(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">모든 선생님</option>
-              {teachers.map(teacher => (
-                <option key={teacher.id} value={teacher.id}>
-                  {teacher.name}
-                </option>
+              <option value="all">전체 평점</option>
+              <option value="5">5점</option>
+              <option value="4">4점</option>
+              <option value="3">3점</option>
+              <option value="2">2점</option>
+              <option value="1">1점</option>
+            </select>
+            
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">전체 상태</option>
+              <option value="no_reply">미답변</option>
+              <option value="replied">답변완료</option>
+            </select>
+            
+            <select
+              value={teacherFilter}
+              onChange={(e) => setTeacherFilter(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">전체 선생님</option>
+              {teachers.map((teacher) => (
+                <option key={teacher} value={teacher}>{teacher}</option>
               ))}
             </select>
             
             <select
-              value={selectedRating}
-              onChange={(e) => setSelectedRating(Number(e.target.value))}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              value={courseFilter}
+              onChange={(e) => setCourseFilter(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value={0}>모든 평점</option>
-              <option value={5}>5점</option>
-              <option value={4}>4점</option>
-              <option value={3}>3점</option>
-              <option value={2}>2점</option>
-              <option value={1}>1점</option>
+              <option value="all">전체 코스</option>
+              {courses.map((course) => (
+                <option key={course} value={course}>{course}</option>
+              ))}
             </select>
             
-            <button className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 flex items-center space-x-2">
-              <Download className="w-4 h-4" />
-              <span>내보내기</span>
-            </button>
+            <select
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">전체 기간</option>
+              <option value="today">오늘</option>
+              <option value="week">최근 7일</option>
+              <option value="month">최근 30일</option>
+            </select>
           </div>
-        </div>
-
-        {/* Reviews List */}
-        <div className="bg-white rounded-lg shadow-md">
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">리뷰 목록</h2>
-          </div>
-          
-          <div className="divide-y divide-gray-200">
-            {filteredReviews.map((review) => {
-              const lesson = lessons.find(l => l.id === review.lessonId);
-              const student = students.find(s => s.id === review.studentId);
-              const teacher = teachers.find(t => t.id === review.teacherId);
-
-              return (
-                <div key={review.id} className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-4 mb-2">
-                        <h3 className="font-medium text-gray-900">
-                          {lesson?.title}
-                        </h3>
-                        <div className="flex items-center space-x-2">
-                          {renderStars(review.rating)}
-                          <span className="text-sm text-gray-500">
-                            {review.rating}/5
-                          </span>
-                        </div>
-                      </div>
-                      
-                      <div className="text-sm text-gray-600 space-y-1">
-                        <p>학생: {student?.name} (레벨 {student?.level})</p>
-                        <p>선생님: {teacher?.name}</p>
-                        <p>수업일: {lesson?.date.toLocaleDateString()}</p>
-                        <p>작성일: {review.createdAt.toLocaleDateString()}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => handleGoogleReviewToggle(review.id)}
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          review.isGoogleReview
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-gray-100 text-gray-800'
-                        }`}
-                      >
-                        {review.isGoogleReview ? 'Google 리뷰 반영' : 'Google 리뷰 미반영'}
-                      </button>
-                      
-                      <button
-                        onClick={() => {
-                          setSelectedReview(review);
-                          setShowResponseModal(true);
-                        }}
-                        className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
-                      >
-                        답변
-                      </button>
-                    </div>
-                  </div>
-                  
-                  {/* Review Content */}
-                  <div className="mb-4">
-                    <p className="text-gray-700">{review.comment}</p>
-                  </div>
-                  
-                  {/* Category Ratings */}
-                  <div className="grid grid-cols-3 gap-4 mb-4 text-sm">
-                    <div>
-                      <span className="text-gray-500">수업 진행:</span>
-                      <div className="flex">{renderStars(review.categories.teaching)}</div>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">교재/자료:</span>
-                      <div className="flex">{renderStars(review.categories.materials)}</div>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">소통:</span>
-                      <div className="flex">{renderStars(review.categories.communication)}</div>
-                    </div>
-                  </div>
-                  
-                  {/* Responses */}
-                  {review.teacherResponse && (
-                    <div className="bg-blue-50 p-3 rounded-lg mb-3">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <User className="w-4 h-4 text-blue-500" />
-                        <span className="text-sm font-medium text-blue-700">선생님 답변</span>
-                      </div>
-                      <p className="text-sm text-blue-800">{review.teacherResponse}</p>
-                      {review.teacherResponseDate && (
-                        <p className="text-xs text-blue-600 mt-1">
-                          {review.teacherResponseDate.toLocaleDateString()}
-                        </p>
-                      )}
-                    </div>
-                  )}
-                  
-                  {review.adminResponse && (
-                    <div className="bg-green-50 p-3 rounded-lg">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <CheckCircle className="w-4 h-4 text-green-500" />
-                        <span className="text-sm font-medium text-green-700">관리자 답변</span>
-                      </div>
-                      <p className="text-sm text-green-800">{review.adminResponse}</p>
-                      {review.adminResponseDate && (
-                        <p className="text-xs text-green-600 mt-1">
-                          {review.adminResponseDate.toLocaleDateString()}
-                        </p>
-                      )}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-          
-          {filteredReviews.length === 0 && (
-            <div className="p-6 text-center text-gray-500">
-              조건에 맞는 리뷰가 없습니다.
-            </div>
-          )}
         </div>
       </div>
 
-      {/* Response Modal */}
-      {showResponseModal && selectedReview && (
+      {/* 리뷰 목록 */}
+      <div className="bg-white rounded-lg shadow">
+        <div className="p-6 border-b">
+          <h2 className="text-lg font-semibold">리뷰 목록 ({filteredReviews.length}개)</h2>
+        </div>
+        
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
+        ) : filteredReviews.length === 0 ? (
+          <div className="text-center py-12">
+            <MessageSquare className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">리뷰가 없습니다</h3>
+            <p className="text-gray-600">검색 조건을 변경해보세요.</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-gray-200">
+            {filteredReviews.map((review) => (
+              <div key={review.id} className="p-6 hover:bg-gray-50">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-3 mb-2">
+                      <div className="flex items-center space-x-1">
+                        {getRatingStars(review.rating)}
+                      </div>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getReplyStatusColor(review.replyStatus)}`}>
+                        {getReplyStatusText(review.replyStatus)}
+                      </span>
+                      {review.isFlagged && (
+                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                          플래그됨
+                        </span>
+                      )}
+                    </div>
+                    
+                    <div className="mb-3">
+                      <p className="text-gray-900 line-clamp-2">{review.content}</p>
+                    </div>
+                    
+                    <div className="flex items-center space-x-4 text-sm text-gray-500">
+                      <div className="flex items-center space-x-1">
+                        <User className="w-4 h-4" />
+                        <span>{review.authorName} ({review.authorUid})</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <Calendar className="w-4 h-4" />
+                        <span>수업: {formatDate(review.classDate)}</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <Calendar className="w-4 h-4" />
+                        <span>리뷰: {formatDate(review.reviewDate)}</span>
+                      </div>
+                      <div className="text-sm">
+                        {review.courseName} • {review.teacherName}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2 ml-4">
+                    <button
+                      onClick={() => {
+                        setSelectedReview(review);
+                        setShowDetailModal(true);
+                      }}
+                      className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg"
+                    >
+                      <Eye className="w-4 h-4" />
+                    </button>
+                    {review.replyStatus === 'no_reply' && (
+                      <button
+                        onClick={() => {
+                          setSelectedReview(review);
+                          setReplyContent('');
+                          setShowReplyModal(true);
+                        }}
+                        className="p-2 text-green-600 hover:bg-green-100 rounded-lg"
+                      >
+                        <Reply className="w-4 h-4" />
+                      </button>
+                    )}
+                    <button
+                      onClick={() => handleLikeToggle(review.id)}
+                      className={`p-2 rounded-lg ${
+                        review.isLiked 
+                          ? 'text-purple-600 bg-purple-100' 
+                          : 'text-gray-600 hover:bg-gray-100'
+                      }`}
+                    >
+                      <ThumbsUp className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleFlagToggle(review.id)}
+                      className={`p-2 rounded-lg ${
+                        review.isFlagged 
+                          ? 'text-red-600 bg-red-100' 
+                          : 'text-gray-600 hover:bg-gray-100'
+                      }`}
+                    >
+                      <AlertTriangle className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 리뷰 상세 보기 모달 */}
+      {showDetailModal && selectedReview && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
-            <h2 className="text-xl font-semibold mb-4">관리자 답변 작성</h2>
-            
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                답변 내용
-              </label>
-              <textarea
-                value={responseText}
-                onChange={(e) => setResponseText(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg resize-none"
-                rows={4}
-                placeholder="학생에게 답변할 내용을 작성해주세요..."
-              />
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-semibold mb-4">리뷰 상세</h3>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    작성자
+                  </label>
+                  <div className="p-2 bg-gray-50 rounded border">
+                    {selectedReview.authorName} ({selectedReview.authorUid})
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    평점
+                  </label>
+                  <div className="p-2 bg-gray-50 rounded border">
+                    <div className="flex items-center space-x-1">
+                      {getRatingStars(selectedReview.rating)}
+                      <span className="ml-2 text-sm text-gray-600">({selectedReview.rating}/5)</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    수업 정보
+                  </label>
+                  <div className="p-2 bg-gray-50 rounded border">
+                    {selectedReview.courseName} • {selectedReview.teacherName}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    수업일
+                  </label>
+                  <div className="p-2 bg-gray-50 rounded border">
+                    {formatDate(selectedReview.classDate)}
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  리뷰 내용
+                </label>
+                <div className="p-3 bg-gray-50 rounded border">
+                  <p className="text-gray-900 whitespace-pre-wrap">{selectedReview.content}</p>
+                </div>
+              </div>
+
+              {selectedReview.adminReply && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    관리자 답변
+                  </label>
+                  <div className="p-3 bg-blue-50 rounded border">
+                    <p className="text-gray-900 whitespace-pre-wrap">{selectedReview.adminReply}</p>
+                    <div className="text-xs text-gray-500 mt-2">
+                      답변일: {selectedReview.replyDate && formatDate(selectedReview.replyDate)}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {selectedReview.isFlagged && selectedReview.flaggedReason && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    플래그 사유
+                  </label>
+                  <div className="p-2 bg-red-50 rounded border">
+                    <p className="text-red-800">{selectedReview.flaggedReason}</p>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex justify-end space-x-3 pt-4">
+                {selectedReview.replyStatus === 'no_reply' && (
+                  <button
+                    onClick={() => {
+                      setShowDetailModal(false);
+                      setReplyContent('');
+                      setShowReplyModal(true);
+                    }}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                  >
+                    답변하기
+                  </button>
+                )}
+                <button
+                  onClick={() => setShowDetailModal(false)}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                >
+                  닫기
+                </button>
+              </div>
             </div>
-            
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={() => {
-                  setShowResponseModal(false);
-                  setSelectedReview(null);
-                  setResponseText('');
-                }}
-                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
-              >
-                취소
-              </button>
-              <button
-                onClick={handleAdminResponse}
-                disabled={loading || !responseText.trim()}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
-              >
-                답변 등록
-              </button>
-            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 답변 작성 모달 */}
+      {showReplyModal && selectedReview && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-semibold mb-4">답변 작성</h3>
+            <form onSubmit={handleReplySubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  원본 리뷰
+                </label>
+                <div className="p-3 bg-gray-50 rounded border mb-4">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <div className="flex items-center space-x-1">
+                      {getRatingStars(selectedReview.rating)}
+                    </div>
+                    <span className="text-sm text-gray-600">by {selectedReview.authorName}</span>
+                  </div>
+                  <p className="text-gray-900">{selectedReview.content}</p>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  답변 내용
+                </label>
+                <textarea
+                  value={replyContent}
+                  onChange={(e) => setReplyContent(e.target.value)}
+                  rows={6}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="답변 내용을 입력하세요..."
+                  required
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowReplyModal(false)}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                >
+                  취소
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  답변 등록
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

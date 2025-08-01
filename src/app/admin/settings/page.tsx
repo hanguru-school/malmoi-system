@@ -1,420 +1,672 @@
 'use client';
 
-import React, { useState } from 'react';
-import { 
-  Settings, 
-  Save, 
-  Users, 
-  Bell, 
-  Shield, 
-  Database,
-  Globe,
-  Mail,
-  CreditCard,
-  FileText,
-  Palette,
-  Monitor,
-  AlertTriangle,
-  CheckCircle,
-  X
-} from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { User, Shield, Key, Eye, EyeOff, Plus, Edit, Trash2, Check, X } from 'lucide-react';
 
-interface SystemSetting {
+interface Admin {
   id: string;
-  category: string;
   name: string;
-  description: string;
-  type: 'toggle' | 'input' | 'select' | 'textarea';
-  value: any;
-  options?: string[];
-  required?: boolean;
+  email: string;
+  role: 'master' | 'admin';
+  isActive: boolean;
+  twoFactorEnabled: boolean;
+  lastLogin: string;
+  createdAt: string;
 }
 
-const SystemSettingsPage = () => {
-  const [settings, setSettings] = useState<SystemSetting[]>([
-    // General Settings
-    {
-      id: 'site_name',
-      category: 'general',
-      name: '사이트 이름',
-      description: '교육 플랫폼의 이름을 설정합니다',
-      type: 'input',
-      value: '에듀북',
-      required: true
-    },
-    {
-      id: 'site_description',
-      category: 'general',
-      name: '사이트 설명',
-      description: '사이트에 대한 간단한 설명을 입력합니다',
-      type: 'textarea',
-      value: '최고의 교육 서비스를 제공하는 플랫폼입니다'
-    },
-    {
-      id: 'timezone',
-      category: 'general',
-      name: '시간대',
-      description: '시스템 시간대를 설정합니다',
-      type: 'select',
-      value: 'Asia/Seoul',
-      options: ['Asia/Seoul', 'UTC', 'America/New_York', 'Europe/London']
-    },
-    {
-      id: 'language',
-      category: 'general',
-      name: '기본 언어',
-      description: '시스템의 기본 언어를 설정합니다',
-      type: 'select',
-      value: 'ko',
-      options: ['ko', 'en', 'ja', 'zh']
-    },
+interface MasterInfo {
+  name: string;
+  email: string;
+  phone: string;
+  twoFactorEnabled: boolean;
+}
 
-    // User Management
-    {
-      id: 'user_registration',
-      category: 'users',
-      name: '사용자 등록',
-      description: '새로운 사용자 등록을 허용합니다',
-      type: 'toggle',
-      value: true
-    },
-    {
-      id: 'email_verification',
-      category: 'users',
-      name: '이메일 인증',
-      description: '사용자 등록 시 이메일 인증을 요구합니다',
-      type: 'toggle',
-      value: true
-    },
-    {
-      id: 'max_students_per_class',
-      category: 'users',
-      name: '클래스당 최대 학생 수',
-      description: '한 클래스에 등록할 수 있는 최대 학생 수를 설정합니다',
-      type: 'input',
-      value: 20
-    },
+export default function AdminSettingsPage() {
+  const [admins, setAdmins] = useState<Admin[]>([]);
+  const [masterInfo, setMasterInfo] = useState<MasterInfo>({
+    name: '마스터 관리자',
+    email: 'master@hanguru.com',
+    phone: '010-1234-5678',
+    twoFactorEnabled: true
+  });
+  const [loading, setLoading] = useState(true);
+  const [isEditMasterModalOpen, setIsEditMasterModalOpen] = useState(false);
+  const [isAddAdminModalOpen, setIsAddAdminModalOpen] = useState(false);
+  const [isTwoFactorModalOpen, setIsTwoFactorModalOpen] = useState(false);
+  const [twoFactorCode, setTwoFactorCode] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
-    // Notifications
-    {
-      id: 'email_notifications',
-      category: 'notifications',
-      name: '이메일 알림',
-      description: '시스템 이메일 알림을 활성화합니다',
-      type: 'toggle',
-      value: true
-    },
-    {
-      id: 'sms_notifications',
-      category: 'notifications',
-      name: 'SMS 알림',
-      description: 'SMS 알림을 활성화합니다',
-      type: 'toggle',
-      value: false
-    },
-    {
-      id: 'notification_schedule',
-      category: 'notifications',
-      name: '알림 시간',
-      description: '알림을 보낼 수 있는 시간대를 설정합니다',
-      type: 'select',
-      value: '9-18',
-      options: ['9-18', '8-20', '24시간', '사용자 설정']
-    },
+  // 샘플 데이터
+  useEffect(() => {
+    setTimeout(() => {
+      const sampleAdmins: Admin[] = [
+        {
+          id: '1',
+          name: '마스터 관리자',
+          email: 'master@hanguru.com',
+          role: 'master',
+          isActive: true,
+          twoFactorEnabled: true,
+          lastLogin: '2024-01-15 14:30',
+          createdAt: '2024-01-01'
+        },
+        {
+          id: '2',
+          name: '김선생님',
+          email: 'kim@hanguru.com',
+          role: 'admin',
+          isActive: true,
+          twoFactorEnabled: false,
+          lastLogin: '2024-01-14 16:20',
+          createdAt: '2024-01-05'
+        },
+        {
+          id: '3',
+          name: '이선생님',
+          email: 'lee@hanguru.com',
+          role: 'admin',
+          isActive: true,
+          twoFactorEnabled: true,
+          lastLogin: '2024-01-13 09:15',
+          createdAt: '2024-01-10'
+        },
+        {
+          id: '4',
+          name: '박선생님',
+          email: 'park@hanguru.com',
+          role: 'admin',
+          isActive: false,
+          twoFactorEnabled: false,
+          lastLogin: '2024-01-10 11:45',
+          createdAt: '2024-01-12'
+        }
+      ];
+      setAdmins(sampleAdmins);
+      setLoading(false);
+    }, 1000);
+  }, []);
 
-    // Security
-    {
-      id: 'password_min_length',
-      category: 'security',
-      name: '최소 비밀번호 길이',
-      description: '사용자 비밀번호의 최소 길이를 설정합니다',
-      type: 'input',
-      value: 8
-    },
-    {
-      id: 'session_timeout',
-      category: 'security',
-      name: '세션 타임아웃',
-      description: '사용자 세션의 자동 종료 시간을 설정합니다 (분)',
-      type: 'input',
-      value: 30
-    },
-    {
-      id: 'two_factor_auth',
-      category: 'security',
-      name: '2단계 인증',
-      description: '관리자 계정에 2단계 인증을 요구합니다',
-      type: 'toggle',
-      value: true
-    },
-
-    // Payment
-    {
-      id: 'currency',
-      category: 'payment',
-      name: '기본 통화',
-      description: '시스템에서 사용할 기본 통화를 설정합니다',
-      type: 'select',
-      value: 'KRW',
-      options: ['KRW', 'USD', 'EUR', 'JPY']
-    },
-    {
-      id: 'tax_rate',
-      category: 'payment',
-      name: '세율',
-      description: '기본 세율을 설정합니다 (%)',
-      type: 'input',
-      value: 10
-    },
-    {
-      id: 'auto_invoice',
-      category: 'payment',
-      name: '자동 인보이스',
-      description: '결제 완료 시 자동으로 인보이스를 생성합니다',
-      type: 'toggle',
-      value: true
-    },
-
-    // Appearance
-    {
-      id: 'theme',
-      category: 'appearance',
-      name: '테마',
-      description: '시스템의 기본 테마를 설정합니다',
-      type: 'select',
-      value: 'light',
-      options: ['light', 'dark', 'auto']
-    },
-    {
-      id: 'logo_url',
-      category: 'appearance',
-      name: '로고 URL',
-      description: '사이트 로고의 URL을 설정합니다',
-      type: 'input',
-      value: '/logo.png'
-    },
-    {
-      id: 'favicon_url',
-      category: 'appearance',
-      name: '파비콘 URL',
-      description: '사이트 파비콘의 URL을 설정합니다',
-      type: 'input',
-      value: '/favicon.ico'
-    }
-  ]);
-
-  const [activeTab, setActiveTab] = useState('general');
-  const [hasChanges, setHasChanges] = useState(false);
-  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
-
-  const categories = [
-    { id: 'general', name: '일반', icon: Settings },
-    { id: 'users', name: '사용자 관리', icon: Users },
-    { id: 'notifications', name: '알림', icon: Bell },
-    { id: 'security', name: '보안', icon: Shield },
-    { id: 'payment', name: '결제', icon: CreditCard },
-    { id: 'appearance', name: '외관', icon: Palette }
-  ];
-
-  const handleSettingChange = (id: string, value: any) => {
-    setSettings(prev => prev.map(setting => 
-      setting.id === id ? { ...setting, value } : setting
-    ));
-    setHasChanges(true);
+  const handleEditMasterInfo = (data: MasterInfo) => {
+    setMasterInfo(data);
+    setIsEditMasterModalOpen(false);
   };
 
-  const handleSave = () => {
-    // Here you would typically save to backend
-    setHasChanges(false);
-    setShowSaveSuccess(true);
-    setTimeout(() => setShowSaveSuccess(false), 3000);
+  const handleAddAdmin = (adminData: Omit<Admin, 'id' | 'lastLogin' | 'createdAt'>) => {
+    const newAdmin: Admin = {
+      id: Date.now().toString(),
+      ...adminData,
+      lastLogin: '-',
+      createdAt: new Date().toISOString().split('T')[0]
+    };
+    setAdmins(prev => [...prev, newAdmin]);
+    setIsAddAdminModalOpen(false);
   };
 
-  const handleReset = () => {
-    // Reset to default values
-    setSettings(prev => prev.map(setting => ({
-      ...setting,
-      value: setting.type === 'toggle' ? false : 
-             setting.type === 'input' ? 0 : 
-             setting.type === 'select' ? setting.options?.[0] || '' : ''
-    })));
-    setHasChanges(true);
+  const handleToggleAdminStatus = (id: string) => {
+    setAdmins(prev =>
+      prev.map(admin =>
+        admin.id === id
+          ? { ...admin, isActive: !admin.isActive }
+          : admin
+      )
+    );
   };
 
-  const renderSettingInput = (setting: SystemSetting) => {
-    switch (setting.type) {
-      case 'toggle':
-        return (
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={setting.value}
-              onChange={(e) => handleSettingChange(setting.id, e.target.checked)}
-              className="sr-only peer"
-            />
-            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-          </label>
-        );
-      
-      case 'input':
-        return (
-          <input
-            type="number"
-            value={setting.value}
-            onChange={(e) => handleSettingChange(setting.id, e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            required={setting.required}
-          />
-        );
-      
-      case 'select':
-        return (
-          <select
-            value={setting.value}
-            onChange={(e) => handleSettingChange(setting.id, e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          >
-            {setting.options?.map(option => (
-              <option key={option} value={option}>{option}</option>
-            ))}
-          </select>
-        );
-      
-      case 'textarea':
-        return (
-          <textarea
-            value={setting.value}
-            onChange={(e) => handleSettingChange(setting.id, e.target.value)}
-            rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
-        );
-      
-      default:
-        return null;
+  const handleDeleteAdmin = (id: string) => {
+    if (confirm('정말로 이 관리자를 삭제하시겠습니까?')) {
+      setAdmins(prev => prev.filter(admin => admin.id !== id));
     }
   };
 
-  const filteredSettings = settings.filter(setting => setting.category === activeTab);
+  const handleToggleTwoFactor = (id: string) => {
+    setAdmins(prev =>
+      prev.map(admin =>
+        admin.id === id
+          ? { ...admin, twoFactorEnabled: !admin.twoFactorEnabled }
+          : admin
+      )
+    );
+  };
+
+  const handleTwoFactorVerification = () => {
+    // 2단계 인증 코드 검증 로직
+    if (twoFactorCode === '123456') {
+      setIsTwoFactorModalOpen(false);
+      setTwoFactorCode('');
+      alert('2단계 인증이 완료되었습니다.');
+    } else {
+      alert('잘못된 인증 코드입니다.');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">시스템 설정</h1>
-          <p className="text-gray-600">시스템 전반의 설정을 관리하세요</p>
-        </div>
-        <div className="flex gap-2">
-          {hasChanges && (
-            <button
-              onClick={handleReset}
-              className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200"
-            >
-              초기화
-            </button>
-          )}
+    <div className="space-y-6">
+      {/* 헤더 */}
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">관리자 설정</h1>
+        <p className="text-gray-600">마스터 계정 정보 및 관리자 권한을 관리합니다.</p>
+      </div>
+
+      {/* 마스터 계정 정보 */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+            <User className="w-5 h-5 mr-2" />
+            마스터 계정 정보
+          </h2>
           <button
-            onClick={handleSave}
-            disabled={!hasChanges}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+            onClick={() => setIsEditMasterModalOpen(true)}
+            className="flex items-center px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            <Save className="w-4 h-4" />
-            저장
+            <Edit className="w-4 h-4 mr-2" />
+            정보 수정
           </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">이름</label>
+            <p className="text-gray-900">{masterInfo.name}</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">이메일</label>
+            <p className="text-gray-900">{masterInfo.email}</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">전화번호</label>
+            <p className="text-gray-900">{masterInfo.phone}</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">2단계 인증</label>
+            <div className="flex items-center">
+              <span
+                className={`inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full ${
+                  masterInfo.twoFactorEnabled
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-gray-100 text-gray-800'
+                }`}
+              >
+                {masterInfo.twoFactorEnabled ? '활성화' : '비활성화'}
+              </span>
+              <button
+                onClick={() => setIsTwoFactorModalOpen(true)}
+                className="ml-2 text-sm text-blue-600 hover:text-blue-800"
+              >
+                {masterInfo.twoFactorEnabled ? '설정 변경' : '활성화'}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Success Message */}
-      {showSaveSuccess && (
-        <div className="flex items-center gap-2 p-4 bg-green-50 border border-green-200 rounded-lg">
-          <CheckCircle className="w-5 h-5 text-green-600" />
-          <span className="text-green-800">설정이 성공적으로 저장되었습니다.</span>
+      {/* 관리자 목록 */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+            <Shield className="w-5 h-5 mr-2" />
+            관리자 목록
+          </h2>
           <button
-            onClick={() => setShowSaveSuccess(false)}
-            className="ml-auto"
+            onClick={() => setIsAddAdminModalOpen(true)}
+            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            <X className="w-4 h-4 text-green-600" />
+            <Plus className="w-4 h-4 mr-2" />
+            관리자 추가
           </button>
         </div>
+
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  관리자
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  역할
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  상태
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  2단계 인증
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  최근 로그인
+                </th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  작업
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {admins.map((admin) => (
+                <tr key={admin.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div>
+                      <div className="text-sm font-medium text-gray-900">{admin.name}</div>
+                      <div className="text-sm text-gray-500">{admin.email}</div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        admin.role === 'master'
+                          ? 'bg-purple-100 text-purple-800'
+                          : 'bg-blue-100 text-blue-800'
+                      }`}
+                    >
+                      {admin.role === 'master' ? '마스터' : '관리자'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        admin.isActive
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-800'
+                      }`}
+                    >
+                      {admin.isActive ? '활성' : '비활성'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                          admin.twoFactorEnabled
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-gray-100 text-gray-800'
+                        }`}
+                      >
+                        {admin.twoFactorEnabled ? '활성화' : '비활성화'}
+                      </span>
+                      {admin.role !== 'master' && (
+                        <button
+                          onClick={() => handleToggleTwoFactor(admin.id)}
+                          className="ml-2 text-xs text-blue-600 hover:text-blue-800"
+                        >
+                          {admin.twoFactorEnabled ? '해제' : '활성화'}
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {admin.lastLogin}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    {admin.role !== 'master' && (
+                      <div className="flex items-center justify-end space-x-2">
+                        <button
+                          onClick={() => handleToggleAdminStatus(admin.id)}
+                          className={`px-2 py-1 text-xs rounded ${
+                            admin.isActive
+                              ? 'text-orange-600 hover:text-orange-900'
+                              : 'text-green-600 hover:text-green-900'
+                          }`}
+                        >
+                          {admin.isActive ? '비활성화' : '활성화'}
+                        </button>
+                        <button
+                          onClick={() => handleDeleteAdmin(admin.id)}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* 마스터 정보 수정 모달 */}
+      {isEditMasterModalOpen && (
+        <EditMasterModal
+          masterInfo={masterInfo}
+          onSave={handleEditMasterInfo}
+          onClose={() => setIsEditMasterModalOpen(false)}
+        />
       )}
 
-      {/* Tabs */}
-      <div className="bg-white rounded-lg shadow-sm border">
-        <div className="border-b border-gray-200">
-          <nav className="flex space-x-8 px-6" aria-label="Tabs">
-            {categories.map((category) => {
-              const Icon = category.icon;
-              return (
-                <button
-                  key={category.id}
-                  onClick={() => setActiveTab(category.id)}
-                  className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === category.id
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  {category.name}
-                </button>
-              );
-            })}
-          </nav>
-        </div>
+      {/* 관리자 추가 모달 */}
+      {isAddAdminModalOpen && (
+        <AddAdminModal
+          onSave={handleAddAdmin}
+          onClose={() => setIsAddAdminModalOpen(false)}
+        />
+      )}
 
-        {/* Settings Content */}
-        <div className="p-6">
-          <div className="space-y-6">
-            {filteredSettings.map((setting) => (
-              <div key={setting.id} className="flex items-start justify-between p-4 bg-gray-50 rounded-lg">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="text-sm font-medium text-gray-900">{setting.name}</h3>
-                    {setting.required && (
-                      <span className="text-red-500 text-xs">*</span>
-                    )}
-                  </div>
-                  <p className="text-sm text-gray-600">{setting.description}</p>
-                </div>
-                <div className="ml-4">
-                  {renderSettingInput(setting)}
-                </div>
-              </div>
-            ))}
+      {/* 2단계 인증 모달 */}
+      {isTwoFactorModalOpen && (
+        <TwoFactorModal
+          onVerify={handleTwoFactorVerification}
+          onClose={() => {
+            setIsTwoFactorModalOpen(false);
+            setTwoFactorCode('');
+          }}
+          code={twoFactorCode}
+          onCodeChange={setTwoFactorCode}
+        />
+      )}
+    </div>
+  );
+}
+
+// 마스터 정보 수정 모달
+interface EditMasterModalProps {
+  masterInfo: MasterInfo;
+  onSave: (data: MasterInfo) => void;
+  onClose: () => void;
+}
+
+function EditMasterModal({ masterInfo, onSave, onClose }: EditMasterModalProps) {
+  const [formData, setFormData] = useState(masterInfo);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave(formData);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+        <h2 className="text-lg font-semibold mb-4">마스터 정보 수정</h2>
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              이름 *
+            </label>
+            <input
+              type="text"
+              required
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
           </div>
-        </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              이메일 *
+            </label>
+            <input
+              type="email"
+              required
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              전화번호
+            </label>
+            <input
+              type="tel"
+              value={formData.phone}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              현재 비밀번호 *
+            </label>
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                required
+                className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="현재 비밀번호를 입력하세요"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="twoFactor"
+              checked={formData.twoFactorEnabled}
+              onChange={(e) => setFormData({ ...formData, twoFactorEnabled: e.target.checked })}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label htmlFor="twoFactor" className="ml-2 block text-sm text-gray-900">
+              2단계 인증 활성화
+            </label>
+          </div>
+
+          <div className="flex justify-end space-x-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              취소
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              수정
+            </button>
+          </div>
+        </form>
       </div>
+    </div>
+  );
+}
 
-      {/* System Info */}
-      <div className="bg-white rounded-lg shadow-sm border p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">시스템 정보</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-            <Database className="w-5 h-5 text-blue-600" />
-            <div>
-              <p className="text-sm font-medium text-gray-900">데이터베이스</p>
-              <p className="text-sm text-gray-600">PostgreSQL 14.5</p>
+// 관리자 추가 모달
+interface AddAdminModalProps {
+  onSave: (data: Omit<Admin, 'id' | 'lastLogin' | 'createdAt'>) => void;
+  onClose: () => void;
+}
+
+function AddAdminModal({ onSave, onClose }: AddAdminModalProps) {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    role: 'admin' as 'master' | 'admin',
+    isActive: true,
+    twoFactorEnabled: false
+  });
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave(formData);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+        <h2 className="text-lg font-semibold mb-4">관리자 추가</h2>
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              이름 *
+            </label>
+            <input
+              type="text"
+              required
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              이메일 *
+            </label>
+            <input
+              type="email"
+              required
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              역할
+            </label>
+            <select
+              value={formData.role}
+              onChange={(e) => setFormData({ ...formData, role: e.target.value as 'master' | 'admin' })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="admin">관리자</option>
+              <option value="master">마스터</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              비밀번호 *
+            </label>
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                required
+                className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="비밀번호를 입력하세요"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
             </div>
           </div>
-          <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-            <Monitor className="w-5 h-5 text-green-600" />
-            <div>
-              <p className="text-sm font-medium text-gray-900">서버</p>
-              <p className="text-sm text-gray-600">Ubuntu 20.04 LTS</p>
-            </div>
+
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="isActive"
+              checked={formData.isActive}
+              onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label htmlFor="isActive" className="ml-2 block text-sm text-gray-900">
+              활성 상태
+            </label>
           </div>
-          <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-            <Globe className="w-5 h-5 text-purple-600" />
-            <div>
-              <p className="text-sm font-medium text-gray-900">도메인</p>
-              <p className="text-sm text-gray-600">edubook.com</p>
-            </div>
+
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="twoFactor"
+              checked={formData.twoFactorEnabled}
+              onChange={(e) => setFormData({ ...formData, twoFactorEnabled: e.target.checked })}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label htmlFor="twoFactor" className="ml-2 block text-sm text-gray-900">
+              2단계 인증 활성화
+            </label>
+          </div>
+
+          <div className="flex justify-end space-x-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              취소
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              추가
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// 2단계 인증 모달
+interface TwoFactorModalProps {
+  onVerify: () => void;
+  onClose: () => void;
+  code: string;
+  onCodeChange: (code: string) => void;
+}
+
+function TwoFactorModal({ onVerify, onClose, code, onCodeChange }: TwoFactorModalProps) {
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+        <h2 className="text-lg font-semibold mb-4">2단계 인증</h2>
+        
+        <div className="space-y-4">
+          <div className="text-center">
+            <Key className="w-12 h-12 text-blue-600 mx-auto mb-4" />
+            <p className="text-gray-600 mb-4">
+              인증 앱에서 생성된 6자리 코드를 입력하세요.
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              인증 코드
+            </label>
+            <input
+              type="text"
+              value={code}
+              onChange={(e) => onCodeChange(e.target.value)}
+              maxLength={6}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center text-lg tracking-widest"
+              placeholder="000000"
+            />
+          </div>
+
+          <div className="flex justify-end space-x-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              취소
+            </button>
+            <button
+              onClick={onVerify}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              확인
+            </button>
           </div>
         </div>
       </div>
     </div>
   );
-};
-
-export default SystemSettingsPage; 
+} 

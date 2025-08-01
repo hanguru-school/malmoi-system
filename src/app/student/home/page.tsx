@@ -27,6 +27,7 @@ import {
 import Link from 'next/link';
 import { useTranslation, Language } from '@/lib/translations';
 import { useAuth } from '@/hooks/useAuth';
+import { withRole } from '@/lib/auth-utils';
 
 interface StudentStats {
   totalClasses: number;
@@ -59,7 +60,7 @@ interface RecentNote {
   duration: string;
 }
 
-export default function StudentHomePage() {
+function StudentHomePage() {
   const { user, loading, logout } = useAuth();
   const [stats, setStats] = useState<StudentStats | null>(null);
   const [recentReservations, setRecentReservations] = useState<RecentReservation[]>([]);
@@ -548,3 +549,5 @@ export default function StudentHomePage() {
     </div>
   );
 } 
+
+export default withRole(StudentHomePage, ['master', 'student']); 

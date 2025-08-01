@@ -2,403 +2,537 @@
 
 import { useState, useEffect } from 'react';
 import { 
-  Plus, 
-  Search, 
-  Filter, 
+  User, 
+  Clock, 
   DollarSign, 
   CreditCard, 
-  User, 
+  Plus, 
+  Search,
   Calendar,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  Eye,
-  Download,
   TrendingUp,
-  TrendingDown
+  AlertCircle
 } from 'lucide-react';
 
-interface Payment {
+interface Student {
   id: string;
-  studentName: string;
-  courseName: string;
-  amount: number;
-  method: 'card' | 'bank_transfer' | 'cash' | 'online';
-  status: 'completed' | 'pending' | 'failed' | 'refunded';
-  date: string;
-  dueDate: string;
-  description: string;
-  receiptNumber: string;
+  name: string;
+  email: string;
+  uid: string;
+  totalPurchasedTime: number; // 분 단위
+  totalUsedTime: number; // 분 단위
+  remainingTime: number; // 분 단위
 }
 
-export default function AdminPaymentsPage() {
-  const [payments, setPayments] = useState<Payment[]>([]);
-  const [loading, setLoading] = useState(true);
+interface PurchaseRecord {
+  id: string;
+  purchaseDate: string;
+  purchaseTime: number; // 분 단위
+  amount: number;
+  paymentMethod: 'cash' | 'card' | 'paypay' | 'other';
+  studentId: string;
+  studentName: string;
+  notes?: string;
+}
+
+export default function PaymentsPage() {
+  const [students, setStudents] = useState<Student[]>([]);
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [purchaseRecords, setPurchaseRecords] = useState<PurchaseRecord[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'completed' | 'pending' | 'failed' | 'refunded'>('all');
-  const [methodFilter, setMethodFilter] = useState<'all' | 'card' | 'bank_transfer' | 'cash' | 'online'>('all');
-  const [dateRange, setDateRange] = useState({ start: '', end: '' });
+  
+  // 새로운 구매 입력 필드
+  const [newPurchase, setNewPurchase] = useState<{
+    purchaseTime: number;
+    amount: number;
+    paymentMethod: 'cash' | 'card' | 'paypay' | 'other';
+    purchaseDate: string;
+    notes: string;
+  }>({
+    purchaseTime: 60,
+    amount: 0,
+    paymentMethod: 'cash',
+    purchaseDate: new Date().toISOString().split('T')[0],
+    notes: ''
+  });
 
   useEffect(() => {
-    // 실제 API 호출로 대체
-    setTimeout(() => {
-      const mockPayments: Payment[] = [
+    fetchStudents();
+  }, []);
+
+  useEffect(() => {
+    if (selectedStudent) {
+      fetchPurchaseRecords(selectedStudent.id);
+    }
+  }, [selectedStudent]);
+
+  const fetchStudents = async () => {
+    setIsLoading(true);
+    try {
+      // 실제 API 호출로 대체
+      const mockStudents: Student[] = [
         {
           id: '1',
-          studentName: '김학생',
-          courseName: '한국어 기초 과정',
-          amount: 300000,
-          method: 'card',
-          status: 'completed',
-          date: '2024-01-15',
-          dueDate: '2024-01-15',
-          description: '1월 수강료',
-          receiptNumber: 'RCP-2024-001'
+          name: '김학생',
+          email: 'kim@example.com',
+          uid: 'ST001',
+          totalPurchasedTime: 600,
+          totalUsedTime: 240,
+          remainingTime: 360
         },
         {
           id: '2',
-          studentName: '이학생',
-          courseName: '한국어 중급 과정',
-          amount: 400000,
-          method: 'bank_transfer',
-          status: 'pending',
-          date: '2024-01-16',
-          dueDate: '2024-01-20',
-          description: '1월 수강료',
-          receiptNumber: 'RCP-2024-002'
+          name: '박학생',
+          email: 'park@example.com',
+          uid: 'ST002',
+          totalPurchasedTime: 480,
+          totalUsedTime: 180,
+          remainingTime: 300
         },
         {
           id: '3',
-          studentName: '박학생',
-          courseName: '한국어 고급 과정',
-          amount: 500000,
-          method: 'cash',
-          status: 'completed',
-          date: '2024-01-14',
-          dueDate: '2024-01-14',
-          description: '1월 수강료',
-          receiptNumber: 'RCP-2024-003'
-        },
-        {
-          id: '4',
-          studentName: '최학생',
-          courseName: '한국어 초급 과정',
-          amount: 350000,
-          method: 'online',
-          status: 'failed',
-          date: '2024-01-13',
-          dueDate: '2024-01-15',
-          description: '1월 수강료',
-          receiptNumber: 'RCP-2024-004'
-        },
-        {
-          id: '5',
-          studentName: '정학생',
-          courseName: '한국어 기초 과정',
-          amount: 300000,
-          method: 'card',
-          status: 'refunded',
-          date: '2024-01-12',
-          dueDate: '2024-01-12',
-          description: '1월 수강료 (환불)',
-          receiptNumber: 'RCP-2024-005'
+          name: '이학생',
+          email: 'lee@example.com',
+          uid: 'ST003',
+          totalPurchasedTime: 720,
+          totalUsedTime: 600,
+          remainingTime: 120
         }
       ];
-
-      setPayments(mockPayments);
-      setLoading(false);
-    }, 1000);
-  }, []);
-
-  const filteredPayments = payments.filter(payment => {
-    const matchesSearch = 
-      payment.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      payment.courseName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      payment.receiptNumber.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = statusFilter === 'all' || payment.status === statusFilter;
-    const matchesMethod = methodFilter === 'all' || payment.method === methodFilter;
-    
-    const matchesDateRange = (!dateRange.start || payment.date >= dateRange.start) &&
-                           (!dateRange.end || payment.date <= dateRange.end);
-    
-    return matchesSearch && matchesStatus && matchesMethod && matchesDateRange;
-  });
-
-  const totalRevenue = filteredPayments
-    .filter(p => p.status === 'completed')
-    .reduce((sum, p) => sum + p.amount, 0);
-
-  const pendingAmount = filteredPayments
-    .filter(p => p.status === 'pending')
-    .reduce((sum, p) => sum + p.amount, 0);
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return 'bg-green-100 text-green-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'failed':
-        return 'bg-red-100 text-red-800';
-      case 'refunded':
-        return 'bg-gray-100 text-gray-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+      setStudents(mockStudents);
+    } catch (error) {
+      console.error('학생 목록 로딩 실패:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return '완료';
-      case 'pending':
-        return '대기';
-      case 'failed':
-        return '실패';
-      case 'refunded':
-        return '환불';
-      default:
-        return '알 수 없음';
+  const fetchPurchaseRecords = async (studentId: string) => {
+    try {
+      // 실제 API 호출로 대체
+      const mockRecords: PurchaseRecord[] = [
+        {
+          id: '1',
+          purchaseDate: '2024-01-15',
+          purchaseTime: 120,
+          amount: 60000,
+          paymentMethod: 'card',
+          studentId: studentId,
+          studentName: selectedStudent?.name || ''
+        },
+        {
+          id: '2',
+          purchaseDate: '2024-01-10',
+          purchaseTime: 180,
+          amount: 90000,
+          paymentMethod: 'paypay',
+          studentId: studentId,
+          studentName: selectedStudent?.name || ''
+        },
+        {
+          id: '3',
+          purchaseDate: '2024-01-05',
+          purchaseTime: 60,
+          amount: 30000,
+          paymentMethod: 'cash',
+          studentId: studentId,
+          studentName: selectedStudent?.name || '',
+          notes: '첫 구매'
+        }
+      ];
+      setPurchaseRecords(mockRecords);
+    } catch (error) {
+      console.error('구매 기록 로딩 실패:', error);
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return <CheckCircle className="w-4 h-4" />;
-      case 'pending':
-        return <AlertCircle className="w-4 h-4" />;
-      case 'failed':
-        return <XCircle className="w-4 h-4" />;
-      case 'refunded':
-        return <TrendingDown className="w-4 h-4" />;
-      default:
-        return <AlertCircle className="w-4 h-4" />;
+  const handlePurchaseSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedStudent) return;
+
+    try {
+      const response = await fetch('/api/admin/payments/purchase', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          studentId: selectedStudent.id,
+          ...newPurchase
+        }),
+      });
+
+      if (response.ok) {
+        // 성공 시 학생 정보와 구매 기록 새로고침
+        await fetchStudents();
+        await fetchPurchaseRecords(selectedStudent.id);
+        setShowPurchaseModal(false);
+        setNewPurchase({
+          purchaseTime: 60,
+          amount: 0,
+          paymentMethod: 'cash',
+          purchaseDate: new Date().toISOString().split('T')[0],
+          notes: ''
+        });
+        alert('구매가 등록되었습니다.');
+      } else {
+        alert('구매 등록에 실패했습니다.');
+      }
+    } catch (error) {
+      alert('구매 등록 중 오류가 발생했습니다.');
     }
   };
 
-  const getMethodText = (method: string) => {
+  const getPaymentMethodText = (method: PurchaseRecord['paymentMethod']) => {
     switch (method) {
-      case 'card':
-        return '카드';
-      case 'bank_transfer':
-        return '계좌이체';
       case 'cash':
         return '현금';
-      case 'online':
-        return '온라인';
+      case 'card':
+        return '카드';
+      case 'paypay':
+        return 'PayPay';
+      case 'other':
+        return '기타';
       default:
         return '알 수 없음';
     }
+  };
+
+  const formatTime = (minutes: number) => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    if (hours > 0) {
+      return `${hours}시간 ${mins}분`;
+    }
+    return `${mins}분`;
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('ko-KR').format(amount);
+    return amount.toLocaleString('ko-KR');
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
+  const filteredStudents = students.filter(student =>
+    student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    student.uid.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">결제 관리</h1>
-          <p className="text-lg text-gray-600">학생 결제를 관리하세요</p>
-        </div>
-        <div className="flex gap-2">
-          <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-            <Download className="w-5 h-5" />
-            내보내기
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-            <Plus className="w-5 h-5" />
-            수동 결제
-          </button>
-        </div>
+    <div className="p-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold">결제 정보 관리</h1>
+        <p className="text-gray-600">학생의 구매 내역과 잔여 시간을 관리합니다.</p>
       </div>
 
-      {/* 통계 카드 */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-lg shadow-sm border p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">총 수익</p>
-              <p className="text-2xl font-bold text-gray-900">{formatCurrency(totalRevenue)}원</p>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* 학생 선택 */}
+        <div className="lg:col-span-1">
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-lg font-semibold mb-4">학생 선택</h2>
+            
+            {/* 검색 */}
+            <div className="mb-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="학생 검색..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
             </div>
-            <div className="p-2 bg-green-100 rounded-lg">
-              <TrendingUp className="w-6 h-6 text-green-600" />
+
+            {/* 학생 목록 */}
+            <div className="space-y-2 max-h-96 overflow-y-auto">
+              {isLoading ? (
+                <div className="text-center py-4">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
+                </div>
+              ) : filteredStudents.length === 0 ? (
+                <div className="text-center py-4 text-gray-500">
+                  학생을 찾을 수 없습니다.
+                </div>
+              ) : (
+                filteredStudents.map((student) => (
+                  <button
+                    key={student.id}
+                    onClick={() => setSelectedStudent(student)}
+                    className={`w-full p-3 text-left rounded-lg border transition-colors ${
+                      selectedStudent?.id === student.id
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="font-medium">{student.name}</div>
+                    <div className="text-sm text-gray-600">{student.email}</div>
+                    <div className="text-xs text-gray-500">UID: {student.uid}</div>
+                  </button>
+                ))
+              )}
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">대기 중인 결제</p>
-              <p className="text-2xl font-bold text-gray-900">{formatCurrency(pendingAmount)}원</p>
-            </div>
-            <div className="p-2 bg-yellow-100 rounded-lg">
-              <AlertCircle className="w-6 h-6 text-yellow-600" />
-            </div>
-          </div>
-        </div>
+        {/* 선택된 학생 정보 */}
+        <div className="lg:col-span-2">
+          {selectedStudent ? (
+            <div className="space-y-6">
+              {/* 학생 요약 정보 */}
+              <div className="bg-white rounded-lg shadow p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold">{selectedStudent.name}님의 결제 정보</h2>
+                  <button
+                    onClick={() => setShowPurchaseModal(true)}
+                    className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>시간 구매</span>
+                  </button>
+                </div>
 
-        <div className="bg-white rounded-lg shadow-sm border p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">이번 달 결제</p>
-              <p className="text-2xl font-bold text-gray-900">{filteredPayments.filter(p => p.status === 'completed').length}건</p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <TrendingUp className="w-5 h-5 text-blue-600" />
+                      <span className="font-medium text-blue-900">총 구매 시간</span>
+                    </div>
+                    <div className="text-2xl font-bold text-blue-900">
+                      {formatTime(selectedStudent.totalPurchasedTime)}
+                    </div>
+                  </div>
+
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <Clock className="w-5 h-5 text-green-600" />
+                      <span className="font-medium text-green-900">총 사용 시간</span>
+                    </div>
+                    <div className="text-2xl font-bold text-green-900">
+                      {formatTime(selectedStudent.totalUsedTime)}
+                    </div>
+                  </div>
+
+                  <div className={`p-4 rounded-lg ${
+                    selectedStudent.remainingTime < 180 
+                      ? 'bg-red-50' 
+                      : selectedStudent.remainingTime < 300 
+                        ? 'bg-yellow-50' 
+                        : 'bg-green-50'
+                  }`}>
+                    <div className="flex items-center space-x-2 mb-2">
+                      <AlertCircle className={`w-5 h-5 ${
+                        selectedStudent.remainingTime < 180 
+                          ? 'text-red-600' 
+                          : selectedStudent.remainingTime < 300 
+                            ? 'text-yellow-600' 
+                            : 'text-green-600'
+                      }`} />
+                      <span className={`font-medium ${
+                        selectedStudent.remainingTime < 180 
+                          ? 'text-red-900' 
+                          : selectedStudent.remainingTime < 300 
+                            ? 'text-yellow-900' 
+                            : 'text-green-900'
+                      }`}>남은 시간</span>
+                    </div>
+                    <div className={`text-2xl font-bold ${
+                      selectedStudent.remainingTime < 180 
+                        ? 'text-red-900' 
+                        : selectedStudent.remainingTime < 300 
+                          ? 'text-yellow-900' 
+                          : 'text-green-900'
+                    }`}>
+                      {formatTime(selectedStudent.remainingTime)}
+                    </div>
+                    {selectedStudent.remainingTime < 180 && (
+                      <div className="text-sm text-red-600 mt-1">시간이 부족합니다!</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* 구매 기록 */}
+              <div className="bg-white rounded-lg shadow">
+                <div className="p-6 border-b">
+                  <h3 className="text-lg font-semibold">구매 기록</h3>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          구매일
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          구매 시간
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          금액
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          결제 수단
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          메모
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {purchaseRecords.map((record) => (
+                        <tr key={record.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {new Date(record.purchaseDate).toLocaleDateString('ko-KR')}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {formatTime(record.purchaseTime)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            ¥{formatCurrency(record.amount)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {getPaymentMethodText(record.paymentMethod)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {record.notes || '-'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <DollarSign className="w-6 h-6 text-blue-600" />
+          ) : (
+            <div className="bg-white rounded-lg shadow p-12 text-center">
+              <User className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">학생을 선택하세요</h3>
+              <p className="text-gray-600">왼쪽에서 학생을 선택하여 결제 정보를 확인하세요.</p>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
-      {/* 검색 및 필터 */}
-      <div className="bg-white rounded-lg shadow-sm border p-6">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input
-              type="text"
-              placeholder="학생, 코스, 영수증번호 검색..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as 'all' | 'completed' | 'pending' | 'failed' | 'refunded')}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="all">전체 상태</option>
-            <option value="completed">완료</option>
-            <option value="pending">대기</option>
-            <option value="failed">실패</option>
-            <option value="refunded">환불</option>
-          </select>
-          
-          <select
-            value={methodFilter}
-            onChange={(e) => setMethodFilter(e.target.value as 'all' | 'card' | 'bank_transfer' | 'cash' | 'online')}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="all">전체 방법</option>
-            <option value="card">카드</option>
-            <option value="bank_transfer">계좌이체</option>
-            <option value="cash">현금</option>
-            <option value="online">온라인</option>
-          </select>
-          
-          <input
-            type="date"
-            value={dateRange.start}
-            onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="시작일"
-          />
-          
-          <input
-            type="date"
-            value={dateRange.end}
-            onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="종료일"
-          />
-        </div>
-      </div>
+      {/* 구매 등록 모달 */}
+      {showPurchaseModal && selectedStudent && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <h3 className="text-lg font-semibold mb-4">시간 구매 등록</h3>
+            <form onSubmit={handlePurchaseSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  학생
+                </label>
+                <div className="p-3 bg-gray-100 rounded border">
+                  {selectedStudent.name} ({selectedStudent.uid})
+                </div>
+              </div>
 
-      {/* 결제 목록 */}
-      <div className="bg-white rounded-lg shadow-sm border">
-        <div className="p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">결제 목록</h2>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  구매 시간 (분)
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={newPurchase.purchaseTime}
+                  onChange={(e) => setNewPurchase(prev => ({ 
+                    ...prev, 
+                    purchaseTime: parseInt(e.target.value) || 0 
+                  }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  금액 (¥)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={newPurchase.amount}
+                  onChange={(e) => setNewPurchase(prev => ({ 
+                    ...prev, 
+                    amount: parseInt(e.target.value) || 0 
+                  }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  결제 수단
+                </label>
+                <select
+                  value={newPurchase.paymentMethod}
+                  onChange={(e) => setNewPurchase(prev => ({ 
+                    ...prev, 
+                    paymentMethod: e.target.value as 'cash' | 'card' | 'paypay' | 'other'
+                  }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="cash">현금</option>
+                  <option value="card">카드</option>
+                  <option value="paypay">PayPay</option>
+                  <option value="other">기타</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  구매일
+                </label>
+                <input
+                  type="date"
+                  value={newPurchase.purchaseDate}
+                  onChange={(e) => setNewPurchase(prev => ({ 
+                    ...prev, 
+                    purchaseDate: e.target.value 
+                  }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  메모 (선택사항)
+                </label>
+                <textarea
+                  value={newPurchase.notes}
+                  onChange={(e) => setNewPurchase(prev => ({ 
+                    ...prev, 
+                    notes: e.target.value 
+                  }))}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="메모를 입력하세요..."
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowPurchaseModal(false)}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                >
+                  취소
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  구매 등록
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-        
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  학생/코스
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  금액
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  결제 방법
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  결제일
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  상태
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  액션
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredPayments.map((payment) => (
-                <tr key={payment.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">{payment.studentName}</div>
-                      <div className="text-sm text-gray-500">{payment.courseName}</div>
-                      <div className="text-xs text-gray-400">{payment.receiptNumber}</div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm font-medium text-gray-900">{formatCurrency(payment.amount)}원</div>
-                    <div className="text-sm text-gray-500">{payment.description}</div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {getMethodText(payment.method)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-gray-900">
-                      {new Date(payment.date).toLocaleDateString()}
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      만기: {new Date(payment.dueDate).toLocaleDateString()}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(payment.status)}`}>
-                      {getStatusIcon(payment.status)}
-                      {getStatusText(payment.status)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <button className="p-1 text-blue-600 hover:bg-blue-100 rounded">
-                        <Eye className="w-4 h-4" />
-                      </button>
-                      <button className="p-1 text-green-600 hover:bg-green-100 rounded">
-                        <Download className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      )}
     </div>
   );
 } 

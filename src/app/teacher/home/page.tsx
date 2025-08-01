@@ -19,6 +19,7 @@ import {
   Edit,
   Eye
 } from 'lucide-react';
+import { withRole } from '@/lib/auth-utils';
 
 interface TeacherStats {
   currentLevel: string;
@@ -50,7 +51,7 @@ interface RecentReservation {
   status: 'confirmed' | 'pending' | 'cancelled';
 }
 
-export default function TeacherHomePage() {
+function TeacherHomePage() {
   const [stats, setStats] = useState<TeacherStats | null>(null);
   const [recentNotes, setRecentNotes] = useState<RecentNote[]>([]);
   const [recentReservations, setRecentReservations] = useState<RecentReservation[]>([]);
@@ -303,3 +304,5 @@ export default function TeacherHomePage() {
     </div>
   );
 } 
+
+export default withRole(TeacherHomePage, ['master', 'teacher']); 

@@ -77,11 +77,16 @@ model Teacher {
   phone        String?
   subjects     String[]
   hourlyRate   Int                 @default(30000)
+  colorCode    String              @default("#3B82F6")
+  availableDays String[]           @default([])
+  availableTimeSlots String[]      @default([])
+  isActive     Boolean             @default(true)
   createdAt    DateTime            @default(now())
   updatedAt    DateTime            @updatedAt
   notes        LessonNote[]
   reservations Reservation[]
   attendances  TeacherAttendance[]
+  services     TeacherService[]
   user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("teachers")
@@ -629,6 +634,44 @@ model Admin {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("admins")
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  duration    Int      // 분 단위
+  bufferTime  Int      // 분 단위
+  isActive    Boolean  @default(true)
+  imageUrl    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  teachers    TeacherService[]
+
+  @@map("services")
+}
+
+model MemoType {
+  id        String   @id @default(cuid())
+  name      String
+  color     String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("memo_types")
+}
+
+model TeacherService {
+  id         String   @id @default(cuid())
+  teacherId  String
+  serviceId  String
+  createdAt  DateTime @default(now())
+  teacher    Teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  service    Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@unique([teacherId, serviceId])
+  @@map("teacher_services")
 }
 
 enum UserRole {

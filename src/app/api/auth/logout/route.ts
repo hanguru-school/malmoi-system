@@ -1,24 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
-    const response = NextResponse.json(
-      { message: '로그아웃되었습니다.' },
-      { status: 200 }
-    );
-
+    // 쿠키 삭제
+    const response = NextResponse.json({ success: true });
+    
     // 세션 쿠키 삭제
-    response.cookies.set('auth-session', '', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 0,
-      path: '/'
-    });
-
+    response.cookies.delete('user-session');
+    
     return response;
   } catch (error) {
-    console.error('로그아웃 오류:', error);
     return NextResponse.json(
       { error: '로그아웃 중 오류가 발생했습니다.' },
       { status: 500 }
