@@ -16,7 +16,7 @@ import {
   Plus,
   Eye
 } from 'lucide-react';
-import { withRole } from '@/lib/auth-utils';
+import { withRole } from '@/components/auth-guards';
 
 interface Reservation {
   id: string;

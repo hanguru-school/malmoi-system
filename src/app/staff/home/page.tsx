@@ -19,7 +19,7 @@ import {
   LogOut
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { withRole } from '@/lib/auth-utils';
+import { withRole } from '@/components/auth-guards';
 
 interface WorkLog {
   id: string;

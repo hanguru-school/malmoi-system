@@ -19,7 +19,7 @@ import {
   Edit,
   Eye
 } from 'lucide-react';
-import { withRole } from '@/lib/auth-utils';
+import { withRole } from '@/components/auth-guards';
 
 interface TeacherStats {
   currentLevel: string;

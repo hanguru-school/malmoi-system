@@ -27,7 +27,7 @@ import {
 import Link from 'next/link';
 import { useTranslation, Language } from '@/lib/translations';
 import { useAuth } from '@/hooks/useAuth';
-import { withRole } from '@/lib/auth-utils';
+import { withRole } from '@/components/auth-guards';
 
 interface StudentStats {
   totalClasses: number;
