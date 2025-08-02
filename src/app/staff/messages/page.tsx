@@ -2,18 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { 
-  Send, 
   Search, 
-  Filter, 
   Plus, 
   Edit, 
-  Trash2,
-  MessageSquare,
-  User,
-  Calendar,
-  CheckCircle,
-  Clock,
-  AlertCircle
+  Trash2
 } from 'lucide-react';
 
 interface Message {

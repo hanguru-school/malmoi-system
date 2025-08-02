@@ -4,12 +4,9 @@ import { useState, useEffect } from 'react';
 import { 
   Plus, 
   Edit, 
-  Trash2, 
-  Eye, 
-  EyeOff,
+  Trash2,
   Upload,
   Clock,
-  DollarSign,
   CheckCircle,
   XCircle,
   X

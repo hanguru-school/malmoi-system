@@ -5,22 +5,14 @@ import {
   Bell, 
   Calendar, 
   Clock, 
-  MessageSquare, 
-  Send,
+  MessageSquare,
   Edit,
-  Trash2,
   Plus,
-  Settings,
   CheckCircle,
   AlertCircle,
   X,
   Search,
-  Filter,
-  Users,
   Mail,
-  Smartphone,
-  Zap,
-  Activity,
   BarChart3
 } from 'lucide-react';
 

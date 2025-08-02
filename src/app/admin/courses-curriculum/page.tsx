@@ -4,15 +4,12 @@ import { useState, useEffect } from 'react';
 import { 
   Plus, 
   Search, 
-  Filter, 
   BookOpen, 
   Layers,
   Edit, 
-  Trash2, 
-  Eye,
+  Trash2,
   ChevronDown,
   ChevronRight,
-  Save,
   X
 } from 'lucide-react';
 

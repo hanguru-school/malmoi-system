@@ -3,18 +3,13 @@
 import { useState, useEffect } from 'react';
 import { 
   Search, 
-  Filter, 
   RefreshCw, 
-  Edit, 
   Save, 
   AlertTriangle,
   MessageSquare,
   Mail,
   Smartphone,
-  User,
-  Calendar,
-  Eye,
-  Copy
+  Eye
 } from 'lucide-react';
 
 interface SentMessage {

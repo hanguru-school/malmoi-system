@@ -8,10 +8,8 @@ import {
   BookOpen, 
   Calendar, 
   MapPin, 
-  CheckCircle, 
   XCircle, 
-  Edit, 
-  Trash2,
+  Edit,
   ArrowLeft,
   Plus,
   History

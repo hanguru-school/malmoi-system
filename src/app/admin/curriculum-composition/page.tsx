@@ -4,30 +4,15 @@ import React, { useState, useEffect } from 'react';
 import {
   BookOpen,
   Plus,
-  Edit,
-  Trash2,
   CheckCircle,
   Clock,
   User,
-  Search,
-  ChevronDown,
   ChevronRight,
-  Save,
   X,
   AlertCircle,
-  Calendar,
   Target,
-  FileText,
   MessageSquare,
-  Settings,
-  Users,
-  GraduationCap,
-  Award,
-  Star,
-  Eye,
-  Play,
-  Pause,
-  RotateCcw
+  Eye
 } from 'lucide-react';
 import { AddLevelModal, AddSubLevelModal, AddItemModal, StudentSelectorModal } from '@/components/curriculum/CurriculumModals';
 

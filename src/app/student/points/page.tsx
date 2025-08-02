@@ -10,8 +10,7 @@ import {
   Calendar, 
   Award,
   Clock,
-  Target,
-  ChevronRight
+  Target
 } from 'lucide-react';
 
 interface PointsInfo {

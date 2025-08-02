@@ -3,20 +3,15 @@
 import { useState, useEffect } from 'react';
 import { 
   Settings, 
-  Monitor, 
-  Globe, 
   Clock, 
   Bell, 
   Zap, 
   Palette,
   Smartphone,
-  Tablet,
-  Monitor as Desktop,
   Languages,
   Download,
   Upload,
   RotateCcw,
-  Save,
   Home
 } from 'lucide-react';
 import Link from 'next/link';

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Star, Send, Clock, User, BookOpen, MessageSquare, CheckCircle, AlertCircle } from 'lucide-react';
+import { Star, Send, User, MessageSquare, CheckCircle, AlertCircle } from 'lucide-react';
 
 interface Lesson {
   id: string;

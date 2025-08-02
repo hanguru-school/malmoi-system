@@ -8,11 +8,8 @@ import {
   DollarSign, 
   AlertCircle, 
   CheckCircle, 
-  Clock, 
   ChevronRight,
   User,
-  LogOut,
-  Home,
   XCircle,
   Eye,
   GraduationCap,
@@ -22,19 +19,10 @@ import {
   Zap,
   Settings,
   BarChart3,
-  MessageSquare,
-  Bell,
   Star,
-  Volume2,
   CreditCard,
-  Award,
-  Layers,
-  TestTube,
   Shield,
-  Building,
-  UserCheck,
-  PieChart,
-  Target
+  Building
 } from 'lucide-react';
 import Link from 'next/link';
 

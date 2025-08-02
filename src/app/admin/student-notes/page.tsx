@@ -5,19 +5,14 @@ import Link from 'next/link';
 import { 
   ArrowLeft, 
   Search, 
-  Filter, 
   Edit, 
   Eye, 
   Download,
-  Calendar,
   User,
-  BookOpen,
   Star,
-  MessageSquare,
   X,
   Mic,
   MicOff,
-  Plus,
   Trash2
 } from 'lucide-react';
 

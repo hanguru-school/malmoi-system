@@ -7,19 +7,12 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
-  ChevronLeft,
-  ChevronRight,
   Eye,
-  Edit,
   Download,
-  Send,
-  MessageSquare,
   User,
   Building,
   Car,
-  FileText,
-  ThumbsUp,
-  ThumbsDown
+  FileText
 } from 'lucide-react';
 
 interface AttendanceRecord {

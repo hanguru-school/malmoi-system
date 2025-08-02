@@ -8,7 +8,6 @@ import {
   Filter,
   Download,
   RefreshCw,
-  Search,
   Eye,
   Edit,
   Trash2

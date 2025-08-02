@@ -4,9 +4,7 @@ import { useState, useEffect } from 'react';
 import { 
   MessageSquare, 
   Send, 
-  Search, 
-  Filter,
-  User,
+  Search,
   Clock,
   CheckCircle,
   AlertCircle,

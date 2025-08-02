@@ -6,13 +6,11 @@ import {
   Award, 
   Target, 
   CheckCircle, 
-  Clock, 
-  BookOpen,
+  Clock,
   Star,
   Trophy,
   BarChart3,
-  Calendar,
-  Users
+  Calendar
 } from 'lucide-react';
 
 interface LevelProgress {

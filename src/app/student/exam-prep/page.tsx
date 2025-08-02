@@ -4,37 +4,20 @@ import React, { useState, useEffect } from 'react';
 import { 
   BookOpen, 
   Search,
-  Filter,
   Play,
-  Volume2,
   Eye,
-  CalendarDays,
-  GraduationCap,
-  Globe,
-  Monitor,
   FileText,
-  MessageSquare,
-  Target,
-  TrendingUp,
   BarChart3,
   Award,
-  Zap,
   CheckCircle,
   XCircle,
-  AlertCircle,
-  Heart,
-  Star,
   Clock,
   User,
-  Calendar,
   Mic,
   Headphones,
   PenTool,
   Type,
-  Brain,
-  Trophy,
-  TrendingDown,
-  Activity
+  Trophy
 } from 'lucide-react';
 import Link from 'next/link';
 

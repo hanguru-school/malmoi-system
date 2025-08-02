@@ -3,10 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Play, 
-  Pause, 
   Mic, 
   MicOff, 
-  Volume2, 
   Download,
   BookOpen,
   Edit,
@@ -15,9 +13,6 @@ import {
   Target,
   Star,
   BarChart3,
-  ChevronRight,
-  ChevronLeft,
-  Settings,
   Headphones,
   FileText,
   Award

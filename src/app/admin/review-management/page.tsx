@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { 
   Search, 
-  Filter, 
   Star, 
   MessageSquare, 
   ThumbsUp, 
@@ -11,9 +10,7 @@ import {
   User,
   Calendar,
   Eye,
-  Edit,
-  Reply,
-  ExternalLink
+  Reply
 } from 'lucide-react';
 
 interface Review {

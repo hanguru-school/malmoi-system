@@ -4,11 +4,8 @@ import { useState, useEffect } from 'react';
 import { 
   User, 
   Clock, 
-  DollarSign, 
-  CreditCard, 
   Plus, 
   Search,
-  Calendar,
   TrendingUp,
   AlertCircle
 } from 'lucide-react';

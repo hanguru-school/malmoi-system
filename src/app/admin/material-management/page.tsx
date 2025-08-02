@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { 
-  BookOpen, 
   FileText, 
   Image, 
   Volume2, 
@@ -10,28 +9,13 @@ import {
   Plus, 
   Search, 
   Filter, 
-  Download, 
   Upload,
   CheckCircle,
-  Clock,
   Eye,
-  EyeOff,
   Edit,
-  Trash2,
-  Link,
-  Unlink,
   MessageSquare,
   Target,
-  BarChart3,
-  Settings,
   ChevronRight,
-  ChevronLeft,
-  Bookmark,
-  BookmarkPlus,
-  Mic,
-  MicOff,
-  Save,
-  X,
   Play,
   Pause
 } from 'lucide-react';

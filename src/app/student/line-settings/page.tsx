@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, MessageCircle, CheckCircle, AlertCircle, ExternalLink } from 'lucide-react';
+import { ArrowLeft, MessageCircle, CheckCircle } from 'lucide-react';
 
 export default function StudentLineSettingsPage() {
   const [isConnected, setIsConnected] = useState(false);

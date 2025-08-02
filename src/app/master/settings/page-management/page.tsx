@@ -2,10 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { 
-  Settings, 
   Shield, 
   CheckCircle, 
-  XCircle, 
   Save,
   Loader2,
   AlertCircle

@@ -4,8 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { 
   User, 
   Mail, 
-  Phone, 
-  MapPin, 
   Calendar, 
   Shield,
   Edit,

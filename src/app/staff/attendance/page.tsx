@@ -5,11 +5,8 @@ import {
   Calendar, 
   Clock, 
   CheckCircle, 
-  XCircle, 
   TrendingUp,
-  Download,
-  Filter,
-  Search
+  Download
 } from 'lucide-react';
 
 interface AttendanceRecord {

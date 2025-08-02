@@ -5,7 +5,6 @@ import {
   BookOpen, 
   Users, 
   Calendar, 
-  Clock, 
   MapPin, 
   Wifi,
   Edit, 
@@ -13,7 +12,6 @@ import {
   Eye,
   Plus,
   Search,
-  Filter,
   Home
 } from 'lucide-react';
 import Link from 'next/link';

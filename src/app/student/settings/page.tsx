@@ -7,16 +7,11 @@ import {
   Settings, 
   User, 
   Bell, 
-  Globe, 
   Shield, 
   Palette,
   Smartphone,
   Mail,
-  Lock,
-  Eye,
-  EyeOff,
   Save,
-  X,
   TrendingUp
 } from 'lucide-react';
 

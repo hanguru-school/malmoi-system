@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { 
   CreditCard, 
-  Smartphone, 
   Wifi, 
   WifiOff, 
   CheckCircle, 

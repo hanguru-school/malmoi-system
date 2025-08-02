@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
   BarChart3, 
-  PieChart, 
   TrendingUp, 
   BookOpen, 
   Clock, 
@@ -11,12 +10,8 @@ import {
   Star,
   Calendar,
   Book,
-  FileText,
-  Mic,
-  Headphones,
   Award,
   ChevronRight,
-  Filter,
   Download,
   RefreshCw
 } from 'lucide-react';

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import prisma, { checkPrismaConnection } from '@/lib/db';
+import { checkPrismaConnection } from '@/lib/db';
 
 // 표준화된 API 응답 인터페이스
 export interface ApiResponse<T = any> {

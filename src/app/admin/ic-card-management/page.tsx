@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { CreditCard, Users, Clock, DollarSign, CheckCircle, XCircle, AlertCircle, Settings, Download, RefreshCw } from 'lucide-react';
+import { CreditCard, Users, Clock, DollarSign, CheckCircle, XCircle, AlertCircle, Settings, Download } from 'lucide-react';
 
 interface ICUser {
   uid: string;

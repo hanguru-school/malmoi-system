@@ -2,28 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import { 
-  Users, 
   QrCode, 
-  RefreshCw, 
-  Download, 
   Copy, 
-  Search, 
-  Filter,
+  Search,
   Plus,
-  Edit,
-  Trash2,
-  Eye,
   CheckCircle,
   XCircle,
-  AlertCircle,
   ArrowLeft,
-  Save,
   RotateCcw
 } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
-import { StudentIdentifier, StudentIdentifierHistory } from '@/types/student';
-import { generateUniqueIdentifier, validateIdentifierFormat } from '@/utils/identifierUtils';
+import { StudentIdentifier } from '@/types/student';
+import { generateUniqueIdentifier } from '@/utils/identifierUtils';
 import StudentQRCode from '@/components/student/StudentQRCode';
 
 interface Student {

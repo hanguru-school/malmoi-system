@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Plus, X, User, Clock } from 'lucide-react';
+import { User, Clock } from 'lucide-react';
 
 interface CurriculumLevel {
   id: string;

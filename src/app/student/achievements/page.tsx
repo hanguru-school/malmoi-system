@@ -6,13 +6,11 @@ import {
   ArrowLeft, 
   Award, 
   Star, 
-  Trophy, 
   Target, 
   Calendar,
   TrendingUp,
   CheckCircle,
   Clock,
-  ChevronRight,
   BookOpen
 } from 'lucide-react';
 

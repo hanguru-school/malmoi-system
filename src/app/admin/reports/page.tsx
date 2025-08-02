@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Plus, FileText, Download, Eye, Trash2, Calendar, User, BookOpen, XCircle } from 'lucide-react';
+import { Search, Plus, FileText, Download, Eye, Trash2, Calendar, User, XCircle } from 'lucide-react';
 
 interface Report {
   id: string;

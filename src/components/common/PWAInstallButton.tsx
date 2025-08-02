@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Download, CheckCircle, XCircle, Smartphone, Monitor } from 'lucide-react';
+import { Download, CheckCircle, Smartphone, Monitor } from 'lucide-react';
 
 interface PWAInstallButtonProps {
   language?: 'ja' | 'ko';

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Calendar, Clock, User, CheckCircle, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface ClassSchedule {
   id: string;

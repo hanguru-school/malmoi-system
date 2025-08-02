@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { taggingSystem } from '@/lib/tagging-system';
 
 const prisma = new PrismaClient();
 

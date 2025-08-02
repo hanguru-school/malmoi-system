@@ -4,16 +4,12 @@ import { useState, useEffect, useMemo } from 'react';
 import { 
   ChevronLeft, 
   ChevronRight, 
-  Calendar, 
   Clock, 
   User, 
   MapPin, 
   Plus,
-  Filter,
-  Eye,
-  EyeOff
+  Filter
 } from 'lucide-react';
-import { PrismaClient } from '@prisma/client';
 
 interface Reservation {
   id: string;

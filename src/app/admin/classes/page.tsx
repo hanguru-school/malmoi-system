@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Plus, Users, Clock, Calendar, BookOpen, Edit, Trash2, Eye, XCircle, User, MapPin } from 'lucide-react';
+import { Search, Plus, Users, Clock, Edit, Trash2, Eye, XCircle, User, MapPin } from 'lucide-react';
 
 interface Class {
   id: string;

@@ -13,7 +13,6 @@ import {
   Settings, 
   AlertTriangle, 
   CheckCircle, 
-  XCircle, 
   Plus 
 } from 'lucide-react';
 import Link from 'next/link';

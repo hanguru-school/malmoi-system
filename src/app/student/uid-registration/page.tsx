@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, CreditCard, CheckCircle, AlertCircle, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, CreditCard, Plus, Trash2 } from 'lucide-react';
 
 interface UIDCard {
   id: string;

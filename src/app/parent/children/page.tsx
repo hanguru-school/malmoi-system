@@ -4,14 +4,11 @@ import { useState, useEffect } from 'react';
 import { 
   Users, 
   Plus, 
-  Search, 
-  Filter,
+  Search,
   Edit,
   Trash2,
   Eye,
-  Calendar,
   BookOpen,
-  Star,
   TrendingUp,
   Home
 } from 'lucide-react';

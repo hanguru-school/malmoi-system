@@ -13,16 +13,12 @@ import {
   Star,
   BookOpen,
   Video,
-  FileText,
   AlertCircle,
   CalendarPlus,
   ArrowRight,
-  Play,
   Download,
   ExternalLink,
-  Shield,
-  Check,
-  X
+  Shield
 } from 'lucide-react';
 
 interface Course {

@@ -10,7 +10,6 @@ import {
   Search,
   Upload,
   CheckCircle,
-  Play,
   Eye,
   GraduationCap,
   BookMarked,

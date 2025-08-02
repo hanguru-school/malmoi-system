@@ -8,15 +8,13 @@ import {
   User, 
   TrendingUp,
   Download,
-  Filter,
   Search,
   ChevronLeft,
   ChevronRight,
   FileText,
   Car,
   Gift,
-  Award,
-  Calculator
+  Award
 } from 'lucide-react';
 
 interface SalaryItem {

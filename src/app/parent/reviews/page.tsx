@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Star, Filter, Search, Calendar, User, MessageSquare } from 'lucide-react';
+import { Star, Search, Calendar, User, MessageSquare } from 'lucide-react';
 
 // Mock data for teacher reviews
 const mockReviews = [

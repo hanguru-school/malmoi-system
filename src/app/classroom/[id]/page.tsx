@@ -7,16 +7,11 @@ import {
   MapPin,
   Clock,
   Users,
-  Calendar,
   Phone,
   Mail,
   MessageSquare,
-  Star,
-  CheckCircle,
   AlertCircle,
-  Plus,
-  Search,
-  Filter
+  Plus
 } from 'lucide-react';
 
 

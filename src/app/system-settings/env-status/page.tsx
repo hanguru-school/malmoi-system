@@ -8,12 +8,9 @@ import {
   Info, 
   RefreshCw, 
   Database, 
-  Shield, 
-  Server, 
   Settings,
   Activity,
-  Copy,
-  ExternalLink
+  Copy
 } from 'lucide-react';
 
 interface EnvironmentStatus {

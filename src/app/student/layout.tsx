@@ -20,7 +20,7 @@ import {
   Bell,
   Globe
 } from 'lucide-react';
-import { useTranslation, Language } from '@/lib/translations';
+import { useTranslation } from '@/lib/translations';
 
 const navigation = [
   { name: '홈', href: '/student/home', icon: Home },

@@ -8,7 +8,6 @@ import {
   User, 
   BookOpen, 
   MapPin, 
-  MessageSquare, 
   ArrowLeft, 
   Save,
   CheckCircle,

@@ -4,17 +4,12 @@ import { useState } from 'react';
 import { 
   BookOpen, 
   Calendar, 
-  FileText, 
   MessageSquare, 
-  Star, 
-  Target, 
-  Clock, 
-  Award,
+  Clock,
   Languages,
   User,
   Settings,
   LogOut,
-  Building,
   Users,
   CheckCircle
 } from 'lucide-react';

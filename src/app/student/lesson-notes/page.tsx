@@ -7,18 +7,11 @@ import {
   Clock,
   User,
   FileText,
-  AlertCircle,
-  ChevronRight,
   Search,
-  Filter,
   Play,
   Volume2,
-  Download,
   Eye,
-  CalendarDays,
   GraduationCap,
-  Globe,
-  Monitor,
   BookMarked,
   MessageSquare
 } from 'lucide-react';
@@ -117,7 +110,7 @@ export default function StudentLessonNotesPage() {
     // 기간 필터
     if (periodFilter !== 'all') {
       const now = new Date();
-      let cutoffDate = new Date();
+      const cutoffDate = new Date();
       
       switch (periodFilter) {
         case '7days':

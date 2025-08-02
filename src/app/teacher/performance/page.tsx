@@ -2,18 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { 
-  BarChart3, 
   TrendingUp, 
-  TrendingDown, 
   Users, 
-  Clock, 
   Star,
-  Target,
-  Award,
   Home,
   Calendar,
-  CheckCircle,
-  AlertCircle
+  CheckCircle
 } from 'lucide-react';
 import Link from 'next/link';
 

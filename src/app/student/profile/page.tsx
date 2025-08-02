@@ -3,12 +3,8 @@
 import { useState, useEffect } from 'react';
 import { 
   User, 
-  Mail, 
-  Phone, 
   Calendar, 
-  Edit, 
-  Save, 
-  X,
+  Edit,
   ArrowLeft,
   Star,
   Award,
@@ -20,16 +16,7 @@ import {
   PenTool,
   ChevronRight,
   Settings,
-  Camera,
-  Upload,
-  Download,
-  Trash2,
-  Eye,
-  EyeOff,
-  Lock,
-  Unlock,
-  Shield,
-  Bell
+  Download
 } from 'lucide-react';
 import Link from 'next/link';
 

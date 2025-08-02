@@ -4,18 +4,12 @@ import { useState, useEffect } from 'react';
 import { 
   CreditCard, 
   DollarSign, 
-  Calendar, 
-  Clock, 
-  CheckCircle, 
-  XCircle,
-  AlertCircle,
-  Search, 
-  Filter,
+  CheckCircle,
+  Search,
   Download,
   Eye,
   Home,
-  TrendingUp,
-  TrendingDown
+  TrendingUp
 } from 'lucide-react';
 import Link from 'next/link';
 

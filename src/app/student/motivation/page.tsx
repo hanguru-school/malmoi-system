@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Trophy, Target, TrendingUp, BookOpen, Star, Award, Calendar, CheckCircle, Clock, Lightbulb } from 'lucide-react';
+import { Trophy, Target, TrendingUp, BookOpen, Star, CheckCircle, Clock, Lightbulb } from 'lucide-react';
 
 interface Badge {
   id: string;

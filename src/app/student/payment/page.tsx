@@ -8,9 +8,7 @@ import {
   CheckCircle, 
   AlertCircle,
   ShoppingCart,
-  Star,
-  Calculator,
-  Calendar
+  Star
 } from 'lucide-react';
 
 interface PaymentPlan {

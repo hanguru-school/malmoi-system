@@ -3,38 +3,18 @@
 import React, { useState, useEffect } from 'react';
 import { 
   BookOpen, 
-  FileText, 
-  Users, 
   Target, 
   CheckCircle, 
   Play, 
   Pause, 
-  Volume2, 
   Plus,
   Search,
   Filter,
   Download,
-  Upload,
-  MessageSquare,
   Clock,
-  Star,
-  Award,
   BarChart3,
-  Calendar,
-  ChevronRight,
-  ChevronLeft,
   Settings,
-  Eye,
-  EyeOff,
-  Mic,
-  MicOff,
-  Save,
-  Edit,
-  Trash2,
-  Link,
-  Unlink,
-  Bookmark,
-  BookmarkPlus
+  Save
 } from 'lucide-react';
 
 interface Student {

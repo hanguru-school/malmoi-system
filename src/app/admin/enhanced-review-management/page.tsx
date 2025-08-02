@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Star, MessageSquare, Search, Filter, Send, Download, Eye, Reply, Flag, Calendar, User, ThumbsUp } from 'lucide-react';
+import { Star, MessageSquare, Search, Download, Reply, ThumbsUp } from 'lucide-react';
 
 interface Review {
   id: string;

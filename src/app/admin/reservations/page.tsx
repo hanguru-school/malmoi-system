@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Plus, Calendar, Clock, User, BookOpen, CheckCircle, XCircle, AlertCircle, MoreVertical, Edit, Trash2, Eye } from 'lucide-react';
-import Link from 'next/link';
+import { Search, Plus, Calendar, Clock, User, CheckCircle, XCircle, Trash2, Eye } from 'lucide-react';
 
 interface Reservation {
   id: string;

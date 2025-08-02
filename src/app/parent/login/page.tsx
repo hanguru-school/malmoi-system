@@ -9,10 +9,7 @@ import {
   Eye, 
   EyeOff, 
   ArrowLeft,
-  Users,
-  Calendar,
-  Clock,
-  DollarSign
+  Users
 } from 'lucide-react';
 
 export default function ParentLoginPage() {

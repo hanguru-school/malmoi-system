@@ -7,15 +7,8 @@ import {
   Search, 
   Save, 
   Mic, 
-  PenTool, 
   Play, 
-  Pause, 
-  Download,
-  Calendar,
-  Clock,
-  User,
-  BookOpen,
-  CheckCircle,
+  Pause,
   AlertCircle,
   X
 } from 'lucide-react';

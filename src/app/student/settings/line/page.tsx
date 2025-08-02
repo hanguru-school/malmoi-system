@@ -6,7 +6,6 @@ import {
   ArrowLeft,
   Save,
   CheckCircle,
-  ExternalLink,
   QrCode
 } from 'lucide-react';
 import Link from 'next/link';

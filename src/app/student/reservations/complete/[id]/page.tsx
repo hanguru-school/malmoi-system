@@ -12,7 +12,6 @@ import {
   ArrowLeft,
   Plus,
   X,
-  Download,
   Trash2,
   Eye
 } from 'lucide-react';

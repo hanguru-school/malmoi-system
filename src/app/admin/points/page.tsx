@@ -2,10 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { 
-  Save, 
   Plus, 
-  Edit, 
-  Trash2,
+  Edit,
   Settings,
   Coins,
   CheckCircle,
@@ -14,7 +12,6 @@ import {
   MessageSquare,
   ShoppingCart,
   Star,
-  AlertCircle,
   ToggleLeft,
   ToggleRight
 } from 'lucide-react';

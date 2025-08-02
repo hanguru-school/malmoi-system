@@ -3,18 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
-  Calendar, 
   Search, 
-  Filter, 
   Plus, 
   Edit, 
   Trash2,
-  User,
-  Clock,
-  MapPin,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
   ArrowRight
 } from 'lucide-react';
 

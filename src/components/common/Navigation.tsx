@@ -10,7 +10,6 @@ import {
   Home,
   Calendar,
   BookOpen,
-  Users,
   Shield,
   GraduationCap,
   Building

@@ -1,13 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { 
   CheckCircle, 
   XCircle, 
   AlertCircle, 
   User, 
-  Clock, 
-  MapPin,
+  Clock,
   Smartphone,
   Tablet,
   Monitor

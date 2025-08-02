@@ -4,18 +4,15 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
-  Home, 
   Calendar,
   Clock,
   DollarSign,
   User,
-  Settings,
   Menu, 
   X,
   LogOut,
   Bell,
-  FileText,
-  BarChart3
+  FileText
 } from 'lucide-react';
 
 const navigation = [

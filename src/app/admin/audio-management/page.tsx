@@ -5,16 +5,9 @@ import {
   Upload, 
   Play, 
   Pause, 
-  Volume2, 
   Move, 
   FileAudio,
-  Calendar,
-  Clock,
   Search,
-  Filter,
-  Plus,
-  Trash2,
-  Edit,
   Eye,
   Download
 } from 'lucide-react';

@@ -1,18 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { 
   Plus, 
   Edit, 
   Trash2, 
   Search, 
-  Filter, 
-  BookOpen, 
   Layers,
-  ChevronDown,
-  ChevronRight,
-  Save,
   X
 } from 'lucide-react';
 

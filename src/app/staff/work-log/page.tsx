@@ -1,19 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { 
   Plus, 
   Search, 
-  Filter, 
-  Calendar, 
-  Clock, 
   Edit, 
-  Trash2,
-  FileText,
-  MessageSquare,
-  Users,
-  Settings
+  Trash2
 } from 'lucide-react';
 
 interface WorkLog {

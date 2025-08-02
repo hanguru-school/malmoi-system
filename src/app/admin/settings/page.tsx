@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { User, Shield, Key, Eye, EyeOff, Plus, Edit, Trash2, Check, X } from 'lucide-react';
+import { User, Shield, Key, Eye, EyeOff, Plus, Edit, Trash2 } from 'lucide-react';
 
 interface Admin {
   id: string;

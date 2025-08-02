@@ -1,4 +1,3 @@
-import { NextResponse } from 'next/server';
 import { handleApiError, createSuccessResponse, checkDatabaseConnection, checkCognitoConnection, validateEnvironmentVariables } from '@/lib/api-utils';
 
 export const runtime = 'nodejs';

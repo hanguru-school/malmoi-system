@@ -9,11 +9,7 @@ import {
   MessageSquare, 
   Star,
   Settings,
-  Eye,
-  Edit,
-  Plus,
-  RefreshCw,
-  Filter
+  Plus
 } from 'lucide-react';
 
 interface Student {

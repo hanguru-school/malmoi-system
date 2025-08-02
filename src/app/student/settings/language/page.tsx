@@ -6,8 +6,7 @@ import {
   ArrowLeft,
   Save,
   CheckCircle,
-  Languages,
-  Flag
+  Languages
 } from 'lucide-react';
 import Link from 'next/link';
 

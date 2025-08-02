@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { BarChart3, TrendingUp, TrendingDown, Calendar, User, BookOpen, Target, Award, Download } from 'lucide-react';
+import { BarChart3, TrendingUp, Target, Award, Download } from 'lucide-react';
 
 // Mock data for learning reports
 const mockReports = [

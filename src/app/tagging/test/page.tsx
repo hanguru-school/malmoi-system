@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Play, 
-  Pause, 
   RefreshCw, 
   CheckCircle, 
   XCircle, 
@@ -11,11 +10,9 @@ import {
   Clock,
   Zap,
   BarChart3,
-  Settings,
   TestTube,
   Database,
-  Wifi,
-  WifiOff
+  Wifi
 } from 'lucide-react';
 import { taggingSystem } from '@/lib/tagging-system';
 

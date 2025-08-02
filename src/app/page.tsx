@@ -9,22 +9,11 @@ import {
   Star, 
   CheckCircle, 
   ArrowRight, 
-  Play, 
-  GraduationCap,
-  Clock,
-  MapPin,
+  Play,
   MessageSquare,
-  Award,
   Target,
-  Heart,
-  Zap,
-  Globe,
-  Smartphone,
   Video,
   FileText,
-  Headphones,
-  Mic,
-  Camera,
   Languages
 } from 'lucide-react';
 

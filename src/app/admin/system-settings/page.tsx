@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { 
-  Settings, 
   Monitor, 
   Smartphone, 
   Tablet, 
@@ -13,9 +12,6 @@ import {
   Save,
   Download,
   Upload,
-  Users,
-  Database,
-  Shield,
   Activity
 } from 'lucide-react';
 

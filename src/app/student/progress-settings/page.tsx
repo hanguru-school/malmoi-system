@@ -6,12 +6,9 @@ import {
   ArrowLeft, 
   TrendingUp, 
   Target, 
-  BookOpen, 
-  Star,
+  BookOpen,
   Calendar,
   Save,
-  CheckCircle,
-  Clock,
   Award
 } from 'lucide-react';
 

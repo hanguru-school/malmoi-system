@@ -3,11 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import { 
   TrendingUp, 
-  TrendingDown, 
   DollarSign, 
   Users, 
   Calendar,
-  Filter,
   Search,
   Download,
   BarChart3,

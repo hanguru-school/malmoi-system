@@ -4,21 +4,16 @@ import React, { useState, useEffect } from 'react';
 import { 
   BarChart3, 
   TrendingUp,
-  TrendingDown,
-  Calendar,
   Clock,
   Target,
   Award,
-  Star,
   CheckCircle,
-  XCircle,
   AlertCircle,
   Heart,
   Zap,
   Activity,
   BookOpen,
   FileText,
-  BookMarked,
   Mic,
   Headphones,
   PenTool,
@@ -28,11 +23,7 @@ import {
   Lightbulb,
   MessageSquare,
   User,
-  CalendarDays,
-  Clock3,
-  Target as TargetIcon,
-  TrendingUp as TrendingUpIcon,
-  TrendingDown as TrendingDownIcon
+  Target as TargetIcon
 } from 'lucide-react';
 import Link from 'next/link';
 

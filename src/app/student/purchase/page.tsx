@@ -8,9 +8,7 @@ import {
   Clock, 
   CreditCard, 
   ShoppingCart,
-  CheckCircle,
-  DollarSign,
-  Calendar
+  CheckCircle
 } from 'lucide-react';
 
 interface PurchaseOption {

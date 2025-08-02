@@ -7,11 +7,8 @@ import {
   Clock, 
   Calendar, 
   Play, 
-  Pause, 
   TrendingUp,
-  AlertCircle,
-  CheckCircle,
-  ChevronRight
+  AlertCircle
 } from 'lucide-react';
 
 interface TimeInfo {

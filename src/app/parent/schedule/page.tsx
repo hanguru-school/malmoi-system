@@ -7,13 +7,11 @@ import {
   User, 
   MapPin, 
   Wifi,
-  Search, 
-  Filter,
+  Search,
   ChevronLeft,
   ChevronRight,
   Home,
   CheckCircle,
-  XCircle,
   AlertCircle
 } from 'lucide-react';
 import Link from 'next/link';

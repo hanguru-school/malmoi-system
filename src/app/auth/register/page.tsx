@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Globe, ArrowLeft, CheckCircle, XCircle, Loader2, Languages } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, Loader2, Languages } from 'lucide-react';
 import TermsModal from '@/components/common/TermsModal';
 import { useLanguage } from '@/contexts/LanguageContext';
 

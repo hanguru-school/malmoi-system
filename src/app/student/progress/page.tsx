@@ -6,13 +6,11 @@ import {
   ArrowLeft, 
   Award, 
   Calendar, 
-  TrendingUp, 
   BookOpen, 
   Target,
   CheckCircle,
   Clock,
-  Star,
-  ChevronRight
+  Star
 } from 'lucide-react';
 
 interface ProgressInfo {

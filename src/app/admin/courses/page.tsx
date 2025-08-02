@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Plus, BookOpen, Clock, DollarSign, Users, Edit, Trash2, Eye, XCircle, Tag } from 'lucide-react';
+import { Search, Plus, BookOpen, Clock, DollarSign, Users, Edit, Trash2, Eye, XCircle, Tag } from 'lucide-react';
 
 interface Course {
   id: string;

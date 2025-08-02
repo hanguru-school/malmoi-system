@@ -3,19 +3,13 @@
 import { useState, useEffect } from 'react';
 import { 
   User, 
-  Mail, 
-  Phone, 
-  Calendar, 
-  MapPin, 
   Camera, 
   ArrowLeft,
   Save,
   CheckCircle,
   Eye,
   EyeOff,
-  AlertTriangle,
-  Building,
-  MapPinIcon
+  AlertTriangle
 } from 'lucide-react';
 import Link from 'next/link';
 

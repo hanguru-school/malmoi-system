@@ -4,26 +4,14 @@ import { useState, useEffect } from 'react';
 import { 
   GraduationCap, 
   Search, 
-  Plus, 
   Edit3, 
   Trash2, 
-  Eye, 
-  Filter,
-  SortAsc,
-  Calendar,
-  BookOpen,
+  Eye,
   Star,
-  Phone,
-  Mail,
-  MapPin,
-  MoreVertical,
   UserPlus,
-  Users,
   Clock,
   CheckCircle,
   XCircle,
-  DollarSign,
-  Award,
   User
 } from 'lucide-react';
 
@@ -156,7 +144,7 @@ export default function AdminTeachers() {
   };
 
   const filterAndSortTeachers = () => {
-    let filtered = teachers.filter(teacher => {
+    const filtered = teachers.filter(teacher => {
       const matchesSearch = teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            teacher.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            teacher.phone.includes(searchTerm);

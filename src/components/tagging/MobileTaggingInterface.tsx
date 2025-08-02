@@ -4,9 +4,6 @@ import { useState, useEffect } from 'react';
 import { 
   CheckCircle, 
   XCircle, 
-  AlertCircle, 
-  User, 
-  Clock, 
   Smartphone,
   ArrowLeft,
   Home

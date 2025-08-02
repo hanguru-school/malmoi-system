@@ -1,7 +1,7 @@
 'use client';
 
 import { Home, User, CheckCircle, AlertCircle, BookOpen, Clock, MoreHorizontal, MessageSquare, ShoppingCart, Calendar } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { hardwareReaderManager } from '@/lib/hardware-reader';
 

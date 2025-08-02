@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { User, Mail, Phone, Camera, Eye, EyeOff, Bell, Save, Upload } from 'lucide-react';
+import { User, Camera, Eye, EyeOff, Bell, Save } from 'lucide-react';
 
 interface EmployeeProfile {
   id: string;

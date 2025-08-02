@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Bell, Plus, Edit, Trash2, Send, Eye, EyeOff, Search, Filter, Clock, Users, MessageSquare } from 'lucide-react';
+import { Plus, Edit, Trash2, Send, Search, Filter, Clock, Users } from 'lucide-react';
 
 interface NotificationType {
   id: string;

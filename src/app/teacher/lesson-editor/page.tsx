@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { 
   ArrowLeft, 
-  Save, 
   Printer, 
   Bold, 
   Italic, 
@@ -14,21 +13,12 @@ import {
   AlignRight,
   List,
   ListOrdered,
-  Type,
   Palette,
   Star,
-  CheckCircle,
   Clock,
   Maximize,
   Minimize,
-  MessageSquare,
-  BookOpen,
-  X,
-  ChevronLeft,
-  ChevronRight,
-  ChevronUp,
-  ChevronDown,
-  Calendar
+  BookOpen
 } from 'lucide-react';
 
 interface LessonNote {

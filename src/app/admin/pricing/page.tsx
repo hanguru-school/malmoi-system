@@ -3,11 +3,8 @@
 import { useState, useEffect } from 'react';
 import { 
   Save, 
-  DollarSign, 
   Star, 
-  Clock, 
-  TrendingUp,
-  Settings
+  Clock
 } from 'lucide-react';
 
 interface PricingSettings {

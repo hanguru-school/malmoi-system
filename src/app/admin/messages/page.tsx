@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Plus, Send, MessageSquare, Users, Eye, Edit, Trash2, Calendar, User, XCircle, Copy, CheckCircle } from 'lucide-react';
+import { Search, Plus, Send, MessageSquare, Users, Eye, Trash2, Calendar, User, XCircle, Copy } from 'lucide-react';
 
 interface Message {
   id: string;

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Settings, User, Bell, Shield, CreditCard, Users, Mail, Phone, Camera, Save, Eye, EyeOff } from 'lucide-react';
+import { User, Bell, Shield, CreditCard, Users, Camera, Save, Eye, EyeOff } from 'lucide-react';
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('profile');

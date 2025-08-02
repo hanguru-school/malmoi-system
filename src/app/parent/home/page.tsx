@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { 
-  Home, 
   Users, 
   Calendar, 
   BookOpen, 
@@ -11,10 +10,7 @@ import {
   TrendingUp, 
   Bell, 
   User, 
-  MessageSquare, 
-  Settings, 
   ChevronRight,
-  Globe,
   CheckCircle,
   AlertCircle,
   XCircle,

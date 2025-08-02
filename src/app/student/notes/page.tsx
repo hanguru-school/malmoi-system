@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Search, Filter, Play, Calendar, Clock, User, BookOpen } from 'lucide-react';
+import { Search, Play, Calendar, Clock, User, BookOpen } from 'lucide-react';
 import Link from 'next/link';
 
 interface LessonNote {

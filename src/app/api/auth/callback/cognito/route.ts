@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { handleCognitoCallback, createAuthSuccessResponse, createAuthErrorResponse } from '@/lib/auth-utils';
+import { handleCognitoCallback, createAuthSuccessResponse } from '@/lib/auth-utils';
 
 export async function GET(request: NextRequest) {
   try {

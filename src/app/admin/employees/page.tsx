@@ -4,16 +4,11 @@ import { useState, useEffect } from 'react';
 import { 
   Plus, 
   Search, 
-  Filter, 
-  User, 
-  Mail, 
-  Phone, 
-  Calendar,
+  User,
   Edit,
   Trash2,
   Eye,
   GraduationCap,
-  Clock,
   CheckCircle,
   AlertCircle,
   Users

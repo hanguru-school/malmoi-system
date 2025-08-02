@@ -4,17 +4,11 @@ import { useState, useEffect } from 'react';
 import { 
   Users, 
   GraduationCap, 
-  Calendar, 
   DollarSign, 
-  TrendingUp, 
-  TrendingDown,
-  BarChart3,
-  PieChart,
+  TrendingUp,
   Activity,
-  Clock,
   Star,
-  CheckCircle,
-  AlertCircle
+  CheckCircle
 } from 'lucide-react';
 
 interface StatisticsData {

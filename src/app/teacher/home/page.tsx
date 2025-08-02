@@ -4,18 +4,11 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
   Calendar, 
-  Clock, 
-  BookOpen, 
-  QrCode, 
   TrendingUp, 
   Award, 
   Star, 
   Users,
-  Bell,
-  MessageCircle,
   FileText,
-  CheckCircle,
-  AlertCircle,
   Edit,
   Eye
 } from 'lucide-react';

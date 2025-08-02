@@ -4,28 +4,17 @@ import { useState, useEffect } from 'react';
 import { 
   Calendar, 
   Clock, 
-  MapPin, 
-  Users, 
   TrendingUp, 
-  CheckCircle, 
-  XCircle, 
   AlertCircle,
-  ChevronRight,
   User,
   LogOut,
-  Home,
   Award,
   Star,
   BookOpen,
-  Play,
-  FileText,
-  Mic,
-  PenTool,
-  Globe,
-  QrCode
+  Globe
 } from 'lucide-react';
 import Link from 'next/link';
-import { useTranslation, Language } from '@/lib/translations';
+import { useTranslation } from '@/lib/translations';
 import { useAuth } from '@/hooks/useAuth';
 import ProtectedRoute from '@/components/common/ProtectedRoute';
 import Navigation from '@/components/common/Navigation';
