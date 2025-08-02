@@ -1,283 +1,77 @@
-# Booking System - Production Ready
+# MalMoi 한국어 교실 시스템
 
-A comprehensive booking and management system for educational institutions, built with Next.js 15, Prisma, and AWS services.
+## 🚀 자동 배포 시스템
 
-## 🚀 Production Deployment
+이제 `feature/production-system-setup` 브랜치에 push하면 자동으로 배포됩니다!
 
-This project is configured for **direct deployment to production** via Vercel with automatic deployments from GitHub.
+### 배포 방법
+1. 코드 수정
+2. `git add . && git commit -m "메시지" && git push origin feature/production-system-setup`
+3. 자동 배포 완료! 🎉
 
-### Live Site
-
-- **Production URL**: https://app.hanguru.school
-- **Health Check**: https://app.hanguru.school/api/health
-
-### Automatic Deployment
-
-- Push to `main` branch triggers automatic deployment
-- GitHub Actions runs tests and builds
-- Vercel deploys to production immediately
-- Zero-downtime deployments
-
-## 🏗️ Architecture
-
-### Tech Stack
-
-- **Frontend**: Next.js 15 with App Router
-- **Backend**: Next.js API Routes
-- **Database**: PostgreSQL (AWS RDS)
-- **Authentication**: AWS Cognito
-- **File Storage**: AWS S3
-- **Hosting**: Vercel
-- **ORM**: Prisma
-
-### Key Features
-
-- Role-based access control (Admin, Student, Teacher, Staff)
-- Real-time booking system
-- File upload and management
-- Authentication with AWS Cognito
-- Responsive design
-- PWA support
-
-## 🛠️ Development Setup
-
-### Prerequisites
-
-- Node.js 18+
-- npm or yarn
-- Git
-
-### Local Development
-
-```bash
-# Clone repository
-git clone https://github.com/hanguru-school/malmoi-system.git
-cd malmoi-system
-
-# Install dependencies
-npm install
-
-# Set up environment variables
-cp .env.example .env.local
-# Edit .env.local with your local configuration
-
-# Run database migrations
-npx prisma migrate dev
-
-# Start development server
-npm run dev
-```
-
-### Available Scripts
-
-```bash
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run start        # Start production server
-npm run lint         # Run ESLint
-npm run type-check   # Run TypeScript checks
-```
-
-## 📁 Project Structure
-
-```
-src/
-├── app/                    # Next.js App Router
-│   ├── admin/             # Admin pages
-│   ├── student/           # Student pages
-│   ├── teacher/           # Teacher pages
-│   ├── staff/             # Staff pages
-│   └── api/               # API routes
-├── components/            # React components
-├── lib/                   # Utility functions
-├── hooks/                 # Custom React hooks
-└── types/                 # TypeScript type definitions
-```
-
-## 🔐 Authentication
-
-### User Roles
-
-- **Admin**: Full system access
-- **Student**: Booking and learning features
-- **Teacher**: Class management
-- **Staff**: Administrative tasks
-
-### Login Credentials
-
-- **Admin**: admin@hanguru.school / admin123
-- **Student**: hp9419@gmail.com / gtbtyj
-
-## 🚀 Deployment
-
-### Production Deployment
-
-The project is configured for automatic deployment to production:
-
-1. **Push to main branch**
-2. **GitHub Actions** runs tests and builds
-3. **Vercel** deploys to production
-4. **Live site** updated at https://app.hanguru.school
-
-### Environment Variables
-
-All production environment variables are configured in Vercel:
-
-- Database connection
-- AWS credentials
-- Cognito configuration
-- JWT secrets
-
-## 📊 Monitoring
-
-### Health Checks
-
-- Production health: https://app.hanguru.school/api/health
-- Database connectivity monitoring
-- AWS service status
-
-### Performance
-
-- Vercel Analytics
-- Database performance monitoring
-- Error tracking
-
-## 🔧 Configuration
-
-### Key Files
-
-- `vercel.json` - Vercel deployment configuration
-- `next.config.ts` - Next.js production optimizations
-- `prisma/schema.prisma` - Database schema
-- `.github/workflows/deploy.yml` - CI/CD pipeline
-
-### Environment Variables
-
-```env
-# Database
-DATABASE_URL=postgresql://...
-
-# AWS
-AWS_REGION=ap-northeast-1
-AWS_ACCESS_KEY_ID=your-key
-AWS_SECRET_ACCESS_KEY=your-secret
-
-# Cognito
-COGNITO_USER_POOL_ID=your-pool-id
-COGNITO_CLIENT_ID=your-client-id
-
-# JWT
-JWT_SECRET=your-secret
-SESSION_SECRET=your-session-secret
-```
-
-## 🛡️ Security
-
-### Security Features
-
-- HTTPS enforced
-- Security headers configured
-- Role-based access control
-- JWT token authentication
-- CORS properly configured
-
-### Best Practices
-
-- Environment variables for secrets
-- Input validation
-- SQL injection prevention
-- XSS protection
-
-## 📈 Performance
-
-### Optimizations
-
-- SWC minification
-- Bundle splitting
-- Image optimization
-- CDN distribution
-- Static generation where possible
-
-### Monitoring
-
-- Core Web Vitals
-- API response times
-- Database performance
-- Error rates
-
-## 🔄 Development Workflow
-
-### Local Development
-
-1. Make changes locally
-2. Test with `npm run dev`
-3. Run linting and type checks
-4. Commit and push to main
-
-### Production Deployment
-
-1. Push to main branch
-2. GitHub Actions automatically runs
-3. Vercel deploys to production
-4. Site is live immediately
-
-## 🆘 Troubleshooting
-
-### Common Issues
-
-#### Build Failures
-
-```bash
-# Check TypeScript errors
-npm run type-check
-
-# Check linting errors
-npm run lint
-
-# Verify dependencies
-npm install
-```
-
-#### Database Issues
-
-```bash
-# Reset database
-npx prisma migrate reset
-
-# Generate Prisma client
-npx prisma generate
-```
-
-#### Deployment Issues
-
-- Check Vercel deployment logs
-- Verify environment variables
-- Review GitHub Actions workflow
-
-## 📞 Support
-
-### Resources
-
-- [Vercel Documentation](https://vercel.com/docs)
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Prisma Documentation](https://www.prisma.io/docs)
-- [AWS Documentation](https://docs.aws.amazon.com/)
-
-### Contact
-
-For production issues:
-
-1. Check Vercel deployment logs
-2. Review GitHub Actions workflow
-3. Monitor AWS CloudWatch metrics
-4. Contact development team
-
-## 📄 License
-
-This project is proprietary software for Hanguru School.
+### 배포 확인
+- **Vercel 대시보드**: https://vercel.com/dashboard
+- **사이트 접속**: https://app.hanguru.school
 
 ---
 
-**Last Updated**: July 31, 2025  
-**Version**: 1.0.0  
-**Production URL**: https://app.hanguru.school
+## 프로젝트 개요
+
+한국어 교실을 위한 종합적인 예약 및 관리 시스템입니다.
+
+### 주요 기능
+
+- **학생 관리**: 학생 정보, 수업 예약, 진도 추적
+- **교사 관리**: 수업 일정, 학생 관리, 자료 공유
+- **예약 시스템**: 실시간 예약, 알림, 결제 연동
+- **학습 관리**: 진도 추적, 과제 관리, 성과 분석
+- **통신 시스템**: 메시지, 알림, 리뷰 시스템
+
+### 기술 스택
+
+- **Frontend**: Next.js 15, React 19, TypeScript
+- **Backend**: Next.js API Routes, Prisma ORM
+- **Database**: PostgreSQL (AWS RDS)
+- **Authentication**: AWS Cognito
+- **Deployment**: Vercel
+- **Styling**: Tailwind CSS
+
+### 환경 설정
+
+1. **환경 변수 설정**
+   ```bash
+   cp .env.example .env.local
+   ```
+
+2. **의존성 설치**
+   ```bash
+   npm install
+   ```
+
+3. **데이터베이스 설정**
+   ```bash
+   npx prisma generate
+   npx prisma db push
+   ```
+
+4. **개발 서버 실행**
+   ```bash
+   npm run dev
+   ```
+
+### 배포
+
+프로젝트는 Vercel을 통해 자동 배포됩니다.
+
+- **Production**: https://app.hanguru.school
+- **Preview**: 각 브랜치별 자동 배포
+
+### 개발 가이드
+
+- **코딩 스타일**: ESLint + Prettier
+- **타입 체크**: TypeScript
+- **테스트**: Jest + React Testing Library
+
+### 라이센스
+
+MIT License
