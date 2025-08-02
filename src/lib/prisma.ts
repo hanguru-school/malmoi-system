@@ -1,25 +1,45 @@
 import { PrismaClient } from "@prisma/client";
 
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
-};
+declare global {
+  // 개발 환경에서 HMR로 인한 다중 인스턴스 방지
+  var prisma: PrismaClient | undefined;
+}
 
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
+// Singleton 패턴으로 Prisma 클라이언트 관리
+const createPrismaClient = () => {
+  return new PrismaClient({
     log:
       process.env.NODE_ENV === "development"
         ? ["query", "error", "warn"]
         : ["error"],
+    datasources: {
+      db: {
+        url: process.env.DATABASE_URL,
+      },
+    },
   });
+};
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+const prisma = globalThis.prisma || createPrismaClient();
 
-// 빌드 시 Prisma 클라이언트 초기화 방지
-if (typeof window === "undefined" && process.env.NODE_ENV !== "production") {
+if (process.env.NODE_ENV !== "production") {
+  globalThis.prisma = prisma;
+}
+
+// 연결 상태 확인 함수
+export async function checkPrismaConnection() {
   try {
-    prisma.$connect();
+    await prisma.$connect();
+    await prisma.$queryRaw`SELECT 1`;
+    return { success: true, message: "Database connection successful" };
   } catch (error) {
-    console.warn("Prisma connection failed during build:", error);
+    console.error("Prisma connection failed:", error);
+    return {
+      success: false,
+      message: "Database connection failed",
+      error: error instanceof Error ? error.message : "UNKNOWN_ERROR",
+    };
   }
 }
+
+export default prisma;

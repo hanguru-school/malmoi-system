@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import prisma from "./db";
+import prisma from "./prisma";
 import { UserRole } from "@prisma/client";
 
 // 사용자 인증 함수
