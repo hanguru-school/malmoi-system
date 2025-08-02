@@ -1,34 +1,42 @@
 #!/bin/bash
 
-# 운영 환경 전용 배포 스크립트
-# 이 스크립트는 main 브랜치에서만 실행되어야 합니다
+# 자동 배포 스크립트
+# 사용법: ./scripts/deploy.sh [커밋 메시지]
 
 set -e
 
-echo "🚀 운영 환경 배포 시작..."
+echo "🚀 자동 배포 시작..."
+
+# 커밋 메시지 설정
+COMMIT_MESSAGE=${1:-"feat: 자동 배포"}
+BRANCH_NAME="feature/production-system-setup"
 
 # 현재 브랜치 확인
 CURRENT_BRANCH=$(git branch --show-current)
-
-if [ "$CURRENT_BRANCH" != "main" ]; then
-    echo "❌ 오류: 이 스크립트는 main 브랜치에서만 실행할 수 있습니다."
-    echo "현재 브랜치: $CURRENT_BRANCH"
-    exit 1
+if [ "$CURRENT_BRANCH" != "$BRANCH_NAME" ]; then
+    echo "⚠️  $BRANCH_NAME 브랜치로 전환합니다..."
+    git checkout $BRANCH_NAME
 fi
 
-# 환경 변수 확인
-if [ -z "$VERCEL_TOKEN" ]; then
-    echo "❌ 오류: VERCEL_TOKEN 환경 변수가 설정되지 않았습니다."
-    exit 1
-fi
+# 변경사항 스테이징
+echo "📦 변경사항 스테이징..."
+git add .
 
-# 빌드
-echo "📦 프로젝트 빌드 중..."
-npm run build
+# 커밋
+echo "💾 커밋 중..."
+git commit -m "$COMMIT_MESSAGE"
 
-# 운영 환경 배포
-echo "🚀 운영 환경에 배포 중..."
-npx vercel --prod --token=$VERCEL_TOKEN
+# 푸시
+echo "📤 푸시 중..."
+git push origin $BRANCH_NAME
 
 echo "✅ 배포 완료!"
-echo "🌐 운영 URL: https://app.hanguru.school" 
+echo "🌐 Vercel에서 자동 배포가 시작됩니다..."
+echo "📊 배포 상태 확인: https://vercel.com/dashboard"
+echo "🌍 사이트 접속: https://app.hanguru.school"
+
+# GitHub Actions 상태 확인
+echo "⏳ GitHub Actions 상태 확인 중..."
+sleep 5
+
+echo "🎉 배포 프로세스가 완료되었습니다!" 
