@@ -1,555 +1,346 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { useState } from 'react';
 import { 
-  Calendar, 
   BookOpen, 
   Users, 
+  Calendar, 
   FileText, 
-  Bell, 
-  Settings,
-  ChevronRight,
-  Clock,
-  MapPin,
+  MessageSquare, 
+  Star, 
+  Target, 
+  Clock, 
+  Award,
+  Languages,
   User,
-  Star,
-  CheckCircle,
-  AlertCircle,
-  Plus,
-  Search,
-  Filter,
-  LogOut
+  Settings,
+  LogOut,
+  CreditCard,
+  BarChart3
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
-interface Child {
-  id: string;
-  name: string;
-  grade: string;
-  avatar: string;
-  status: 'active' | 'inactive';
-}
+// 다국어 텍스트 정의
+const translations = {
+  ja: {
+    title: "韓国語教室MalMoi",
+    welcome: "保護者ダッシュボード",
+    subtitle: "お子様の学習状況を確認できます",
+    children: "お子様",
+    payments: "支払い",
+    reports: "レポート",
+    messages: "メッセージ",
+    settings: "設定",
+    logout: "ログアウト",
+    viewAll: "すべて表示",
+    progressTitle: "学習進捗",
+    completedLessons: "完了したレッスン",
+    studyHours: "学習時間",
+    currentLevel: "現在のレベル",
+    nextLevel: "次のレベル",
+    points: "ポイント",
+    streak: "連続学習日数",
+    days: "日",
+    hours: "時間",
+    lessons: "レッスン",
+    pointsText: "ポイント",
+    upcomingClasses: "今後のレッスン",
+    recentPayments: "最近の支払い",
+    noUpcoming: "予定されたレッスンはありません",
+    noPayments: "最近の支払いはありません",
+    noMessages: "新しいメッセージはありません"
+  },
+  ko: {
+    title: "한국어교실MalMoi",
+    welcome: "학부모 대시보드",
+    subtitle: "자녀의 학습 상황을 확인할 수 있습니다",
+    children: "자녀",
+    payments: "결제",
+    reports: "보고서",
+    messages: "메시지",
+    settings: "설정",
+    logout: "로그아웃",
+    viewAll: "모두 보기",
+    progressTitle: "학습 진도",
+    completedLessons: "완료한 수업",
+    studyHours: "학습 시간",
+    currentLevel: "현재 레벨",
+    nextLevel: "다음 레벨",
+    points: "포인트",
+    streak: "연속 학습일",
+    days: "일",
+    hours: "시간",
+    lessons: "수업",
+    pointsText: "포인트",
+    upcomingClasses: "예정된 수업",
+    recentPayments: "최근 결제",
+    noUpcoming: "예정된 수업이 없습니다",
+    noPayments: "최근 결제가 없습니다",
+    noMessages: "새 메시지가 없습니다"
+  }
+};
 
-interface Reservation {
-  id: string;
-  childName: string;
-  courseName: string;
-  date: string;
-  time: string;
-  duration: string;
-  teacher: string;
-  status: 'confirmed' | 'pending' | 'cancelled';
-  location: string;
-}
+export default function ParentDashboard() {
+  const router = useRouter();
+  const [language, setLanguage] = useState<'ja' | 'ko'>('ja');
+  
+  const t = translations[language];
 
-interface Course {
-  id: string;
-  name: string;
-  description: string;
-  level: string;
-  duration: string;
-  price: number;
-  teacher: string;
-  schedule: string;
-  enrolled: boolean;
-}
-
-const ParentPage = () => {
-  const [children, setChildren] = useState<Child[]>([]);
-  const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [selectedChild, setSelectedChild] = useState<string>('');
-  const [activeTab, setActiveTab] = useState('dashboard');
-
-  // Mock data
-  useEffect(() => {
-    const mockChildren: Child[] = [
-      {
-        id: '1',
-        name: '김민수',
-        grade: '초등 3학년',
-        avatar: '/avatars/child1.jpg',
-        status: 'active'
-      },
-      {
-        id: '2',
-        name: '김민지',
-        grade: '초등 1학년',
-        avatar: '/avatars/child2.jpg',
-        status: 'active'
-      }
-    ];
-
-    const mockReservations: Reservation[] = [
-      {
-        id: '1',
-        childName: '김민수',
-        courseName: '수학 기초 과정',
-        date: '2024-01-20',
-        time: '14:00',
-        duration: '60분',
-        teacher: '김선생님',
-        status: 'confirmed',
-        location: '교실A'
-      },
-      {
-        id: '2',
-        childName: '김민지',
-        courseName: '국어 기초 과정',
-        date: '2024-01-22',
-        time: '15:30',
-        duration: '45分',
-        teacher: '鈴木先生',
-        status: 'pending',
-        location: '教室B'
-      },
-      {
-        id: '3',
-        childName: '田中 太郎',
-        courseName: '英語基礎コース',
-        date: '2024-01-25',
-        time: '16:00',
-        duration: '60分',
-        teacher: '高橋先生',
-        status: 'confirmed',
-        location: '教室C'
-      }
-    ];
-
-    const mockCourses: Course[] = [
-      {
-        id: '1',
-        name: '算数基礎コース',
-        description: '小学校低学年向けの算数基礎を学ぶコースです',
-        level: '初級',
-        duration: '60分',
-        price: 8000,
-        teacher: '佐藤先生',
-        schedule: '月・水・金 14:00-15:00',
-        enrolled: true
-      },
-      {
-        id: '2',
-        name: '国語基礎コース',
-        description: '読解力と作文力を向上させるコースです',
-        level: '初級',
-        duration: '45分',
-        price: 6000,
-        teacher: '鈴木先生',
-        schedule: '火・木 15:30-16:15',
-        enrolled: true
-      },
-      {
-        id: '3',
-        name: '英語基礎コース',
-        description: '英語の基礎を楽しく学ぶコースです',
-        level: '初級',
-        duration: '60分',
-        price: 10000,
-        teacher: '高橋先生',
-        schedule: '土 16:00-17:00',
-        enrolled: true
-      },
-      {
-        id: '4',
-        name: '理科実験コース',
-        description: '実験を通じて理科の楽しさを学ぶコースです',
-        level: '中級',
-        duration: '90分',
-        price: 12000,
-        teacher: '田中先生',
-        schedule: '日 10:00-11:30',
-        enrolled: false
-      }
-    ];
-
-    setChildren(mockChildren);
-    setReservations(mockReservations);
-    setCourses(mockCourses);
-    if (mockChildren.length > 0) {
-      setSelectedChild(mockChildren[0].id);
-    }
-  }, []);
+  const toggleLanguage = () => {
+    setLanguage(language === 'ja' ? 'ko' : 'ja');
+  };
 
   const handleLogout = () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('parentToken');
-      sessionStorage.clear();
-      window.location.href = '/login';
-    }
+    router.push('/auth/login');
   };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'confirmed':
-        return 'bg-green-100 text-green-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'confirmed':
-        return '確認済み';
-      case 'pending':
-        return '保留中';
-      case 'cancelled':
-        return 'キャンセル';
-      default:
-        return status;
-    }
-  };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('ja-JP', {
-      style: 'currency',
-      currency: 'JPY'
-    }).format(amount);
-  };
-
-  const renderDashboard = () => (
-    <div className="space-y-6">
-      {/* 子供選択 */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">お子様選択</h2>
-        <div className="flex gap-4">
-          {children.map((child) => (
-            <button
-              key={child.id}
-              onClick={() => setSelectedChild(child.id)}
-              className={`flex items-center gap-3 p-4 rounded-lg border-2 transition-colors ${
-                selectedChild === child.id
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}
-            >
-              <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
-                <User className="w-6 h-6 text-gray-600" />
-              </div>
-              <div className="text-left">
-                <p className="font-medium text-gray-900">{child.name}</p>
-                <p className="text-sm text-gray-600">{child.grade}</p>
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* 予約状況 */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">今週の予約</h2>
-          <Link href="/parent/reservations" className="text-blue-600 hover:text-blue-800 text-sm">
-            すべて見る
-          </Link>
-        </div>
-        <div className="space-y-3">
-          {reservations.slice(0, 3).map((reservation) => (
-            <div key={reservation.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                  <Calendar className="w-5 h-5 text-blue-600" />
-                </div>
-                <div>
-                  <p className="font-medium text-gray-900">{reservation.courseName}</p>
-                  <p className="text-sm text-gray-600">
-                    {reservation.date} {reservation.time} - {reservation.duration}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(reservation.status)}`}>
-                  {getStatusText(reservation.status)}
-                </span>
-                <ChevronRight className="w-4 h-4 text-gray-400" />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* コース状況 */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">登録コース</h2>
-          <Link href="/parent/courses" className="text-blue-600 hover:text-blue-800 text-sm">
-            すべて見る
-          </Link>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {courses.filter(course => course.enrolled).slice(0, 4).map((course) => (
-            <div key={course.id} className="p-4 border border-gray-200 rounded-lg">
-              <div className="flex items-start justify-between mb-2">
-                <h3 className="font-medium text-gray-900">{course.name}</h3>
-                <span className="text-sm text-gray-500">{course.level}</span>
-              </div>
-              <p className="text-sm text-gray-600 mb-3">{course.description}</p>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-500">{course.teacher}</span>
-                <span className="font-medium text-gray-900">{formatCurrency(course.price)}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderReservations = () => (
-    <div className="space-y-6">
-      <div className="bg-white p-6 rounded-lg shadow-sm border">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-gray-900">予約管理</h2>
-          <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-            <Plus className="w-4 h-4" />
-            新しい予約
-          </button>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">お子様</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">コース</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">日時</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">先生</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">場所</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ステータス</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">アクション</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {reservations.map((reservation) => (
-                <tr key={reservation.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{reservation.childName}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{reservation.courseName}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {reservation.date} {reservation.time}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{reservation.teacher}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{reservation.location}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(reservation.status)}`}>
-                      {getStatusText(reservation.status)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <button className="text-blue-600 hover:text-blue-900 mr-2">編集</button>
-                    <button className="text-red-600 hover:text-red-900">キャンセル</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderCourses = () => (
-    <div className="space-y-6">
-      <div className="bg-white p-6 rounded-lg shadow-sm border">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-gray-900">コース一覧</h2>
-          <div className="flex gap-2">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="text"
-                placeholder="コースを検索..."
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <select className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-              <option>すべてのレベル</option>
-              <option>初級</option>
-              <option>中級</option>
-              <option>上級</option>
-            </select>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {courses.map((course) => (
-            <div key={course.id} className="border border-gray-200 rounded-lg p-6">
-              <div className="flex items-start justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">{course.name}</h3>
-                <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                  {course.level}
-                </span>
-              </div>
-              <p className="text-gray-600 mb-4">{course.description}</p>
-              <div className="space-y-2 mb-4">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Clock className="w-4 h-4" />
-                  {course.duration}
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <User className="w-4 h-4" />
-                  {course.teacher}
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Calendar className="w-4 h-4" />
-                  {course.schedule}
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-lg font-bold text-gray-900">{formatCurrency(course.price)}</span>
-                <button
-                  className={`px-4 py-2 rounded-lg font-medium ${
-                    course.enrolled
-                      ? 'bg-green-100 text-green-800 cursor-not-allowed'
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
-                  }`}
-                  disabled={course.enrolled}
-                >
-                  {course.enrolled ? '登録済み' : '登録する'}
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderContact = () => (
-    <div className="space-y-6">
-      <div className="bg-white p-6 rounded-lg shadow-sm border">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">문의 및 연락처 정보</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <h3 className="font-medium text-gray-900 mb-3">연락처</h3>
-            <div className="space-y-2">
-              <p className="text-sm text-gray-600">
-                <strong>전화번호:</strong> 02-1234-5678
-              </p>
-              <p className="text-sm text-gray-600">
-                <strong>이메일:</strong> info@edubook.com
-              </p>
-              <p className="text-sm text-gray-600">
-                <strong>주소:</strong> 서울시 강남구 테헤란로 123
-              </p>
-            </div>
-          </div>
-          <div>
-            <h3 className="font-medium text-gray-900 mb-3">운영시간</h3>
-            <div className="space-y-2">
-              <p className="text-sm text-gray-600">
-                <strong>평일:</strong> 9:00 - 18:00
-              </p>
-              <p className="text-sm text-gray-600">
-                <strong>토요일:</strong> 9:00 - 17:00
-              </p>
-              <p className="text-sm text-gray-600">
-                <strong>일요일・공휴일:</strong> 휴무
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white p-6 rounded-lg shadow-sm border">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">문의 양식</h2>
-        <form className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">제목</label>
-            <input
-              type="text"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="문의 제목을 입력하세요"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">메시지</label>
-            <textarea
-              rows={4}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="문의 내용을 입력하세요"
-            />
-          </div>
-          <button
-            type="submit"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            보내기
-          </button>
-        </form>
-      </div>
-    </div>
-  );
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* 헤더 */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center">
-            <h1 className="text-xl font-bold text-gray-900">학부모 포털</h1>
-          </div>
-          <div className="flex items-center space-x-4">
-            <button className="p-2 text-gray-400 hover:text-gray-600 relative">
-              <Bell className="w-5 h-5" />
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
-            </button>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800"
-            >
-              <LogOut className="w-4 h-4" />
-              로그아웃
-            </button>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                <BookOpen className="w-6 h-6 text-white" />
+              </div>
+              <h1 className="text-2xl font-bold text-gray-900">{t.title}</h1>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={toggleLanguage}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200"
+              >
+                <Languages className="w-4 h-4" />
+                {language === 'ja' ? '한국어' : '日本語'}
+              </button>
+              <button
+                onClick={() => router.push('/parent/settings')}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200"
+              >
+                <Settings className="w-4 h-4" />
+                {t.settings}
+              </button>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-all duration-200"
+              >
+                <LogOut className="w-4 h-4" />
+                {t.logout}
+              </button>
+            </div>
           </div>
         </div>
       </header>
 
-      <div className="flex">
-        {/* 사이드바 */}
-        <aside className="w-64 bg-white shadow-sm border-r border-gray-200">
-          <nav className="mt-6 px-3">
-            <div className="space-y-1">
-              {[
-                { id: 'dashboard', name: '대시보드', icon: Calendar },
-                { id: 'reservations', name: '예약 관리', icon: BookOpen },
-                { id: 'courses', name: '과정 목록', icon: Users },
-                { id: 'contact', name: '문의 및 연락처', icon: FileText }
-              ].map((item) => {
-                const Icon = item.icon;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => setActiveTab(item.id)}
-                    className={`flex items-center w-full px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                      activeTab === item.id
-                        ? 'bg-blue-50 text-blue-700'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                    }`}
-                  >
-                    <Icon className="w-5 h-5 mr-3" />
-                    {item.name}
-                  </button>
-                );
-              })}
-            </div>
-          </nav>
-        </aside>
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        {/* Welcome Section */}
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+            {t.welcome}
+          </h2>
+          <p className="text-lg text-gray-600">
+            {t.subtitle}
+          </p>
+        </div>
 
-        {/* 메인 콘텐츠 */}
-        <main className="flex-1 p-6">
-          {activeTab === 'dashboard' && renderDashboard()}
-          {activeTab === 'reservations' && renderReservations()}
-          {activeTab === 'courses' && renderCourses()}
-          {activeTab === 'contact' && renderContact()}
-        </main>
-      </div>
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <button
+            onClick={() => router.push('/parent/children')}
+            className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+          >
+            <Users className="w-8 h-8 mb-3" />
+            <h3 className="text-lg font-semibold mb-2">
+              {t.children}
+            </h3>
+            <p className="text-sm opacity-90">
+              {language === 'ja' ? 'お子様の学習状況を確認する' : '자녀의 학습 상황을 확인하세요'}
+            </p>
+          </button>
+
+          <button
+            onClick={() => router.push('/parent/payments')}
+            className="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+          >
+            <CreditCard className="w-8 h-8 mb-3" />
+            <h3 className="text-lg font-semibold mb-2">
+              {t.payments}
+            </h3>
+            <p className="text-sm opacity-90">
+              {language === 'ja' ? '支払い履歴を確認する' : '결제 내역을 확인하세요'}
+            </p>
+          </button>
+
+          <button
+            onClick={() => router.push('/parent/reports')}
+            className="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+          >
+            <BarChart3 className="w-8 h-8 mb-3" />
+            <h3 className="text-lg font-semibold mb-2">
+              {t.reports}
+            </h3>
+            <p className="text-sm opacity-90">
+              {language === 'ja' ? '学習レポートを確認する' : '학습 보고서를 확인하세요'}
+            </p>
+          </button>
+
+          <button
+            onClick={() => router.push('/parent/messages')}
+            className="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-6 rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+          >
+            <MessageSquare className="w-8 h-8 mb-3" />
+            <h3 className="text-lg font-semibold mb-2">
+              {t.messages}
+            </h3>
+            <p className="text-sm opacity-90">
+              {language === 'ja' ? '先生とメッセージを交換する' : '선생님과 메시지를 주고받으세요'}
+            </p>
+          </button>
+        </div>
+
+        {/* Children Overview */}
+        <div className="bg-white rounded-2xl shadow-xl p-6 mb-8">
+          <h3 className="text-xl font-semibold text-gray-900 mb-6">
+            {language === 'ja' ? 'お子様の学習状況' : '자녀의 학습 상황'}
+          </h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Target className="w-8 h-8 text-blue-600" />
+              </div>
+              <div className="text-2xl font-bold text-gray-900">田中 花子</div>
+              <div className="text-sm text-gray-600">
+                {language === 'ja' ? '中級レベル' : '중급 레벨'}
+              </div>
+              <div className="text-xs text-gray-500 mt-2">
+                {language === 'ja' ? '12レッスン完了' : '12수업 완료'}
+              </div>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Clock className="w-8 h-8 text-green-600" />
+              </div>
+              <div className="text-2xl font-bold text-gray-900">田中 太郎</div>
+              <div className="text-sm text-gray-600">
+                {language === 'ja' ? '初級レベル' : '초급 레벨'}
+              </div>
+              <div className="text-xs text-gray-500 mt-2">
+                {language === 'ja' ? '8レッスン完了' : '8수업 완료'}
+              </div>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Star className="w-8 h-8 text-purple-600" />
+              </div>
+              <div className="text-2xl font-bold text-gray-900">田中 次郎</div>
+              <div className="text-sm text-gray-600">
+                {language === 'ja' ? '上級レベル' : '고급 레벨'}
+              </div>
+              <div className="text-xs text-gray-500 mt-2">
+                {language === 'ja' ? '20レッスン完了' : '20수업 완료'}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Activity */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Upcoming Classes */}
+          <div className="bg-white rounded-2xl shadow-xl p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-gray-900">
+                {t.upcomingClasses}
+              </h3>
+              <button className="text-sm text-blue-600 hover:text-blue-700">
+                {t.viewAll}
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Calendar className="w-6 h-6 text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-medium text-gray-900">
+                    {language === 'ja' ? '田中 花子 - 中級会話' : '田中 花子 - 중급 회화'}
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    {language === 'ja' ? '明日 18:00 - 19:00' : '내일 18:00 - 19:00'}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                  <Calendar className="w-6 h-6 text-green-600" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-medium text-gray-900">
+                    {language === 'ja' ? '田中 太郎 - 初級文法' : '田中 太郎 - 초급 문법'}
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    {language === 'ja' ? '金曜日 19:00 - 20:00' : '금요일 19:00 - 20:00'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Recent Payments */}
+          <div className="bg-white rounded-2xl shadow-xl p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-gray-900">
+                {t.recentPayments}
+              </h3>
+              <button className="text-sm text-blue-600 hover:text-blue-700">
+                {t.viewAll}
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                  <CreditCard className="w-6 h-6 text-green-600" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-medium text-gray-900">
+                    {language === 'ja' ? '月額プラン更新' : '월간 플랜 갱신'}
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    {language === 'ja' ? '¥15,000' : '¥15,000'}
+                  </p>
+                </div>
+                <div className="text-xs text-gray-500">
+                  {language === 'ja' ? '3日前' : '3일 전'}
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                  <CreditCard className="w-6 h-6 text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-medium text-gray-900">
+                    {language === 'ja' ? '追加レッスン購入' : '추가 수업 구매'}
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    {language === 'ja' ? '¥5,000' : '¥5,000'}
+                  </p>
+                </div>
+                <div className="text-xs text-gray-500">
+                  {language === 'ja' ? '1週間前' : '1주일 전'}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
   );
-};
-
-export default ParentPage; 
+} 

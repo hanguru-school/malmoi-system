@@ -1,499 +1,365 @@
 'use client';
 
-import { CreditCard, Smartphone, BarChart3, Plus, Edit, Trash2, Filter, CheckCircle, XCircle, RefreshCw, Download, Search, Calendar, Clock, Wifi, WifiOff } from 'lucide-react';
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { taggingSystem, UIDRegistration, TaggingDevice } from '@/lib/tagging-system';
-import TaggingInterface from '@/components/tagging/TaggingInterface';
+import { useState, useEffect } from 'react';
+import { 
+  Users, 
+  Calendar, 
+  TrendingUp, 
+  Filter,
+  Download,
+  RefreshCw,
+  Search,
+  Eye,
+  Edit,
+  Trash2
+} from 'lucide-react';
+import ProtectedRoute from '@/components/common/ProtectedRoute';
+import Navigation from '@/components/common/Navigation';
 
-// API에서 반환하는 실제 로그 타입
-interface ApiTaggingLog {
+interface TaggingLog {
   id: string;
-  uid: string;
   userId: string;
-  userName: string;
-  userRole: string;
-  tagType: string;
-  deviceId: string;
-  deviceName: string;
-  taggedAt: string;
-  studentName?: string;
-  teacherName?: string;
-  staffName?: string;
+  type: string;
+  location: string;
+  timestamp: string;
+  user?: {
+    name: string;
+    email: string;
+    role: string;
+    student?: { name: string; level: string; points: number };
+    staff?: { name: string; position: string };
+    teacher?: { name: string; subjects: string[] };
+  };
 }
 
-// 가상화된 리스트 컴포넌트 (성능 최적화)
-const VirtualizedList = ({ items, renderItem, itemHeight = 60 }: {
-  items: Record<string, unknown>[];
-  renderItem: (item: Record<string, unknown>, index: number) => React.ReactNode;
-  itemHeight?: number;
-}) => {
-  const [scrollTop, setScrollTop] = useState(0);
-  const containerHeight = 400;
-  const visibleItems = Math.ceil(containerHeight / itemHeight);
-  const startIndex = Math.floor(scrollTop / itemHeight);
-  const endIndex = Math.min(startIndex + visibleItems, items.length);
-
-  const visibleItemsData = items.slice(startIndex, endIndex);
-  const totalHeight = items.length * itemHeight;
-  const offsetY = startIndex * itemHeight;
-
-  return (
-    <div 
-      className="overflow-auto"
-      style={{ height: containerHeight }}
-      onScroll={(e) => setScrollTop(e.currentTarget.scrollTop)}
-    >
-      <div style={{ height: totalHeight, position: 'relative' }}>
-        <div style={{ transform: `translateY(${offsetY}px)` }}>
-          {visibleItemsData.map((item, index) => (
-            <div key={startIndex + index} style={{ height: itemHeight }}>
-              {renderItem(item, startIndex + index)}
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-};
-
 export default function TaggingManagementPage() {
-  const [activeTab, setActiveTab] = useState('overview');
-  const [logs, setLogs] = useState<ApiTaggingLog[]>([]);
-  const [uidRegistrations, setUIDRegistrations] = useState<UIDRegistration[]>([]);
-  const [devices, setDevices] = useState<TaggingDevice[]>([]);
-  const [stats, setStats] = useState<Record<string, unknown>>({});
+  return (
+    <ProtectedRoute allowedRoles={['ADMIN', 'MASTER']}>
+      <div className="min-h-screen bg-gray-50">
+        <Navigation userRole="ADMIN" />
+        <TaggingManagementContent />
+      </div>
+    </ProtectedRoute>
+  );
+}
+
+function TaggingManagementContent() {
+  const [logs, setLogs] = useState<TaggingLog[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
-    startDate: '',
-    endDate: '',
-    userRole: '',
-    deviceId: '',
-    success: ''
+    startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    endDate: new Date().toISOString().split('T')[0],
+    userType: '',
+    action: ''
   });
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
-
-  // 디바운스된 검색
-  const debouncedSearchTerm = useMemo(() => {
-    const timeoutId = setTimeout(() => {}, 300);
-    return searchTerm;
-  }, [searchTerm]);
-
-  // 데이터 로드 (최적화)
-  const loadData = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      // API에서 데이터 로드
-      const [logsResponse, devicesResponse] = await Promise.all([
-        fetch('/api/tagging/logs?' + new URLSearchParams({
-          ...filters,
-          limit: '100',
-          offset: '0'
-        })),
-        fetch('/api/tagging/register')
-      ]);
-
-      if (logsResponse.ok) {
-        const logsData = await logsResponse.json();
-        setLogs(logsData.logs || []);
-        setStats(logsData.stats || {});
-      }
-
-      if (devicesResponse.ok) {
-        const devicesData = await devicesResponse.json();
-        setUIDRegistrations(devicesData.devices || []);
-      }
-
-      // 디바이스 정보는 하드코딩 (실제로는 별도 API 필요)
-      setDevices([
-        {
-          id: 'device_001',
-          name: 'Mac 태깅 리더',
-          type: 'desktop',
-          location: '1층 로비',
-          capabilities: ['felica', 'nfc'],
-          isActive: true,
-          connectionStatus: 'connected',
-          lastSeen: new Date()
-        },
-        {
-          id: 'device_002',
-          name: 'iPad 태깅 리더',
-          type: 'tablet',
-          location: '2층 강의실',
-          capabilities: ['felica', 'nfc', 'qr'],
-          isActive: true,
-          connectionStatus: 'connected',
-          lastSeen: new Date()
-        }
-      ]);
-
-      setLastUpdate(new Date());
-    } catch (error) {
-      console.error('데이터 로드 실패:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [filters]);
 
   useEffect(() => {
-    loadData();
-    
-    // 실시간 업데이트 (5초마다)
-    const interval = setInterval(loadData, 5000);
-    return () => clearInterval(interval);
-  }, [loadData]);
+    fetchTaggingStats();
+  }, [filters]);
 
-  // 필터 변경 핸들러 (최적화)
-  const handleFilterChange = useCallback((key: string, value: string) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
-  }, []);
+  const fetchTaggingStats = async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({
+        startDate: filters.startDate,
+        endDate: filters.endDate,
+        ...(filters.userType && { userType: filters.userType }),
+        ...(filters.action && { action: filters.action })
+      });
 
-  // 필터링된 로그 (메모이제이션)
-  const filteredLogs = useMemo(() => {
-    let filtered = logs;
+      const response = await fetch(`/api/tagging/stats?${params}`);
+      const data = await response.json();
 
-    if (filters.startDate) {
-      filtered = filtered.filter(log => 
-        new Date(log.taggedAt) >= new Date(filters.startDate)
-      );
+      if (data.success) {
+        setLogs(data.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch tagging stats:', error);
+    } finally {
+      setLoading(false);
     }
-    if (filters.endDate) {
-      filtered = filtered.filter(log => 
-        new Date(log.taggedAt) <= new Date(filters.endDate)
-      );
-    }
-    if (filters.userRole) {
-      filtered = filtered.filter(log => log.userRole === filters.userRole);
-    }
-    if (filters.deviceId) {
-      filtered = filtered.filter(log => log.deviceId === filters.deviceId);
-    }
-    if (filters.success) {
-      filtered = filtered.filter(log => 
-        filters.success === 'true' // 모든 로그는 성공으로 간주
-      );
-    }
-    if (debouncedSearchTerm) {
-      filtered = filtered.filter(log => 
-        log.uid.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-        log.userName.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
-      );
-    }
+  };
 
-    return filtered.sort((a, b) => new Date(b.taggedAt).getTime() - new Date(a.taggedAt).getTime());
-  }, [logs, filters, debouncedSearchTerm]);
+  const exportData = () => {
+    const csvContent = [
+      ['ID', '사용자', '이메일', '역할', '액션', '위치', '시간'].join(','),
+      ...logs.map(log => [
+        log.id,
+        log.user?.name || 'N/A',
+        log.user?.email || 'N/A',
+        log.user?.role || 'N/A',
+        log.type,
+        log.location,
+        new Date(log.timestamp).toLocaleString()
+      ].join(','))
+    ].join('\n');
 
-  // 통계 데이터 (메모이제이션)
-  const statisticsData = useMemo(() => {
-    if (!stats) return null;
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `tagging_logs_${filters.startDate}_${filters.endDate}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
 
-    return {
-      totalTagging: (stats.totalTagging as number) || 0,
-      successRate: (stats.successRate as number) || 0,
-      byMethod: (stats.byMethod as Record<string, number>) || {},
-      byRole: (stats.byRole as Record<string, number>) || {},
-      byDevice: (stats.byDevice as Record<string, number>) || {}
-    };
-  }, [stats]);
-
-  // 디바이스 상태 표시
-  const getDeviceStatusIcon = (device: TaggingDevice) => {
-    switch (device.connectionStatus) {
-      case 'connected':
-        return <Wifi className="w-4 h-4 text-green-500" />;
-      case 'disconnected':
-        return <WifiOff className="w-4 h-4 text-gray-500" />;
-      case 'error':
-        return <XCircle className="w-4 h-4 text-red-500" />;
+  const getActionColor = (action: string) => {
+    switch (action) {
+      case 'ATTENDANCE':
+        return 'bg-green-100 text-green-800';
+      case 'CHECK_IN':
+        return 'bg-blue-100 text-blue-800';
+      case 'CHECK_OUT':
+        return 'bg-orange-100 text-orange-800';
+      case 'VISIT':
+        return 'bg-purple-100 text-purple-800';
       default:
-        return <Wifi className="w-4 h-4 text-gray-500" />;
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
-  // 시간 포맷팅
-  const formatTime = (date: Date) => {
-    return date.toLocaleString('ko-KR', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  // 처리 시간 포맷팅
-  const formatProcessingTime = (time?: number) => {
-    if (!time) return '-';
-    if (time < 1000) return `${time}ms`;
-    return `${(time / 1000).toFixed(1)}s`;
+  const getRoleName = (role: string) => {
+    switch (role) {
+      case 'STUDENT':
+        return '학생';
+      case 'STAFF':
+        return '직원';
+      case 'TEACHER':
+        return '선생님';
+      case 'ADMIN':
+        return '관리자';
+      default:
+        return role;
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="p-6">
       <div className="max-w-7xl mx-auto">
         {/* 헤더 */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">태깅 관리</h1>
-            <p className="text-lg text-gray-600">UID 태깅 시스템 관리 및 모니터링</p>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">태깅 관리</h1>
+          <p className="text-gray-600">UID 태깅 시스템의 로그와 통계를 관리합니다.</p>
+        </div>
+
+        {/* 통계 카드 */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">총 태깅 수</p>
+                <p className="text-2xl font-bold text-gray-900">{logs.length}</p>
+              </div>
+              <Users className="w-8 h-8 text-blue-600" />
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">출석 태깅</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {logs.filter(log => log.type === 'ATTENDANCE').length}
+                </p>
+              </div>
+              <Calendar className="w-8 h-8 text-green-600" />
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">출근 태깅</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {logs.filter(log => log.type === 'CHECK_IN').length}
+                </p>
+              </div>
+              <TrendingUp className="w-8 h-8 text-orange-600" />
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">방문 태깅</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {logs.filter(log => log.type === 'VISIT').length}
+                </p>
+              </div>
+              <Eye className="w-8 h-8 text-purple-600" />
+            </div>
+          </div>
+        </div>
+
+        {/* 필터 */}
+        <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
+          <div className="flex items-center gap-4 mb-4">
+            <Filter className="w-5 h-5 text-gray-600" />
+            <h3 className="text-lg font-semibold text-gray-900">필터</h3>
           </div>
           
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <Clock className="w-4 h-4" />
-              <span>마지막 업데이트: {formatTime(lastUpdate)}</span>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">시작일</label>
+              <input
+                type="date"
+                value={filters.startDate}
+                onChange={(e) => setFilters(prev => ({ ...prev, startDate: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
             
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">종료일</label>
+              <input
+                type="date"
+                value={filters.endDate}
+                onChange={(e) => setFilters(prev => ({ ...prev, endDate: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">사용자 타입</label>
+              <select
+                value={filters.userType}
+                onChange={(e) => setFilters(prev => ({ ...prev, userType: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">전체</option>
+                <option value="student">학생</option>
+                <option value="staff">직원</option>
+                <option value="teacher">선생님</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">액션</label>
+              <select
+                value={filters.action}
+                onChange={(e) => setFilters(prev => ({ ...prev, action: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">전체</option>
+                <option value="ATTENDANCE">출석</option>
+                <option value="CHECK_IN">출근</option>
+                <option value="CHECK_OUT">퇴근</option>
+                <option value="VISIT">방문</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* 액션 버튼 */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
             <button
-              onClick={loadData}
-              disabled={isLoading}
+              onClick={fetchTaggingStats}
+              disabled={loading}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
             >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
               새로고침
+            </button>
+            
+            <button
+              onClick={exportData}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+            >
+              <Download className="w-4 h-4" />
+              내보내기
             </button>
           </div>
         </div>
 
-        {/* 탭 네비게이션 */}
-        <div className="bg-white rounded-xl shadow-lg mb-6">
-          <div className="flex border-b">
-            {[
-              { id: 'overview', label: '개요', icon: BarChart3 },
-              { id: 'logs', label: '태깅 로그', icon: CreditCard },
-              { id: 'devices', label: '디바이스', icon: Smartphone },
-              { id: 'registrations', label: 'UID 등록', icon: Plus }
-            ].map((tab) => {
-              const IconComponent = tab.icon;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors ${
-                    activeTab === tab.id
-                      ? 'text-blue-600 border-b-2 border-blue-600'
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  <IconComponent className="w-5 h-5" />
-                  {tab.label}
-                </button>
-              );
-            })}
+        {/* 로그 테이블 */}
+        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900">태깅 로그</h3>
           </div>
-        </div>
-
-        {/* 탭 컨텐츠 */}
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          {activeTab === 'overview' && (
-            <div className="space-y-6">
-              {/* 통계 카드 */}
-              {statisticsData && (
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <div className="bg-blue-50 rounded-lg p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-blue-600">총 태깅</p>
-                        <p className="text-2xl font-bold text-blue-900">{statisticsData.totalTagging}</p>
-                      </div>
-                      <BarChart3 className="w-8 h-8 text-blue-600" />
-                    </div>
-                  </div>
-                  
-                  <div className="bg-green-50 rounded-lg p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-green-600">성공률</p>
-                        <p className="text-2xl font-bold text-green-900">{statisticsData.successRate.toFixed(1)}%</p>
-                      </div>
-                      <CheckCircle className="w-8 h-8 text-green-600" />
-                    </div>
-                  </div>
-                  
-                  <div className="bg-purple-50 rounded-lg p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-purple-600">활성 디바이스</p>
-                        <p className="text-2xl font-bold text-purple-900">{devices.filter(d => d.isActive).length}</p>
-                      </div>
-                      <Smartphone className="w-8 h-8 text-purple-600" />
-                    </div>
-                  </div>
-                  
-                  <div className="bg-orange-50 rounded-lg p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-orange-600">등록된 UID</p>
-                        <p className="text-2xl font-bold text-orange-900">{uidRegistrations.length}</p>
-                      </div>
-                      <Plus className="w-8 h-8 text-orange-600" />
-                    </div>
-                  </div>
+          
+          {loading ? (
+            <div className="p-8 text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="text-gray-600 mt-2">데이터를 불러오는 중...</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      사용자
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      역할
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      액션
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      위치
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      시간
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      액션
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {logs.map((log) => (
+                    <tr key={log.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">
+                            {log.user?.name || 'N/A'}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {log.user?.email || 'N/A'}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="text-sm text-gray-900">
+                          {getRoleName(log.user?.role || '')}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getActionColor(log.type)}`}>
+                          {log.type}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {log.location}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {new Date(log.timestamp).toLocaleString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div className="flex items-center gap-2">
+                          <button className="text-blue-600 hover:text-blue-900">
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button className="text-green-600 hover:text-green-900">
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button className="text-red-600 hover:text-red-900">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              
+              {logs.length === 0 && (
+                <div className="p-8 text-center">
+                  <p className="text-gray-500">태깅 로그가 없습니다.</p>
                 </div>
               )}
-
-              {/* 실시간 태깅 인터페이스 */}
-              <div className="border-t pt-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">실시간 태깅 테스트</h2>
-                <TaggingInterface deviceId="device_001" deviceType="desktop" />
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'logs' && (
-            <div className="space-y-6">
-              {/* 필터 및 검색 */}
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <input
-                    type="text"
-                    placeholder="UID 또는 사용자 검색..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                
-                <select
-                  value={filters.userRole}
-                  onChange={(e) => handleFilterChange('userRole', e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">모든 역할</option>
-                  <option value="student">학생</option>
-                  <option value="teacher">선생님</option>
-                  <option value="staff">직원</option>
-                  <option value="master">관리자</option>
-                </select>
-                
-                <select
-                  value={filters.success}
-                  onChange={(e) => handleFilterChange('success', e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">모든 결과</option>
-                  <option value="true">성공</option>
-                  <option value="false">실패</option>
-                </select>
-              </div>
-
-              {/* 태깅 로그 테이블 */}
-              <div className="overflow-hidden rounded-lg border">
-                <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="text-left py-3 px-4 font-medium text-gray-900">UID</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-900">사용자</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-900">역할</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-900">방법</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-900">시간</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-900">처리시간</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-900">상태</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredLogs.slice(0, 100).map((log) => (
-                      <tr key={log.id} className="border-t border-gray-100 hover:bg-gray-50">
-                        <td className="py-3 px-4 text-sm font-mono text-gray-900">{log.uid}</td>
-                        <td className="py-3 px-4 text-sm text-gray-900">{log.userName}</td>
-                        <td className="py-3 px-4">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            log.userRole === 'student' ? 'bg-blue-100 text-blue-800' :
-                            log.userRole === 'teacher' ? 'bg-green-100 text-green-800' :
-                            log.userRole === 'staff' ? 'bg-purple-100 text-purple-800' :
-                            'bg-orange-100 text-orange-800'
-                          }`}>
-                            {log.userRole}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 text-sm text-gray-600">{log.tagType?.toUpperCase() || 'FELICA'}</td>
-                        <td className="py-3 px-4 text-sm text-gray-600">{formatTime(new Date(log.taggedAt))}</td>
-                        <td className="py-3 px-4 text-sm text-gray-600">-</td>
-                        <td className="py-3 px-4">
-                          <CheckCircle className="w-5 h-5 text-green-600" />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'devices' && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {devices.map((device) => (
-                  <div key={device.id} className="border rounded-lg p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        {device.type === 'desktop' && <CreditCard className="w-6 h-6 text-blue-600" />}
-                        {device.type === 'tablet' && <Smartphone className="w-6 h-6 text-green-600" />}
-                        {device.type === 'mobile' && <Smartphone className="w-6 h-6 text-purple-600" />}
-                        <div>
-                          <h3 className="font-semibold text-gray-900">{device.name}</h3>
-                          <p className="text-sm text-gray-500">{device.location}</p>
-                        </div>
-                      </div>
-                      {getDeviceStatusIcon(device)}
-                    </div>
-                    
-                    <div className="space-y-3">
-                      <div className="flex flex-wrap gap-2">
-                        {device.capabilities.map((cap) => (
-                          <span key={cap} className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
-                            {cap.toUpperCase()}
-                          </span>
-                        ))}
-                      </div>
-                      
-                      <div className="flex items-center justify-between text-sm text-gray-600">
-                        <span>상태: {device.isActive ? '활성' : '비활성'}</span>
-                        <span>연결: {device.connectionStatus}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'registrations' && (
-            <div className="space-y-6">
-              <div className="overflow-hidden rounded-lg border">
-                <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="text-left py-3 px-4 font-medium text-gray-900">UID</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-900">사용자</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-900">디바이스</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-900">등록일</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-900">사용횟수</th>
-                      <th className="text-left py-3 px-4 font-medium text-gray-900">상태</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {uidRegistrations.map((reg) => (
-                      <tr key={reg.id} className="border-t border-gray-100 hover:bg-gray-50">
-                        <td className="py-3 px-4 text-sm font-mono text-gray-900">{reg.uid}</td>
-                        <td className="py-3 px-4 text-sm text-gray-900">{reg.userId}</td>
-                        <td className="py-3 px-4 text-sm text-gray-600">{reg.deviceName}</td>
-                        <td className="py-3 px-4 text-sm text-gray-600">{formatTime(reg.registeredAt)}</td>
-                        <td className="py-3 px-4 text-sm text-gray-600">{reg.usageCount || 0}</td>
-                        <td className="py-3 px-4">
-                          {reg.isApproved ? (
-                            <CheckCircle className="w-5 h-5 text-green-600" />
-                          ) : (
-                            <XCircle className="w-5 h-5 text-red-600" />
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
             </div>
           )}
         </div>

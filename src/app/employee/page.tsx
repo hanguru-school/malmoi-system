@@ -1,539 +1,333 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { 
-  ChevronLeft, 
-  ChevronRight, 
-  Calendar as CalendarIcon,
-  Clock,
+  BookOpen, 
+  Calendar, 
+  FileText, 
+  MessageSquare, 
+  Star, 
+  Target, 
+  Clock, 
+  Award,
+  Languages,
   User,
-  BookOpen,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  Eye,
-  Video,
-  MapPin
+  Settings,
+  LogOut,
+  Building,
+  Users,
+  CheckCircle
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
-interface Lesson {
-  id: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  studentName: string;
-  serviceName: string;
-  lessonType: 'face-to-face' | 'online';
-  isTagged: boolean;
-  tagTime?: string;
-  zoomLink?: string;
-  memo?: string;
-}
+// 다국어 텍스트 정의
+const translations = {
+  ja: {
+    title: "韓国語教室MalMoi",
+    welcome: "職員ダッシュボード",
+    subtitle: "教室運営と生徒管理のためのツール",
+    attendance: "出勤管理",
+    schedule: "スケジュール",
+    students: "生徒管理",
+    messages: "メッセージ",
+    settings: "設定",
+    logout: "ログアウト",
+    viewAll: "すべて表示",
+    todayAttendance: "今日の出勤状況",
+    upcomingClasses: "今後のレッスン",
+    recentMessages: "最近のメッセージ",
+    noUpcoming: "予定されたレッスンはありません",
+    noMessages: "新しいメッセージはありません",
+    checkIn: "出勤",
+    checkOut: "退勤",
+    workingHours: "勤務時間",
+    breakTime: "休憩時間",
+    totalStudents: "総生徒数",
+    activeStudents: "アクティブな生徒",
+    completedClasses: "完了したレッスン",
+    pendingTasks: "保留中のタスク"
+  },
+  ko: {
+    title: "한국어교실MalMoi",
+    welcome: "직원 대시보드",
+    subtitle: "교실 운영과 학생 관리를 위한 도구",
+    attendance: "출근 관리",
+    schedule: "스케줄",
+    students: "학생 관리",
+    messages: "메시지",
+    settings: "설정",
+    logout: "로그아웃",
+    viewAll: "모두 보기",
+    todayAttendance: "오늘의 출근 상황",
+    upcomingClasses: "예정된 수업",
+    recentMessages: "최근 메시지",
+    noUpcoming: "예정된 수업이 없습니다",
+    noMessages: "새 메시지가 없습니다",
+    checkIn: "출근",
+    checkOut: "퇴근",
+    workingHours: "근무 시간",
+    breakTime: "휴식 시간",
+    totalStudents: "총 학생 수",
+    activeStudents: "활성 학생",
+    completedClasses: "완료된 수업",
+    pendingTasks: "대기 중인 작업"
+  }
+};
 
-export default function EmployeeSchedulePage() {
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [viewMode, setViewMode] = useState<'day' | 'week' | 'month'>('day');
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [lessons, setLessons] = useState<Lesson[]>([]);
-  const [showDatePicker, setShowDatePicker] = useState(false);
+export default function EmployeeDashboard() {
+  const router = useRouter();
+  const [language, setLanguage] = useState<'ja' | 'ko'>('ja');
+  
+  const t = translations[language];
 
-  // 샘플 수업 데이터
-  useEffect(() => {
-    const sampleLessons: Lesson[] = [
-      {
-        id: '1',
-        date: '2025-01-15',
-        startTime: '09:00',
-        endTime: '09:40',
-        studentName: '田中太郎',
-        serviceName: '대면 수업 40분',
-        lessonType: 'face-to-face',
-        isTagged: true,
-        tagTime: '09:05',
-        memo: '발음 교정에 집중'
-      },
-      {
-        id: '2',
-        date: '2025-01-15',
-        startTime: '10:00',
-        endTime: '11:00',
-        studentName: '鈴木花子',
-        serviceName: '온라인 수업 60분',
-        lessonType: 'online',
-        isTagged: false,
-        zoomLink: 'https://zoom.us/j/123456789'
-      },
-      {
-        id: '3',
-        date: '2025-01-16',
-        startTime: '14:00',
-        endTime: '14:40',
-        studentName: '山田次郎',
-        serviceName: '대면 수업 40분',
-        lessonType: 'face-to-face',
-        isTagged: true,
-        tagTime: '14:02'
-      }
-    ];
-    setLessons(sampleLessons);
-  }, []);
-
-  const getDaysInMonth = (date: Date) => {
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const startDate = new Date(firstDay);
-    startDate.setDate(startDate.getDate() - firstDay.getDay() + 1); // 월요일 시작
-    const endDate = new Date(lastDay);
-    endDate.setDate(endDate.getDate() + (6 - lastDay.getDay())); // 일요일 끝
-
-    const days = [];
-    const current = new Date(startDate);
-    while (current <= endDate) {
-      days.push(new Date(current));
-      current.setDate(current.getDate() + 1);
-    }
-    return days;
+  const toggleLanguage = () => {
+    setLanguage(language === 'ja' ? 'ko' : 'ja');
   };
 
-  const getLessonsForDate = (date: Date) => {
-    const dateStr = date.toISOString().split('T')[0];
-    return lessons.filter(lesson => lesson.date === dateStr);
-  };
-
-  const getWeekDays = (date: Date) => {
-    const startOfWeek = new Date(date);
-    const dayOfWeek = startOfWeek.getDay();
-    startOfWeek.setDate(startOfWeek.getDate() - dayOfWeek + 1);
-
-    const days = [];
-    for (let i = 0; i < 7; i++) {
-      const day = new Date(startOfWeek);
-      day.setDate(day.getDate() + i);
-      days.push(day);
-    }
-    return days;
-  };
-
-  const handlePreviousPeriod = () => {
-    const newDate = new Date(currentDate);
-    if (viewMode === 'month') {
-      newDate.setMonth(newDate.getMonth() - 1);
-    } else if (viewMode === 'week') {
-      newDate.setDate(newDate.getDate() - 7);
-    } else {
-      newDate.setDate(newDate.getDate() - 1);
-    }
-    setCurrentDate(newDate);
-  };
-
-  const handleNextPeriod = () => {
-    const newDate = new Date(currentDate);
-    if (viewMode === 'month') {
-      newDate.setMonth(newDate.getMonth() + 1);
-    } else if (viewMode === 'week') {
-      newDate.setDate(newDate.getDate() + 7);
-    } else {
-      newDate.setDate(newDate.getDate() + 1);
-    }
-    setCurrentDate(newDate);
-  };
-
-  const handleDateClick = (date: Date) => {
-    setSelectedDate(date);
-  };
-
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('ja-JP', { 
-      year: 'numeric', 
-      month: 'long' 
-    });
-  };
-
-  const formatTime = (time: string) => {
-    return time;
-  };
-
-  const getLessonTypeIcon = (type: string) => {
-    return type === 'online' ? <Video className="w-4 h-4" /> : <MapPin className="w-4 h-4" />;
-  };
-
-  const getTaggingStatus = (isTagged: boolean) => {
-    return isTagged ? (
-      <CheckCircle className="w-4 h-4 text-green-600" />
-    ) : (
-      <AlertCircle className="w-4 h-4 text-yellow-600" />
-    );
-  };
-
-  const renderDayView = () => {
-    const dayLessons = getLessonsForDate(currentDate);
-    
-    return (
-      <div className="space-y-4">
-        <div className="text-lg font-semibold text-gray-900">
-          {currentDate.toLocaleDateString('ja-JP', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            weekday: 'long'
-          })}
-        </div>
-        
-        <div className="space-y-3">
-          {dayLessons.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              이 날의 수업이 없습니다.
-            </div>
-          ) : (
-            dayLessons.map((lesson) => (
-              <div
-                key={lesson.id}
-                className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center space-x-3">
-                    <Clock className="w-4 h-4 text-gray-500" />
-                    <span className="font-medium">
-                      {lesson.startTime} - {lesson.endTime}
-                    </span>
-                    {getLessonTypeIcon(lesson.lessonType)}
-                    <span className="text-sm text-gray-500">
-                      {lesson.lessonType === 'online' ? '온라인' : '대면'}
-                    </span>
-                  </div>
-                  {getTaggingStatus(lesson.isTagged)}
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <User className="w-4 h-4 text-gray-500" />
-                    <span className="font-medium">{lesson.studentName}</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <BookOpen className="w-4 h-4 text-gray-500" />
-                    <span className="text-gray-700">{lesson.serviceName}</span>
-                  </div>
-                  {lesson.zoomLink && (
-                    <div className="flex items-center space-x-2">
-                      <Video className="w-4 h-4 text-blue-500" />
-                      <a 
-                        href={lesson.zoomLink} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-800 text-sm"
-                      >
-                        Zoom 링크
-                      </a>
-                    </div>
-                  )}
-                  {lesson.tagTime && (
-                    <div className="flex items-center space-x-2 text-sm text-green-600">
-                      <CheckCircle className="w-4 h-4" />
-                      <span>출석 태깅: {lesson.tagTime}</span>
-                    </div>
-                  )}
-                  {lesson.memo && (
-                    <div className="mt-2 p-2 bg-gray-100 rounded text-sm">
-                      <span className="font-medium">메모:</span> {lesson.memo}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-    );
-  };
-
-  const renderWeekView = () => {
-    const weekDays = getWeekDays(currentDate);
-    
-    return (
-      <div className="space-y-4">
-        <div className="grid grid-cols-7 gap-1">
-          {weekDays.map((day, index) => {
-            const dayLessons = getLessonsForDate(day);
-            const isToday = day.toDateString() === new Date().toDateString();
-            
-            return (
-              <div
-                key={index}
-                className={`min-h-[200px] p-2 border border-gray-200 ${
-                  isToday ? 'bg-blue-50 border-blue-300' : 'bg-white'
-                }`}
-              >
-                <div className="text-sm font-medium mb-2">
-                  {day.toLocaleDateString('ja-JP', { 
-                    month: 'short', 
-                    day: 'numeric',
-                    weekday: 'short'
-                  })}
-                </div>
-                
-                <div className="space-y-1">
-                  {dayLessons.map((lesson) => (
-                    <div
-                      key={lesson.id}
-                      className={`p-2 rounded text-xs ${
-                        lesson.isTagged 
-                          ? 'bg-green-100 border border-green-200' 
-                          : 'bg-blue-100 border border-blue-200'
-                      }`}
-                    >
-                      <div className="font-medium">
-                        {lesson.startTime}-{lesson.endTime}
-                      </div>
-                      <div className="text-gray-700 truncate">
-                        {lesson.studentName}
-                      </div>
-                      <div className="flex items-center space-x-1 mt-1">
-                        {getLessonTypeIcon(lesson.lessonType)}
-                        {getTaggingStatus(lesson.isTagged)}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
-
-  const renderMonthView = () => {
-    const days = getDaysInMonth(currentDate);
-    
-    return (
-      <div className="bg-white rounded-lg shadow">
-        {/* 요일 헤더 */}
-        <div className="grid grid-cols-7 gap-px bg-gray-200 border-b">
-          {['월', '화', '수', '목', '금', '토', '일'].map((day) => (
-            <div key={day} className="p-3 text-center text-sm font-medium text-gray-700 bg-white">
-              {day}
-            </div>
-          ))}
-        </div>
-
-        {/* 날짜 그리드 */}
-        <div className="grid grid-cols-7 gap-px bg-gray-200">
-          {days.map((day, index) => {
-            const dayLessons = getLessonsForDate(day);
-            const isCurrentMonth = day.getMonth() === currentDate.getMonth();
-            const isToday = day.toDateString() === new Date().toDateString();
-            const isSelected = selectedDate && day.toDateString() === selectedDate.toDateString();
-
-            return (
-              <div
-                key={index}
-                onClick={() => handleDateClick(day)}
-                className={`min-h-[120px] p-2 bg-white cursor-pointer hover:bg-gray-50 ${
-                  !isCurrentMonth ? 'text-gray-400' : ''
-                } ${isToday ? 'bg-blue-50 border-2 border-blue-300' : ''} ${
-                  isSelected ? 'bg-blue-100 border-2 border-blue-500' : ''
-                }`}
-              >
-                <div className="text-sm font-medium mb-1">
-                  {day.getDate()}
-                </div>
-                
-                <div className="space-y-1">
-                  {dayLessons.map((lesson) => (
-                    <div
-                      key={lesson.id}
-                      className={`p-1 rounded text-xs ${
-                        lesson.isTagged 
-                          ? 'bg-green-100 border border-green-200' 
-                          : 'bg-blue-100 border border-blue-200'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="font-medium">
-                          {lesson.startTime}-{lesson.endTime}
-                        </span>
-                        {getTaggingStatus(lesson.isTagged)}
-                      </div>
-                      <div className="text-gray-700">
-                        <div className="flex items-center space-x-1">
-                          <User className="w-3 h-3" />
-                          <span>{lesson.studentName}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          {getLessonTypeIcon(lesson.lessonType)}
-                          <span className="text-xs">
-                            {lesson.lessonType === 'online' ? '온라인' : '대면'}
-                          </span>
-                        </div>
-                      </div>
-                      {lesson.tagTime && (
-                        <div className="text-xs text-green-600 mt-1">
-                          태깅: {lesson.tagTime}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
+  const handleLogout = () => {
+    router.push('/auth/login');
   };
 
   return (
-    <div className="space-y-6">
-      {/* 헤더 */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <h1 className="text-2xl font-bold text-gray-900">내 수업 일정</h1>
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => setViewMode('day')}
-              className={`px-3 py-1 rounded-md text-sm font-medium ${
-                viewMode === 'day' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              일별
-            </button>
-            <button
-              onClick={() => setViewMode('week')}
-              className={`px-3 py-1 rounded-md text-sm font-medium ${
-                viewMode === 'week' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              주별
-            </button>
-            <button
-              onClick={() => setViewMode('month')}
-              className={`px-3 py-1 rounded-md text-sm font-medium ${
-                viewMode === 'month' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              월별
-            </button>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                <BookOpen className="w-6 h-6 text-white" />
+              </div>
+              <h1 className="text-2xl font-bold text-gray-900">{t.title}</h1>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={toggleLanguage}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200"
+              >
+                <Languages className="w-4 h-4" />
+                {language === 'ja' ? '한국어' : '日本語'}
+              </button>
+              <button
+                onClick={() => router.push('/employee/settings')}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200"
+              >
+                <Settings className="w-4 h-4" />
+                {t.settings}
+              </button>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-all duration-200"
+              >
+                <LogOut className="w-4 h-4" />
+                {t.logout}
+              </button>
+            </div>
           </div>
         </div>
+      </header>
 
-        <div className="flex items-center space-x-4">
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        {/* Welcome Section */}
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+            {t.welcome}
+          </h2>
+          <p className="text-lg text-gray-600">
+            {t.subtitle}
+          </p>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <button
-            onClick={handlePreviousPeriod}
-            className="p-2 rounded-md hover:bg-gray-100"
+            onClick={() => router.push('/employee/attendance')}
+            className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl"
           >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          
-          <button
-            onClick={() => setShowDatePicker(!showDatePicker)}
-            className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-          >
-            <CalendarIcon className="w-4 h-4" />
-            <span className="font-medium">{formatDate(currentDate)}</span>
+            <CheckCircle className="w-8 h-8 mb-3" />
+            <h3 className="text-lg font-semibold mb-2">
+              {t.attendance}
+            </h3>
+            <p className="text-sm opacity-90">
+              {language === 'ja' ? '出勤状況を管理する' : '출근 상황을 관리하세요'}
+            </p>
           </button>
 
           <button
-            onClick={handleNextPeriod}
-            className="p-2 rounded-md hover:bg-gray-100"
+            onClick={() => router.push('/employee/schedule')}
+            className="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg hover:shadow-xl"
           >
-            <ChevronRight className="w-5 h-5" />
+            <Calendar className="w-8 h-8 mb-3" />
+            <h3 className="text-lg font-semibold mb-2">
+              {t.schedule}
+            </h3>
+            <p className="text-sm opacity-90">
+              {language === 'ja' ? 'スケジュールを確認する' : '스케줄을 확인하세요'}
+            </p>
+          </button>
+
+          <button
+            onClick={() => router.push('/employee/students')}
+            className="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+          >
+            <Users className="w-8 h-8 mb-3" />
+            <h3 className="text-lg font-semibold mb-2">
+              {t.students}
+            </h3>
+            <p className="text-sm opacity-90">
+              {language === 'ja' ? '生徒情報を管理する' : '학생 정보를 관리하세요'}
+            </p>
+          </button>
+
+          <button
+            onClick={() => router.push('/employee/messages')}
+            className="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-6 rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+          >
+            <MessageSquare className="w-8 h-8 mb-3" />
+            <h3 className="text-lg font-semibold mb-2">
+              {t.messages}
+            </h3>
+            <p className="text-sm opacity-90">
+              {language === 'ja' ? 'メッセージを確認する' : '메시지를 확인하세요'}
+            </p>
           </button>
         </div>
-      </div>
 
-      {/* 날짜 선택기 */}
-      {showDatePicker && (
-        <div className="absolute top-20 right-4 bg-white border border-gray-300 rounded-md shadow-lg p-4 z-10">
-          <input
-            type="date"
-            value={currentDate.toISOString().split('T')[0]}
-            onChange={(e) => {
-              setCurrentDate(new Date(e.target.value));
-              setShowDatePicker(false);
-            }}
-            className="border border-gray-300 rounded-md px-3 py-2"
-          />
-        </div>
-      )}
-
-      {/* 캘린더 뷰 */}
-      <div className="bg-white rounded-lg shadow p-6">
-        {viewMode === 'day' && renderDayView()}
-        {viewMode === 'week' && renderWeekView()}
-        {viewMode === 'month' && renderMonthView()}
-      </div>
-
-      {/* 선택된 날짜의 상세 정보 */}
-      {selectedDate && viewMode === 'month' && (
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold mb-4">
-            {selectedDate.toLocaleDateString('ja-JP', { 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
-            })} 수업 목록
+        {/* Today's Overview */}
+        <div className="bg-white rounded-2xl shadow-xl p-6 mb-8">
+          <h3 className="text-xl font-semibold text-gray-900 mb-6">
+            {t.todayAttendance}
           </h3>
           
-          <div className="space-y-3">
-            {getLessonsForDate(selectedDate).map((lesson) => (
-              <div
-                key={lesson.id}
-                className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
-              >
-                <div className="flex-1">
-                  <div className="flex items-center space-x-4">
-                    <div className="flex items-center space-x-2">
-                      <Clock className="w-4 h-4 text-gray-500" />
-                      <span className="font-medium">
-                        {lesson.startTime} - {lesson.endTime}
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <User className="w-4 h-4 text-gray-500" />
-                      <span>{lesson.studentName}</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <BookOpen className="w-4 h-4 text-gray-500" />
-                      <span>{lesson.serviceName}</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      {getLessonTypeIcon(lesson.lessonType)}
-                      <span className="text-sm text-gray-500">
-                        {lesson.lessonType === 'online' ? '온라인' : '대면'}
-                      </span>
-                    </div>
-                  </div>
-                  {lesson.tagTime && (
-                    <div className="text-sm text-green-600 mt-1">
-                      출석 태깅: {lesson.tagTime}
-                    </div>
-                  )}
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-md">
-                    <Eye className="w-4 h-4" />
-                  </button>
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <CheckCircle className="w-8 h-8 text-green-600" />
               </div>
-            ))}
+              <div className="text-2xl font-bold text-gray-900">08:30</div>
+              <div className="text-sm text-gray-600">{t.checkIn}</div>
+            </div>
             
-            {getLessonsForDate(selectedDate).length === 0 && (
-              <div className="text-center py-8 text-gray-500">
-                해당 날짜에 수업이 없습니다.
+            <div className="text-center">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Clock className="w-8 h-8 text-blue-600" />
               </div>
-            )}
+              <div className="text-2xl font-bold text-gray-900">8.5</div>
+              <div className="text-sm text-gray-600">{t.workingHours}</div>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Users className="w-8 h-8 text-purple-600" />
+              </div>
+              <div className="text-2xl font-bold text-gray-900">45</div>
+              <div className="text-sm text-gray-600">{t.totalStudents}</div>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Calendar className="w-8 h-8 text-orange-600" />
+              </div>
+              <div className="text-2xl font-bold text-gray-900">12</div>
+              <div className="text-sm text-gray-600">{t.completedClasses}</div>
+            </div>
           </div>
         </div>
-      )}
+
+        {/* Recent Activity */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Upcoming Classes */}
+          <div className="bg-white rounded-2xl shadow-xl p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-gray-900">
+                {t.upcomingClasses}
+              </h3>
+              <button className="text-sm text-blue-600 hover:text-blue-700">
+                {t.viewAll}
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Calendar className="w-6 h-6 text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-medium text-gray-900">
+                    {language === 'ja' ? '中級会話レッスン' : '중급 회화 수업'}
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    {language === 'ja' ? '明日 18:00 - 19:00' : '내일 18:00 - 19:00'}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                  <Calendar className="w-6 h-6 text-green-600" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-medium text-gray-900">
+                    {language === 'ja' ? '初級文法レッスン' : '초급 문법 수업'}
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    {language === 'ja' ? '金曜日 19:00 - 20:00' : '금요일 19:00 - 20:00'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Recent Messages */}
+          <div className="bg-white rounded-2xl shadow-xl p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-gray-900">
+                {t.recentMessages}
+              </h3>
+              <button className="text-sm text-blue-600 hover:text-blue-700">
+                {t.viewAll}
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                  <User className="w-6 h-6 text-purple-600" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-medium text-gray-900">
+                    {language === 'ja' ? '田中先生' : '田中선생님'}
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    {language === 'ja' ? 'レッスン資料の準備をお願いします' : '수업 자료 준비를 부탁드립니다'}
+                  </p>
+                </div>
+                <div className="text-xs text-gray-500">
+                  {language === 'ja' ? '1時間前' : '1시간 전'}
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+                <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                  <User className="w-6 h-6 text-orange-600" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-medium text-gray-900">
+                    {language === 'ja' ? 'システム' : '시스템'}
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    {language === 'ja' ? '新しい生徒が登録されました' : '새로운 학생이 등록되었습니다'}
+                  </p>
+                </div>
+                <div className="text-xs text-gray-500">
+                  {language === 'ja' ? '2時間前' : '2시간 전'}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
   );
 } 

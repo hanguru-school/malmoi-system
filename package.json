@@ -11,7 +11,11 @@
     "optimize": "node scripts/optimize.js",
     "type-check": "tsc --noEmit",
     "analyze": "npm run build -- --analyze",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "check-production": "node scripts/production-check.js",
+    "production-setup": "npm run check-production && echo '운영 서버 설정을 확인하세요: https://app.hanguru.school'",
+    "setup-branch-protection": "./scripts/setup-branch-protection.sh",
+    "protect-main": "npm run setup-branch-protection"
   },
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.855.0",

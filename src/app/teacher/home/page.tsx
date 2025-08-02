@@ -19,7 +19,8 @@ import {
   Edit,
   Eye
 } from 'lucide-react';
-import { withRole } from '@/components/auth-guards';
+import ProtectedRoute from '@/components/common/ProtectedRoute';
+import Navigation from '@/components/common/Navigation';
 
 interface TeacherStats {
   currentLevel: string;
@@ -51,7 +52,18 @@ interface RecentReservation {
   status: 'confirmed' | 'pending' | 'cancelled';
 }
 
-function TeacherHomePage() {
+export default function TeacherHomePage() {
+  return (
+    <ProtectedRoute allowedRoles={['TEACHER']}>
+      <div className="min-h-screen bg-gray-50">
+        <Navigation userRole="TEACHER" />
+        <TeacherHomeContent />
+      </div>
+    </ProtectedRoute>
+  );
+}
+
+function TeacherHomeContent() {
   const [stats, setStats] = useState<TeacherStats | null>(null);
   const [recentNotes, setRecentNotes] = useState<RecentNote[]>([]);
   const [recentReservations, setRecentReservations] = useState<RecentReservation[]>([]);
@@ -304,5 +316,3 @@ function TeacherHomePage() {
     </div>
   );
 } 
-
-export default withRole(TeacherHomePage, ['master', 'teacher']); 

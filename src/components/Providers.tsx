@@ -2,11 +2,14 @@
 
 import { ReactNode } from 'react';
 import { AuthProvider } from '@/hooks/useAuth';
+import { LanguageProvider } from '@/contexts/LanguageContext';
 
-export default function Providers({ children }: { children: React.ReactNode }) {
+export default function Providers({ children }: { children: ReactNode }) {
   return (
-    <AuthProvider>
-      {children}
-    </AuthProvider>
+    <LanguageProvider>
+      <AuthProvider>
+        {children}
+      </AuthProvider>
+    </LanguageProvider>
   );
 } 

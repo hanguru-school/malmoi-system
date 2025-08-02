@@ -27,7 +27,8 @@ import {
 import Link from 'next/link';
 import { useTranslation, Language } from '@/lib/translations';
 import { useAuth } from '@/hooks/useAuth';
-import { withRole } from '@/components/auth-guards';
+import ProtectedRoute from '@/components/common/ProtectedRoute';
+import Navigation from '@/components/common/Navigation';
 
 interface StudentStats {
   totalClasses: number;
@@ -60,7 +61,18 @@ interface RecentNote {
   duration: string;
 }
 
-function StudentHomePage() {
+export default function StudentHomePage() {
+  return (
+    <ProtectedRoute allowedRoles={['STUDENT']}>
+      <div className="min-h-screen bg-gray-50">
+        <Navigation userRole="STUDENT" />
+        <StudentHomeContent />
+      </div>
+    </ProtectedRoute>
+  );
+}
+
+function StudentHomeContent() {
   const { user, loading, logout } = useAuth();
   const [stats, setStats] = useState<StudentStats | null>(null);
   const [recentReservations, setRecentReservations] = useState<RecentReservation[]>([]);
@@ -549,5 +561,3 @@ function StudentHomePage() {
     </div>
   );
 } 
-
-export default withRole(StudentHomePage, ['master', 'student']); 

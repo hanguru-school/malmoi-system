@@ -62,6 +62,9 @@ interface StudentInfo {
   totalAttendance: number;
   totalStudyTime: number; // 분 단위
   remainingTime: number; // 분 단위
+  purchasedTime: number; // 구매한 시간 (분 단위)
+  birthDate: string; // 생년월일 추가
+  profileImage?: string; // 프로필 사진 추가
   lastModified?: string;
 }
 
@@ -399,87 +402,135 @@ export default function StudentMyPage() {
           </div>
         )}
 
-        {/* 학생 프로필 요약 정보 */}
-        {studentInfo && (
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
-              <User className="w-6 h-6 text-blue-600" />
-              프로필 요약
-            </h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {/* 기본 정보 */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <User className="w-5 h-5 text-gray-500" />
-                  <span className="text-sm text-gray-600">이름</span>
-                </div>
-                <div className="text-lg font-semibold text-gray-900">{studentInfo.name}</div>
-              </div>
+                    {/* 학생 프로필 요약 정보 */}
+            {studentInfo && (
+              <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <h2 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
+                  <User className="w-6 h-6 text-blue-600" />
+                  프로필 요약
+                </h2>
+                
+                {/* 프로필 사진 및 기본 정보 */}
+                <div className="flex items-start gap-6 mb-8">
+                  <div className="flex-shrink-0">
+                    <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                      {studentInfo.profileImage ? (
+                        <img 
+                          src={studentInfo.profileImage} 
+                          alt="프로필 사진" 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <User className="w-12 h-12 text-gray-400" />
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="flex-1">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <User className="w-5 h-5 text-gray-500" />
+                          <span className="text-sm text-gray-600">이름</span>
+                        </div>
+                        <div className="text-lg font-semibold text-gray-900">{studentInfo.name}</div>
+                      </div>
 
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <Mail className="w-5 h-5 text-gray-500" />
-                  <span className="text-sm text-gray-600">이메일</span>
-                </div>
-                <div className="text-lg font-semibold text-gray-900">{studentInfo.email}</div>
-              </div>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-5 h-5 text-gray-500" />
+                          <span className="text-sm text-gray-600">생년월일</span>
+                        </div>
+                        <div className="text-lg font-semibold text-gray-900">{studentInfo.birthDate}</div>
+                      </div>
 
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <Shield className="w-5 h-5 text-gray-500" />
-                  <span className="text-sm text-gray-600">UID</span>
-                </div>
-                <div className="text-lg font-semibold text-gray-900 font-mono">{studentInfo.uid}</div>
-              </div>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Mail className="w-5 h-5 text-gray-500" />
+                          <span className="text-sm text-gray-600">이메일</span>
+                        </div>
+                        <div className="text-lg font-semibold text-gray-900">{studentInfo.email}</div>
+                      </div>
 
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <LinkIcon className="w-5 h-5 text-gray-500" />
-                  <span className="text-sm text-gray-600">LINE 연동</span>
-                </div>
-                <div className={`text-lg font-semibold ${studentInfo.lineConnected ? 'text-green-600' : 'text-red-600'}`}>
-                  {studentInfo.lineConnected ? '연동됨' : '미연동'}
-                </div>
-              </div>
-            </div>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Phone className="w-5 h-5 text-gray-500" />
+                          <span className="text-sm text-gray-600">전화번호</span>
+                        </div>
+                        <div className="text-lg font-semibold text-gray-900">{studentInfo.phone}</div>
+                      </div>
 
-            {/* 학습 통계 */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
-              <div className="bg-blue-50 rounded-lg p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Calendar className="w-5 h-5 text-blue-600" />
-                  <span className="text-sm text-gray-600">누적 출석</span>
-                </div>
-                <div className="text-2xl font-bold text-blue-600">{studentInfo.totalAttendance}회</div>
-              </div>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Shield className="w-5 h-5 text-gray-500" />
+                          <span className="text-sm text-gray-600">UID</span>
+                        </div>
+                        <div className="text-lg font-semibold text-gray-900 font-mono">{studentInfo.uid}</div>
+                      </div>
 
-              <div className="bg-green-50 rounded-lg p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Clock className="w-5 h-5 text-green-600" />
-                  <span className="text-sm text-gray-600">누적 수업시간</span>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <LinkIcon className="w-5 h-5 text-gray-500" />
+                          <span className="text-sm text-gray-600">LINE 연동</span>
+                        </div>
+                        <div className={`text-lg font-semibold ${studentInfo.lineConnected ? 'text-green-600' : 'text-red-600'}`}>
+                          {studentInfo.lineConnected ? '연동됨' : '미연동'}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="text-2xl font-bold text-green-600">{studentInfo.totalStudyTime}분</div>
-              </div>
 
-              <div className="bg-orange-50 rounded-lg p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Target className="w-5 h-5 text-orange-600" />
-                  <span className="text-sm text-gray-600">예약 가능 시간</span>
-                </div>
-                <div className="text-2xl font-bold text-orange-600">{studentInfo.remainingTime}분</div>
-              </div>
+                {/* 학습 통계 */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="bg-blue-50 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Calendar className="w-5 h-5 text-blue-600" />
+                      <span className="text-sm text-gray-600">누적 출석</span>
+                    </div>
+                    <div className="text-2xl font-bold text-blue-600">{studentInfo.totalAttendance}회</div>
+                  </div>
 
-              <div className="bg-purple-50 rounded-lg p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Award className="w-5 h-5 text-purple-600" />
-                  <span className="text-sm text-gray-600">현재 레벨</span>
+                  <div className="bg-green-50 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Clock className="w-5 h-5 text-green-600" />
+                      <span className="text-sm text-gray-600">누적 수업시간</span>
+                    </div>
+                    <div className="text-2xl font-bold text-green-600">{studentInfo.totalStudyTime}분</div>
+                  </div>
+
+                  <div className="bg-orange-50 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Target className="w-5 h-5 text-orange-600" />
+                      <span className="text-sm text-gray-600">예약 가능 시간</span>
+                    </div>
+                    <div className="text-2xl font-bold text-orange-600">{studentInfo.remainingTime}분</div>
+                  </div>
+
+                  <div className="bg-purple-50 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Award className="w-5 h-5 text-purple-600" />
+                      <span className="text-sm text-gray-600">현재 레벨</span>
+                    </div>
+                    <div className="text-2xl font-bold text-purple-600">{studentInfo.level}</div>
+                  </div>
                 </div>
-                <div className="text-2xl font-bold text-purple-600">{studentInfo.level}</div>
+
+                {/* 구매한 시간 정보 */}
+                <div className="mt-6 bg-yellow-50 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <BookOpen className="w-5 h-5 text-yellow-600" />
+                      <span className="text-sm text-gray-600">구매한 시간</span>
+                    </div>
+                    <div className="text-lg font-semibold text-yellow-600">{studentInfo.purchasedTime}분</div>
+                  </div>
+                  <div className="mt-2 text-xs text-gray-500">
+                    사용률: {Math.round(((studentInfo.purchasedTime - studentInfo.remainingTime) / studentInfo.purchasedTime) * 100)}%
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        )}
+            )}
 
         {/* 탭 네비게이션 */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-8">

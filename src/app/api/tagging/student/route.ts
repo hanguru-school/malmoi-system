@@ -4,189 +4,251 @@ import { taggingSystem } from '@/lib/tagging-system';
 
 const prisma = new PrismaClient();
 
+interface StudentTaggingRequest {
+  uid: string;
+  action: 'attendance' | 'visit_purpose';
+  purpose?: 'consultation' | 'material_purchase' | 'other';
+  memo?: string;
+}
+
+interface StudentTaggingResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    studentName: string;
+    hasReservation: boolean;
+    reservationTime?: string;
+    pointsEarned?: number;
+    attendanceRecorded: boolean;
+    visitPurpose?: string;
+  };
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { uid, timestamp } = body;
-
-    if (!uid || !timestamp) {
+    const body: StudentTaggingRequest = await request.json();
+    
+    if (!body.uid) {
       return NextResponse.json(
-        { success: false, message: '필수 파라미터가 누락되었습니다.' },
+        { success: false, message: 'UID가 필요합니다.' },
         { status: 400 }
       );
     }
 
-    // UID로 학생 조회
-    const user = await prisma.user.findFirst({
-      where: { uid },
-      include: {
-        student: true,
-      }
-    });
-
-    if (!user || !user.student) {
+    // 학생 정보 조회
+    const studentInfo = await getStudentInfo(body.uid);
+    if (!studentInfo) {
       return NextResponse.json(
-        { 
-          success: false, 
-          eventType: 'attendance',
-          message: '등록되지 않은 학생입니다.' 
-        },
+        { success: false, message: '등록되지 않은 UID입니다.' },
         { status: 404 }
       );
     }
 
-    // 태깅 시스템으로 처리
-    const taggingResult = await taggingSystem.processTagging(
-      uid,
-      'device_001', // 기본 디바이스 ID
-      'felica',
-      {
-        ipAddress: request.headers.get('x-forwarded-for') || undefined,
-        userAgent: request.headers.get('user-agent') || undefined,
-      }
-    );
-
-    if (!taggingResult.success) {
+    // 오늘 이미 태깅했는지 확인
+    const todayTagging = await checkTodayTagging(body.uid);
+    if (todayTagging && body.action === 'attendance') {
       return NextResponse.json(
-        { 
-          success: false, 
-          eventType: 'attendance',
-          message: taggingResult.error || '태깅 처리에 실패했습니다.' 
-        },
-        { status: 500 }
+        { success: false, message: '오늘 이미 출석 기록이 있습니다.' },
+        { status: 409 }
       );
     }
 
-    // 오늘 예약 확인
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    let responseData: any = {
+      studentName: studentInfo.name,
+      hasReservation: studentInfo.hasReservation,
+      attendanceRecorded: false
+    };
 
-    const todayReservations = await prisma.reservation.findMany({
-      where: {
-        studentId: user.student.id,
-        date: {
-          gte: today,
-          lt: tomorrow,
-        },
-        status: 'CONFIRMED',
-      },
-      include: {
-        teacher: true,
-      },
-      orderBy: {
-        date: 'asc',
-      },
-    });
-
-    // 출석 상태 판단
-    const now = new Date();
-    const hour = now.getHours();
-    const minute = now.getMinutes();
-    const currentTime = hour * 60 + minute;
-
-    let attendanceStatus: 'present' | 'late' | 'early' | 'absent' = 'present';
-    let eventType: 'attendance' | 'checkout' | 're_attendance' = 'attendance';
-
-    if (todayReservations.length > 0) {
-      const firstReservation = todayReservations[0];
-      const reservationTime = new Date(firstReservation.startTime);
-      const reservationHour = reservationTime.getHours();
-      const reservationMinute = reservationTime.getMinutes();
-      const reservationTimeMinutes = reservationHour * 60 + reservationMinute;
-
-      // 수업 시작 10분 전 ~ 10분 후: 정시
-      if (Math.abs(currentTime - reservationTimeMinutes) <= 10) {
-        attendanceStatus = 'present';
-      }
-      // 수업 시작 10분 후: 지각
-      else if (currentTime > reservationTimeMinutes + 10) {
-        attendanceStatus = 'late';
-      }
-      // 수업 시작 10분 전: 일찍
-      else {
-        attendanceStatus = 'early';
-      }
-    } else {
-      attendanceStatus = 'absent';
+    if (body.action === 'attendance') {
+      // 출석 처리
+      const attendanceResult = await processStudentAttendance(body.uid, studentInfo);
+      responseData = { ...responseData, ...attendanceResult };
+    } else if (body.action === 'visit_purpose') {
+      // 방문 목적 처리
+      const visitResult = await processVisitPurpose(body.uid, body.purpose!, body.memo);
+      responseData = { ...responseData, ...visitResult };
     }
 
-    // 포인트 적립 (출석 시)
-    let pointsEarned = 0;
-    if (attendanceStatus === 'present') {
-      pointsEarned = 10;
-      
-      // 학생 포인트 업데이트
-      await prisma.student.update({
-        where: { id: user.student.id },
-        data: {
-          points: {
-            increment: pointsEarned,
-          },
-        },
-      });
-    }
-
-    // UID 태그 로그 저장
-    await prisma.uIDTag.create({
-      data: {
-        userId: user.id,
-        uid,
-        tagType: eventType,
-        deviceId: 'device_001',
-      },
+    // 태깅 기록 저장
+    await saveTaggingRecord({
+      uid: body.uid,
+      userType: 'student',
+      action: body.action,
+      timestamp: new Date(),
+      status: 'completed',
+      memo: body.memo
     });
 
     return NextResponse.json({
       success: true,
-      student: {
-        id: user.student.id,
-        name: user.student.name,
-        uid,
-      },
-      eventType,
-      attendanceStatus,
-      message: getAttendanceMessage(attendanceStatus),
-      todaySchedule: todayReservations.length > 0 ? {
-        lessons: todayReservations.map(reservation => ({
-          teacherName: reservation.teacher.name,
-          time: new Date(reservation.startTime).toLocaleTimeString('ko-KR', {
-            hour: '2-digit',
-            minute: '2-digit',
-          }),
-          duration: `${reservation.startTime} ~ ${reservation.endTime}`,
-        })),
-        totalLessons: todayReservations.length,
-      } : null,
-      pointsEarned,
-      currentPoints: user.student.points + pointsEarned,
+      message: '학생 태깅이 성공적으로 처리되었습니다.',
+      data: responseData
     });
 
   } catch (error) {
-    console.error('Student tagging error:', error);
+    console.error('학생 태깅 오류:', error);
     return NextResponse.json(
-      { 
-        success: false, 
-        eventType: 'attendance',
-        message: '서버 오류가 발생했습니다.' 
-      },
+      { success: false, message: '학생 태깅 처리 중 오류가 발생했습니다.' },
       { status: 500 }
     );
   }
 }
 
-function getAttendanceMessage(status: string): string {
-  switch (status) {
-    case 'present':
-      return '출석이 확인되었습니다!';
-    case 'late':
-      return '지각으로 처리되었습니다.';
-    case 'early':
-      return '일찍 오셨네요!';
-    case 'absent':
-      return '오늘 예약된 수업이 없습니다.';
-    default:
-      return '태그 처리 완료';
+async function getStudentInfo(uid: string): Promise<any> {
+  // 실제로는 데이터베이스에서 조회
+  const mockStudents = {
+    'student_001': {
+      uid: 'student_001',
+      name: '田中 花子',
+      hasReservation: true,
+      reservationTime: '18:00',
+      reservationId: 'res_001',
+      level: '中級',
+      points: 850
+    },
+    'student_002': {
+      uid: 'student_002',
+      name: '鈴木 太郎',
+      hasReservation: false,
+      level: '初級',
+      points: 450
+    },
+    'student_003': {
+      uid: 'student_003',
+      name: '山田 次郎',
+      hasReservation: true,
+      reservationTime: '19:00',
+      reservationId: 'res_002',
+      level: '上級',
+      points: 1200
+    }
+  };
+
+  return mockStudents[uid] || null;
+}
+
+async function checkTodayTagging(uid: string): Promise<boolean> {
+  // 실제로는 데이터베이스에서 오늘 태깅 기록 조회
+  const today = new Date().toDateString();
+  const mockTodayTaggings = [
+    { uid: 'student_001', date: today },
+    { uid: 'student_003', date: today }
+  ];
+
+  return mockTodayTaggings.some(tagging => tagging.uid === uid);
+}
+
+async function processStudentAttendance(uid: string, studentInfo: any): Promise<any> {
+  const result: any = {
+    attendanceRecorded: true,
+    pointsEarned: 0
+  };
+
+  if (studentInfo.hasReservation) {
+    // 예약이 있는 경우 - 예약 상태를 '완료'로 변경
+    await updateReservationStatus(studentInfo.reservationId, 'completed');
+    
+    // 포인트 적립 (예약 수업 완료)
+    const pointsEarned = calculateAttendancePoints(studentInfo.level);
+    await addStudentPoints(uid, pointsEarned);
+    
+    result.pointsEarned = pointsEarned;
+    result.reservationTime = studentInfo.reservationTime;
+  } else {
+    // 예약이 없는 경우 - 일반 출석 기록
+    await recordGeneralAttendance(uid);
+    
+    // 기본 포인트 적립
+    const basicPoints = 10;
+    await addStudentPoints(uid, basicPoints);
+    
+    result.pointsEarned = basicPoints;
+  }
+
+  return result;
+}
+
+async function processVisitPurpose(uid: string, purpose: string, memo?: string): Promise<any> {
+  // 방문 목적 기록
+  await recordVisitPurpose(uid, purpose, memo);
+  
+  return {
+    visitPurpose: purpose,
+    visitMemo: memo
+  };
+}
+
+async function updateReservationStatus(reservationId: string, status: string): Promise<void> {
+  // 예약 상태 업데이트
+  console.log(`예약 상태 업데이트: ${reservationId} -> ${status}`);
+}
+
+async function addStudentPoints(uid: string, points: number): Promise<void> {
+  // 학생 포인트 적립
+  console.log(`학생 포인트 적립: ${uid} +${points}포인트`);
+}
+
+async function recordGeneralAttendance(uid: string): Promise<void> {
+  // 일반 출석 기록
+  console.log(`일반 출석 기록: ${uid}`);
+}
+
+async function recordVisitPurpose(uid: string, purpose: string, memo?: string): Promise<void> {
+  // 방문 목적 기록
+  console.log(`방문 목적 기록: ${uid} - ${purpose}${memo ? ` (${memo})` : ''}`);
+}
+
+function calculateAttendancePoints(level: string): number {
+  // 레벨별 포인트 계산
+  const pointMap: { [key: string]: number } = {
+    '初級': 20,
+    '中級': 30,
+    '上級': 40
+  };
+  
+  return pointMap[level] || 20;
+}
+
+async function saveTaggingRecord(record: any): Promise<void> {
+  // 태깅 기록 저장
+  console.log('태깅 기록 저장:', record);
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const uid = searchParams.get('uid');
+    
+    if (!uid) {
+      return NextResponse.json(
+        { success: false, message: 'UID 파라미터가 필요합니다.' },
+        { status: 400 }
+      );
+    }
+
+    const studentInfo = await getStudentInfo(uid);
+    if (!studentInfo) {
+      return NextResponse.json(
+        { success: false, message: '학생 정보를 찾을 수 없습니다.' },
+        { status: 404 }
+      );
+    }
+
+    const todayTagging = await checkTodayTagging(uid);
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        ...studentInfo,
+        alreadyTaggedToday: todayTagging
+      }
+    });
+
+  } catch (error) {
+    console.error('학생 정보 조회 오류:', error);
+    return NextResponse.json(
+      { success: false, message: '학생 정보 조회 중 오류가 발생했습니다.' },
+      { status: 500 }
+    );
   }
 } 

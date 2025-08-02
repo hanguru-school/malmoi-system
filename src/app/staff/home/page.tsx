@@ -19,7 +19,6 @@ import {
   LogOut
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { withRole } from '@/components/auth-guards';
 
 interface WorkLog {
   id: string;
@@ -50,7 +49,7 @@ interface StaffPermissions {
   canManageStudents: boolean;
 }
 
-function StaffHomePage() {
+export default function StaffHomePage() {
   const { user, logout } = useAuth();
   const [workLogs, setWorkLogs] = useState<WorkLog[]>([]);
   const [stats, setStats] = useState<StaffStats | null>(null);
@@ -595,5 +594,3 @@ function StaffHomePage() {
     </div>
   );
 } 
-
-export default withRole(StaffHomePage, ['master', 'staff']); 

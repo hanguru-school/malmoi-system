@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Globe, ArrowLeft, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { Globe, ArrowLeft, CheckCircle, XCircle, Loader2, Languages } from 'lucide-react';
 import TermsModal from '@/components/common/TermsModal';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Translations {
   title: string;
@@ -46,7 +47,7 @@ interface Translations {
 }
 
 export default function RegisterPage() {
-  const [currentLanguage, setCurrentLanguage] = useState<'ko' | 'ja'>('ko');
+  const { language, toggleLanguage } = useLanguage();
   const [kanjiName, setKanjiName] = useState('');
   const [yomigana, setYomigana] = useState('');
   const [koreanName, setKoreanName] = useState('');
@@ -144,12 +145,7 @@ export default function RegisterPage() {
     }
   };
 
-  const t = translations[currentLanguage];
-
-  // 언어 전환 함수
-  const toggleLanguage = () => {
-    setCurrentLanguage(currentLanguage === 'ko' ? 'ja' : 'ko');
-  };
+  const t = translations[language];
 
   // 필드 에러 초기화
   const clearFieldErrors = () => {
@@ -277,13 +273,13 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      {/* 언어 전환 버튼 */}
+      {/* 언어 변경 버튼 */}
       <button
         onClick={toggleLanguage}
-        className="absolute top-4 right-4 p-2 rounded-full bg-white shadow-lg hover:shadow-xl transition-shadow"
-        aria-label="언어 전환"
+        className="absolute top-4 right-4 flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-lg hover:bg-gray-50 transition-all duration-200 shadow-lg"
       >
-        <Globe className="w-5 h-5 text-gray-600" />
+        <Languages className="w-4 h-4" />
+        {language === 'ja' ? '한국어' : '日本語'}
       </button>
 
       <div className="max-w-md w-full space-y-8">
@@ -315,7 +311,7 @@ export default function RegisterPage() {
                 className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                   fieldErrors.kanjiName ? 'border-red-300' : 'border-gray-300'
                 }`}
-                placeholder={currentLanguage === 'ko' ? '田中太郎' : '田中太郎'}
+                placeholder={language === 'ko' ? '田中太郎' : '田中太郎'}
               />
               {fieldErrors.kanjiName && (
                 <p className="mt-1 text-sm text-red-600">{fieldErrors.kanjiName}</p>
@@ -337,7 +333,7 @@ export default function RegisterPage() {
                 className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                   fieldErrors.yomigana ? 'border-red-300' : 'border-gray-300'
                 }`}
-                placeholder={currentLanguage === 'ko' ? 'たなかたろう' : 'たなかたろう'}
+                placeholder={language === 'ko' ? 'たなかたろう' : 'たなかたろう'}
               />
               {fieldErrors.yomigana && (
                 <p className="mt-1 text-sm text-red-600">{fieldErrors.yomigana}</p>
@@ -356,7 +352,7 @@ export default function RegisterPage() {
                 value={koreanName}
                 onChange={(e) => setKoreanName(e.target.value)}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder={currentLanguage === 'ko' ? '홍길동' : '홍길동'}
+                placeholder={language === 'ko' ? '홍길동' : '홍길동'}
               />
             </div>
 
@@ -376,7 +372,7 @@ export default function RegisterPage() {
                 className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                   fieldErrors.email ? 'border-red-300' : 'border-gray-300'
                 }`}
-                placeholder={currentLanguage === 'ko' ? 'example@email.com' : 'example@email.com'}
+                placeholder={language === 'ko' ? 'example@email.com' : 'example@email.com'}
               />
               {fieldErrors.email && (
                 <p className="mt-1 text-sm text-red-600">{fieldErrors.email}</p>
@@ -399,7 +395,7 @@ export default function RegisterPage() {
                 className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                   fieldErrors.phone ? 'border-red-300' : 'border-gray-300'
                 }`}
-                placeholder={currentLanguage === 'ko' ? '010-1234-5678' : '090-1234-5678'}
+                placeholder={language === 'ko' ? '010-1234-5678' : '090-1234-5678'}
               />
               {fieldErrors.phone && (
                 <p className="mt-1 text-sm text-red-600">{fieldErrors.phone}</p>
@@ -422,7 +418,7 @@ export default function RegisterPage() {
                 className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                   fieldErrors.password ? 'border-red-300' : 'border-gray-300'
                 }`}
-                placeholder={currentLanguage === 'ko' ? '최소 6자 이상' : '6文字以上'}
+                placeholder={language === 'ko' ? '최소 6자 이상' : '6文字以上'}
               />
               {fieldErrors.password && (
                 <p className="mt-1 text-sm text-red-600">{fieldErrors.password}</p>
@@ -445,7 +441,7 @@ export default function RegisterPage() {
                 className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                   fieldErrors.confirmPassword ? 'border-red-300' : 'border-gray-300'
                 }`}
-                placeholder={currentLanguage === 'ko' ? '비밀번호 재입력' : 'パスワード再入力'}
+                placeholder={language === 'ko' ? '비밀번호 재입력' : 'パスワード再入力'}
               />
               {fieldErrors.confirmPassword && (
                 <p className="mt-1 text-sm text-red-600">{fieldErrors.confirmPassword}</p>
@@ -493,7 +489,7 @@ export default function RegisterPage() {
                   className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                     fieldErrors.studentEmail ? 'border-red-300' : 'border-gray-300'
                   }`}
-                  placeholder={currentLanguage === 'ko' ? '학생의 이메일 주소' : '学生のメールアドレス'}
+                  placeholder={language === 'ko' ? '학생의 이메일 주소' : '学生のメールアドレス'}
                 />
                 {fieldErrors.studentEmail && (
                   <p className="mt-1 text-sm text-red-600">{fieldErrors.studentEmail}</p>
@@ -590,7 +586,7 @@ export default function RegisterPage() {
         onClose={() => setShowTermsModal(false)}
         onAgree={handleTermsAgreement}
         role={role}
-        language={currentLanguage}
+        language={language}
       />
     </div>
   );
