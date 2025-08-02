@@ -21,11 +21,6 @@
     }
   },
   "regions": ["nrt1"],
-  "github": {
-    "enabled": true,
-    "silent": true,
-    "autoAlias": false
-  },
   "git": {
     "deploymentEnabled": {
       "main": true,
