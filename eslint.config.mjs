@@ -26,6 +26,7 @@ const eslintConfig = [
           argsIgnorePattern: "^_",
         },
       ],
+      "@typescript-eslint/no-unused-vars": "off", // 중복 방지
     },
   },
 ];
