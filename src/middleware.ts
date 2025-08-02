@@ -4,14 +4,16 @@ import type { NextRequest } from "next/server";
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // 운영 서버 환경 체크
+  // 운영 서버 환경 체크 (개발 환경에서는 비활성화)
   const hostname = request.headers.get("host") || "";
   const isProduction =
     hostname === "app.hanguru.school" || hostname === "hanguru.school";
+  const isDevelopment = process.env.NODE_ENV === "development";
 
-  // 비운영 환경에서 API 요청이 아닌 경우 경고 페이지로 리다이렉트
+  // 개발 환경에서는 환경 경고 페이지 리다이렉트 비활성화
   if (
     !isProduction &&
+    !isDevelopment &&
     !pathname.startsWith("/api/") &&
     !pathname.startsWith("/_next/")
   ) {
@@ -20,7 +22,7 @@ export function middleware(request: NextRequest) {
       return NextResponse.next();
     }
 
-    // 경고 페이지로 리다이렉트
+    // 경고 페이지로 리다이렉트 (운영 환경이 아닌 경우에만)
     return NextResponse.redirect(new URL("/environment-warning", request.url));
   }
 
