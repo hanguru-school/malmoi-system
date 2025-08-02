@@ -43,7 +43,12 @@ export function middleware(request: NextRequest) {
   // 쿠키에서 사용자 세션 확인
   const userSession = request.cookies.get("user-session");
 
-  // 로그인되지 않은 경우 모든 페이지를 로그인 페이지로 리다이렉트
+  // 메인 페이지는 로그인 없이 접근 가능
+  if (pathname === "/") {
+    return NextResponse.next();
+  }
+
+  // 로그인되지 않은 경우 보호된 페이지를 로그인 페이지로 리다이렉트
   if (!userSession) {
     return NextResponse.redirect(new URL("/auth/login", request.url));
   }
@@ -59,7 +64,11 @@ export function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL(dashboardPath, request.url));
     }
   } catch (error) {
-    // 세션 파싱 오류 시 로그인 페이지로 리다이렉트
+    // 세션 파싱 오류 시에도 메인 페이지는 접근 가능하도록 허용
+    if (pathname === "/") {
+      return NextResponse.next();
+    }
+    // 다른 보호된 페이지는 로그인 페이지로 리다이렉트
     return NextResponse.redirect(new URL("/auth/login", request.url));
   }
 
