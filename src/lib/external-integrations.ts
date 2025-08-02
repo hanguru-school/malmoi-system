@@ -445,7 +445,14 @@ export class ExternalIntegrationManager {
     event: IntegrationEvent,
   ): Promise<void> {
     if (this.config.line.enabled && event.data.channel === "line") {
-      await this.sendLineMessage(event.data.userId, event.data.message);
+      const userId = event.data.userId;
+      const message = event.data.message;
+      
+      if (typeof userId === 'string' && typeof message === 'string') {
+        await this.sendLineMessage(userId, message);
+      } else {
+        console.error("Invalid userId or message type:", { userId, message });
+      }
     }
   }
 

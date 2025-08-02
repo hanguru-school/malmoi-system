@@ -429,7 +429,9 @@ export class ChartDataConverter {
   ) {
     return Object.entries(data).map(([key, value]) => ({
       label: key,
-      value: value[valueKey] || value,
+      value: typeof value === 'object' && value !== null && valueKey in value 
+        ? (value as Record<string, unknown>)[valueKey] 
+        : value,
     }));
   }
 
@@ -443,7 +445,9 @@ export class ChartDataConverter {
   ) {
     return Object.entries(data).map(([key, value]) => ({
       label: key,
-      value: value[valueKey] || value,
+      value: typeof value === 'object' && value !== null && valueKey in value 
+        ? (value as Record<string, unknown>)[valueKey] 
+        : value,
     }));
   }
 
@@ -459,7 +463,9 @@ export class ChartDataConverter {
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([key, value]) => ({
         label: key,
-        value: value[valueKey] || value,
+        value: typeof value === 'object' && value !== null && valueKey in value 
+          ? (value as Record<string, unknown>)[valueKey] 
+          : value,
       }));
   }
 
@@ -470,12 +476,14 @@ export class ChartDataConverter {
     const heatmapData: Record<string, unknown>[] = [];
 
     for (const [day, hours] of Object.entries(data)) {
-      for (const [hour, value] of Object.entries(hours as any)) {
-        heatmapData.push({
-          day,
-          hour,
-          value,
-        });
+      if (typeof hours === 'object' && hours !== null) {
+        for (const [hour, value] of Object.entries(hours as Record<string, unknown>)) {
+          heatmapData.push({
+            day,
+            hour,
+            value,
+          });
+        }
       }
     }
 

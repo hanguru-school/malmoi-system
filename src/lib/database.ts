@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import prisma from "./db";
+import { UserRole } from "@prisma/client";
 
 // 사용자 인증 함수
 export async function authenticateUser(email: string, password: string) {
@@ -39,7 +40,7 @@ export async function createUser(userData: {
   email: string;
   name: string;
   password: string;
-  role: string;
+  role: UserRole;
 }) {
   try {
     // 비밀번호 해시화
@@ -50,7 +51,7 @@ export async function createUser(userData: {
         email: userData.email,
         name: userData.name,
         password: hashedPassword,
-        role: userData.role,
+        role: userData.role as UserRole,
       },
     });
 

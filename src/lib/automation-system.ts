@@ -454,7 +454,10 @@ class AutomationSystem {
 
     // 템플릿 변수 치환
     let content = message.content;
-    content = content.replace("{name}", target.name);
+    
+    // 타입 안전한 변수 치환
+    const targetName = typeof target.name === 'string' ? target.name : '사용자';
+    content = content.replace("{name}", targetName);
     content = content.replace("{currentHours}", "120");
     content = content.replace("{nextMonthHours}", "60");
     content = content.replace("{incompleteCount}", "3");
@@ -484,15 +487,19 @@ class AutomationSystem {
       try {
         switch (channel) {
           case "line":
-            if (target.lineId) {
+            if (target.lineId && typeof target.lineId === 'string') {
               await this.sendLineMessage(message, target.lineId);
             }
             break;
           case "email":
-            await this.sendEmailMessage(message, target.email);
+            if (target.email && typeof target.email === 'string') {
+              await this.sendEmailMessage(message, target.email);
+            }
             break;
           case "sms":
-            await this.sendSmsMessage(message, target.phone);
+            if (target.phone && typeof target.phone === 'string') {
+              await this.sendSmsMessage(message, target.phone);
+            }
             break;
         }
       } catch (error) {

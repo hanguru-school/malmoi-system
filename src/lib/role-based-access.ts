@@ -741,14 +741,18 @@ class RoleBasedAccessControl {
       res: Record<string, unknown>,
       next: Record<string, unknown>,
     ) => {
-      const userRole = req.user?.role || "student";
-      const pagePath = req.path;
+      const user = req.user as { role?: string } | undefined;
+      const userRole = user?.role || "student";
+      const pagePath = req.path as string;
 
       if (!this.checkPageAccess(userRole, pagePath)) {
-        return res.status(403).json({ error: "접근 권한이 없습니다." });
+        const response = res as { status: (code: number) => { json: (data: unknown) => void } };
+        return response.status(403).json({ error: "접근 권한이 없습니다." });
       }
 
-      next();
+      if (typeof next === 'function') {
+        (next as () => void)();
+      }
     };
   }
 
