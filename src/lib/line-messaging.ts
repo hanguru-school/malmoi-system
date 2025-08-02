@@ -208,6 +208,16 @@ class LineMessagingClient {
 // Line Messaging 클라이언트 인스턴스
 const lineClient = new LineMessagingClient();
 
+// 웹훅 검증 함수 (별도 export)
+export function verifyLineWebhook(body: string, signature: string): boolean {
+  return lineClient.verifyWebhook(body, signature);
+}
+
+// 텍스트 메시지 전송 함수 (별도 export)
+export async function sendTextMessage(userId: string, message: string): Promise<boolean> {
+  return await lineClient.sendMessage(userId, message);
+}
+
 // API 라우트 핸들러
 export async function POST(request: NextRequest) {
   try {

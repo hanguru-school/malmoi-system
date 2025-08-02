@@ -100,33 +100,33 @@ export async function POST(request: NextRequest) {
 }
 
 async function getStudentInfo(uid: string): Promise<any> {
-  // 실제로는 데이터베이스에서 조회
-  const mockStudents = {
+  // 실제로는 데이터베이스에서 학생 정보 조회
+  const mockStudents: { [key: string]: any } = {
     student_001: {
       uid: "student_001",
       name: "田中 花子",
       hasReservation: true,
-      reservationTime: "18:00",
+      reservationTime: "2024-01-15 14:00",
       reservationId: "res_001",
       level: "中級",
-      points: 850,
+      points: 150
     },
     student_002: {
       uid: "student_002",
       name: "鈴木 太郎",
       hasReservation: false,
       level: "初級",
-      points: 450,
+      points: 80
     },
     student_003: {
       uid: "student_003",
       name: "山田 次郎",
       hasReservation: true,
-      reservationTime: "19:00",
+      reservationTime: "2024-01-15 16:00",
       reservationId: "res_002",
       level: "上級",
-      points: 1200,
-    },
+      points: 320
+    }
   };
 
   return mockStudents[uid] || null;

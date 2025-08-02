@@ -74,6 +74,58 @@ export function createAuthMiddleware() {
   };
 }
 
+// Cognito 콜백 처리
+export async function handleCognitoCallback(code: string, state: string): Promise<AuthResponse> {
+  try {
+    // 실제로는 Cognito에서 토큰을 교환해야 함
+    const user: AuthUser = {
+      id: "user-id",
+      email: "user@example.com",
+      name: "사용자",
+      role: "student",
+    };
+
+    const token = generateToken(user);
+
+    return {
+      success: true,
+      user,
+      token,
+      message: "인증 성공",
+    };
+  } catch (error) {
+    console.error("Cognito 콜백 처리 오류:", error);
+    return {
+      success: false,
+      message: "인증 처리 중 오류가 발생했습니다.",
+    };
+  }
+}
+
+// 인증 성공 응답 생성
+export function createAuthSuccessResponse(user: AuthUser, token: string): NextResponse {
+  return NextResponse.json({
+    success: true,
+    user,
+    token,
+    message: "인증 성공",
+  });
+}
+
+// 쿠키에서 세션 가져오기
+export function getSessionFromCookies(request: NextRequest): AuthUser | null {
+  try {
+    const token = request.cookies.get("auth-token")?.value;
+    if (!token) {
+      return null;
+    }
+    return verifyToken(token);
+  } catch (error) {
+    console.error("세션 가져오기 오류:", error);
+    return null;
+  }
+}
+
 // Cognito 로그인
 export async function cognitoLogin(email: string, password: string): Promise<AuthResponse> {
   try {

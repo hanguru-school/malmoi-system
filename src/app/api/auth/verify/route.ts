@@ -32,9 +32,20 @@ export async function POST(request: NextRequest) {
       process.env.JWT_SECRET || "fallback-secret",
     );
 
+    // 타입 안전성을 위한 체크
+    if (typeof decoded === 'string' || !decoded || typeof decoded !== 'object') {
+      return handleApiError(new Error("Invalid token format"), 401);
+    }
+
+    const typedDecoded = decoded as { userId: string; email: string; role: string };
+    
+    if (!typedDecoded.userId) {
+      return handleApiError(new Error("Token missing userId"), 401);
+    }
+
     // 사용자 정보 가져오기
     const { getUserById } = await import("@/lib/database");
-    const user = await getUserById(decoded.userId);
+    const user = await getUserById(typedDecoded.userId);
 
     if (!user) {
       return handleApiError(new Error("User not found"), 404);
