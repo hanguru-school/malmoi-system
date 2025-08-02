@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { handleApiError, validateEnvironmentVariables } from "@/lib/api-utils";
+import jwt from "jsonwebtoken";
 
 // Node.js 런타임 명시
 export const runtime = "nodejs";
@@ -26,7 +27,6 @@ export async function POST(request: NextRequest) {
     }
 
     // JWT 토큰 검증
-    const jwt = require("jsonwebtoken");
     const decoded = jwt.verify(
       token,
       process.env.JWT_SECRET || "fallback-secret",
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // 환경변수 검증
     const envCheck = validateEnvironmentVariables();
