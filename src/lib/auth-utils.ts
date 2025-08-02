@@ -19,6 +19,11 @@ export interface AuthResponse {
   message: string;
 }
 
+// 세션 타입 정의 (API 라우트에서 사용)
+export interface Session {
+  user: AuthUser;
+}
+
 // Cognito 클라이언트 초기화
 const cognitoClient = new CognitoIdentityProviderClient({
   region: process.env.AWS_REGION || "ap-northeast-1",
@@ -104,24 +109,41 @@ export async function handleCognitoCallback(code: string, state: string): Promis
 
 // 인증 성공 응답 생성
 export function createAuthSuccessResponse(user: AuthUser, token: string): NextResponse {
-  return NextResponse.json({
+  const response = NextResponse.json({
     success: true,
     user,
     token,
     message: "인증 성공",
   });
+
+  // 쿠키 설정
+  response.cookies.set("auth-token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 24 * 60 * 60, // 24시간
+  });
+
+  return response;
 }
 
 // 쿠키에서 세션 가져오기
-export function getSessionFromCookies(request: NextRequest): AuthUser | null {
+export function getSessionFromCookies(request: NextRequest): Session | null {
   try {
     const token = request.cookies.get("auth-token")?.value;
+    
     if (!token) {
       return null;
     }
-    return verifyToken(token);
+
+    const user = verifyToken(token);
+    if (!user) {
+      return null;
+    }
+
+    return { user };
   } catch (error) {
-    console.error("세션 가져오기 오류:", error);
+    console.error("세션 파싱 오류:", error);
     return null;
   }
 }
