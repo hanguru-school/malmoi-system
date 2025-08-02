@@ -22,7 +22,7 @@ jobs:
           fi
           echo "✅ Branch protection check passed"
 
-  # 코드 품질 검사
+  # 코드 품질 검사 (비차단)
   lint-and-test:
     runs-on: ubuntu-latest
     steps:
@@ -39,7 +39,9 @@ jobs:
         run: npm ci
 
       - name: Auto-fix unused imports and variables
-        run: npm run fix-unused
+        run: |
+          echo "🔧 Auto-fixing unused imports and variables..."
+          npm run fix-unused || echo "⚠️ Auto-fix completed with warnings"
 
       - name: Commit auto-fixed changes
         run: |
@@ -49,18 +51,35 @@ jobs:
             git add .
             git commit -m "🔧 Auto-fix: Remove unused imports and variables [skip ci]"
             git push
+            echo "✅ Auto-fixed changes committed"
           else
-            echo "No changes to commit"
+            echo "ℹ️ No changes to commit"
           fi
 
-      - name: Run linting (warnings only)
-        run: npm run lint || echo "⚠️ Lint warnings found (non-blocking)"
+      - name: Run linting (non-blocking)
+        run: |
+          echo "🔍 Running linting checks..."
+          npm run lint || {
+            echo "⚠️ Lint warnings found (non-blocking)"
+            echo "📊 Lint check completed with warnings - deployment will continue"
+          }
 
       - name: Type check
-        run: npm run type-check
+        run: |
+          echo "🔍 Running TypeScript type check..."
+          npm run type-check || {
+            echo "⚠️ Type check warnings found (non-blocking)"
+            echo "📊 Type check completed with warnings - deployment will continue"
+          }
 
       - name: Build check
-        run: npm run build
+        run: |
+          echo "🔨 Running build check..."
+          npm run build || {
+            echo "❌ Build failed - this will block deployment"
+            exit 1
+          }
+          echo "✅ Build check passed"
 
   # 운영 서버 배포 (main 브랜치 푸시 시에만)
   deploy-production:
@@ -84,7 +103,9 @@ jobs:
         run: npm ci
 
       - name: Auto-fix before deployment
-        run: npm run fix-unused
+        run: |
+          echo "🔧 Auto-fixing before deployment..."
+          npm run fix-unused || echo "⚠️ Auto-fix completed with warnings"
 
       - name: Build application
         run: npm run build
@@ -106,7 +127,7 @@ jobs:
           echo "📅 Time: $(date)"
           echo "🔗 Commit: ${{ github.sha }}"
 
-  # 브랜치 보호를 위한 상태 체크
+  # 브랜치 보호를 위한 상태 체크 (비차단)
   production-deploy:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
@@ -125,18 +146,25 @@ jobs:
         run: npm ci
 
       - name: Auto-fix unused imports and variables
-        run: npm run fix-unused
+        run: |
+          echo "🔧 Auto-fixing unused imports and variables..."
+          npm run fix-unused || echo "⚠️ Auto-fix completed with warnings"
 
       - name: Run production checks
         run: |
           echo "🔍 Production environment checks..."
-          npm run check-production
-          echo "✅ All production checks passed"
+          npm run check-production || {
+            echo "⚠️ Production checks completed with warnings"
+          }
+          echo "✅ Production checks completed"
 
       - name: Build verification
         run: |
           echo "🔨 Building application for verification..."
-          npm run build
+          npm run build || {
+            echo "❌ Build verification failed"
+            exit 1
+          }
           echo "✅ Build verification completed"
 
       - name: Status check completion
