@@ -1,17 +1,17 @@
-'use client'
+"use client";
 
-import { useEffect } from 'react'
-import { getProductionUrl } from '@/lib/environment-utils'
+import { useEffect } from "react";
+import { getProductionUrl } from "@/lib/environment-utils";
 
 export default function EnvironmentWarningPage() {
   useEffect(() => {
     // 5초 후 운영 서버로 리다이렉트
     const timer = setTimeout(() => {
-      window.location.href = getProductionUrl()
-    }, 5000)
+      window.location.href = getProductionUrl();
+    }, 5000);
 
-    return () => clearTimeout(timer)
-  }, [])
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div className="fixed inset-0 bg-red-600 text-white flex items-center justify-center z-50">
@@ -29,7 +29,7 @@ export default function EnvironmentWarningPage() {
         </div>
         <div className="mt-8">
           <button
-            onClick={() => window.location.href = getProductionUrl()}
+            onClick={() => (window.location.href = getProductionUrl())}
             className="bg-white text-red-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
           >
             今すぐ移動
@@ -37,5 +37,5 @@ export default function EnvironmentWarningPage() {
         </div>
       </div>
     </div>
-  )
-} 
+  );
+}

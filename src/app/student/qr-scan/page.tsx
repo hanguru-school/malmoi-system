@@ -1,14 +1,16 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import QRCodeScanner from '@/components/student/QRCodeScanner';
-import { StudentIdentifierData } from '@/types/student';
-import { ArrowLeft, QrCode, CheckCircle, AlertCircle } from 'lucide-react';
-import Link from 'next/link';
+import { useState } from "react";
+import QRCodeScanner from "@/components/student/QRCodeScanner";
+import { StudentIdentifierData } from "@/types/student";
+import { ArrowLeft, QrCode, CheckCircle, AlertCircle } from "lucide-react";
+import Link from "next/link";
 
 export default function StudentQRScanPage() {
   const [showScanner, setShowScanner] = useState(false);
-  const [scannedData, setScannedData] = useState<StudentIdentifierData | null>(null);
+  const [scannedData, setScannedData] = useState<StudentIdentifierData | null>(
+    null,
+  );
   const [scanError, setScanError] = useState<string | null>(null);
 
   const handleQRScan = (data: StudentIdentifierData) => {
@@ -43,7 +45,9 @@ export default function StudentQRScanPage() {
 
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-4">QR 코드 스캔</h1>
-        <p className="text-gray-600">QR 코드를 스캔하여 학생 정보를 확인하세요</p>
+        <p className="text-gray-600">
+          QR 코드를 스캔하여 학생 정보를 확인하세요
+        </p>
       </div>
 
       {/* 스캔 결과 또는 스캔 버튼 */}
@@ -51,8 +55,12 @@ export default function StudentQRScanPage() {
         <div className="bg-white rounded-xl shadow-lg p-8 text-center">
           <div className="mb-6">
             <QrCode className="w-16 h-16 text-blue-600 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">QR 코드 스캔</h2>
-            <p className="text-gray-600">카메라를 사용하여 QR 코드를 스캔하세요</p>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">
+              QR 코드 스캔
+            </h2>
+            <p className="text-gray-600">
+              카메라를 사용하여 QR 코드를 스캔하세요
+            </p>
           </div>
           <button
             onClick={() => setShowScanner(true)}
@@ -68,7 +76,9 @@ export default function StudentQRScanPage() {
         <div className="bg-white rounded-xl shadow-lg p-8 text-center">
           <div className="mb-6">
             <AlertCircle className="w-16 h-16 text-red-600 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">스캔 실패</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">
+              스캔 실패
+            </h2>
             <p className="text-gray-600 mb-4">{scanError}</p>
           </div>
           <button
@@ -85,11 +95,15 @@ export default function StudentQRScanPage() {
         <div className="bg-white rounded-xl shadow-lg p-8">
           <div className="text-center mb-6">
             <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">스캔 성공!</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">
+              스캔 성공!
+            </h2>
           </div>
-          
+
           <div className="bg-gray-50 rounded-lg p-6 mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">학생 정보</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              학생 정보
+            </h3>
             <div className="space-y-3">
               <div className="flex justify-between">
                 <span className="text-gray-600">학생 ID:</span>
@@ -139,4 +153,4 @@ export default function StudentQRScanPage() {
       )}
     </div>
   );
-} 
+}

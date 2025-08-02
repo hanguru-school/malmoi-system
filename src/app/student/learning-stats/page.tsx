@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { 
-  BarChart3, 
+import React, { useState, useEffect } from "react";
+import {
+  BarChart3,
   TrendingUp,
   Clock,
   Target,
@@ -23,9 +23,9 @@ import {
   Lightbulb,
   MessageSquare,
   User,
-  Target as TargetIcon
-} from 'lucide-react';
-import Link from 'next/link';
+  Target as TargetIcon,
+} from "lucide-react";
+import Link from "next/link";
 
 interface LearningStats {
   totalStudyTime: number; // 분 단위
@@ -69,17 +69,17 @@ export default function StudentLearningStatsPage() {
   const [stats, setStats] = useState<LearningStats | null>(null);
   const [studyHabits, setStudyHabits] = useState<StudyHabit[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedPeriod, setSelectedPeriod] = useState('month');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedPeriod, setSelectedPeriod] = useState("month");
+  const [selectedCategory, setSelectedCategory] = useState("all");
 
   useEffect(() => {
     const fetchLearningStats = async () => {
       try {
         setLoading(true);
-        
+
         // 실제 API 호출로 대체
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
         // 모의 데이터
         const mockStats: LearningStats = {
           totalStudyTime: 480, // 8시간
@@ -87,13 +87,13 @@ export default function StudentLearningStatsPage() {
           averageScore: 82.5,
           streakDays: 7,
           weeklyProgress: [
-            { date: '2024-01-15', studyTime: 60, classes: 1, score: 85 },
-            { date: '2024-01-16', studyTime: 45, classes: 0, score: 0 },
-            { date: '2024-01-17', studyTime: 90, classes: 1, score: 78 },
-            { date: '2024-01-18', studyTime: 30, classes: 0, score: 0 },
-            { date: '2024-01-19', studyTime: 75, classes: 1, score: 92 },
-            { date: '2024-01-20', studyTime: 60, classes: 1, score: 88 },
-            { date: '2024-01-21', studyTime: 120, classes: 0, score: 0 }
+            { date: "2024-01-15", studyTime: 60, classes: 1, score: 85 },
+            { date: "2024-01-16", studyTime: 45, classes: 0, score: 0 },
+            { date: "2024-01-17", studyTime: 90, classes: 1, score: 78 },
+            { date: "2024-01-18", studyTime: 30, classes: 0, score: 0 },
+            { date: "2024-01-19", studyTime: 75, classes: 1, score: 92 },
+            { date: "2024-01-20", studyTime: 60, classes: 1, score: 88 },
+            { date: "2024-01-21", studyTime: 120, classes: 0, score: 0 },
           ],
           categoryPerformance: {
             vocabulary: 85,
@@ -101,38 +101,74 @@ export default function StudentLearningStatsPage() {
             writing: 72,
             listening: 80,
             speaking: 75,
-            reading: 68
+            reading: 68,
           },
-          weakAreas: ['읽기 이해력', '고급 문법', '작문 표현력'],
-          strongAreas: ['어휘력', '청해력', '기초 문법'],
+          weakAreas: ["읽기 이해력", "고급 문법", "작문 표현력"],
+          strongAreas: ["어휘력", "청해력", "기초 문법"],
           recommendations: [
-            '읽기 연습을 더 자주 해보세요. 짧은 기사나 동화를 읽는 것이 도움이 됩니다.',
-            '고급 문법을 복습해보세요. 특히 연결어와 시제 표현에 집중하세요.',
-            '작문 연습을 늘려보세요. 일기 쓰기나 짧은 에세이를 써보는 것을 추천합니다.'
+            "읽기 연습을 더 자주 해보세요. 짧은 기사나 동화를 읽는 것이 도움이 됩니다.",
+            "고급 문법을 복습해보세요. 특히 연결어와 시제 표현에 집중하세요.",
+            "작문 연습을 늘려보세요. 일기 쓰기나 짧은 에세이를 써보는 것을 추천합니다.",
           ],
-          motivationalMessage: '정말 열심히 공부하고 계시네요! 특히 어휘력과 청해력이 뛰어납니다. 꾸준한 학습으로 더 큰 성장을 이룰 수 있을 거예요!',
+          motivationalMessage:
+            "정말 열심히 공부하고 계시네요! 특히 어휘력과 청해력이 뛰어납니다. 꾸준한 학습으로 더 큰 성장을 이룰 수 있을 거예요!",
           levelProgress: {
-            currentLevel: '초급',
-            nextLevel: '중급',
+            currentLevel: "초급",
+            nextLevel: "중급",
             progressPercentage: 75,
-            pointsToNextLevel: 25
-          }
+            pointsToNextLevel: 25,
+          },
         };
-        
+
         const mockStudyHabits: StudyHabit[] = [
-          { dayOfWeek: '월요일', averageStudyTime: 45, mostActiveTime: '오후 2-4시', consistency: 80 },
-          { dayOfWeek: '화요일', averageStudyTime: 60, mostActiveTime: '오후 7-9시', consistency: 90 },
-          { dayOfWeek: '수요일', averageStudyTime: 30, mostActiveTime: '오전 10-12시', consistency: 60 },
-          { dayOfWeek: '목요일', averageStudyTime: 75, mostActiveTime: '오후 3-5시', consistency: 85 },
-          { dayOfWeek: '금요일', averageStudyTime: 90, mostActiveTime: '오후 6-8시', consistency: 95 },
-          { dayOfWeek: '토요일', averageStudyTime: 120, mostActiveTime: '오전 9-11시', consistency: 70 },
-          { dayOfWeek: '일요일', averageStudyTime: 60, mostActiveTime: '오후 2-4시', consistency: 50 }
+          {
+            dayOfWeek: "월요일",
+            averageStudyTime: 45,
+            mostActiveTime: "오후 2-4시",
+            consistency: 80,
+          },
+          {
+            dayOfWeek: "화요일",
+            averageStudyTime: 60,
+            mostActiveTime: "오후 7-9시",
+            consistency: 90,
+          },
+          {
+            dayOfWeek: "수요일",
+            averageStudyTime: 30,
+            mostActiveTime: "오전 10-12시",
+            consistency: 60,
+          },
+          {
+            dayOfWeek: "목요일",
+            averageStudyTime: 75,
+            mostActiveTime: "오후 3-5시",
+            consistency: 85,
+          },
+          {
+            dayOfWeek: "금요일",
+            averageStudyTime: 90,
+            mostActiveTime: "오후 6-8시",
+            consistency: 95,
+          },
+          {
+            dayOfWeek: "토요일",
+            averageStudyTime: 120,
+            mostActiveTime: "오전 9-11시",
+            consistency: 70,
+          },
+          {
+            dayOfWeek: "일요일",
+            averageStudyTime: 60,
+            mostActiveTime: "오후 2-4시",
+            consistency: 50,
+          },
         ];
-        
+
         setStats(mockStats);
         setStudyHabits(mockStudyHabits);
       } catch (error) {
-        console.error('학습 통계 로드 오류:', error);
+        console.error("학습 통계 로드 오류:", error);
         setStats(null);
         setStudyHabits([]);
       } finally {
@@ -145,44 +181,65 @@ export default function StudentLearningStatsPage() {
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
-      case 'vocabulary': return <BookOpen className="w-5 h-5" />;
-      case 'grammar': return <Type className="w-5 h-5" />;
-      case 'writing': return <PenTool className="w-5 h-5" />;
-      case 'listening': return <Headphones className="w-5 h-5" />;
-      case 'speaking': return <Mic className="w-5 h-5" />;
-      case 'reading': return <FileText className="w-5 h-5" />;
-      default: return <BookOpen className="w-5 h-5" />;
+      case "vocabulary":
+        return <BookOpen className="w-5 h-5" />;
+      case "grammar":
+        return <Type className="w-5 h-5" />;
+      case "writing":
+        return <PenTool className="w-5 h-5" />;
+      case "listening":
+        return <Headphones className="w-5 h-5" />;
+      case "speaking":
+        return <Mic className="w-5 h-5" />;
+      case "reading":
+        return <FileText className="w-5 h-5" />;
+      default:
+        return <BookOpen className="w-5 h-5" />;
     }
   };
 
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case 'vocabulary': return 'bg-blue-100 text-blue-800';
-      case 'grammar': return 'bg-green-100 text-green-800';
-      case 'writing': return 'bg-purple-100 text-purple-800';
-      case 'listening': return 'bg-orange-100 text-orange-800';
-      case 'speaking': return 'bg-red-100 text-red-800';
-      case 'reading': return 'bg-indigo-100 text-indigo-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "vocabulary":
+        return "bg-blue-100 text-blue-800";
+      case "grammar":
+        return "bg-green-100 text-green-800";
+      case "writing":
+        return "bg-purple-100 text-purple-800";
+      case "listening":
+        return "bg-orange-100 text-orange-800";
+      case "speaking":
+        return "bg-red-100 text-red-800";
+      case "reading":
+        return "bg-indigo-100 text-indigo-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getCategoryText = (category: string) => {
     switch (category) {
-      case 'vocabulary': return '어휘';
-      case 'grammar': return '문법';
-      case 'writing': return '작문';
-      case 'listening': return '청해';
-      case 'speaking': return '말하기';
-      case 'reading': return '읽기';
-      default: return category;
+      case "vocabulary":
+        return "어휘";
+      case "grammar":
+        return "문법";
+      case "writing":
+        return "작문";
+      case "listening":
+        return "청해";
+      case "speaking":
+        return "말하기";
+      case "reading":
+        return "읽기";
+      default:
+        return category;
     }
   };
 
   const getConsistencyColor = (consistency: number) => {
-    if (consistency >= 80) return 'text-green-600';
-    if (consistency >= 60) return 'text-yellow-600';
-    return 'text-red-600';
+    if (consistency >= 80) return "text-green-600";
+    if (consistency >= 60) return "text-yellow-600";
+    return "text-red-600";
   };
 
   if (loading) {
@@ -236,7 +293,9 @@ export default function StudentLearningStatsPage() {
         {/* 기간 선택 */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
           <div className="flex items-center gap-4">
-            <span className="text-sm font-medium text-gray-700">분석 기간:</span>
+            <span className="text-sm font-medium text-gray-700">
+              분석 기간:
+            </span>
             <select
               value={selectedPeriod}
               onChange={(e) => setSelectedPeriod(e.target.value)}
@@ -259,7 +318,10 @@ export default function StudentLearningStatsPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">총 학습시간</p>
-                <p className="text-2xl font-bold text-gray-900">{Math.floor(stats.totalStudyTime / 60)}시간 {stats.totalStudyTime % 60}분</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {Math.floor(stats.totalStudyTime / 60)}시간{" "}
+                  {stats.totalStudyTime % 60}분
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2 text-sm">
@@ -275,7 +337,9 @@ export default function StudentLearningStatsPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">총 수업 수</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalClasses}회</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {stats.totalClasses}회
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2 text-sm">
@@ -291,7 +355,9 @@ export default function StudentLearningStatsPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">평균 점수</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.averageScore}점</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {stats.averageScore}점
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2 text-sm">
@@ -307,7 +373,9 @@ export default function StudentLearningStatsPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">연속 학습</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.streakDays}일</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {stats.streakDays}일
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2 text-sm">
@@ -323,33 +391,45 @@ export default function StudentLearningStatsPage() {
             <TargetIcon className="w-6 h-6 text-blue-600" />
             레벨 진행도
           </h2>
-          
+
           <div className="flex items-center gap-6 mb-4">
             <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600 mb-1">{stats.levelProgress.currentLevel}</div>
+              <div className="text-3xl font-bold text-blue-600 mb-1">
+                {stats.levelProgress.currentLevel}
+              </div>
               <div className="text-sm text-gray-600">현재 레벨</div>
             </div>
             <div className="flex-1">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm text-gray-600">진행도</span>
-                <span className="text-sm font-medium text-gray-900">{stats.levelProgress.progressPercentage}%</span>
+                <span className="text-sm font-medium text-gray-900">
+                  {stats.levelProgress.progressPercentage}%
+                </span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-3">
-                <div 
+                <div
                   className="bg-gradient-to-r from-blue-500 to-purple-500 h-3 rounded-full transition-all duration-300"
-                  style={{ width: `${stats.levelProgress.progressPercentage}%` }}
+                  style={{
+                    width: `${stats.levelProgress.progressPercentage}%`,
+                  }}
                 ></div>
               </div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-purple-600 mb-1">{stats.levelProgress.nextLevel}</div>
+              <div className="text-3xl font-bold text-purple-600 mb-1">
+                {stats.levelProgress.nextLevel}
+              </div>
               <div className="text-sm text-gray-600">다음 레벨</div>
             </div>
           </div>
-          
+
           <div className="text-center">
             <p className="text-sm text-gray-600">
-              다음 레벨까지 <span className="font-medium text-blue-600">{stats.levelProgress.pointsToNextLevel}점</span> 더 필요합니다
+              다음 레벨까지{" "}
+              <span className="font-medium text-blue-600">
+                {stats.levelProgress.pointsToNextLevel}점
+              </span>{" "}
+              더 필요합니다
             </p>
           </div>
         </div>
@@ -360,30 +440,41 @@ export default function StudentLearningStatsPage() {
             <BarChart3 className="w-6 h-6 text-green-600" />
             영역별 성과
           </h2>
-          
+
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {Object.entries(stats.categoryPerformance).map(([category, score]) => (
-              <div key={category} className="text-center">
-                <div className="flex items-center justify-center mb-3">
-                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${getCategoryColor(category)}`}>
-                    {getCategoryIcon(category)}
+            {Object.entries(stats.categoryPerformance).map(
+              ([category, score]) => (
+                <div key={category} className="text-center">
+                  <div className="flex items-center justify-center mb-3">
+                    <div
+                      className={`w-12 h-12 rounded-lg flex items-center justify-center ${getCategoryColor(category)}`}
+                    >
+                      {getCategoryIcon(category)}
+                    </div>
+                  </div>
+                  <div className="text-2xl font-bold text-gray-900 mb-1">
+                    {score}점
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    {getCategoryText(category)}
+                  </div>
+                  <div className="mt-2">
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div
+                        className={`h-2 rounded-full transition-all duration-300 ${
+                          score >= 80
+                            ? "bg-green-500"
+                            : score >= 60
+                              ? "bg-yellow-500"
+                              : "bg-red-500"
+                        }`}
+                        style={{ width: `${score}%` }}
+                      ></div>
+                    </div>
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-gray-900 mb-1">{score}점</div>
-                <div className="text-sm text-gray-600">{getCategoryText(category)}</div>
-                <div className="mt-2">
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full transition-all duration-300 ${
-                        score >= 80 ? 'bg-green-500' : 
-                        score >= 60 ? 'bg-yellow-500' : 'bg-red-500'
-                      }`}
-                      style={{ width: `${score}%` }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
-            ))}
+              ),
+            )}
           </div>
         </div>
 
@@ -393,17 +484,30 @@ export default function StudentLearningStatsPage() {
             <Activity className="w-6 h-6 text-orange-600" />
             학습 습관 분석
           </h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4">
             {studyHabits.map((habit, index) => (
-              <div key={index} className="text-center p-4 border border-gray-200 rounded-lg">
-                <div className="text-lg font-semibold text-gray-900 mb-2">{habit.dayOfWeek}</div>
-                <div className="text-2xl font-bold text-blue-600 mb-1">{habit.averageStudyTime}분</div>
+              <div
+                key={index}
+                className="text-center p-4 border border-gray-200 rounded-lg"
+              >
+                <div className="text-lg font-semibold text-gray-900 mb-2">
+                  {habit.dayOfWeek}
+                </div>
+                <div className="text-2xl font-bold text-blue-600 mb-1">
+                  {habit.averageStudyTime}분
+                </div>
                 <div className="text-xs text-gray-600 mb-2">평균 학습시간</div>
-                <div className="text-xs text-gray-500 mb-2">{habit.mostActiveTime}</div>
+                <div className="text-xs text-gray-500 mb-2">
+                  {habit.mostActiveTime}
+                </div>
                 <div className="flex items-center justify-center gap-1">
-                  <div className={`w-2 h-2 rounded-full ${getConsistencyColor(habit.consistency)}`}></div>
-                  <span className={`text-xs ${getConsistencyColor(habit.consistency)}`}>
+                  <div
+                    className={`w-2 h-2 rounded-full ${getConsistencyColor(habit.consistency)}`}
+                  ></div>
+                  <span
+                    className={`text-xs ${getConsistencyColor(habit.consistency)}`}
+                  >
                     {habit.consistency}% 일관성
                   </span>
                 </div>
@@ -420,10 +524,13 @@ export default function StudentLearningStatsPage() {
               <Trophy className="w-6 h-6 text-yellow-600" />
               강점 영역
             </h2>
-            
+
             <div className="space-y-3">
               {stats.strongAreas.map((area, index) => (
-                <div key={index} className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+                <div
+                  key={index}
+                  className="flex items-center gap-3 p-3 bg-green-50 rounded-lg"
+                >
                   <CheckCircle className="w-5 h-5 text-green-600" />
                   <span className="text-gray-900">{area}</span>
                 </div>
@@ -437,10 +544,13 @@ export default function StudentLearningStatsPage() {
               <Target className="w-6 h-6 text-red-600" />
               개선이 필요한 영역
             </h2>
-            
+
             <div className="space-y-3">
               {stats.weakAreas.map((area, index) => (
-                <div key={index} className="flex items-center gap-3 p-3 bg-red-50 rounded-lg">
+                <div
+                  key={index}
+                  className="flex items-center gap-3 p-3 bg-red-50 rounded-lg"
+                >
                   <AlertCircle className="w-5 h-5 text-red-600" />
                   <span className="text-gray-900">{area}</span>
                 </div>
@@ -455,10 +565,13 @@ export default function StudentLearningStatsPage() {
             <Lightbulb className="w-6 h-6 text-yellow-600" />
             개선 추천사항
           </h2>
-          
+
           <div className="space-y-4">
             {stats.recommendations.map((rec, index) => (
-              <div key={index} className="flex items-start gap-3 p-4 bg-blue-50 rounded-lg">
+              <div
+                key={index}
+                className="flex items-start gap-3 p-4 bg-blue-50 rounded-lg"
+              >
                 <MessageSquare className="w-5 h-5 text-blue-600 mt-1" />
                 <p className="text-gray-900">{rec}</p>
               </div>
@@ -470,9 +583,13 @@ export default function StudentLearningStatsPage() {
         <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl shadow-lg p-6 mb-8">
           <div className="flex items-center gap-3 mb-4">
             <Heart className="w-8 h-8 text-pink-600" />
-            <h2 className="text-2xl font-semibold text-gray-900">응원 메시지</h2>
+            <h2 className="text-2xl font-semibold text-gray-900">
+              응원 메시지
+            </h2>
           </div>
-          <p className="text-lg text-gray-700 leading-relaxed">{stats.motivationalMessage}</p>
+          <p className="text-lg text-gray-700 leading-relaxed">
+            {stats.motivationalMessage}
+          </p>
         </div>
 
         {/* 네비게이션 */}
@@ -509,4 +626,4 @@ export default function StudentLearningStatsPage() {
       </div>
     </div>
   );
-} 
+}

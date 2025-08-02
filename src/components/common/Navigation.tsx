@@ -1,20 +1,20 @@
-'use client';
+"use client";
 
-import { useAuth } from '@/hooks/useAuth';
-import { useRouter } from 'next/navigation';
-import { 
-  LogOut, 
-  User, 
-  Settings, 
+import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
+import {
+  LogOut,
+  User,
+  Settings,
   Bell,
   Home,
   Calendar,
   BookOpen,
   Shield,
   GraduationCap,
-  Building
-} from 'lucide-react';
-import { useState } from 'react';
+  Building,
+} from "lucide-react";
+import { useState } from "react";
 
 interface NavigationProps {
   userRole?: string;
@@ -31,15 +31,15 @@ export default function Navigation({ userRole }: NavigationProps) {
 
   const getDashboardIcon = () => {
     switch (userRole || user?.role) {
-      case 'ADMIN':
-      case 'MASTER':
+      case "ADMIN":
+      case "MASTER":
         return <Shield className="w-5 h-5" />;
-      case 'TEACHER':
+      case "TEACHER":
         return <GraduationCap className="w-5 h-5" />;
-      case 'STAFF':
-      case 'EMPLOYEE':
+      case "STAFF":
+      case "EMPLOYEE":
         return <Building className="w-5 h-5" />;
-      case 'STUDENT':
+      case "STUDENT":
         return <BookOpen className="w-5 h-5" />;
       default:
         return <Home className="w-5 h-5" />;
@@ -48,37 +48,37 @@ export default function Navigation({ userRole }: NavigationProps) {
 
   const getDashboardPath = () => {
     switch (userRole || user?.role) {
-      case 'ADMIN':
-      case 'MASTER':
-        return '/admin';
-      case 'TEACHER':
-        return '/teacher';
-      case 'STAFF':
-        return '/staff';
-      case 'EMPLOYEE':
-        return '/employee';
-      case 'STUDENT':
-        return '/student';
+      case "ADMIN":
+      case "MASTER":
+        return "/admin";
+      case "TEACHER":
+        return "/teacher";
+      case "STAFF":
+        return "/staff";
+      case "EMPLOYEE":
+        return "/employee";
+      case "STUDENT":
+        return "/student";
       default:
-        return '/';
+        return "/";
     }
   };
 
   const getRoleName = () => {
     switch (userRole || user?.role) {
-      case 'ADMIN':
-      case 'MASTER':
-        return '관리자';
-      case 'TEACHER':
-        return '선생님';
-      case 'STAFF':
-        return '사무직원';
-      case 'EMPLOYEE':
-        return '직원';
-      case 'STUDENT':
-        return '학생';
+      case "ADMIN":
+      case "MASTER":
+        return "관리자";
+      case "TEACHER":
+        return "선생님";
+      case "STAFF":
+        return "사무직원";
+      case "EMPLOYEE":
+        return "직원";
+      case "STUDENT":
+        return "학생";
       default:
-        return '사용자';
+        return "사용자";
     }
   };
 
@@ -106,7 +106,7 @@ export default function Navigation({ userRole }: NavigationProps) {
               <Home className="w-4 h-4" />
               <span>홈</span>
             </button>
-            
+
             <button
               onClick={() => router.push(`${getDashboardPath()}/schedule`)}
               className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors"
@@ -114,7 +114,7 @@ export default function Navigation({ userRole }: NavigationProps) {
               <Calendar className="w-4 h-4" />
               <span>일정</span>
             </button>
-            
+
             <button
               onClick={() => router.push(`${getDashboardPath()}/profile`)}
               className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors"
@@ -141,17 +141,17 @@ export default function Navigation({ userRole }: NavigationProps) {
                   <User className="w-4 h-4 text-blue-600" />
                 </div>
                 <span className="hidden md:block text-sm font-medium">
-                  {user?.name || '사용자'}
+                  {user?.name || "사용자"}
                 </span>
               </button>
 
               {showDropdown && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
                   <div className="px-4 py-2 text-sm text-gray-700 border-b">
-                    <div className="font-medium">{user?.name || '사용자'}</div>
+                    <div className="font-medium">{user?.name || "사용자"}</div>
                     <div className="text-gray-500">{getRoleName()}</div>
                   </div>
-                  
+
                   <button
                     onClick={() => {
                       router.push(`${getDashboardPath()}/profile`);
@@ -162,7 +162,7 @@ export default function Navigation({ userRole }: NavigationProps) {
                     <User className="w-4 h-4" />
                     <span>프로필</span>
                   </button>
-                  
+
                   <button
                     onClick={() => {
                       router.push(`${getDashboardPath()}/settings`);
@@ -173,7 +173,7 @@ export default function Navigation({ userRole }: NavigationProps) {
                     <Settings className="w-4 h-4" />
                     <span>설정</span>
                   </button>
-                  
+
                   <div className="border-t">
                     <button
                       onClick={() => {
@@ -218,4 +218,4 @@ export default function Navigation({ userRole }: NavigationProps) {
       </div>
     </nav>
   );
-} 
+}

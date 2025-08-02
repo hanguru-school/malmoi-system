@@ -1,7 +1,15 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { DollarSign, Calendar, Clock, TrendingUp, Download, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState, useEffect } from "react";
+import {
+  DollarSign,
+  Calendar,
+  Clock,
+  TrendingUp,
+  Download,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
 interface SalaryDetail {
   id: string;
@@ -14,7 +22,7 @@ interface SalaryDetail {
   bonusAmount: number;
   transportationFee: number;
   totalAmount: number;
-  status: 'confirmed' | 'pending' | 'paid';
+  status: "confirmed" | "pending" | "paid";
   notes?: string;
 }
 
@@ -28,13 +36,15 @@ interface MonthlySalary {
   transportationFees: number;
   points: number;
   totalSalary: number;
-  status: 'confirmed' | 'pending' | 'paid';
+  status: "confirmed" | "pending" | "paid";
   paidAt?: string;
 }
 
 export default function EmployeeSalaryPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [monthlySalary, setMonthlySalary] = useState<MonthlySalary | null>(null);
+  const [monthlySalary, setMonthlySalary] = useState<MonthlySalary | null>(
+    null,
+  );
   const [salaryDetails, setSalaryDetails] = useState<SalaryDetail[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -54,76 +64,76 @@ export default function EmployeeSalaryPage() {
         transportationFees: 12000,
         points: 120,
         totalSalary: 516000,
-        status: 'confirmed',
-        paidAt: '2024-01-31'
+        status: "confirmed",
+        paidAt: "2024-01-31",
       };
 
       const sampleSalaryDetails: SalaryDetail[] = [
         {
-          id: '1',
-          lessonId: 'L001',
-          lessonDate: '2024-01-15',
-          lessonTime: '14:00-16:00',
-          serviceName: '영어회화',
-          studentName: '김학생',
+          id: "1",
+          lessonId: "L001",
+          lessonDate: "2024-01-15",
+          lessonTime: "14:00-16:00",
+          serviceName: "영어회화",
+          studentName: "김학생",
           baseAmount: 20000,
           bonusAmount: 1000,
           transportationFee: 500,
           totalAmount: 21500,
-          status: 'confirmed'
+          status: "confirmed",
         },
         {
-          id: '2',
-          lessonId: 'L002',
-          lessonDate: '2024-01-16',
-          lessonTime: '15:00-17:00',
-          serviceName: '수학',
-          studentName: '이학생',
+          id: "2",
+          lessonId: "L002",
+          lessonDate: "2024-01-16",
+          lessonTime: "15:00-17:00",
+          serviceName: "수학",
+          studentName: "이학생",
           baseAmount: 20000,
           bonusAmount: 1000,
           transportationFee: 500,
           totalAmount: 21500,
-          status: 'confirmed'
+          status: "confirmed",
         },
         {
-          id: '3',
-          lessonId: 'L003',
-          lessonDate: '2024-01-17',
-          lessonTime: '16:00-18:00',
-          serviceName: '과학',
-          studentName: '박학생',
+          id: "3",
+          lessonId: "L003",
+          lessonDate: "2024-01-17",
+          lessonTime: "16:00-18:00",
+          serviceName: "과학",
+          studentName: "박학생",
           baseAmount: 20000,
           bonusAmount: 1000,
           transportationFee: 500,
           totalAmount: 21500,
-          status: 'confirmed'
+          status: "confirmed",
         },
         {
-          id: '4',
-          lessonId: 'L004',
-          lessonDate: '2024-01-18',
-          lessonTime: '14:00-16:00',
-          serviceName: '영어회화',
-          studentName: '최학생',
+          id: "4",
+          lessonId: "L004",
+          lessonDate: "2024-01-18",
+          lessonTime: "14:00-16:00",
+          serviceName: "영어회화",
+          studentName: "최학생",
           baseAmount: 20000,
           bonusAmount: 1000,
           transportationFee: 500,
           totalAmount: 21500,
-          status: 'confirmed'
+          status: "confirmed",
         },
         {
-          id: '5',
-          lessonId: 'L005',
-          lessonDate: '2024-01-19',
-          lessonTime: '15:00-17:00',
-          serviceName: '수학',
-          studentName: '정학생',
+          id: "5",
+          lessonId: "L005",
+          lessonDate: "2024-01-19",
+          lessonTime: "15:00-17:00",
+          serviceName: "수학",
+          studentName: "정학생",
           baseAmount: 20000,
           bonusAmount: 1000,
           transportationFee: 500,
           totalAmount: 21500,
-          status: 'confirmed'
-        }
+          status: "confirmed",
+        },
       ];
 
       setMonthlySalary(sampleMonthlySalary);
@@ -133,7 +143,7 @@ export default function EmployeeSalaryPage() {
   }, [currentDate]);
 
   const handlePreviousMonth = () => {
-    setCurrentDate(prev => {
+    setCurrentDate((prev) => {
       const newDate = new Date(prev);
       newDate.setMonth(prev.getMonth() - 1);
       return newDate;
@@ -141,7 +151,7 @@ export default function EmployeeSalaryPage() {
   };
 
   const handleNextMonth = () => {
-    setCurrentDate(prev => {
+    setCurrentDate((prev) => {
       const newDate = new Date(prev);
       newDate.setMonth(prev.getMonth() + 1);
       return newDate;
@@ -149,32 +159,32 @@ export default function EmployeeSalaryPage() {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('ko-KR').format(amount);
+    return new Intl.NumberFormat("ko-KR").format(amount);
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'confirmed':
-        return '확정';
-      case 'pending':
-        return '대기';
-      case 'paid':
-        return '지급완료';
+      case "confirmed":
+        return "확정";
+      case "pending":
+        return "대기";
+      case "paid":
+        return "지급완료";
       default:
-        return '알 수 없음';
+        return "알 수 없음";
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'confirmed':
-        return 'bg-green-100 text-green-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'paid':
-        return 'bg-blue-100 text-blue-800';
+      case "confirmed":
+        return "bg-green-100 text-green-800";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "paid":
+        return "bg-blue-100 text-blue-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -192,11 +202,11 @@ export default function EmployeeSalaryPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">급여 내역</h1>
-          <p className="text-gray-600">월별 급여 정보와 수업별 상세 내역을 확인할 수 있습니다.</p>
+          <p className="text-gray-600">
+            월별 급여 정보와 수업별 상세 내역을 확인할 수 있습니다.
+          </p>
         </div>
-        <button
-          className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
+        <button className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
           <Download className="w-4 h-4 mr-2" />
           급여명세서 다운로드
         </button>
@@ -233,7 +243,9 @@ export default function EmployeeSalaryPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">총 수업</p>
-                <p className="text-2xl font-bold text-gray-900">{monthlySalary.totalLessons}회</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {monthlySalary.totalLessons}회
+                </p>
               </div>
               <Clock className="w-8 h-8 text-blue-600" />
             </div>
@@ -253,7 +265,11 @@ export default function EmployeeSalaryPage() {
               <DollarSign className="w-8 h-8 text-green-600" />
             </div>
             <p className="text-sm text-gray-500 mt-2">
-              시간당 {formatCurrency(monthlySalary.baseSalary / monthlySalary.totalHours)}원
+              시간당{" "}
+              {formatCurrency(
+                monthlySalary.baseSalary / monthlySalary.totalHours,
+              )}
+              원
             </p>
           </div>
 
@@ -299,7 +315,9 @@ export default function EmployeeSalaryPage() {
       {/* 급여 상세 내역 */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">수업별 급여 상세</h3>
+          <h3 className="text-lg font-semibold text-gray-900">
+            수업별 급여 상세
+          </h3>
         </div>
 
         <div className="overflow-x-auto">
@@ -383,9 +401,11 @@ export default function EmployeeSalaryPage() {
       </div>
 
       {/* 급여 지급 정보 */}
-      {monthlySalary && monthlySalary.status === 'paid' && (
+      {monthlySalary && monthlySalary.status === "paid" && (
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">지급 정보</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            지급 정보
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <p className="text-sm text-gray-600">지급일</p>
@@ -402,4 +422,4 @@ export default function EmployeeSalaryPage() {
       )}
     </div>
   );
-} 
+}

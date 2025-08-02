@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { X } from 'lucide-react';
+import { useState } from "react";
+import { X } from "lucide-react";
 
 interface TermsModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAgree: () => void;
-  role: 'STUDENT' | 'PARENT' | 'TEACHER' | 'STAFF' | 'ADMIN';
-  language: 'ko' | 'ja';
+  role: "STUDENT" | "PARENT" | "TEACHER" | "STAFF" | "ADMIN";
+  language: "ko" | "ja";
 }
 
 interface TermsContent {
@@ -18,22 +18,28 @@ interface TermsContent {
   cancelText: string;
 }
 
-export default function TermsModal({ isOpen, onClose, onAgree, role, language }: TermsModalProps) {
+export default function TermsModal({
+  isOpen,
+  onClose,
+  onAgree,
+  role,
+  language,
+}: TermsModalProps) {
   const [hasAgreed, setHasAgreed] = useState(false);
 
   const termsContent: Record<string, TermsContent> = {
     ko: {
-      title: '회원 약관',
-      content: getTermsContent(role, 'ko'),
-      agreeText: '동의합니다',
-      cancelText: '취소'
+      title: "회원 약관",
+      content: getTermsContent(role, "ko"),
+      agreeText: "동의합니다",
+      cancelText: "취소",
     },
     ja: {
-      title: '利用規約',
-      content: getTermsContent(role, 'ja'),
-      agreeText: '同意します',
-      cancelText: 'キャンセル'
-    }
+      title: "利用規約",
+      content: getTermsContent(role, "ja"),
+      agreeText: "同意します",
+      cancelText: "キャンセル",
+    },
   };
 
   const t = termsContent[language];
@@ -90,7 +96,7 @@ export default function TermsModal({ isOpen, onClose, onAgree, role, language }:
               {t.agreeText}
             </label>
           </div>
-          
+
           <div className="flex gap-3">
             <button
               onClick={onClose}
@@ -112,8 +118,8 @@ export default function TermsModal({ isOpen, onClose, onAgree, role, language }:
   );
 }
 
-function getTermsContent(role: string, language: 'ko' | 'ja'): string {
-  const terms: Record<'ko' | 'ja', Record<string, string>> = {
+function getTermsContent(role: string, language: "ko" | "ja"): string {
+  const terms: Record<"ko" | "ja", Record<string, string>> = {
     ko: {
       STUDENT: `
         <h3>학생 회원 약관</h3>
@@ -266,7 +272,7 @@ function getTermsContent(role: string, language: 'ko' | 'ja'): string {
         
         <p><strong>제7조 (면책조항)</strong></p>
         <p>교실은 천재지변, 전쟁, 기타 불가항력적인 사유로 서비스를 제공할 수 없는 경우 책임을 지지 않습니다.</p>
-      `
+      `,
     },
     ja: {
       STUDENT: `
@@ -420,9 +426,9 @@ function getTermsContent(role: string, language: 'ko' | 'ja'): string {
         
         <p><strong>第7条 (免責事項)</strong></p>
         <p>教室は天災地変、戦争、その他不可抗力的事由によりサービスを提供できない場合、責任を負いません。</p>
-      `
-    }
+      `,
+    },
   };
 
-  return terms[language][role] || '';
-} 
+  return terms[language][role] || "";
+}

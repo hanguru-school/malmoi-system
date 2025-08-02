@@ -1,13 +1,7 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { 
-  Shield, 
-  CheckCircle, 
-  Save,
-  Loader2,
-  AlertCircle
-} from 'lucide-react';
+import { useState, useEffect } from "react";
+import { Shield, CheckCircle, Save, Loader2, AlertCircle } from "lucide-react";
 
 interface PagePermission {
   id: string;
@@ -24,90 +18,90 @@ export default function PageManagementPage() {
   const [pages, setPages] = useState<PagePermission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
 
   // 페이지 권한 설정 (기본값)
   const defaultPages: PagePermission[] = [
     {
-      id: 'master',
-      name: '마스터 페이지',
-      path: '/master',
+      id: "master",
+      name: "마스터 페이지",
+      path: "/master",
       requireAuth: true,
       requireTagging: false,
       requirePassword: false,
-      roles: ['admin', 'teacher', 'staff'],
-      permissions: []
+      roles: ["admin", "teacher", "staff"],
+      permissions: [],
     },
     {
-      id: 'master-dashboard',
-      name: '대시보드',
-      path: '/master/dashboard',
+      id: "master-dashboard",
+      name: "대시보드",
+      path: "/master/dashboard",
       requireAuth: true,
       requireTagging: false,
       requirePassword: false,
-      roles: ['admin', 'teacher', 'staff'],
-      permissions: []
+      roles: ["admin", "teacher", "staff"],
+      permissions: [],
     },
     {
-      id: 'master-users',
-      name: '사용자 관리',
-      path: '/master/users',
+      id: "master-users",
+      name: "사용자 관리",
+      path: "/master/users",
       requireAuth: true,
       requireTagging: false,
       requirePassword: false,
-      roles: ['admin'],
-      permissions: ['user:manage']
+      roles: ["admin"],
+      permissions: ["user:manage"],
     },
     {
-      id: 'master-reservations',
-      name: '예약 관리',
-      path: '/master/reservations',
+      id: "master-reservations",
+      name: "예약 관리",
+      path: "/master/reservations",
       requireAuth: true,
       requireTagging: false,
       requirePassword: false,
-      roles: ['admin', 'teacher', 'staff'],
-      permissions: ['reservation:manage']
+      roles: ["admin", "teacher", "staff"],
+      permissions: ["reservation:manage"],
     },
     {
-      id: 'master-facilities',
-      name: '시설 관리',
-      path: '/master/facilities',
+      id: "master-facilities",
+      name: "시설 관리",
+      path: "/master/facilities",
       requireAuth: true,
       requireTagging: false,
       requirePassword: false,
-      roles: ['admin', 'staff'],
-      permissions: ['facility:manage']
+      roles: ["admin", "staff"],
+      permissions: ["facility:manage"],
     },
     {
-      id: 'master-reports',
-      name: '보고서',
-      path: '/master/reports',
+      id: "master-reports",
+      name: "보고서",
+      path: "/master/reports",
       requireAuth: true,
       requireTagging: false,
       requirePassword: false,
-      roles: ['admin', 'teacher'],
-      permissions: ['report:view']
+      roles: ["admin", "teacher"],
+      permissions: ["report:view"],
     },
     {
-      id: 'master-settings',
-      name: '시스템 설정',
-      path: '/master/settings',
+      id: "master-settings",
+      name: "시스템 설정",
+      path: "/master/settings",
       requireAuth: true,
       requireTagging: false,
       requirePassword: false,
-      roles: ['admin'],
-      permissions: ['system:configure']
+      roles: ["admin"],
+      permissions: ["system:configure"],
     },
     {
-      id: 'master-security',
-      name: '보안 관리',
-      path: '/master/security',
+      id: "master-security",
+      name: "보안 관리",
+      path: "/master/security",
       requireAuth: true,
       requireTagging: false,
       requirePassword: false,
-      roles: ['admin'],
-      permissions: ['security:manage']
-    }
+      roles: ["admin"],
+      permissions: ["security:manage"],
+    },
   ];
 
   useEffect(() => {
@@ -116,7 +110,7 @@ export default function PageManagementPage() {
 
   const loadPagePermissions = async () => {
     try {
-      const response = await fetch('/api/settings/page-permissions');
+      const response = await fetch("/api/settings/page-permissions");
       const result = await response.json();
 
       if (result.success) {
@@ -126,28 +120,34 @@ export default function PageManagementPage() {
         setPages(defaultPages);
       }
     } catch (error) {
-      console.error('페이지 권한 로드 오류:', error);
+      console.error("페이지 권한 로드 오류:", error);
       setPages(defaultPages);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const updatePagePermission = (pageId: string, field: keyof PagePermission, value: string | boolean | string[]) => {
-    setPages(prev => prev.map(page => 
-      page.id === pageId ? { ...page, [field]: value } : page
-    ));
+  const updatePagePermission = (
+    pageId: string,
+    field: keyof PagePermission,
+    value: string | boolean | string[],
+  ) => {
+    setPages((prev) =>
+      prev.map((page) =>
+        page.id === pageId ? { ...page, [field]: value } : page,
+      ),
+    );
   };
 
   const savePagePermissions = async () => {
     try {
       setIsSaving(true);
-      setMessage('');
+      setMessage("");
 
-      const response = await fetch('/api/settings/page-permissions', {
-        method: 'POST',
+      const response = await fetch("/api/settings/page-permissions", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ pages }),
       });
@@ -155,12 +155,12 @@ export default function PageManagementPage() {
       const result = await response.json();
 
       if (result.success) {
-        setMessage('페이지 권한이 성공적으로 저장되었습니다');
+        setMessage("페이지 권한이 성공적으로 저장되었습니다");
       } else {
-        setMessage('저장에 실패했습니다: ' + result.error);
+        setMessage("저장에 실패했습니다: " + result.error);
       }
     } catch (error) {
-      setMessage('저장 중 오류가 발생했습니다');
+      setMessage("저장 중 오류가 발생했습니다");
     } finally {
       setIsSaving(false);
     }
@@ -187,11 +187,15 @@ export default function PageManagementPage() {
                 <Shield className="w-6 h-6 text-blue-600" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">페이지 권한 관리</h1>
-                <p className="text-gray-600">각 페이지의 접근 권한을 설정합니다</p>
+                <h1 className="text-2xl font-bold text-gray-900">
+                  페이지 권한 관리
+                </h1>
+                <p className="text-gray-600">
+                  각 페이지의 접근 권한을 설정합니다
+                </p>
               </div>
             </div>
-            
+
             <button
               onClick={savePagePermissions}
               disabled={isSaving}
@@ -212,13 +216,15 @@ export default function PageManagementPage() {
           </div>
 
           {message && (
-            <div className={`mb-6 p-4 rounded-lg ${
-              message.includes('성공') 
-                ? 'bg-green-50 border border-green-200 text-green-800' 
-                : 'bg-red-50 border border-red-200 text-red-800'
-            }`}>
+            <div
+              className={`mb-6 p-4 rounded-lg ${
+                message.includes("성공")
+                  ? "bg-green-50 border border-green-200 text-green-800"
+                  : "bg-red-50 border border-red-200 text-red-800"
+              }`}
+            >
               <div className="flex items-center">
-                {message.includes('성공') ? (
+                {message.includes("성공") ? (
                   <CheckCircle className="w-5 h-5 mr-2" />
                 ) : (
                   <AlertCircle className="w-5 h-5 mr-2" />
@@ -261,15 +267,19 @@ export default function PageManagementPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">
-                        {page.path}
-                      </div>
+                      <div className="text-sm text-gray-500">{page.path}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
                       <input
                         type="checkbox"
                         checked={page.requireAuth}
-                        onChange={(e) => updatePagePermission(page.id, 'requireAuth', e.target.checked)}
+                        onChange={(e) =>
+                          updatePagePermission(
+                            page.id,
+                            "requireAuth",
+                            e.target.checked,
+                          )
+                        }
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                       />
                     </td>
@@ -277,7 +287,13 @@ export default function PageManagementPage() {
                       <input
                         type="checkbox"
                         checked={page.requireTagging}
-                        onChange={(e) => updatePagePermission(page.id, 'requireTagging', e.target.checked)}
+                        onChange={(e) =>
+                          updatePagePermission(
+                            page.id,
+                            "requireTagging",
+                            e.target.checked,
+                          )
+                        }
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                       />
                     </td>
@@ -285,7 +301,13 @@ export default function PageManagementPage() {
                       <input
                         type="checkbox"
                         checked={page.requirePassword}
-                        onChange={(e) => updatePagePermission(page.id, 'requirePassword', e.target.checked)}
+                        onChange={(e) =>
+                          updatePagePermission(
+                            page.id,
+                            "requirePassword",
+                            e.target.checked,
+                          )
+                        }
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                       />
                     </td>
@@ -308,16 +330,28 @@ export default function PageManagementPage() {
           </div>
 
           <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <h3 className="text-sm font-medium text-blue-900 mb-2">설정 설명</h3>
+            <h3 className="text-sm font-medium text-blue-900 mb-2">
+              설정 설명
+            </h3>
             <ul className="text-sm text-blue-800 space-y-1">
-              <li>• <strong>인증 필요</strong>: 로그인이 필요한지 여부</li>
-              <li>• <strong>태깅 필요</strong>: 카드 태깅이 필요한지 여부</li>
-              <li>• <strong>비밀번호 확인</strong>: 페이지 접근 시 비밀번호 재확인이 필요한지 여부</li>
-              <li>• <strong>허용 역할</strong>: 해당 페이지에 접근할 수 있는 사용자 역할</li>
+              <li>
+                • <strong>인증 필요</strong>: 로그인이 필요한지 여부
+              </li>
+              <li>
+                • <strong>태깅 필요</strong>: 카드 태깅이 필요한지 여부
+              </li>
+              <li>
+                • <strong>비밀번호 확인</strong>: 페이지 접근 시 비밀번호
+                재확인이 필요한지 여부
+              </li>
+              <li>
+                • <strong>허용 역할</strong>: 해당 페이지에 접근할 수 있는
+                사용자 역할
+              </li>
             </ul>
           </div>
         </div>
       </div>
     </div>
   );
-} 
+}

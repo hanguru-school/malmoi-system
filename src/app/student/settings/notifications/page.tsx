@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { 
-  Bell, 
-  Mail, 
-  Clock, 
-  Calendar, 
-  MessageSquare, 
+import { useState } from "react";
+import {
+  Bell,
+  Mail,
+  Clock,
+  Calendar,
+  MessageSquare,
   ArrowLeft,
   Save,
-  CheckCircle
-} from 'lucide-react';
-import Link from 'next/link';
+  CheckCircle,
+} from "lucide-react";
+import Link from "next/link";
 
 interface NotificationSettings {
   lessonReminder: {
@@ -50,63 +50,70 @@ export default function StudentNotificationSettingsPage() {
   const [settings, setSettings] = useState<NotificationSettings>({
     lessonReminder: {
       enabled: true,
-      timeBefore: 30
+      timeBefore: 30,
     },
     homeworkReminder: {
       enabled: true,
-      timeBefore: 24
+      timeBefore: 24,
     },
     lessonStart: {
       enabled: true,
-      timeBefore: 10
+      timeBefore: 10,
     },
     lessonEnd: {
       enabled: false,
-      timeBefore: 5
+      timeBefore: 5,
     },
     emailNotifications: {
       enabled: true,
       lessonUpdates: true,
       homeworkAssignments: true,
       gradeUpdates: true,
-      systemAnnouncements: false
+      systemAnnouncements: false,
     },
     pushNotifications: {
       enabled: true,
       lessonReminders: true,
       homeworkDeadlines: true,
       teacherMessages: true,
-      gradeUpdates: false
-    }
+      gradeUpdates: false,
+    },
   });
 
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  const handleToggle = (category: keyof NotificationSettings, field: string) => {
-    setSettings(prev => ({
+  const handleToggle = (
+    category: keyof NotificationSettings,
+    field: string,
+  ) => {
+    setSettings((prev) => ({
       ...prev,
       [category]: {
         ...prev[category],
-        [field]: !(prev[category] as Record<string, boolean>)[field]
-      }
+        [field]: !(prev[category] as Record<string, boolean>)[field],
+      },
     }));
   };
 
-  const handleTimeChange = (category: keyof NotificationSettings, field: string, value: number) => {
-    setSettings(prev => ({
+  const handleTimeChange = (
+    category: keyof NotificationSettings,
+    field: string,
+    value: number,
+  ) => {
+    setSettings((prev) => ({
       ...prev,
       [category]: {
         ...prev[category],
-        [field]: value
-      }
+        [field]: value,
+      },
     }));
   };
 
   const handleSave = async () => {
     setSaving(true);
     // 실제 API 호출로 대체
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
@@ -119,7 +126,9 @@ export default function StudentNotificationSettingsPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">알림 설정</h1>
-            <p className="text-gray-600">수업 알림 및 리마인더 설정을 관리하세요</p>
+            <p className="text-gray-600">
+              수업 알림 및 리마인더 설정을 관리하세요
+            </p>
           </div>
           <Link
             href="/student/profile"
@@ -137,20 +146,30 @@ export default function StudentNotificationSettingsPage() {
               <Calendar className="w-6 h-6 text-blue-600" />
               <h2 className="text-lg font-semibold text-gray-900">수업 알림</h2>
             </div>
-            
+
             <div className="space-y-4">
               <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                 <div className="flex items-center gap-3">
                   <Clock className="w-5 h-5 text-gray-600" />
                   <div>
-                    <h3 className="font-medium text-gray-900">수업 시작 전 알림</h3>
-                    <p className="text-sm text-gray-600">수업 시작 전 미리 알림을 받습니다</p>
+                    <h3 className="font-medium text-gray-900">
+                      수업 시작 전 알림
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      수업 시작 전 미리 알림을 받습니다
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <select
                     value={settings.lessonStart.timeBefore}
-                    onChange={(e) => handleTimeChange('lessonStart', 'timeBefore', parseInt(e.target.value))}
+                    onChange={(e) =>
+                      handleTimeChange(
+                        "lessonStart",
+                        "timeBefore",
+                        parseInt(e.target.value),
+                      )
+                    }
                     disabled={!settings.lessonStart.enabled}
                     className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50"
                   >
@@ -163,7 +182,7 @@ export default function StudentNotificationSettingsPage() {
                     <input
                       type="checkbox"
                       checked={settings.lessonStart.enabled}
-                      onChange={() => handleToggle('lessonStart', 'enabled')}
+                      onChange={() => handleToggle("lessonStart", "enabled")}
                       className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     />
                   </label>
@@ -174,14 +193,24 @@ export default function StudentNotificationSettingsPage() {
                 <div className="flex items-center gap-3">
                   <Clock className="w-5 h-5 text-gray-600" />
                   <div>
-                    <h3 className="font-medium text-gray-900">수업 종료 전 알림</h3>
-                    <p className="text-sm text-gray-600">수업 종료 전 알림을 받습니다</p>
+                    <h3 className="font-medium text-gray-900">
+                      수업 종료 전 알림
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      수업 종료 전 알림을 받습니다
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <select
                     value={settings.lessonEnd.timeBefore}
-                    onChange={(e) => handleTimeChange('lessonEnd', 'timeBefore', parseInt(e.target.value))}
+                    onChange={(e) =>
+                      handleTimeChange(
+                        "lessonEnd",
+                        "timeBefore",
+                        parseInt(e.target.value),
+                      )
+                    }
                     disabled={!settings.lessonEnd.enabled}
                     className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50"
                   >
@@ -193,7 +222,7 @@ export default function StudentNotificationSettingsPage() {
                     <input
                       type="checkbox"
                       checked={settings.lessonEnd.enabled}
-                      onChange={() => handleToggle('lessonEnd', 'enabled')}
+                      onChange={() => handleToggle("lessonEnd", "enabled")}
                       className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     />
                   </label>
@@ -208,20 +237,30 @@ export default function StudentNotificationSettingsPage() {
               <MessageSquare className="w-6 h-6 text-green-600" />
               <h2 className="text-lg font-semibold text-gray-900">숙제 알림</h2>
             </div>
-            
+
             <div className="space-y-4">
               <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                 <div className="flex items-center gap-3">
                   <Clock className="w-5 h-5 text-gray-600" />
                   <div>
-                    <h3 className="font-medium text-gray-900">숙제 마감일 알림</h3>
-                    <p className="text-sm text-gray-600">숙제 마감일 전 알림을 받습니다</p>
+                    <h3 className="font-medium text-gray-900">
+                      숙제 마감일 알림
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      숙제 마감일 전 알림을 받습니다
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <select
                     value={settings.homeworkReminder.timeBefore}
-                    onChange={(e) => handleTimeChange('homeworkReminder', 'timeBefore', parseInt(e.target.value))}
+                    onChange={(e) =>
+                      handleTimeChange(
+                        "homeworkReminder",
+                        "timeBefore",
+                        parseInt(e.target.value),
+                      )
+                    }
                     disabled={!settings.homeworkReminder.enabled}
                     className="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50"
                   >
@@ -234,7 +273,9 @@ export default function StudentNotificationSettingsPage() {
                     <input
                       type="checkbox"
                       checked={settings.homeworkReminder.enabled}
-                      onChange={() => handleToggle('homeworkReminder', 'enabled')}
+                      onChange={() =>
+                        handleToggle("homeworkReminder", "enabled")
+                      }
                       className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     />
                   </label>
@@ -247,20 +288,28 @@ export default function StudentNotificationSettingsPage() {
           <div className="bg-white rounded-xl shadow-sm p-6">
             <div className="flex items-center gap-3 mb-4">
               <Mail className="w-6 h-6 text-purple-600" />
-              <h2 className="text-lg font-semibold text-gray-900">이메일 알림</h2>
+              <h2 className="text-lg font-semibold text-gray-900">
+                이메일 알림
+              </h2>
             </div>
-            
+
             <div className="space-y-4">
               <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                 <div>
-                  <h3 className="font-medium text-gray-900">이메일 알림 활성화</h3>
-                  <p className="text-sm text-gray-600">모든 이메일 알림을 켜거나 끕니다</p>
+                  <h3 className="font-medium text-gray-900">
+                    이메일 알림 활성화
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    모든 이메일 알림을 켜거나 끕니다
+                  </p>
                 </div>
                 <label className="flex items-center">
                   <input
                     type="checkbox"
                     checked={settings.emailNotifications.enabled}
-                    onChange={() => handleToggle('emailNotifications', 'enabled')}
+                    onChange={() =>
+                      handleToggle("emailNotifications", "enabled")
+                    }
                     className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                   />
                 </label>
@@ -274,7 +323,9 @@ export default function StudentNotificationSettingsPage() {
                       <input
                         type="checkbox"
                         checked={settings.emailNotifications.lessonUpdates}
-                        onChange={() => handleToggle('emailNotifications', 'lessonUpdates')}
+                        onChange={() =>
+                          handleToggle("emailNotifications", "lessonUpdates")
+                        }
                         className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                       />
                     </label>
@@ -284,8 +335,15 @@ export default function StudentNotificationSettingsPage() {
                     <label className="flex items-center">
                       <input
                         type="checkbox"
-                        checked={settings.emailNotifications.homeworkAssignments}
-                        onChange={() => handleToggle('emailNotifications', 'homeworkAssignments')}
+                        checked={
+                          settings.emailNotifications.homeworkAssignments
+                        }
+                        onChange={() =>
+                          handleToggle(
+                            "emailNotifications",
+                            "homeworkAssignments",
+                          )
+                        }
                         className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                       />
                     </label>
@@ -296,18 +354,29 @@ export default function StudentNotificationSettingsPage() {
                       <input
                         type="checkbox"
                         checked={settings.emailNotifications.gradeUpdates}
-                        onChange={() => handleToggle('emailNotifications', 'gradeUpdates')}
+                        onChange={() =>
+                          handleToggle("emailNotifications", "gradeUpdates")
+                        }
                         className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                       />
                     </label>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-700">시스템 공지사항</span>
+                    <span className="text-sm text-gray-700">
+                      시스템 공지사항
+                    </span>
                     <label className="flex items-center">
                       <input
                         type="checkbox"
-                        checked={settings.emailNotifications.systemAnnouncements}
-                        onChange={() => handleToggle('emailNotifications', 'systemAnnouncements')}
+                        checked={
+                          settings.emailNotifications.systemAnnouncements
+                        }
+                        onChange={() =>
+                          handleToggle(
+                            "emailNotifications",
+                            "systemAnnouncements",
+                          )
+                        }
                         className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                       />
                     </label>
@@ -323,18 +392,24 @@ export default function StudentNotificationSettingsPage() {
               <Bell className="w-6 h-6 text-orange-600" />
               <h2 className="text-lg font-semibold text-gray-900">푸시 알림</h2>
             </div>
-            
+
             <div className="space-y-4">
               <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                 <div>
-                  <h3 className="font-medium text-gray-900">푸시 알림 활성화</h3>
-                  <p className="text-sm text-gray-600">모든 푸시 알림을 켜거나 끕니다</p>
+                  <h3 className="font-medium text-gray-900">
+                    푸시 알림 활성화
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    모든 푸시 알림을 켜거나 끕니다
+                  </p>
                 </div>
                 <label className="flex items-center">
                   <input
                     type="checkbox"
                     checked={settings.pushNotifications.enabled}
-                    onChange={() => handleToggle('pushNotifications', 'enabled')}
+                    onChange={() =>
+                      handleToggle("pushNotifications", "enabled")
+                    }
                     className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                   />
                 </label>
@@ -348,7 +423,9 @@ export default function StudentNotificationSettingsPage() {
                       <input
                         type="checkbox"
                         checked={settings.pushNotifications.lessonReminders}
-                        onChange={() => handleToggle('pushNotifications', 'lessonReminders')}
+                        onChange={() =>
+                          handleToggle("pushNotifications", "lessonReminders")
+                        }
                         className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                       />
                     </label>
@@ -359,7 +436,9 @@ export default function StudentNotificationSettingsPage() {
                       <input
                         type="checkbox"
                         checked={settings.pushNotifications.homeworkDeadlines}
-                        onChange={() => handleToggle('pushNotifications', 'homeworkDeadlines')}
+                        onChange={() =>
+                          handleToggle("pushNotifications", "homeworkDeadlines")
+                        }
                         className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                       />
                     </label>
@@ -370,7 +449,9 @@ export default function StudentNotificationSettingsPage() {
                       <input
                         type="checkbox"
                         checked={settings.pushNotifications.teacherMessages}
-                        onChange={() => handleToggle('pushNotifications', 'teacherMessages')}
+                        onChange={() =>
+                          handleToggle("pushNotifications", "teacherMessages")
+                        }
                         className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                       />
                     </label>
@@ -381,7 +462,9 @@ export default function StudentNotificationSettingsPage() {
                       <input
                         type="checkbox"
                         checked={settings.pushNotifications.gradeUpdates}
-                        onChange={() => handleToggle('pushNotifications', 'gradeUpdates')}
+                        onChange={() =>
+                          handleToggle("pushNotifications", "gradeUpdates")
+                        }
                         className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                       />
                     </label>
@@ -411,11 +494,11 @@ export default function StudentNotificationSettingsPage() {
               ) : (
                 <Save className="w-4 h-4" />
               )}
-              <span>{saving ? '저장 중...' : '설정 저장'}</span>
+              <span>{saving ? "저장 중..." : "설정 저장"}</span>
             </button>
           </div>
         </div>
       </div>
     </div>
   );
-} 
+}

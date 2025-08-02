@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { 
-  Users, 
-  Calendar, 
-  TrendingUp, 
+import { useState, useEffect } from "react";
+import {
+  Users,
+  Calendar,
+  TrendingUp,
   Filter,
   Download,
   RefreshCw,
   Eye,
   Edit,
-  Trash2
-} from 'lucide-react';
-import ProtectedRoute from '@/components/common/ProtectedRoute';
-import Navigation from '@/components/common/Navigation';
+  Trash2,
+} from "lucide-react";
+import ProtectedRoute from "@/components/common/ProtectedRoute";
+import Navigation from "@/components/common/Navigation";
 
 interface TaggingLog {
   id: string;
@@ -33,7 +33,7 @@ interface TaggingLog {
 
 export default function TaggingManagementPage() {
   return (
-    <ProtectedRoute allowedRoles={['ADMIN', 'MASTER']}>
+    <ProtectedRoute allowedRoles={["ADMIN", "MASTER"]}>
       <div className="min-h-screen bg-gray-50">
         <Navigation userRole="ADMIN" />
         <TaggingManagementContent />
@@ -46,10 +46,12 @@ function TaggingManagementContent() {
   const [logs, setLogs] = useState<TaggingLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
-    startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    endDate: new Date().toISOString().split('T')[0],
-    userType: '',
-    action: ''
+    startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0],
+    endDate: new Date().toISOString().split("T")[0],
+    userType: "",
+    action: "",
   });
 
   useEffect(() => {
@@ -63,7 +65,7 @@ function TaggingManagementContent() {
         startDate: filters.startDate,
         endDate: filters.endDate,
         ...(filters.userType && { userType: filters.userType }),
-        ...(filters.action && { action: filters.action })
+        ...(filters.action && { action: filters.action }),
       });
 
       const response = await fetch(`/api/tagging/stats?${params}`);
@@ -73,7 +75,7 @@ function TaggingManagementContent() {
         setLogs(data.data);
       }
     } catch (error) {
-      console.error('Failed to fetch tagging stats:', error);
+      console.error("Failed to fetch tagging stats:", error);
     } finally {
       setLoading(false);
     }
@@ -81,21 +83,23 @@ function TaggingManagementContent() {
 
   const exportData = () => {
     const csvContent = [
-      ['ID', '사용자', '이메일', '역할', '액션', '위치', '시간'].join(','),
-      ...logs.map(log => [
-        log.id,
-        log.user?.name || 'N/A',
-        log.user?.email || 'N/A',
-        log.user?.role || 'N/A',
-        log.type,
-        log.location,
-        new Date(log.timestamp).toLocaleString()
-      ].join(','))
-    ].join('\n');
+      ["ID", "사용자", "이메일", "역할", "액션", "위치", "시간"].join(","),
+      ...logs.map((log) =>
+        [
+          log.id,
+          log.user?.name || "N/A",
+          log.user?.email || "N/A",
+          log.user?.role || "N/A",
+          log.type,
+          log.location,
+          new Date(log.timestamp).toLocaleString(),
+        ].join(","),
+      ),
+    ].join("\n");
 
-    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const blob = new Blob([csvContent], { type: "text/csv" });
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `tagging_logs_${filters.startDate}_${filters.endDate}.csv`;
     a.click();
@@ -104,29 +108,29 @@ function TaggingManagementContent() {
 
   const getActionColor = (action: string) => {
     switch (action) {
-      case 'ATTENDANCE':
-        return 'bg-green-100 text-green-800';
-      case 'CHECK_IN':
-        return 'bg-blue-100 text-blue-800';
-      case 'CHECK_OUT':
-        return 'bg-orange-100 text-orange-800';
-      case 'VISIT':
-        return 'bg-purple-100 text-purple-800';
+      case "ATTENDANCE":
+        return "bg-green-100 text-green-800";
+      case "CHECK_IN":
+        return "bg-blue-100 text-blue-800";
+      case "CHECK_OUT":
+        return "bg-orange-100 text-orange-800";
+      case "VISIT":
+        return "bg-purple-100 text-purple-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getRoleName = (role: string) => {
     switch (role) {
-      case 'STUDENT':
-        return '학생';
-      case 'STAFF':
-        return '직원';
-      case 'TEACHER':
-        return '선생님';
-      case 'ADMIN':
-        return '관리자';
+      case "STUDENT":
+        return "학생";
+      case "STAFF":
+        return "직원";
+      case "TEACHER":
+        return "선생님";
+      case "ADMIN":
+        return "관리자";
       default:
         return role;
     }
@@ -138,7 +142,9 @@ function TaggingManagementContent() {
         {/* 헤더 */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">태깅 관리</h1>
-          <p className="text-gray-600">UID 태깅 시스템의 로그와 통계를 관리합니다.</p>
+          <p className="text-gray-600">
+            UID 태깅 시스템의 로그와 통계를 관리합니다.
+          </p>
         </div>
 
         {/* 통계 카드 */}
@@ -147,7 +153,9 @@ function TaggingManagementContent() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">총 태깅 수</p>
-                <p className="text-2xl font-bold text-gray-900">{logs.length}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {logs.length}
+                </p>
               </div>
               <Users className="w-8 h-8 text-blue-600" />
             </div>
@@ -158,7 +166,7 @@ function TaggingManagementContent() {
               <div>
                 <p className="text-sm font-medium text-gray-600">출석 태깅</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {logs.filter(log => log.type === 'ATTENDANCE').length}
+                  {logs.filter((log) => log.type === "ATTENDANCE").length}
                 </p>
               </div>
               <Calendar className="w-8 h-8 text-green-600" />
@@ -170,7 +178,7 @@ function TaggingManagementContent() {
               <div>
                 <p className="text-sm font-medium text-gray-600">출근 태깅</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {logs.filter(log => log.type === 'CHECK_IN').length}
+                  {logs.filter((log) => log.type === "CHECK_IN").length}
                 </p>
               </div>
               <TrendingUp className="w-8 h-8 text-orange-600" />
@@ -182,7 +190,7 @@ function TaggingManagementContent() {
               <div>
                 <p className="text-sm font-medium text-gray-600">방문 태깅</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {logs.filter(log => log.type === 'VISIT').length}
+                  {logs.filter((log) => log.type === "VISIT").length}
                 </p>
               </div>
               <Eye className="w-8 h-8 text-purple-600" />
@@ -196,33 +204,45 @@ function TaggingManagementContent() {
             <Filter className="w-5 h-5 text-gray-600" />
             <h3 className="text-lg font-semibold text-gray-900">필터</h3>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">시작일</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                시작일
+              </label>
               <input
                 type="date"
                 value={filters.startDate}
-                onChange={(e) => setFilters(prev => ({ ...prev, startDate: e.target.value }))}
+                onChange={(e) =>
+                  setFilters((prev) => ({ ...prev, startDate: e.target.value }))
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">종료일</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                종료일
+              </label>
               <input
                 type="date"
                 value={filters.endDate}
-                onChange={(e) => setFilters(prev => ({ ...prev, endDate: e.target.value }))}
+                onChange={(e) =>
+                  setFilters((prev) => ({ ...prev, endDate: e.target.value }))
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">사용자 타입</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                사용자 타입
+              </label>
               <select
                 value={filters.userType}
-                onChange={(e) => setFilters(prev => ({ ...prev, userType: e.target.value }))}
+                onChange={(e) =>
+                  setFilters((prev) => ({ ...prev, userType: e.target.value }))
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">전체</option>
@@ -231,12 +251,16 @@ function TaggingManagementContent() {
                 <option value="teacher">선생님</option>
               </select>
             </div>
-            
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">액션</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                액션
+              </label>
               <select
                 value={filters.action}
-                onChange={(e) => setFilters(prev => ({ ...prev, action: e.target.value }))}
+                onChange={(e) =>
+                  setFilters((prev) => ({ ...prev, action: e.target.value }))
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">전체</option>
@@ -257,10 +281,12 @@ function TaggingManagementContent() {
               disabled={loading}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw
+                className={`w-4 h-4 ${loading ? "animate-spin" : ""}`}
+              />
               새로고침
             </button>
-            
+
             <button
               onClick={exportData}
               className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
@@ -276,7 +302,7 @@ function TaggingManagementContent() {
           <div className="px-6 py-4 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900">태깅 로그</h3>
           </div>
-          
+
           {loading ? (
             <div className="p-8 text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
@@ -313,20 +339,22 @@ function TaggingManagementContent() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
                           <div className="text-sm font-medium text-gray-900">
-                            {log.user?.name || 'N/A'}
+                            {log.user?.name || "N/A"}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {log.user?.email || 'N/A'}
+                            {log.user?.email || "N/A"}
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="text-sm text-gray-900">
-                          {getRoleName(log.user?.role || '')}
+                          {getRoleName(log.user?.role || "")}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getActionColor(log.type)}`}>
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getActionColor(log.type)}`}
+                        >
                           {log.type}
                         </span>
                       </td>
@@ -353,7 +381,7 @@ function TaggingManagementContent() {
                   ))}
                 </tbody>
               </table>
-              
+
               {logs.length === 0 && (
                 <div className="p-8 text-center">
                   <p className="text-gray-500">태깅 로그가 없습니다.</p>
@@ -365,4 +393,4 @@ function TaggingManagementContent() {
       </div>
     </div>
   );
-} 
+}

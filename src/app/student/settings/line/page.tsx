@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { 
-  MessageSquare, 
+import { useState } from "react";
+import {
+  MessageSquare,
   ArrowLeft,
   Save,
   CheckCircle,
-  QrCode
-} from 'lucide-react';
-import Link from 'next/link';
+  QrCode,
+} from "lucide-react";
+import Link from "next/link";
 
 interface LineSettings {
   connected: boolean;
@@ -31,60 +31,63 @@ export default function StudentLineSettingsPage() {
       lessonReminders: true,
       homeworkDeadlines: true,
       teacherMessages: true,
-      gradeUpdates: false
+      gradeUpdates: false,
     },
     autoReply: {
       enabled: false,
-      message: '수업 중입니다. 나중에 연락드리겠습니다.'
-    }
+      message: "수업 중입니다. 나중에 연락드리겠습니다.",
+    },
   });
 
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  const handleToggle = (category: keyof LineSettings['notifications'] | 'enabled', value?: boolean) => {
-    if (category === 'enabled') {
-      setSettings(prev => ({
+  const handleToggle = (
+    category: keyof LineSettings["notifications"] | "enabled",
+    value?: boolean,
+  ) => {
+    if (category === "enabled") {
+      setSettings((prev) => ({
         ...prev,
         autoReply: {
           ...prev.autoReply,
-          enabled: value || !prev.autoReply.enabled
-        }
+          enabled: value || !prev.autoReply.enabled,
+        },
       }));
     } else {
-      setSettings(prev => ({
+      setSettings((prev) => ({
         ...prev,
         notifications: {
           ...prev.notifications,
-          [category]: !prev.notifications[category]
-        }
+          [category]: !prev.notifications[category],
+        },
       }));
     }
   };
 
   const handleMessageChange = (message: string) => {
-    setSettings(prev => ({
+    setSettings((prev) => ({
       ...prev,
       autoReply: {
         ...prev.autoReply,
-        message
-      }
+        message,
+      },
     }));
   };
 
   const handleConnect = () => {
     // 실제 LINE 연동 로직
-    setSettings(prev => ({ ...prev, connected: true }));
+    setSettings((prev) => ({ ...prev, connected: true }));
   };
 
   const handleDisconnect = () => {
-    setSettings(prev => ({ ...prev, connected: false }));
+    setSettings((prev) => ({ ...prev, connected: false }));
   };
 
   const handleSave = async () => {
     setSaving(true);
     // 실제 API 호출로 대체
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
@@ -113,17 +116,23 @@ export default function StudentLineSettingsPage() {
           <div className="bg-white rounded-xl shadow-sm p-6">
             <div className="flex items-center gap-3 mb-4">
               <MessageSquare className="w-6 h-6 text-green-600" />
-              <h2 className="text-lg font-semibold text-gray-900">LINE 연결 상태</h2>
+              <h2 className="text-lg font-semibold text-gray-900">
+                LINE 연결 상태
+              </h2>
             </div>
-            
+
             {settings.connected ? (
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg">
                   <div className="flex items-center gap-3">
                     <CheckCircle className="w-5 h-5 text-green-600" />
                     <div>
-                      <h3 className="font-medium text-green-900">LINE에 연결됨</h3>
-                      <p className="text-sm text-green-700">알림을 LINE으로 받을 수 있습니다</p>
+                      <h3 className="font-medium text-green-900">
+                        LINE에 연결됨
+                      </h3>
+                      <p className="text-sm text-green-700">
+                        알림을 LINE으로 받을 수 있습니다
+                      </p>
                     </div>
                   </div>
                   <button
@@ -140,8 +149,12 @@ export default function StudentLineSettingsPage() {
                   <div className="flex items-center gap-3">
                     <MessageSquare className="w-5 h-5 text-gray-600" />
                     <div>
-                      <h3 className="font-medium text-gray-900">LINE에 연결되지 않음</h3>
-                      <p className="text-sm text-gray-600">LINE을 연결하여 알림을 받으세요</p>
+                      <h3 className="font-medium text-gray-900">
+                        LINE에 연결되지 않음
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        LINE을 연결하여 알림을 받으세요
+                      </p>
                     </div>
                   </div>
                   <button
@@ -152,7 +165,7 @@ export default function StudentLineSettingsPage() {
                     <span>LINE 연결</span>
                   </button>
                 </div>
-                
+
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <h4 className="font-medium text-blue-900 mb-2">연결 방법</h4>
                   <ol className="text-sm text-blue-800 space-y-1">
@@ -171,20 +184,24 @@ export default function StudentLineSettingsPage() {
             <div className="bg-white rounded-xl shadow-sm p-6">
               <div className="flex items-center gap-3 mb-4">
                 <MessageSquare className="w-6 h-6 text-blue-600" />
-                <h2 className="text-lg font-semibold text-gray-900">LINE 알림 설정</h2>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  LINE 알림 설정
+                </h2>
               </div>
-              
+
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                   <div>
                     <h3 className="font-medium text-gray-900">수업 리마인더</h3>
-                    <p className="text-sm text-gray-600">수업 시작 전 LINE으로 알림을 받습니다</p>
+                    <p className="text-sm text-gray-600">
+                      수업 시작 전 LINE으로 알림을 받습니다
+                    </p>
                   </div>
                   <label className="flex items-center">
                     <input
                       type="checkbox"
                       checked={settings.notifications.lessonReminders}
-                      onChange={() => handleToggle('lessonReminders')}
+                      onChange={() => handleToggle("lessonReminders")}
                       className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     />
                   </label>
@@ -193,13 +210,15 @@ export default function StudentLineSettingsPage() {
                 <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                   <div>
                     <h3 className="font-medium text-gray-900">숙제 마감일</h3>
-                    <p className="text-sm text-gray-600">숙제 마감일 전 LINE으로 알림을 받습니다</p>
+                    <p className="text-sm text-gray-600">
+                      숙제 마감일 전 LINE으로 알림을 받습니다
+                    </p>
                   </div>
                   <label className="flex items-center">
                     <input
                       type="checkbox"
                       checked={settings.notifications.homeworkDeadlines}
-                      onChange={() => handleToggle('homeworkDeadlines')}
+                      onChange={() => handleToggle("homeworkDeadlines")}
                       className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     />
                   </label>
@@ -208,13 +227,15 @@ export default function StudentLineSettingsPage() {
                 <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                   <div>
                     <h3 className="font-medium text-gray-900">선생님 메시지</h3>
-                    <p className="text-sm text-gray-600">선생님이 보낸 메시지를 LINE으로 받습니다</p>
+                    <p className="text-sm text-gray-600">
+                      선생님이 보낸 메시지를 LINE으로 받습니다
+                    </p>
                   </div>
                   <label className="flex items-center">
                     <input
                       type="checkbox"
                       checked={settings.notifications.teacherMessages}
-                      onChange={() => handleToggle('teacherMessages')}
+                      onChange={() => handleToggle("teacherMessages")}
                       className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     />
                   </label>
@@ -223,13 +244,15 @@ export default function StudentLineSettingsPage() {
                 <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                   <div>
                     <h3 className="font-medium text-gray-900">성적 업데이트</h3>
-                    <p className="text-sm text-gray-600">성적이 업데이트되면 LINE으로 알림을 받습니다</p>
+                    <p className="text-sm text-gray-600">
+                      성적이 업데이트되면 LINE으로 알림을 받습니다
+                    </p>
                   </div>
                   <label className="flex items-center">
                     <input
                       type="checkbox"
                       checked={settings.notifications.gradeUpdates}
-                      onChange={() => handleToggle('gradeUpdates')}
+                      onChange={() => handleToggle("gradeUpdates")}
                       className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     />
                   </label>
@@ -243,20 +266,26 @@ export default function StudentLineSettingsPage() {
             <div className="bg-white rounded-xl shadow-sm p-6">
               <div className="flex items-center gap-3 mb-4">
                 <MessageSquare className="w-6 h-6 text-purple-600" />
-                <h2 className="text-lg font-semibold text-gray-900">자동 답장 설정</h2>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  자동 답장 설정
+                </h2>
               </div>
-              
+
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                   <div>
-                    <h3 className="font-medium text-gray-900">자동 답장 활성화</h3>
-                    <p className="text-sm text-gray-600">수업 중에 받은 메시지에 자동으로 답장합니다</p>
+                    <h3 className="font-medium text-gray-900">
+                      자동 답장 활성화
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      수업 중에 받은 메시지에 자동으로 답장합니다
+                    </p>
                   </div>
                   <label className="flex items-center">
                     <input
                       type="checkbox"
                       checked={settings.autoReply.enabled}
-                      onChange={() => handleToggle('enabled')}
+                      onChange={() => handleToggle("enabled")}
                       className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     />
                   </label>
@@ -265,7 +294,9 @@ export default function StudentLineSettingsPage() {
                 {settings.autoReply.enabled && (
                   <div className="space-y-3">
                     <label className="block">
-                      <span className="text-sm font-medium text-gray-700">자동 답장 메시지</span>
+                      <span className="text-sm font-medium text-gray-700">
+                        자동 답장 메시지
+                      </span>
                       <textarea
                         value={settings.autoReply.message}
                         onChange={(e) => handleMessageChange(e.target.value)}
@@ -304,7 +335,7 @@ export default function StudentLineSettingsPage() {
                 ) : (
                   <Save className="w-4 h-4" />
                 )}
-                <span>{saving ? '저장 중...' : '설정 저장'}</span>
+                <span>{saving ? "저장 중..." : "설정 저장"}</span>
               </button>
             </div>
           )}
@@ -312,4 +343,4 @@ export default function StudentLineSettingsPage() {
       </div>
     </div>
   );
-} 
+}

@@ -1,7 +1,7 @@
-import fs from 'fs';
-import path from 'path';
-import { exec } from 'child_process';
-import { promisify } from 'util';
+import fs from "fs";
+import path from "path";
+import { exec } from "child_process";
+import { promisify } from "util";
 
 const execAsync = promisify(exec);
 
@@ -19,7 +19,7 @@ export interface BackupInfo {
   version: string;
   timestamp: string;
   path: string;
-  type: 'history' | 'rolling' | 'protected';
+  type: "history" | "rolling" | "protected";
   size: number;
 }
 
@@ -27,16 +27,16 @@ export class BackupManager {
   private config: BackupConfig;
 
   constructor() {
-    const basePath = process.env.BACKUP_BASE_PATH || './backups';
-    
+    const basePath = process.env.BACKUP_BASE_PATH || "./backups";
+
     this.config = {
       basePath,
-      historyPath: path.join(basePath, 'history'),
-      rollingPath: path.join(basePath, 'rolling'),
-      protectedPath: path.join(basePath, 'protected'),
-      protectedListPath: path.join(basePath, 'protected_backups.json'),
+      historyPath: path.join(basePath, "history"),
+      rollingPath: path.join(basePath, "rolling"),
+      protectedPath: path.join(basePath, "protected"),
+      protectedListPath: path.join(basePath, "protected_backups.json"),
       maxRollingBackups: 10,
-      maxProtectedBackups: 5
+      maxProtectedBackups: 5,
     };
 
     this.ensureDirectories();
@@ -48,10 +48,10 @@ export class BackupManager {
       this.config.basePath,
       this.config.historyPath,
       this.config.rollingPath,
-      this.config.protectedPath
+      this.config.protectedPath,
     ];
 
-    dirs.forEach(dir => {
+    dirs.forEach((dir) => {
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
       }
@@ -62,11 +62,11 @@ export class BackupManager {
   private loadProtectedList(): string[] {
     try {
       if (fs.existsSync(this.config.protectedListPath)) {
-        const content = fs.readFileSync(this.config.protectedListPath, 'utf-8');
+        const content = fs.readFileSync(this.config.protectedListPath, "utf-8");
         return JSON.parse(content);
       }
     } catch (error) {
-      console.error('보호 목록 로드 실패:', error);
+      console.error("보호 목록 로드 실패:", error);
     }
     return [];
   }
@@ -74,18 +74,23 @@ export class BackupManager {
   // 보호 목록 저장
   private saveProtectedList(versions: string[]): void {
     try {
-      fs.writeFileSync(this.config.protectedListPath, JSON.stringify(versions, null, 2));
+      fs.writeFileSync(
+        this.config.protectedListPath,
+        JSON.stringify(versions, null, 2),
+      );
     } catch (error) {
-      console.error('보호 목록 저장 실패:', error);
+      console.error("보호 목록 저장 실패:", error);
     }
   }
 
   // Git 아카이브 생성
   private async createGitArchive(targetPath: string): Promise<void> {
     try {
-      await execAsync(`git archive --format=tar HEAD | tar -x -C "${targetPath}"`);
+      await execAsync(
+        `git archive --format=tar HEAD | tar -x -C "${targetPath}"`,
+      );
     } catch (error) {
-      console.error('Git 아카이브 생성 실패:', error);
+      console.error("Git 아카이브 생성 실패:", error);
       throw error;
     }
   }
@@ -94,24 +99,24 @@ export class BackupManager {
   private getFolderSize(folderPath: string): number {
     try {
       if (!fs.existsSync(folderPath)) return 0;
-      
+
       let size = 0;
       const files = fs.readdirSync(folderPath);
-      
-      files.forEach(file => {
+
+      files.forEach((file) => {
         const filePath = path.join(folderPath, file);
         const stat = fs.statSync(filePath);
-        
+
         if (stat.isDirectory()) {
           size += this.getFolderSize(filePath);
         } else {
           size += stat.size;
         }
       });
-      
+
       return size;
     } catch (error) {
-      console.error('폴더 크기 계산 실패:', error);
+      console.error("폴더 크기 계산 실패:", error);
       return 0;
     }
   }
@@ -127,13 +132,13 @@ export class BackupManager {
       if (!fs.existsSync(historyPath)) {
         fs.mkdirSync(historyPath, { recursive: true });
         await this.createGitArchive(historyPath);
-        
+
         backups.push({
           version,
           timestamp,
           path: historyPath,
-          type: 'history',
-          size: this.getFolderSize(historyPath)
+          type: "history",
+          size: this.getFolderSize(historyPath),
         });
       }
 
@@ -142,13 +147,13 @@ export class BackupManager {
       if (!fs.existsSync(rollingPath)) {
         fs.mkdirSync(rollingPath, { recursive: true });
         await this.createGitArchive(rollingPath);
-        
+
         backups.push({
           version,
           timestamp,
           path: rollingPath,
-          type: 'rolling',
-          size: this.getFolderSize(rollingPath)
+          type: "rolling",
+          size: this.getFolderSize(rollingPath),
         });
 
         // 오래된 rolling 백업 정리
@@ -162,20 +167,20 @@ export class BackupManager {
         if (!fs.existsSync(protectedPath)) {
           fs.mkdirSync(protectedPath, { recursive: true });
           await this.createGitArchive(protectedPath);
-          
+
           backups.push({
             version,
             timestamp,
             path: protectedPath,
-            type: 'protected',
-            size: this.getFolderSize(protectedPath)
+            type: "protected",
+            size: this.getFolderSize(protectedPath),
           });
         }
       }
 
       return backups;
     } catch (error) {
-      console.error('백업 생성 실패:', error);
+      console.error("백업 생성 실패:", error);
       throw error;
     }
   }
@@ -183,13 +188,16 @@ export class BackupManager {
   // Rolling 백업 정리 (최신 10개만 유지)
   private async pruneRollingBackups(): Promise<void> {
     try {
-      const rollingBackups = fs.readdirSync(this.config.rollingPath)
-        .filter(dir => fs.statSync(path.join(this.config.rollingPath, dir)).isDirectory())
+      const rollingBackups = fs
+        .readdirSync(this.config.rollingPath)
+        .filter((dir) =>
+          fs.statSync(path.join(this.config.rollingPath, dir)).isDirectory(),
+        )
         .sort((a, b) => {
           // 버전 번호로 정렬
-          const aParts = a.replace('v', '').split('.').map(Number);
-          const bParts = b.replace('v', '').split('.').map(Number);
-          
+          const aParts = a.replace("v", "").split(".").map(Number);
+          const bParts = b.replace("v", "").split(".").map(Number);
+
           for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
             const aVal = aParts[i] || 0;
             const bVal = bParts[i] || 0;
@@ -200,14 +208,14 @@ export class BackupManager {
 
       // 최신 10개를 제외한 나머지 삭제
       const toDelete = rollingBackups.slice(0, -this.config.maxRollingBackups);
-      
-      toDelete.forEach(version => {
+
+      toDelete.forEach((version) => {
         const backupPath = path.join(this.config.rollingPath, version);
         fs.rmSync(backupPath, { recursive: true, force: true });
         console.log(`Rolling 백업 삭제: ${version}`);
       });
     } catch (error) {
-      console.error('Rolling 백업 정리 실패:', error);
+      console.error("Rolling 백업 정리 실패:", error);
     }
   }
 
@@ -220,55 +228,74 @@ export class BackupManager {
     const result = {
       history: [] as BackupInfo[],
       rolling: [] as BackupInfo[],
-      protected: [] as BackupInfo[]
+      protected: [] as BackupInfo[],
     };
 
     try {
       // History 백업 목록
       if (fs.existsSync(this.config.historyPath)) {
-        const historyDirs = fs.readdirSync(this.config.historyPath)
-          .filter(dir => fs.statSync(path.join(this.config.historyPath, dir)).isDirectory());
-        
-        result.history = historyDirs.map(version => ({
+        const historyDirs = fs
+          .readdirSync(this.config.historyPath)
+          .filter((dir) =>
+            fs.statSync(path.join(this.config.historyPath, dir)).isDirectory(),
+          );
+
+        result.history = historyDirs.map((version) => ({
           version,
-          timestamp: fs.statSync(path.join(this.config.historyPath, version)).mtime.toISOString(),
+          timestamp: fs
+            .statSync(path.join(this.config.historyPath, version))
+            .mtime.toISOString(),
           path: path.join(this.config.historyPath, version),
-          type: 'history' as const,
-          size: this.getFolderSize(path.join(this.config.historyPath, version))
+          type: "history" as const,
+          size: this.getFolderSize(path.join(this.config.historyPath, version)),
         }));
       }
 
       // Rolling 백업 목록
       if (fs.existsSync(this.config.rollingPath)) {
-        const rollingDirs = fs.readdirSync(this.config.rollingPath)
-          .filter(dir => fs.statSync(path.join(this.config.rollingPath, dir)).isDirectory());
-        
-        result.rolling = rollingDirs.map(version => ({
+        const rollingDirs = fs
+          .readdirSync(this.config.rollingPath)
+          .filter((dir) =>
+            fs.statSync(path.join(this.config.rollingPath, dir)).isDirectory(),
+          );
+
+        result.rolling = rollingDirs.map((version) => ({
           version,
-          timestamp: fs.statSync(path.join(this.config.rollingPath, version)).mtime.toISOString(),
+          timestamp: fs
+            .statSync(path.join(this.config.rollingPath, version))
+            .mtime.toISOString(),
           path: path.join(this.config.rollingPath, version),
-          type: 'rolling' as const,
-          size: this.getFolderSize(path.join(this.config.rollingPath, version))
+          type: "rolling" as const,
+          size: this.getFolderSize(path.join(this.config.rollingPath, version)),
         }));
       }
 
       // Protected 백업 목록
       if (fs.existsSync(this.config.protectedPath)) {
-        const protectedDirs = fs.readdirSync(this.config.protectedPath)
-          .filter(dir => fs.statSync(path.join(this.config.protectedPath, dir)).isDirectory());
-        
-        result.protected = protectedDirs.map(version => ({
+        const protectedDirs = fs
+          .readdirSync(this.config.protectedPath)
+          .filter((dir) =>
+            fs
+              .statSync(path.join(this.config.protectedPath, dir))
+              .isDirectory(),
+          );
+
+        result.protected = protectedDirs.map((version) => ({
           version,
-          timestamp: fs.statSync(path.join(this.config.protectedPath, version)).mtime.toISOString(),
+          timestamp: fs
+            .statSync(path.join(this.config.protectedPath, version))
+            .mtime.toISOString(),
           path: path.join(this.config.protectedPath, version),
-          type: 'protected' as const,
-          size: this.getFolderSize(path.join(this.config.protectedPath, version))
+          type: "protected" as const,
+          size: this.getFolderSize(
+            path.join(this.config.protectedPath, version),
+          ),
         }));
       }
 
       return result;
     } catch (error) {
-      console.error('백업 목록 조회 실패:', error);
+      console.error("백업 목록 조회 실패:", error);
       return result;
     }
   }
@@ -276,15 +303,17 @@ export class BackupManager {
   // 보호 목록 관리
   async addToProtectedList(version: string): Promise<void> {
     const protectedList = this.loadProtectedList();
-    
+
     if (!protectedList.includes(version)) {
       if (protectedList.length >= this.config.maxProtectedBackups) {
-        throw new Error(`보호 목록은 최대 ${this.config.maxProtectedBackups}개까지만 가능합니다`);
+        throw new Error(
+          `보호 목록은 최대 ${this.config.maxProtectedBackups}개까지만 가능합니다`,
+        );
       }
-      
+
       protectedList.push(version);
       this.saveProtectedList(protectedList);
-      
+
       // Protected 백업 생성
       const protectedPath = path.join(this.config.protectedPath, version);
       if (!fs.existsSync(protectedPath)) {
@@ -297,11 +326,11 @@ export class BackupManager {
   async removeFromProtectedList(version: string): Promise<void> {
     const protectedList = this.loadProtectedList();
     const index = protectedList.indexOf(version);
-    
+
     if (index > -1) {
       protectedList.splice(index, 1);
       this.saveProtectedList(protectedList);
-      
+
       // Protected 백업 삭제
       const protectedPath = path.join(this.config.protectedPath, version);
       if (fs.existsSync(protectedPath)) {
@@ -311,21 +340,24 @@ export class BackupManager {
   }
 
   // 백업 복원
-  async restoreBackup(version: string, type: 'history' | 'rolling' | 'protected' = 'rolling'): Promise<void> {
+  async restoreBackup(
+    version: string,
+    type: "history" | "rolling" | "protected" = "rolling",
+  ): Promise<void> {
     let backupPath: string;
-    
+
     switch (type) {
-      case 'history':
+      case "history":
         backupPath = path.join(this.config.historyPath, version);
         break;
-      case 'rolling':
+      case "rolling":
         backupPath = path.join(this.config.rollingPath, version);
         break;
-      case 'protected':
+      case "protected":
         backupPath = path.join(this.config.protectedPath, version);
         break;
       default:
-        throw new Error('잘못된 백업 타입입니다');
+        throw new Error("잘못된 백업 타입입니다");
     }
 
     if (!fs.existsSync(backupPath)) {
@@ -335,24 +367,26 @@ export class BackupManager {
     try {
       // 현재 작업 디렉토리를 백업으로 복사
       const currentDir = process.cwd();
-      
+
       // 기존 파일 백업 (복원 전)
-      const tempBackup = path.join(this.config.basePath, 'temp_restore_backup');
+      const tempBackup = path.join(this.config.basePath, "temp_restore_backup");
       if (fs.existsSync(tempBackup)) {
         fs.rmSync(tempBackup, { recursive: true, force: true });
       }
       fs.mkdirSync(tempBackup, { recursive: true });
-      
+
       // 현재 상태를 임시 백업
-      await execAsync(`git archive --format=tar HEAD | tar -x -C "${tempBackup}"`);
-      
+      await execAsync(
+        `git archive --format=tar HEAD | tar -x -C "${tempBackup}"`,
+      );
+
       // 백업에서 복원
       await execAsync(`cp -r "${backupPath}"/* "${currentDir}/"`);
-      
+
       console.log(`백업 복원 완료: ${version} (${type})`);
       console.log(`임시 백업 위치: ${tempBackup}`);
     } catch (error) {
-      console.error('백업 복원 실패:', error);
+      console.error("백업 복원 실패:", error);
       throw error;
     }
   }
@@ -368,35 +402,41 @@ export class BackupManager {
   }> {
     const backups = await this.listBackups();
     const protectedList = this.loadProtectedList();
-    
+
     const totalSize = [
       ...backups.history,
       ...backups.rolling,
-      ...backups.protected
+      ...backups.protected,
     ].reduce((sum, backup) => sum + backup.size, 0);
 
     return {
-      totalBackups: backups.history.length + backups.rolling.length + backups.protected.length,
+      totalBackups:
+        backups.history.length +
+        backups.rolling.length +
+        backups.protected.length,
       totalSize,
       historyCount: backups.history.length,
       rollingCount: backups.rolling.length,
       protectedCount: backups.protected.length,
-      protectedList
+      protectedList,
     };
   }
 
   // 백업 경로 조회
-  async getBackupPath(version: string, type: 'history' | 'rolling' | 'protected'): Promise<string | null> {
+  async getBackupPath(
+    version: string,
+    type: "history" | "rolling" | "protected",
+  ): Promise<string | null> {
     let backupPath: string;
-    
+
     switch (type) {
-      case 'history':
+      case "history":
         backupPath = path.join(this.config.historyPath, version);
         break;
-      case 'rolling':
+      case "rolling":
         backupPath = path.join(this.config.rollingPath, version);
         break;
-      case 'protected':
+      case "protected":
         backupPath = path.join(this.config.protectedPath, version);
         break;
       default:
@@ -407,9 +447,12 @@ export class BackupManager {
   }
 
   // 백업 정보 조회
-  async getBackupInfo(version: string, type: 'history' | 'rolling' | 'protected'): Promise<BackupInfo | null> {
+  async getBackupInfo(
+    version: string,
+    type: "history" | "rolling" | "protected",
+  ): Promise<BackupInfo | null> {
     const backupPath = await this.getBackupPath(version, type);
-    
+
     if (!backupPath) {
       return null;
     }
@@ -419,7 +462,7 @@ export class BackupManager {
       timestamp: fs.statSync(backupPath).mtime.toISOString(),
       path: backupPath,
       type,
-      size: this.getFolderSize(backupPath)
+      size: this.getFolderSize(backupPath),
     };
   }
 
@@ -436,4 +479,4 @@ export class BackupManager {
 }
 
 // 싱글톤 인스턴스
-export const backupManager = new BackupManager(); 
+export const backupManager = new BackupManager();

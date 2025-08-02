@@ -1,40 +1,40 @@
-import cache from './cache';
+import cache from "./cache";
 
 export interface DeviceSettings {
-  type: 'mobile' | 'tablet' | 'desktop';
+  type: "mobile" | "tablet" | "desktop";
   uiScale: number;
-  layout: 'compact' | 'normal' | 'spacious';
+  layout: "compact" | "normal" | "spacious";
   showAdvancedFeatures: boolean;
   priorityFeatures: string[];
 }
 
 export interface LanguageSettings {
   autoDetect: boolean;
-  preferredLanguage: 'ko' | 'ja' | 'en' | 'zh';
-  fallbackLanguage: 'ko' | 'ja' | 'en' | 'zh';
+  preferredLanguage: "ko" | "ja" | "en" | "zh";
+  fallbackLanguage: "ko" | "ja" | "en" | "zh";
 }
 
 export interface TimeSettings {
   timezone: string;
-  dateFormat: 'YYYY-MM-DD' | 'MM/DD/YYYY' | 'DD/MM/YYYY';
-  timeFormat: '12h' | '24h';
+  dateFormat: "YYYY-MM-DD" | "MM/DD/YYYY" | "DD/MM/YYYY";
+  timeFormat: "12h" | "24h";
   autoSync: boolean;
 }
 
 export interface NotificationSettings {
   email: {
     enabled: boolean;
-    frequency: 'immediate' | 'daily' | 'weekly';
+    frequency: "immediate" | "daily" | "weekly";
     types: string[];
   };
   line: {
     enabled: boolean;
-    frequency: 'immediate' | 'daily' | 'weekly';
+    frequency: "immediate" | "daily" | "weekly";
     types: string[];
   };
   push: {
     enabled: boolean;
-    frequency: 'immediate' | 'daily' | 'weekly';
+    frequency: "immediate" | "daily" | "weekly";
     types: string[];
   };
   reminders: {
@@ -55,8 +55,8 @@ export interface PerformanceSettings {
 }
 
 export interface UserPreferences {
-  theme: 'light' | 'dark' | 'auto';
-  fontSize: 'small' | 'medium' | 'large';
+  theme: "light" | "dark" | "auto";
+  fontSize: "small" | "medium" | "large";
   colorBlindMode: boolean;
   reducedMotion: boolean;
   quickAccess: string[];
@@ -80,7 +80,7 @@ export interface SystemSettings {
 export class SettingsManager {
   private static instance: SettingsManager;
   private settings: SystemSettings;
-  private readonly CACHE_KEY = 'system_settings';
+  private readonly CACHE_KEY = "system_settings";
   private readonly CACHE_TTL = 3600; // 1 hour
 
   private constructor() {
@@ -98,45 +98,45 @@ export class SettingsManager {
   private getDefaultSettings(): SystemSettings {
     return {
       device: {
-        type: 'desktop',
+        type: "desktop",
         uiScale: 1.0,
-        layout: 'normal',
+        layout: "normal",
         showAdvancedFeatures: true,
-        priorityFeatures: ['booking', 'attendance', 'payments']
+        priorityFeatures: ["booking", "attendance", "payments"],
       },
       language: {
         autoDetect: true,
-        preferredLanguage: 'ja',
-        fallbackLanguage: 'en'
+        preferredLanguage: "ja",
+        fallbackLanguage: "en",
       },
       time: {
-        timezone: 'Asia/Tokyo',
-        dateFormat: 'YYYY-MM-DD',
-        timeFormat: '24h',
-        autoSync: true
+        timezone: "Asia/Tokyo",
+        dateFormat: "YYYY-MM-DD",
+        timeFormat: "24h",
+        autoSync: true,
       },
       notifications: {
         email: {
           enabled: true,
-          frequency: 'immediate',
-          types: ['booking', 'reminder', 'payment', 'attendance']
+          frequency: "immediate",
+          types: ["booking", "reminder", "payment", "attendance"],
         },
         line: {
           enabled: true,
-          frequency: 'immediate',
-          types: ['booking', 'reminder', 'payment', 'attendance']
+          frequency: "immediate",
+          types: ["booking", "reminder", "payment", "attendance"],
         },
         push: {
           enabled: true,
-          frequency: 'immediate',
-          types: ['booking', 'reminder', 'payment', 'attendance']
+          frequency: "immediate",
+          types: ["booking", "reminder", "payment", "attendance"],
         },
         reminders: {
           beforeClass: 60, // 1 hour
           afterClass: 24, // 24 hours
           weekly: true,
-          monthly: true
-        }
+          monthly: true,
+        },
       },
       performance: {
         cacheEnabled: true,
@@ -144,21 +144,21 @@ export class SettingsManager {
         imageCompression: true,
         audioCompression: true,
         lazyLoading: true,
-        prefetchEnabled: true
+        prefetchEnabled: true,
       },
       userPreferences: {
-        theme: 'auto',
-        fontSize: 'medium',
+        theme: "auto",
+        fontSize: "medium",
         colorBlindMode: false,
         reducedMotion: false,
         quickAccess: [],
-        pinnedMenus: []
+        pinnedMenus: [],
       },
       analytics: {
         enabled: true,
         trackUserBehavior: true,
-        autoOptimize: true
-      }
+        autoOptimize: true,
+      },
     };
   }
 
@@ -169,7 +169,7 @@ export class SettingsManager {
         this.settings = { ...this.getDefaultSettings(), ...cached };
       }
     } catch (error) {
-      console.error('설정 로드 실패:', error);
+      console.error("설정 로드 실패:", error);
     }
   }
 
@@ -177,38 +177,38 @@ export class SettingsManager {
     try {
       cache.set(this.CACHE_KEY, this.settings, this.CACHE_TTL);
     } catch (error) {
-      console.error('설정 저장 실패:', error);
+      console.error("설정 저장 실패:", error);
     }
   }
 
   // 기기 타입 감지
-  detectDeviceType(): 'mobile' | 'tablet' | 'desktop' {
-    if (typeof window === 'undefined') return 'desktop';
-    
+  detectDeviceType(): "mobile" | "tablet" | "desktop" {
+    if (typeof window === "undefined") return "desktop";
+
     const width = window.innerWidth;
-    if (width < 768) return 'mobile';
-    if (width < 1024) return 'tablet';
-    return 'desktop';
+    if (width < 768) return "mobile";
+    if (width < 1024) return "tablet";
+    return "desktop";
   }
 
   // 브라우저 언어 감지
   detectBrowserLanguage(): string {
-    if (typeof window === 'undefined') return 'ja';
-    
-    const language = navigator.language || navigator.languages?.[0] || 'ja';
-    const langCode = language.split('-')[0];
-    
-    return ['ko', 'ja', 'en', 'zh'].includes(langCode) ? langCode : 'ja';
+    if (typeof window === "undefined") return "ja";
+
+    const language = navigator.language || navigator.languages?.[0] || "ja";
+    const langCode = language.split("-")[0];
+
+    return ["ko", "ja", "en", "zh"].includes(langCode) ? langCode : "ja";
   }
 
   // 시간대 감지
   detectTimezone(): string {
-    if (typeof Intl === 'undefined') return 'Asia/Tokyo';
-    
+    if (typeof Intl === "undefined") return "Asia/Tokyo";
+
     try {
       return Intl.DateTimeFormat().resolvedOptions().timeZone;
     } catch {
-      return 'Asia/Tokyo';
+      return "Asia/Tokyo";
     }
   }
 
@@ -235,7 +235,10 @@ export class SettingsManager {
   }
 
   updateNotificationSettings(settings: Partial<NotificationSettings>): void {
-    this.settings.notifications = { ...this.settings.notifications, ...settings };
+    this.settings.notifications = {
+      ...this.settings.notifications,
+      ...settings,
+    };
     this.saveSettings();
   }
 
@@ -245,7 +248,10 @@ export class SettingsManager {
   }
 
   updateUserPreferences(preferences: Partial<UserPreferences>): void {
-    this.settings.userPreferences = { ...this.settings.userPreferences, ...preferences };
+    this.settings.userPreferences = {
+      ...this.settings.userPreferences,
+      ...preferences,
+    };
     this.saveSettings();
   }
 
@@ -288,26 +294,34 @@ export class SettingsManager {
     if (deviceType !== this.settings.device.type) {
       this.updateDeviceSettings({
         type: deviceType,
-        uiScale: deviceType === 'mobile' ? 0.9 : deviceType === 'tablet' ? 1.0 : 1.1,
-        layout: deviceType === 'mobile' ? 'compact' : 'normal',
-        showAdvancedFeatures: deviceType !== 'mobile',
-        priorityFeatures: deviceType === 'tablet' 
-          ? ['booking', 'attendance', 'notes']
-          : ['booking', 'attendance', 'payments', 'analytics']
+        uiScale:
+          deviceType === "mobile" ? 0.9 : deviceType === "tablet" ? 1.0 : 1.1,
+        layout: deviceType === "mobile" ? "compact" : "normal",
+        showAdvancedFeatures: deviceType !== "mobile",
+        priorityFeatures:
+          deviceType === "tablet"
+            ? ["booking", "attendance", "notes"]
+            : ["booking", "attendance", "payments", "analytics"],
       });
     }
 
     // 언어 자동 감지
-    if (this.settings.language.autoDetect && browserLanguage !== this.settings.language.preferredLanguage) {
+    if (
+      this.settings.language.autoDetect &&
+      browserLanguage !== this.settings.language.preferredLanguage
+    ) {
       this.updateLanguageSettings({
-        preferredLanguage: browserLanguage as any
+        preferredLanguage: browserLanguage as any,
       });
     }
 
     // 시간대 자동 감지
-    if (this.settings.time.autoSync && timezone !== this.settings.time.timezone) {
+    if (
+      this.settings.time.autoSync &&
+      timezone !== this.settings.time.timezone
+    ) {
       this.updateTimeSettings({
-        timezone
+        timezone,
       });
     }
   }
@@ -325,7 +339,7 @@ export class SettingsManager {
       this.saveSettings();
       return true;
     } catch (error) {
-      console.error('설정 복원 실패:', error);
+      console.error("설정 복원 실패:", error);
       return false;
     }
   }
@@ -337,4 +351,4 @@ export class SettingsManager {
   }
 }
 
-export const settingsManager = SettingsManager.getInstance(); 
+export const settingsManager = SettingsManager.getInstance();

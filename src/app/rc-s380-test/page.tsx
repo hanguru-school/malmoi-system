@@ -1,22 +1,24 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { 
-  CreditCard, 
-  Wifi, 
-  WifiOff, 
-  XCircle, 
+import { useState, useEffect } from "react";
+import {
+  CreditCard,
+  Wifi,
+  WifiOff,
+  XCircle,
   AlertCircle,
   Loader2,
   Info,
   Search,
   Usb,
-  Bluetooth
-} from 'lucide-react';
-import { hardwareReaderManager } from '@/lib/hardware-reader';
+  Bluetooth,
+} from "lucide-react";
+import { hardwareReaderManager } from "@/lib/hardware-reader";
 
 export default function RC380TestPage() {
-  const [connectionStatus, setConnectionStatus] = useState<'disconnected' | 'connecting' | 'connected' | 'error'>('disconnected');
+  const [connectionStatus, setConnectionStatus] = useState<
+    "disconnected" | "connecting" | "connected" | "error"
+  >("disconnected");
   const [deviceInfo, setDeviceInfo] = useState<{
     name: string;
     type: string;
@@ -26,37 +28,38 @@ export default function RC380TestPage() {
     version?: string;
     capabilities?: string[] | Record<string, unknown>;
   } | null>(null);
-  const [lastUID, setLastUID] = useState<string>('');
+  const [lastUID, setLastUID] = useState<string>("");
   const [isReading, setIsReading] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
-  const [error, setError] = useState<string>('');
-  const [availableDevices, setAvailableDevices] = useState<{
-    name: string;
-    type: string;
-    vendorId?: number;
-    productId?: number;
-    serialNumber?: string;
-  }[]>([]);
+  const [error, setError] = useState<string>("");
+  const [availableDevices, setAvailableDevices] = useState<
+    {
+      name: string;
+      type: string;
+      vendorId?: number;
+      productId?: number;
+      serialNumber?: string;
+    }[]
+  >([]);
   const [isScanning, setIsScanning] = useState(false);
 
   const addLog = (message: string) => {
     const timestamp = new Date().toLocaleTimeString();
-    setLogs(prev => [...prev, `[${timestamp}] ${message}`]);
+    setLogs((prev) => [...prev, `[${timestamp}] ${message}`]);
   };
 
   const scanDevices = async () => {
     try {
       setIsScanning(true);
-      addLog('사용 가능한 디바이스 스캔 시작...');
-      
+      addLog("사용 가능한 디바이스 스캔 시작...");
+
       const devices = await hardwareReaderManager.listAvailableDevices();
       setAvailableDevices(devices);
-      
+
       addLog(`스캔 완료: ${devices.length}개 디바이스 발견`);
-      devices.forEach(device => {
+      devices.forEach((device) => {
         addLog(`- ${device.name} (${device.type})`);
       });
-      
     } catch (error) {
       addLog(`디바이스 스캔 실패: ${error}`);
     } finally {
@@ -66,25 +69,25 @@ export default function RC380TestPage() {
 
   const requestSerialPermission = async () => {
     try {
-      addLog('Serial 포트 권한 요청...');
-      
-      if ('serial' in navigator) {
+      addLog("Serial 포트 권한 요청...");
+
+      if ("serial" in navigator) {
         const port = await (navigator as any).serial.requestPort({
           filters: [
             {
-              usbVendorId: 0x054c,  // Sony
-              usbProductId: 0x06c3  // RC-S380
-            }
-          ]
+              usbVendorId: 0x054c, // Sony
+              usbProductId: 0x06c3, // RC-S380
+            },
+          ],
         });
-        
-        addLog('Serial 포트 권한 획득 성공!');
+
+        addLog("Serial 포트 권한 획득 성공!");
         addLog(`포트 정보: ${JSON.stringify(port.getInfo())}`);
-        
+
         // 권한 획득 후 다시 스캔
         await scanDevices();
       } else {
-        addLog('Web Serial API가 지원되지 않습니다.');
+        addLog("Web Serial API가 지원되지 않습니다.");
       }
     } catch (error) {
       addLog(`Serial 권한 요청 실패: ${error}`);
@@ -93,27 +96,29 @@ export default function RC380TestPage() {
 
   const requestHIDPermission = async () => {
     try {
-      addLog('HID 디바이스 권한 요청...');
-      
-      if ('hid' in navigator) {
+      addLog("HID 디바이스 권한 요청...");
+
+      if ("hid" in navigator) {
         const devices = await (navigator as any).hid.requestDevice({
           filters: [
             {
-              vendorId: 0x054c,  // Sony
-              productId: 0x06c3  // RC-S380
-            }
-          ]
+              vendorId: 0x054c, // Sony
+              productId: 0x06c3, // RC-S380
+            },
+          ],
         });
-        
+
         addLog(`HID 디바이스 권한 획득 성공! ${devices.length}개 디바이스`);
         devices.forEach((device: any) => {
-          addLog(`- ${device.productName} (${device.vendorId}:${device.productId})`);
+          addLog(
+            `- ${device.productName} (${device.vendorId}:${device.productId})`,
+          );
         });
-        
+
         // 권한 획득 후 다시 스캔
         await scanDevices();
       } else {
-        addLog('USB HID API가 지원되지 않습니다.');
+        addLog("USB HID API가 지원되지 않습니다.");
       }
     } catch (error) {
       addLog(`HID 권한 요청 실패: ${error}`);
@@ -122,25 +127,27 @@ export default function RC380TestPage() {
 
   const requestUSBPermission = async () => {
     try {
-      addLog('USB 디바이스 권한 요청...');
-      
-      if ('usb' in navigator) {
+      addLog("USB 디바이스 권한 요청...");
+
+      if ("usb" in navigator) {
         const device = await (navigator as any).usb.requestDevice({
           filters: [
             {
-              vendorId: 0x054c,  // Sony
-              productId: 0x06c3  // RC-S380
-            }
-          ]
+              vendorId: 0x054c, // Sony
+              productId: 0x06c3, // RC-S380
+            },
+          ],
         });
-        
-        addLog('USB 디바이스 권한 획득 성공!');
-        addLog(`디바이스: ${device.productName} (${device.vendorId}:${device.productId})`);
-        
+
+        addLog("USB 디바이스 권한 획득 성공!");
+        addLog(
+          `디바이스: ${device.productName} (${device.vendorId}:${device.productId})`,
+        );
+
         // 권한 획득 후 다시 스캔
         await scanDevices();
       } else {
-        addLog('USB API가 지원되지 않습니다.');
+        addLog("USB API가 지원되지 않습니다.");
       }
     } catch (error) {
       addLog(`USB 권한 요청 실패: ${error}`);
@@ -149,29 +156,29 @@ export default function RC380TestPage() {
 
   const connectReader = async () => {
     try {
-      setConnectionStatus('connecting');
-      addLog('RC-S380 리더 연결 시도...');
-      
+      setConnectionStatus("connecting");
+      addLog("RC-S380 리더 연결 시도...");
+
       const success = await hardwareReaderManager.connect();
-      
+
       if (success) {
-        setConnectionStatus('connected');
-        addLog('RC-S380 리더 연결 성공!');
-        
+        setConnectionStatus("connected");
+        addLog("RC-S380 리더 연결 성공!");
+
         // 디바이스 정보 가져오기
         try {
           const info = await hardwareReaderManager.getDeviceInfo();
           setDeviceInfo(info);
           addLog(`디바이스: ${info.name} (${info.type})`);
         } catch (error) {
-          addLog('디바이스 정보 가져오기 실패');
+          addLog("디바이스 정보 가져오기 실패");
         }
       } else {
-        setConnectionStatus('error');
-        addLog('RC-S380 리더 연결 실패');
+        setConnectionStatus("error");
+        addLog("RC-S380 리더 연결 실패");
       }
     } catch (error) {
-      setConnectionStatus('error');
+      setConnectionStatus("error");
       addLog(`연결 오류: ${error}`);
     }
   };
@@ -179,9 +186,9 @@ export default function RC380TestPage() {
   const disconnectReader = async () => {
     try {
       await hardwareReaderManager.disconnect();
-      setConnectionStatus('disconnected');
+      setConnectionStatus("disconnected");
       setDeviceInfo(null);
-      addLog('RC-S380 리더 연결 해제');
+      addLog("RC-S380 리더 연결 해제");
     } catch (error) {
       addLog(`연결 해제 오류: ${error}`);
     }
@@ -189,19 +196,18 @@ export default function RC380TestPage() {
 
   const readUID = async () => {
     if (!hardwareReaderManager.isConnected()) {
-      setError('리더가 연결되지 않았습니다');
+      setError("리더가 연결되지 않았습니다");
       return;
     }
 
     try {
       setIsReading(true);
-      setError('');
-      addLog('카드 읽기 시작...');
-      
+      setError("");
+      addLog("카드 읽기 시작...");
+
       const uid = await hardwareReaderManager.readUID();
       setLastUID(uid);
       addLog(`UID 읽기 성공: ${uid}`);
-      
     } catch (error) {
       setError(`UID 읽기 실패: ${error}`);
       addLog(`UID 읽기 실패: ${error}`);
@@ -227,27 +233,42 @@ export default function RC380TestPage() {
             <CreditCard className="w-8 h-8 mr-3 text-blue-600" />
             RC-S380 리더기 테스트
           </h1>
-          
+
           {/* 연결 상태 */}
           <div className="mb-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
-                <div className={`flex items-center space-x-2 ${
-                  connectionStatus === 'connected' ? 'text-green-600' : 
-                  connectionStatus === 'connecting' ? 'text-yellow-600' : 
-                  connectionStatus === 'error' ? 'text-red-600' : 'text-gray-600'
-                }`}>
-                  {connectionStatus === 'connected' ? <Wifi className="w-5 h-5" /> :
-                   connectionStatus === 'connecting' ? <Loader2 className="w-5 h-5 animate-spin" /> :
-                   connectionStatus === 'error' ? <XCircle className="w-5 h-5" /> :
-                   <WifiOff className="w-5 h-5" />}
+                <div
+                  className={`flex items-center space-x-2 ${
+                    connectionStatus === "connected"
+                      ? "text-green-600"
+                      : connectionStatus === "connecting"
+                        ? "text-yellow-600"
+                        : connectionStatus === "error"
+                          ? "text-red-600"
+                          : "text-gray-600"
+                  }`}
+                >
+                  {connectionStatus === "connected" ? (
+                    <Wifi className="w-5 h-5" />
+                  ) : connectionStatus === "connecting" ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : connectionStatus === "error" ? (
+                    <XCircle className="w-5 h-5" />
+                  ) : (
+                    <WifiOff className="w-5 h-5" />
+                  )}
                   <span className="font-medium">
-                    {connectionStatus === 'connected' ? '연결됨' :
-                     connectionStatus === 'connecting' ? '연결 중...' :
-                     connectionStatus === 'error' ? '연결 오류' : '연결 안됨'}
+                    {connectionStatus === "connected"
+                      ? "연결됨"
+                      : connectionStatus === "connecting"
+                        ? "연결 중..."
+                        : connectionStatus === "error"
+                          ? "연결 오류"
+                          : "연결 안됨"}
                   </span>
                 </div>
-                
+
                 {deviceInfo && (
                   <div className="flex items-center space-x-2 text-gray-600">
                     <Info className="w-4 h-4" />
@@ -255,7 +276,7 @@ export default function RC380TestPage() {
                   </div>
                 )}
               </div>
-              
+
               <div className="flex space-x-3">
                 <button
                   onClick={scanDevices}
@@ -274,29 +295,29 @@ export default function RC380TestPage() {
                     </>
                   )}
                 </button>
-                
+
                 <button
                   onClick={requestSerialPermission}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   Serial 권한
                 </button>
-                
+
                 <button
                   onClick={requestHIDPermission}
                   className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                 >
                   HID 권한
                 </button>
-                
+
                 <button
                   onClick={requestUSBPermission}
                   className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
                 >
                   USB 권한
                 </button>
-                
-                {connectionStatus === 'disconnected' && (
+
+                {connectionStatus === "disconnected" && (
                   <button
                     onClick={connectReader}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -304,8 +325,8 @@ export default function RC380TestPage() {
                     리더 연결
                   </button>
                 )}
-                
-                {connectionStatus === 'connected' && (
+
+                {connectionStatus === "connected" && (
                   <>
                     <button
                       onClick={disconnectReader}
@@ -347,25 +368,40 @@ export default function RC380TestPage() {
             ) : (
               <div className="space-y-2">
                 {availableDevices.map((device, index) => (
-                  <div key={index} className="bg-white rounded p-3 border border-blue-200">
+                  <div
+                    key={index}
+                    className="bg-white rounded p-3 border border-blue-200"
+                  >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        {device.type === 'usb' ? <Usb className="w-4 h-4 text-blue-600" /> :
-                         device.type === 'bluetooth' ? <Bluetooth className="w-4 h-4 text-blue-600" /> :
-                         <CreditCard className="w-4 h-4 text-blue-600" />}
+                        {device.type === "usb" ? (
+                          <Usb className="w-4 h-4 text-blue-600" />
+                        ) : device.type === "bluetooth" ? (
+                          <Bluetooth className="w-4 h-4 text-blue-600" />
+                        ) : (
+                          <CreditCard className="w-4 h-4 text-blue-600" />
+                        )}
                         <div>
-                          <div className="font-medium text-gray-900">{device.name}</div>
+                          <div className="font-medium text-gray-900">
+                            {device.name}
+                          </div>
                           <div className="text-sm text-gray-600">
-                            {device.type} • {device.version} • {device.serialNumber}
+                            {device.type} • {device.version} •{" "}
+                            {device.serialNumber}
                           </div>
                         </div>
                       </div>
                       <div className="flex flex-wrap gap-1">
-                        {device.capabilities.map((cap: string, capIndex: number) => (
-                          <span key={capIndex} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-                            {cap}
-                          </span>
-                        ))}
+                        {device.capabilities.map(
+                          (cap: string, capIndex: number) => (
+                            <span
+                              key={capIndex}
+                              className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full"
+                            >
+                              {cap}
+                            </span>
+                          ),
+                        )}
                       </div>
                     </div>
                   </div>
@@ -377,7 +413,9 @@ export default function RC380TestPage() {
           {/* 디바이스 정보 */}
           {deviceInfo && (
             <div className="bg-gray-50 rounded-lg p-4 mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">연결된 디바이스 정보</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                연결된 디바이스 정보
+              </h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
                   <span className="text-sm text-gray-600">이름:</span>
@@ -400,7 +438,10 @@ export default function RC380TestPage() {
                 <span className="text-sm text-gray-600">기능:</span>
                 <div className="flex flex-wrap gap-2 mt-1">
                   {deviceInfo.capabilities.map((cap: string, index: number) => (
-                    <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                    <span
+                      key={index}
+                      className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full"
+                    >
                       {cap}
                     </span>
                   ))}
@@ -412,9 +453,13 @@ export default function RC380TestPage() {
           {/* 마지막 읽은 UID */}
           {lastUID && (
             <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-              <h3 className="text-lg font-semibold text-green-900 mb-2">마지막 읽은 UID</h3>
+              <h3 className="text-lg font-semibold text-green-900 mb-2">
+                마지막 읽은 UID
+              </h3>
               <div className="bg-white border border-green-300 rounded p-3">
-                <code className="text-lg font-mono text-green-800">{lastUID}</code>
+                <code className="text-lg font-mono text-green-800">
+                  {lastUID}
+                </code>
               </div>
             </div>
           )}
@@ -441,13 +486,15 @@ export default function RC380TestPage() {
               로그 지우기
             </button>
           </div>
-          
+
           <div className="bg-gray-900 text-green-400 p-4 rounded-lg h-64 overflow-y-auto font-mono text-sm">
             {logs.length === 0 ? (
               <div className="text-gray-500">로그가 없습니다...</div>
             ) : (
               logs.map((log, index) => (
-                <div key={index} className="mb-1">{log}</div>
+                <div key={index} className="mb-1">
+                  {log}
+                </div>
               ))
             )}
           </div>
@@ -455,4 +502,4 @@ export default function RC380TestPage() {
       </div>
     </div>
   );
-} 
+}

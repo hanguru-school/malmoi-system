@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { 
-  MessageSquare, 
+import React, { useState, useEffect } from "react";
+import {
+  MessageSquare,
   Heart,
   BookOpen,
   Calendar,
@@ -17,18 +17,23 @@ import {
   Share,
   Eye,
   X,
-  HelpCircle
-} from 'lucide-react';
+  HelpCircle,
+} from "lucide-react";
 
 interface Post {
   id: string;
-  category: 'introduction' | 'daily-phrase' | 'question' | 'study-share' | 'class-notice';
+  category:
+    | "introduction"
+    | "daily-phrase"
+    | "question"
+    | "study-share"
+    | "class-notice";
   title: string;
   content: string;
   author: {
     id: string;
     name: string;
-    role: 'student' | 'teacher' | 'admin';
+    role: "student" | "teacher" | "admin";
     badge: string;
     level: string;
     avatar?: string;
@@ -41,7 +46,7 @@ interface Post {
   isHighlighted: boolean;
   tags: string[];
   attachments?: {
-    type: 'image' | 'audio' | 'video';
+    type: "image" | "audio" | "video";
     url: string;
     name: string;
   }[];
@@ -54,7 +59,7 @@ interface Comment {
   author: {
     id: string;
     name: string;
-    role: 'student' | 'teacher' | 'admin';
+    role: "student" | "teacher" | "admin";
     badge: string;
   };
   createdAt: string;
@@ -65,7 +70,7 @@ interface Comment {
 interface User {
   id: string;
   name: string;
-  role: 'student' | 'teacher' | 'admin';
+  role: "student" | "teacher" | "admin";
   badge: string;
   level: string;
   points: number;
@@ -90,149 +95,217 @@ export default function CommunityPage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<'all' | 'introduction' | 'daily-phrase' | 'question' | 'study-share' | 'class-notice'>('all');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<
+    | "all"
+    | "introduction"
+    | "daily-phrase"
+    | "question"
+    | "study-share"
+    | "class-notice"
+  >("all");
+  const [searchTerm, setSearchTerm] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showPostModal, setShowPostModal] = useState(false);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
-  const [newComment, setNewComment] = useState('');
+  const [newComment, setNewComment] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'posts' | 'ranking' | 'badges'>('posts');
+  const [activeTab, setActiveTab] = useState<"posts" | "ranking" | "badges">(
+    "posts",
+  );
 
   const categories = [
-    { id: 'all', name: '전체', icon: <MessageSquare className="w-4 h-4" /> },
-    { id: 'introduction', name: '자기소개', icon: <User className="w-4 h-4" /> },
-    { id: 'daily-phrase', name: '오늘의 한마디', icon: <Calendar className="w-4 h-4" /> },
-    { id: 'question', name: '질문 게시판', icon: <HelpCircle className="w-4 h-4" /> },
-    { id: 'study-share', name: '학습 공유', icon: <BookOpen className="w-4 h-4" /> },
-    { id: 'class-notice', name: '수업 공지', icon: <Bell className="w-4 h-4" /> }
+    { id: "all", name: "전체", icon: <MessageSquare className="w-4 h-4" /> },
+    {
+      id: "introduction",
+      name: "자기소개",
+      icon: <User className="w-4 h-4" />,
+    },
+    {
+      id: "daily-phrase",
+      name: "오늘의 한마디",
+      icon: <Calendar className="w-4 h-4" />,
+    },
+    {
+      id: "question",
+      name: "질문 게시판",
+      icon: <HelpCircle className="w-4 h-4" />,
+    },
+    {
+      id: "study-share",
+      name: "학습 공유",
+      icon: <BookOpen className="w-4 h-4" />,
+    },
+    {
+      id: "class-notice",
+      name: "수업 공지",
+      icon: <Bell className="w-4 h-4" />,
+    },
   ];
 
   const badges: Badge[] = [
-    { id: 'beginner', name: '초보자', icon: '🔰', description: '처음 시작한 학생', requiredPoints: 0, color: 'bg-gray-100 text-gray-800' },
-    { id: 'learner', name: '학습자', icon: '📘', description: '꾸준히 학습하는 학생', requiredPoints: 50, color: 'bg-blue-100 text-blue-800' },
-    { id: 'challenger', name: '도전자', icon: '💪', description: '적극적으로 도전하는 학생', requiredPoints: 100, color: 'bg-green-100 text-green-800' },
-    { id: 'top-class', name: '탑클래스', icon: '🏅', description: '최고 수준의 학생', requiredPoints: 200, color: 'bg-yellow-100 text-yellow-800' },
-    { id: 'master', name: '마스터', icon: '🎓', description: '완벽한 마스터', requiredPoints: 500, color: 'bg-purple-100 text-purple-800' }
+    {
+      id: "beginner",
+      name: "초보자",
+      icon: "🔰",
+      description: "처음 시작한 학생",
+      requiredPoints: 0,
+      color: "bg-gray-100 text-gray-800",
+    },
+    {
+      id: "learner",
+      name: "학습자",
+      icon: "📘",
+      description: "꾸준히 학습하는 학생",
+      requiredPoints: 50,
+      color: "bg-blue-100 text-blue-800",
+    },
+    {
+      id: "challenger",
+      name: "도전자",
+      icon: "💪",
+      description: "적극적으로 도전하는 학생",
+      requiredPoints: 100,
+      color: "bg-green-100 text-green-800",
+    },
+    {
+      id: "top-class",
+      name: "탑클래스",
+      icon: "🏅",
+      description: "최고 수준의 학생",
+      requiredPoints: 200,
+      color: "bg-yellow-100 text-yellow-800",
+    },
+    {
+      id: "master",
+      name: "마스터",
+      icon: "🎓",
+      description: "완벽한 마스터",
+      requiredPoints: 500,
+      color: "bg-purple-100 text-purple-800",
+    },
   ];
 
   // Mock data initialization
   useEffect(() => {
     const initializeData = async () => {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       const mockUsers: User[] = [
         {
-          id: 'USER001',
-          name: '김학생',
-          role: 'student',
-          badge: 'challenger',
-          level: 'A-2',
+          id: "USER001",
+          name: "김학생",
+          role: "student",
+          badge: "challenger",
+          level: "A-2",
           points: 150,
           rank: 1,
-          joinDate: '2024-01-01',
+          joinDate: "2024-01-01",
           postCount: 15,
           commentCount: 45,
-          likeCount: 120
+          likeCount: 120,
         },
         {
-          id: 'USER002',
-          name: '이선생님',
-          role: 'teacher',
-          badge: 'master',
-          level: 'C-3',
+          id: "USER002",
+          name: "이선생님",
+          role: "teacher",
+          badge: "master",
+          level: "C-3",
           points: 800,
           rank: 2,
-          joinDate: '2023-06-01',
+          joinDate: "2023-06-01",
           postCount: 25,
           commentCount: 150,
-          likeCount: 300
+          likeCount: 300,
         },
         {
-          id: 'USER003',
-          name: '박학생',
-          role: 'student',
-          badge: 'learner',
-          level: 'B-1',
+          id: "USER003",
+          name: "박학생",
+          role: "student",
+          badge: "learner",
+          level: "B-1",
           points: 80,
           rank: 3,
-          joinDate: '2024-02-01',
+          joinDate: "2024-02-01",
           postCount: 8,
           commentCount: 20,
-          likeCount: 60
-        }
+          likeCount: 60,
+        },
       ];
 
       const mockPosts: Post[] = [
         {
-          id: 'POST001',
-          category: 'introduction',
-          title: '안녕하세요! 처음 뵙겠습니다',
-          content: '한국어를 배우기 시작한 지 3개월이 되었습니다. 여러분과 함께 즐겁게 공부하고 싶어요!',
+          id: "POST001",
+          category: "introduction",
+          title: "안녕하세요! 처음 뵙겠습니다",
+          content:
+            "한국어를 배우기 시작한 지 3개월이 되었습니다. 여러분과 함께 즐겁게 공부하고 싶어요!",
           author: mockUsers[0],
-          createdAt: '2024-01-15T10:00:00Z',
+          createdAt: "2024-01-15T10:00:00Z",
           likes: 12,
           comments: [
             {
-              id: 'COMMENT001',
-              content: '환영합니다! 함께 열심히 공부해요 😊',
+              id: "COMMENT001",
+              content: "환영합니다! 함께 열심히 공부해요 😊",
               author: mockUsers[1],
-              createdAt: '2024-01-15T10:30:00Z',
+              createdAt: "2024-01-15T10:30:00Z",
               likes: 5,
-              isTeacherComment: true
-            }
+              isTeacherComment: true,
+            },
           ],
           isPinned: false,
           isHighlighted: false,
-          tags: ['자기소개', '초보자'],
-          viewCount: 45
+          tags: ["자기소개", "초보자"],
+          viewCount: 45,
         },
         {
-          id: 'POST002',
-          category: 'daily-phrase',
+          id: "POST002",
+          category: "daily-phrase",
           title: '오늘 배운 표현: "정말 맛있어요!"',
-          content: '오늘 수업에서 음식에 대한 표현을 배웠어요. "정말 맛있어요!"라는 표현을 연습해보세요!',
+          content:
+            '오늘 수업에서 음식에 대한 표현을 배웠어요. "정말 맛있어요!"라는 표현을 연습해보세요!',
           author: mockUsers[1],
-          createdAt: '2024-01-15T09:00:00Z',
+          createdAt: "2024-01-15T09:00:00Z",
           likes: 25,
           comments: [
             {
-              id: 'COMMENT002',
-              content: '정말 맛있어요! 연습해보겠습니다!',
+              id: "COMMENT002",
+              content: "정말 맛있어요! 연습해보겠습니다!",
               author: mockUsers[0],
-              createdAt: '2024-01-15T09:15:00Z',
+              createdAt: "2024-01-15T09:15:00Z",
               likes: 3,
-              isTeacherComment: false
-            }
+              isTeacherComment: false,
+            },
           ],
           isPinned: true,
           isHighlighted: true,
-          tags: ['일상표현', '음식'],
-          viewCount: 120
+          tags: ["일상표현", "음식"],
+          viewCount: 120,
         },
         {
-          id: 'POST003',
-          category: 'question',
-          title: '~습니다와 ~어요의 차이점이 궁금해요',
-          content: '~습니다와 ~어요의 사용법 차이점을 잘 모르겠어요. 언제 어떤 것을 사용해야 하나요?',
+          id: "POST003",
+          category: "question",
+          title: "~습니다와 ~어요의 차이점이 궁금해요",
+          content:
+            "~습니다와 ~어요의 사용법 차이점을 잘 모르겠어요. 언제 어떤 것을 사용해야 하나요?",
           author: mockUsers[2],
-          createdAt: '2024-01-14T15:00:00Z',
+          createdAt: "2024-01-14T15:00:00Z",
           likes: 8,
           comments: [
             {
-              id: 'COMMENT003',
-              content: '~습니다는 더 정중한 표현이고, ~어요는 친근한 표현입니다. 상황에 따라 선택하시면 됩니다!',
+              id: "COMMENT003",
+              content:
+                "~습니다는 더 정중한 표현이고, ~어요는 친근한 표현입니다. 상황에 따라 선택하시면 됩니다!",
               author: mockUsers[1],
-              createdAt: '2024-01-14T15:30:00Z',
+              createdAt: "2024-01-14T15:30:00Z",
               likes: 12,
-              isTeacherComment: true
-            }
+              isTeacherComment: true,
+            },
           ],
           isPinned: false,
           isHighlighted: false,
-          tags: ['문법', '질문'],
-          viewCount: 67
-        }
+          tags: ["문법", "질문"],
+          viewCount: 67,
+        },
       ];
 
       setUsers(mockUsers);
@@ -250,20 +323,28 @@ export default function CommunityPage() {
   };
 
   const handleLike = (postId: string) => {
-    setPosts(prev => prev.map(post => 
-      post.id === postId ? { ...post, likes: post.likes + 1 } : post
-    ));
+    setPosts((prev) =>
+      prev.map((post) =>
+        post.id === postId ? { ...post, likes: post.likes + 1 } : post,
+      ),
+    );
   };
 
   const handleCommentLike = (postId: string, commentId: string) => {
-    setPosts(prev => prev.map(post => 
-      post.id === postId ? {
-        ...post,
-        comments: post.comments.map(comment =>
-          comment.id === commentId ? { ...comment, likes: comment.likes + 1 } : comment
-        )
-      } : post
-    ));
+    setPosts((prev) =>
+      prev.map((post) =>
+        post.id === postId
+          ? {
+              ...post,
+              comments: post.comments.map((comment) =>
+                comment.id === commentId
+                  ? { ...comment, likes: comment.likes + 1 }
+                  : comment,
+              ),
+            }
+          : post,
+      ),
+    );
   };
 
   const handleAddComment = () => {
@@ -275,31 +356,38 @@ export default function CommunityPage() {
       author: currentUser,
       createdAt: new Date().toISOString(),
       likes: 0,
-      isTeacherComment: currentUser.role === 'teacher'
+      isTeacherComment: currentUser.role === "teacher",
     };
 
-    setPosts(prev => prev.map(post => 
-      post.id === selectedPost.id ? {
-        ...post,
-        comments: [...post.comments, newCommentObj]
-      } : post
-    ));
+    setPosts((prev) =>
+      prev.map((post) =>
+        post.id === selectedPost.id
+          ? {
+              ...post,
+              comments: [...post.comments, newCommentObj],
+            }
+          : post,
+      ),
+    );
 
-    setNewComment('');
+    setNewComment("");
   };
 
   const getFilteredPosts = () => {
     let filtered = posts;
 
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(post => post.category === selectedCategory);
+    if (selectedCategory !== "all") {
+      filtered = filtered.filter((post) => post.category === selectedCategory);
     }
 
     if (searchTerm) {
-      filtered = filtered.filter(post => 
-        post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        post.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        post.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+      filtered = filtered.filter(
+        (post) =>
+          post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          post.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          post.tags.some((tag) =>
+            tag.toLowerCase().includes(searchTerm.toLowerCase()),
+          ),
       );
     }
 
@@ -311,12 +399,12 @@ export default function CommunityPage() {
   };
 
   const getCategoryName = (category: string) => {
-    const cat = categories.find(c => c.id === category);
+    const cat = categories.find((c) => c.id === category);
     return cat ? cat.name : category;
   };
 
   const getBadgeInfo = (badgeId: string) => {
-    return badges.find(badge => badge.id === badgeId) || badges[0];
+    return badges.find((badge) => badge.id === badgeId) || badges[0];
   };
 
   const getTopUsers = () => {
@@ -350,11 +438,18 @@ export default function CommunityPage() {
             <div className="flex items-center space-x-4">
               {currentUser && (
                 <div className="flex items-center space-x-2 bg-blue-50 px-4 py-2 rounded-lg">
-                  <span className="text-sm font-medium text-blue-900">{currentUser.name}</span>
-                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getBadgeInfo(currentUser.badge).color}`}>
-                    {getBadgeInfo(currentUser.badge).icon} {getBadgeInfo(currentUser.badge).name}
+                  <span className="text-sm font-medium text-blue-900">
+                    {currentUser.name}
                   </span>
-                  <span className="text-sm text-blue-700">{currentUser.points}P</span>
+                  <span
+                    className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getBadgeInfo(currentUser.badge).color}`}
+                  >
+                    {getBadgeInfo(currentUser.badge).icon}{" "}
+                    {getBadgeInfo(currentUser.badge).name}
+                  </span>
+                  <span className="text-sm text-blue-700">
+                    {currentUser.points}P
+                  </span>
                 </div>
               )}
               <button
@@ -381,31 +476,31 @@ export default function CommunityPage() {
                 </div>
                 <nav className="p-2">
                   <button
-                    onClick={() => setActiveTab('posts')}
+                    onClick={() => setActiveTab("posts")}
                     className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium ${
-                      activeTab === 'posts'
-                        ? 'bg-blue-50 text-blue-700'
-                        : 'text-gray-600 hover:bg-gray-50'
+                      activeTab === "posts"
+                        ? "bg-blue-50 text-blue-700"
+                        : "text-gray-600 hover:bg-gray-50"
                     }`}
                   >
                     게시판
                   </button>
                   <button
-                    onClick={() => setActiveTab('ranking')}
+                    onClick={() => setActiveTab("ranking")}
                     className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium ${
-                      activeTab === 'ranking'
-                        ? 'bg-blue-50 text-blue-700'
-                        : 'text-gray-600 hover:bg-gray-50'
+                      activeTab === "ranking"
+                        ? "bg-blue-50 text-blue-700"
+                        : "text-gray-600 hover:bg-gray-50"
                     }`}
                   >
                     랭킹
                   </button>
                   <button
-                    onClick={() => setActiveTab('badges')}
+                    onClick={() => setActiveTab("badges")}
                     className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium ${
-                      activeTab === 'badges'
-                        ? 'bg-blue-50 text-blue-700'
-                        : 'text-gray-600 hover:bg-gray-50'
+                      activeTab === "badges"
+                        ? "bg-blue-50 text-blue-700"
+                        : "text-gray-600 hover:bg-gray-50"
                     }`}
                   >
                     배지
@@ -414,20 +509,31 @@ export default function CommunityPage() {
               </div>
 
               {/* Categories */}
-              {activeTab === 'posts' && (
+              {activeTab === "posts" && (
                 <div className="bg-white rounded-lg shadow-sm border">
                   <div className="p-4 border-b border-gray-200">
-                    <h2 className="text-lg font-semibold text-gray-900">카테고리</h2>
+                    <h2 className="text-lg font-semibold text-gray-900">
+                      카테고리
+                    </h2>
                   </div>
                   <nav className="p-2">
-                    {categories.map(category => (
+                    {categories.map((category) => (
                       <button
                         key={category.id}
-                        onClick={() => setSelectedCategory(category.id as 'introduction' | 'daily-phrase' | 'question' | 'study-share' | 'class-notice')}
+                        onClick={() =>
+                          setSelectedCategory(
+                            category.id as
+                              | "introduction"
+                              | "daily-phrase"
+                              | "question"
+                              | "study-share"
+                              | "class-notice",
+                          )
+                        }
                         className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium flex items-center space-x-2 ${
                           selectedCategory === category.id
-                            ? 'bg-blue-50 text-blue-700'
-                            : 'text-gray-600 hover:bg-gray-50'
+                            ? "bg-blue-50 text-blue-700"
+                            : "text-gray-600 hover:bg-gray-50"
                         }`}
                       >
                         {category.icon}
@@ -439,30 +545,46 @@ export default function CommunityPage() {
               )}
 
               {/* Top Users */}
-              {activeTab === 'ranking' && (
+              {activeTab === "ranking" && (
                 <div className="bg-white rounded-lg shadow-sm border">
                   <div className="p-4 border-b border-gray-200">
-                    <h2 className="text-lg font-semibold text-gray-900">🏆 상위 랭킹</h2>
+                    <h2 className="text-lg font-semibold text-gray-900">
+                      🏆 상위 랭킹
+                    </h2>
                   </div>
                   <div className="p-4 space-y-3">
                     {topUsers.map((user, index) => (
-                      <div key={user.id} className="flex items-center space-x-3">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                          index === 0 ? 'bg-yellow-100 text-yellow-800' :
-                          index === 1 ? 'bg-gray-100 text-gray-800' :
-                          index === 2 ? 'bg-orange-100 text-orange-800' :
-                          'bg-blue-100 text-blue-800'
-                        }`}>
+                      <div
+                        key={user.id}
+                        className="flex items-center space-x-3"
+                      >
+                        <div
+                          className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                            index === 0
+                              ? "bg-yellow-100 text-yellow-800"
+                              : index === 1
+                                ? "bg-gray-100 text-gray-800"
+                                : index === 2
+                                  ? "bg-orange-100 text-orange-800"
+                                  : "bg-blue-100 text-blue-800"
+                          }`}
+                        >
                           {index + 1}
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center space-x-2">
-                            <span className="font-medium text-gray-900">{user.name}</span>
-                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getBadgeInfo(user.badge).color}`}>
+                            <span className="font-medium text-gray-900">
+                              {user.name}
+                            </span>
+                            <span
+                              className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getBadgeInfo(user.badge).color}`}
+                            >
                               {getBadgeInfo(user.badge).icon}
                             </span>
                           </div>
-                          <div className="text-sm text-gray-500">{user.points}P</div>
+                          <div className="text-sm text-gray-500">
+                            {user.points}P
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -474,7 +596,7 @@ export default function CommunityPage() {
 
           {/* Main Content */}
           <div className="lg:col-span-3">
-            {activeTab === 'posts' && (
+            {activeTab === "posts" && (
               <div className="space-y-6">
                 {/* Search and Filters */}
                 <div className="bg-white rounded-lg shadow-sm border p-6">
@@ -511,12 +633,12 @@ export default function CommunityPage() {
                         <p className="text-gray-500">게시글이 없습니다.</p>
                       </div>
                     ) : (
-                      filteredPosts.map(post => (
+                      filteredPosts.map((post) => (
                         <div
                           key={post.id}
                           onClick={() => handlePostClick(post)}
                           className={`p-6 cursor-pointer hover:bg-gray-50 transition-colors ${
-                            post.isPinned ? 'bg-yellow-50' : ''
+                            post.isPinned ? "bg-yellow-50" : ""
                           }`}
                         >
                           <div className="flex items-start justify-between">
@@ -531,23 +653,27 @@ export default function CommunityPage() {
                                   {getCategoryName(post.category)}
                                 </span>
                                 <span className="text-sm text-gray-400">
-                                  {new Date(post.createdAt).toLocaleDateString()}
+                                  {new Date(
+                                    post.createdAt,
+                                  ).toLocaleDateString()}
                                 </span>
                               </div>
-                              
+
                               <h3 className="text-lg font-medium text-gray-900 mb-2">
                                 {post.title}
                               </h3>
-                              
+
                               <p className="text-gray-600 mb-3 line-clamp-2">
                                 {post.content}
                               </p>
-                              
+
                               <div className="flex items-center space-x-4 text-sm text-gray-500">
                                 <div className="flex items-center space-x-2">
                                   <User className="w-4 h-4" />
                                   <span>{post.author.name}</span>
-                                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getBadgeInfo(post.author.badge).color}`}>
+                                  <span
+                                    className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getBadgeInfo(post.author.badge).color}`}
+                                  >
                                     {getBadgeInfo(post.author.badge).icon}
                                   </span>
                                 </div>
@@ -575,28 +701,43 @@ export default function CommunityPage() {
               </div>
             )}
 
-            {activeTab === 'ranking' && (
+            {activeTab === "ranking" && (
               <div className="bg-white rounded-lg shadow-sm border">
                 <div className="p-6 border-b border-gray-200">
-                  <h2 className="text-lg font-semibold text-gray-900">전체 랭킹</h2>
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    전체 랭킹
+                  </h2>
                 </div>
                 <div className="p-6">
                   <div className="space-y-4">
                     {topUsers.map((user, index) => (
-                      <div key={user.id} className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-                        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold ${
-                          index === 0 ? 'bg-yellow-100 text-yellow-800' :
-                          index === 1 ? 'bg-gray-100 text-gray-800' :
-                          index === 2 ? 'bg-orange-100 text-orange-800' :
-                          'bg-blue-100 text-blue-800'
-                        }`}>
+                      <div
+                        key={user.id}
+                        className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg"
+                      >
+                        <div
+                          className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold ${
+                            index === 0
+                              ? "bg-yellow-100 text-yellow-800"
+                              : index === 1
+                                ? "bg-gray-100 text-gray-800"
+                                : index === 2
+                                  ? "bg-orange-100 text-orange-800"
+                                  : "bg-blue-100 text-blue-800"
+                          }`}
+                        >
                           {index + 1}
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center space-x-3">
-                            <h3 className="text-lg font-medium text-gray-900">{user.name}</h3>
-                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getBadgeInfo(user.badge).color}`}>
-                              {getBadgeInfo(user.badge).icon} {getBadgeInfo(user.badge).name}
+                            <h3 className="text-lg font-medium text-gray-900">
+                              {user.name}
+                            </h3>
+                            <span
+                              className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getBadgeInfo(user.badge).color}`}
+                            >
+                              {getBadgeInfo(user.badge).icon}{" "}
+                              {getBadgeInfo(user.badge).name}
                             </span>
                           </div>
                           <div className="flex items-center space-x-6 mt-2 text-sm text-gray-600">
@@ -613,23 +754,36 @@ export default function CommunityPage() {
               </div>
             )}
 
-            {activeTab === 'badges' && (
+            {activeTab === "badges" && (
               <div className="bg-white rounded-lg shadow-sm border">
                 <div className="p-6 border-b border-gray-200">
-                  <h2 className="text-lg font-semibold text-gray-900">배지 시스템</h2>
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    배지 시스템
+                  </h2>
                 </div>
                 <div className="p-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {badges.map(badge => (
-                      <div key={badge.id} className="p-6 border border-gray-200 rounded-lg">
+                    {badges.map((badge) => (
+                      <div
+                        key={badge.id}
+                        className="p-6 border border-gray-200 rounded-lg"
+                      >
                         <div className="flex items-center space-x-4">
-                          <div className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl ${badge.color}`}>
+                          <div
+                            className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl ${badge.color}`}
+                          >
                             {badge.icon}
                           </div>
                           <div className="flex-1">
-                            <h3 className="text-lg font-medium text-gray-900">{badge.name}</h3>
-                            <p className="text-sm text-gray-600 mt-1">{badge.description}</p>
-                            <p className="text-sm text-gray-500 mt-2">필요 포인트: {badge.requiredPoints}P</p>
+                            <h3 className="text-lg font-medium text-gray-900">
+                              {badge.name}
+                            </h3>
+                            <p className="text-sm text-gray-600 mt-1">
+                              {badge.description}
+                            </p>
+                            <p className="text-sm text-gray-500 mt-2">
+                              필요 포인트: {badge.requiredPoints}P
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -665,16 +819,22 @@ export default function CommunityPage() {
                   <X className="w-6 h-6" />
                 </button>
               </div>
-              <h2 className="text-xl font-bold text-gray-900 mt-3">{selectedPost.title}</h2>
+              <h2 className="text-xl font-bold text-gray-900 mt-3">
+                {selectedPost.title}
+              </h2>
               <div className="flex items-center space-x-4 mt-3 text-sm text-gray-500">
                 <div className="flex items-center space-x-2">
                   <User className="w-4 h-4" />
                   <span>{selectedPost.author.name}</span>
-                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getBadgeInfo(selectedPost.author.badge).color}`}>
+                  <span
+                    className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getBadgeInfo(selectedPost.author.badge).color}`}
+                  >
                     {getBadgeInfo(selectedPost.author.badge).icon}
                   </span>
                 </div>
-                <span>{new Date(selectedPost.createdAt).toLocaleDateString()}</span>
+                <span>
+                  {new Date(selectedPost.createdAt).toLocaleDateString()}
+                </span>
                 <div className="flex items-center space-x-2">
                   <Eye className="w-4 h-4" />
                   <span>{selectedPost.viewCount}</span>
@@ -684,15 +844,20 @@ export default function CommunityPage() {
 
             <div className="p-6">
               <div className="prose max-w-none mb-6">
-                <p className="text-gray-700 whitespace-pre-wrap">{selectedPost.content}</p>
+                <p className="text-gray-700 whitespace-pre-wrap">
+                  {selectedPost.content}
+                </p>
               </div>
 
               {/* Tags */}
               {selectedPost.tags.length > 0 && (
                 <div className="mb-6">
                   <div className="flex flex-wrap gap-2">
-                    {selectedPost.tags.map(tag => (
-                      <span key={tag} className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                    {selectedPost.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
+                      >
                         #{tag}
                       </span>
                     ))}
@@ -726,16 +891,25 @@ export default function CommunityPage() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   댓글 ({selectedPost.comments.length})
                 </h3>
-                
+
                 <div className="space-y-4 mb-6">
-                  {selectedPost.comments.map(comment => (
-                    <div key={comment.id} className={`p-4 rounded-lg ${
-                      comment.isTeacherComment ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50'
-                    }`}>
+                  {selectedPost.comments.map((comment) => (
+                    <div
+                      key={comment.id}
+                      className={`p-4 rounded-lg ${
+                        comment.isTeacherComment
+                          ? "bg-blue-50 border border-blue-200"
+                          : "bg-gray-50"
+                      }`}
+                    >
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center space-x-2">
-                          <span className="font-medium text-gray-900">{comment.author.name}</span>
-                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getBadgeInfo(comment.author.badge).color}`}>
+                          <span className="font-medium text-gray-900">
+                            {comment.author.name}
+                          </span>
+                          <span
+                            className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getBadgeInfo(comment.author.badge).color}`}
+                          >
                             {getBadgeInfo(comment.author.badge).icon}
                           </span>
                           {comment.isTeacherComment && (
@@ -751,7 +925,9 @@ export default function CommunityPage() {
                       <p className="text-gray-700 mb-2">{comment.content}</p>
                       <div className="flex items-center space-x-4">
                         <button
-                          onClick={() => handleCommentLike(selectedPost.id, comment.id)}
+                          onClick={() =>
+                            handleCommentLike(selectedPost.id, comment.id)
+                          }
                           className="flex items-center space-x-1 text-sm text-gray-500 hover:text-gray-700"
                         >
                           <Heart className="w-4 h-4" />
@@ -792,4 +968,4 @@ export default function CommunityPage() {
       )}
     </div>
   );
-} 
+}

@@ -1,13 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { Pool } from 'pg';
+import { NextRequest, NextResponse } from "next/server";
+import { Pool } from "pg";
 
 // Node.js 런타임 명시
-export const runtime = 'nodejs';
+export const runtime = "nodejs";
 
 // 데이터베이스 연결 설정
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  ssl:
+    process.env.NODE_ENV === "production"
+      ? { rejectUnauthorized: false }
+      : false,
 });
 
 // 방 목록 조회 함수
@@ -17,7 +20,7 @@ async function getRooms() {
     FROM rooms
     ORDER BY name
   `;
-  
+
   const result = await pool.query(query);
   return result.rows;
 }
@@ -25,13 +28,13 @@ async function getRooms() {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const activeOnly = searchParams.get('activeOnly') === 'true';
+    const activeOnly = searchParams.get("activeOnly") === "true";
 
     // Get rooms
     const rooms = await getRooms();
 
     // Filter active rooms if requested
-    const filteredRooms = activeOnly 
+    const filteredRooms = activeOnly
       ? rooms.filter((room: any) => room.is_active)
       : rooms;
 
@@ -43,15 +46,14 @@ export async function GET(request: NextRequest) {
         capacity: room.capacity,
         description: room.description,
         isActive: room.is_active,
-        createdAt: room.created_at
-      }))
+        createdAt: room.created_at,
+      })),
     });
-
   } catch (error) {
-    console.error('Room list error:', error);
+    console.error("Room list error:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch rooms' },
-      { status: 500 }
+      { error: "Failed to fetch rooms" },
+      { status: 500 },
     );
   }
-} 
+}

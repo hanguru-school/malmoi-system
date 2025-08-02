@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { 
-  ArrowLeft, 
-  TrendingUp, 
-  Target, 
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import {
+  ArrowLeft,
+  TrendingUp,
+  Target,
   BookOpen,
   Calendar,
   Save,
-  Award
-} from 'lucide-react';
+  Award,
+} from "lucide-react";
 
 interface ProgressSettings {
   level: string;
@@ -36,7 +36,7 @@ export default function StudentProgressSettingsPage() {
     // 실제 API 호출로 대체
     setTimeout(() => {
       setSettings({
-        level: '중급 B',
+        level: "중급 B",
         targetClasses: 24,
         currentClasses: 20,
         targetWords: 500,
@@ -48,7 +48,7 @@ export default function StudentProgressSettingsPage() {
         weeklyGoal: 3,
         monthlyGoal: 12,
         autoProgress: true,
-        notifications: true
+        notifications: true,
       });
       setLoading(false);
     }, 1000);
@@ -56,8 +56,8 @@ export default function StudentProgressSettingsPage() {
 
   const handleSave = () => {
     // 실제 API 호출로 대체
-    console.log('진행도 설정 저장:', settings);
-    alert('진행도 설정이 저장되었습니다.');
+    console.log("진행도 설정 저장:", settings);
+    alert("진행도 설정이 저장되었습니다.");
   };
 
   const calculateProgress = (current: number, target: number) => {
@@ -109,7 +109,8 @@ export default function StudentProgressSettingsPage() {
           <h1 className="text-2xl font-bold text-gray-900">학습 진행도 설정</h1>
         </div>
         <div className="text-lg text-gray-600 mb-6">
-          현재 레벨: <span className="font-semibold text-blue-600">{settings.level}</span>
+          현재 레벨:{" "}
+          <span className="font-semibold text-blue-600">{settings.level}</span>
         </div>
       </div>
 
@@ -120,49 +121,66 @@ export default function StudentProgressSettingsPage() {
             <Calendar className="w-6 h-6 text-green-600" />
             수업 목표 설정
           </h2>
-          
+
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">총 수업 목표</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                총 수업 목표
+              </label>
               <div className="flex items-center gap-4">
                 <input
                   type="number"
                   value={settings.targetClasses}
-                  onChange={(e) => setSettings({
-                    ...settings,
-                    targetClasses: parseInt(e.target.value) || 0
-                  })}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      targetClasses: parseInt(e.target.value) || 0,
+                    })
+                  }
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
                 <span className="text-sm text-gray-600">회</span>
               </div>
               <div className="mt-2 text-sm text-gray-600">
-                현재: {settings.currentClasses}회 / 목표: {settings.targetClasses}회
+                현재: {settings.currentClasses}회 / 목표:{" "}
+                {settings.targetClasses}회
               </div>
               <div className="mt-2">
                 <div className="flex justify-between text-sm text-gray-600 mb-1">
                   <span>진행률</span>
-                  <span>{calculateProgress(settings.currentClasses, settings.targetClasses)}%</span>
+                  <span>
+                    {calculateProgress(
+                      settings.currentClasses,
+                      settings.targetClasses,
+                    )}
+                    %
+                  </span>
                 </div>
                 <div className="bg-gray-200 rounded-full h-2">
-                  <div 
+                  <div
                     className="bg-green-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${calculateProgress(settings.currentClasses, settings.targetClasses)}%` }}
+                    style={{
+                      width: `${calculateProgress(settings.currentClasses, settings.targetClasses)}%`,
+                    }}
                   />
                 </div>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">주간 목표</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                주간 목표
+              </label>
               <div className="flex items-center gap-4">
                 <input
                   type="number"
                   value={settings.weeklyGoal}
-                  onChange={(e) => setSettings({
-                    ...settings,
-                    weeklyGoal: parseInt(e.target.value) || 0
-                  })}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      weeklyGoal: parseInt(e.target.value) || 0,
+                    })
+                  }
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
                 <span className="text-sm text-gray-600">회/주</span>
@@ -170,15 +188,19 @@ export default function StudentProgressSettingsPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">월간 목표</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                월간 목표
+              </label>
               <div className="flex items-center gap-4">
                 <input
                   type="number"
                   value={settings.monthlyGoal}
-                  onChange={(e) => setSettings({
-                    ...settings,
-                    monthlyGoal: parseInt(e.target.value) || 0
-                  })}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      monthlyGoal: parseInt(e.target.value) || 0,
+                    })
+                  }
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
                 <span className="text-sm text-gray-600">회/월</span>
@@ -193,18 +215,22 @@ export default function StudentProgressSettingsPage() {
             <BookOpen className="w-6 h-6 text-purple-600" />
             학습 목표 설정
           </h2>
-          
+
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">단어 목표</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                단어 목표
+              </label>
               <div className="flex items-center gap-4">
                 <input
                   type="number"
                   value={settings.targetWords}
-                  onChange={(e) => setSettings({
-                    ...settings,
-                    targetWords: parseInt(e.target.value) || 0
-                  })}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      targetWords: parseInt(e.target.value) || 0,
+                    })
+                  }
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
                 <span className="text-sm text-gray-600">개</span>
@@ -215,58 +241,83 @@ export default function StudentProgressSettingsPage() {
               <div className="mt-2">
                 <div className="flex justify-between text-sm text-gray-600 mb-1">
                   <span>진행률</span>
-                  <span>{calculateProgress(settings.currentWords, settings.targetWords)}%</span>
+                  <span>
+                    {calculateProgress(
+                      settings.currentWords,
+                      settings.targetWords,
+                    )}
+                    %
+                  </span>
                 </div>
                 <div className="bg-gray-200 rounded-full h-2">
-                  <div 
+                  <div
                     className="bg-purple-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${calculateProgress(settings.currentWords, settings.targetWords)}%` }}
+                    style={{
+                      width: `${calculateProgress(settings.currentWords, settings.targetWords)}%`,
+                    }}
                   />
                 </div>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">학습 시간 목표</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                학습 시간 목표
+              </label>
               <div className="flex items-center gap-4">
                 <input
                   type="number"
                   value={settings.targetHours}
-                  onChange={(e) => setSettings({
-                    ...settings,
-                    targetHours: parseInt(e.target.value) || 0
-                  })}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      targetHours: parseInt(e.target.value) || 0,
+                    })
+                  }
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
                 <span className="text-sm text-gray-600">시간</span>
               </div>
               <div className="mt-2 text-sm text-gray-600">
-                현재: {settings.currentHours}시간 / 목표: {settings.targetHours}시간
+                현재: {settings.currentHours}시간 / 목표: {settings.targetHours}
+                시간
               </div>
               <div className="mt-2">
                 <div className="flex justify-between text-sm text-gray-600 mb-1">
                   <span>진행률</span>
-                  <span>{calculateProgress(settings.currentHours, settings.targetHours)}%</span>
+                  <span>
+                    {calculateProgress(
+                      settings.currentHours,
+                      settings.targetHours,
+                    )}
+                    %
+                  </span>
                 </div>
                 <div className="bg-gray-200 rounded-full h-2">
-                  <div 
+                  <div
                     className="bg-orange-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${calculateProgress(settings.currentHours, settings.targetHours)}%` }}
+                    style={{
+                      width: `${calculateProgress(settings.currentHours, settings.targetHours)}%`,
+                    }}
                   />
                 </div>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">목표 점수</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                목표 점수
+              </label>
               <div className="flex items-center gap-4">
                 <input
                   type="number"
                   value={settings.targetScore}
-                  onChange={(e) => setSettings({
-                    ...settings,
-                    targetScore: parseInt(e.target.value) || 0
-                  })}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      targetScore: parseInt(e.target.value) || 0,
+                    })
+                  }
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
                 <span className="text-sm text-gray-600">점</span>
@@ -285,24 +336,30 @@ export default function StudentProgressSettingsPage() {
           <Target className="w-6 h-6 text-red-600" />
           자동 진행 설정
         </h2>
-        
+
         <div className="space-y-4">
           <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
             <div className="flex items-center gap-3">
               <TrendingUp className="w-5 h-5 text-blue-600" />
               <div>
-                <div className="font-medium text-gray-900">자동 진행도 업데이트</div>
-                <div className="text-sm text-gray-600">수업 완료 시 자동으로 진행도를 업데이트합니다</div>
+                <div className="font-medium text-gray-900">
+                  자동 진행도 업데이트
+                </div>
+                <div className="text-sm text-gray-600">
+                  수업 완료 시 자동으로 진행도를 업데이트합니다
+                </div>
               </div>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
               <input
                 type="checkbox"
                 checked={settings.autoProgress}
-                onChange={(e) => setSettings({
-                  ...settings,
-                  autoProgress: e.target.checked
-                })}
+                onChange={(e) =>
+                  setSettings({
+                    ...settings,
+                    autoProgress: e.target.checked,
+                  })
+                }
                 className="sr-only peer"
               />
               <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
@@ -314,17 +371,21 @@ export default function StudentProgressSettingsPage() {
               <Award className="w-5 h-5 text-green-600" />
               <div>
                 <div className="font-medium text-gray-900">목표 달성 알림</div>
-                <div className="text-sm text-gray-600">목표 달성 시 알림을 받습니다</div>
+                <div className="text-sm text-gray-600">
+                  목표 달성 시 알림을 받습니다
+                </div>
               </div>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
               <input
                 type="checkbox"
                 checked={settings.notifications}
-                onChange={(e) => setSettings({
-                  ...settings,
-                  notifications: e.target.checked
-                })}
+                onChange={(e) =>
+                  setSettings({
+                    ...settings,
+                    notifications: e.target.checked,
+                  })
+                }
                 className="sr-only peer"
               />
               <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
@@ -336,22 +397,31 @@ export default function StudentProgressSettingsPage() {
       {/* 현재 진행도 요약 */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
         <div className="bg-white rounded-xl shadow-lg p-4 text-center">
-          <div className="text-2xl font-bold text-green-600">{calculateProgress(settings.currentClasses, settings.targetClasses)}%</div>
+          <div className="text-2xl font-bold text-green-600">
+            {calculateProgress(settings.currentClasses, settings.targetClasses)}
+            %
+          </div>
           <div className="text-sm text-gray-600">수업 진행도</div>
         </div>
         <div className="bg-white rounded-xl shadow-lg p-4 text-center">
-          <div className="text-2xl font-bold text-purple-600">{calculateProgress(settings.currentWords, settings.targetWords)}%</div>
+          <div className="text-2xl font-bold text-purple-600">
+            {calculateProgress(settings.currentWords, settings.targetWords)}%
+          </div>
           <div className="text-sm text-gray-600">단어 진행도</div>
         </div>
         <div className="bg-white rounded-xl shadow-lg p-4 text-center">
-          <div className="text-2xl font-bold text-orange-600">{calculateProgress(settings.currentHours, settings.targetHours)}%</div>
+          <div className="text-2xl font-bold text-orange-600">
+            {calculateProgress(settings.currentHours, settings.targetHours)}%
+          </div>
           <div className="text-sm text-gray-600">시간 진행도</div>
         </div>
         <div className="bg-white rounded-xl shadow-lg p-4 text-center">
-          <div className="text-2xl font-bold text-blue-600">{settings.currentScore}점</div>
+          <div className="text-2xl font-bold text-blue-600">
+            {settings.currentScore}점
+          </div>
           <div className="text-sm text-gray-600">현재 점수</div>
         </div>
       </div>
     </div>
   );
-} 
+}

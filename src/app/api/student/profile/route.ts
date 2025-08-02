@@ -1,18 +1,18 @@
-import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/db';
-import { getSessionFromCookies } from '@/lib/auth-utils';
+import { NextRequest, NextResponse } from "next/server";
+import prisma from "@/lib/db";
+import { getSessionFromCookies } from "@/lib/auth-utils";
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('=== 학생 프로필 조회 API 시작 ===');
-    
+    console.log("=== 학생 프로필 조회 API 시작 ===");
+
     // 1. 세션 확인
     const session = await getSessionFromCookies(request);
     if (!session?.user?.id) {
-      console.log('세션 없음 - 401 반환');
+      console.log("세션 없음 - 401 반환");
       return NextResponse.json(
-        { error: '로그인이 필요합니다.' },
-        { status: 401 }
+        { error: "로그인이 필요합니다." },
+        { status: 401 },
       );
     }
 
@@ -28,29 +28,29 @@ export async function GET(request: NextRequest) {
             phone: true,
             role: true,
             createdAt: true,
-            updatedAt: true
-          }
+            updatedAt: true,
+          },
         },
         reservations: {
           where: {
-            status: 'CONFIRMED'
+            status: "CONFIRMED",
           },
           select: {
             id: true,
             date: true,
             startTime: true,
             endTime: true,
-            duration: true
-          }
-        }
-      }
+            duration: true,
+          },
+        },
+      },
     });
 
     if (!student) {
-      console.log('학생 정보 없음 - 404 반환');
+      console.log("학생 정보 없음 - 404 반환");
       return NextResponse.json(
-        { error: '학생 정보를 찾을 수 없습니다.' },
-        { status: 404 }
+        { error: "학생 정보를 찾을 수 없습니다." },
+        { status: 404 },
       );
     }
 
@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
     // 6. 예약 가능 시간 계산 (실제로는 더 복잡한 로직 필요)
     const remainingTime = 160; // 임시로 160분
 
-    console.log('학생 프로필 조회 성공:', student.id);
+    console.log("학생 프로필 조회 성공:", student.id);
 
     // 7. 응답 반환
     return NextResponse.json({
@@ -81,8 +81,8 @@ export async function GET(request: NextRequest) {
         id: student.id,
         name: student.name,
         email: student.user.email,
-        phone: student.phone || '',
-        address: '', // 실제로는 주소 필드 필요
+        phone: student.phone || "",
+        address: "", // 실제로는 주소 필드 필요
         level: student.level,
         points: student.points,
         joinDate: student.joinDate,
@@ -91,19 +91,27 @@ export async function GET(request: NextRequest) {
         totalAttendance: totalAttendance,
         totalStudyTime: Math.round(totalStudyTime),
         remainingTime: remainingTime,
-        lastModified: student.updatedAt
-      }
+        lastModified: student.updatedAt,
+      },
     });
-
   } catch (error) {
-    console.error('=== 학생 프로필 조회 API 오류 ===');
-    console.error('오류 타입:', error instanceof Error ? error.constructor.name : typeof error);
-    console.error('오류 메시지:', error instanceof Error ? error.message : String(error));
-    console.error('오류 스택:', error instanceof Error ? error.stack : 'No stack trace');
-    
+    console.error("=== 학생 프로필 조회 API 오류 ===");
+    console.error(
+      "오류 타입:",
+      error instanceof Error ? error.constructor.name : typeof error,
+    );
+    console.error(
+      "오류 메시지:",
+      error instanceof Error ? error.message : String(error),
+    );
+    console.error(
+      "오류 스택:",
+      error instanceof Error ? error.stack : "No stack trace",
+    );
+
     return NextResponse.json(
-      { error: '학생 프로필 조회 중 오류가 발생했습니다.' },
-      { status: 500 }
+      { error: "학생 프로필 조회 중 오류가 발생했습니다." },
+      { status: 500 },
     );
   } finally {
     await prisma.$disconnect();
@@ -112,30 +120,30 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    console.log('=== 학생 프로필 수정 API 시작 ===');
-    
+    console.log("=== 학생 프로필 수정 API 시작 ===");
+
     // 1. 세션 확인
     const session = await getSessionFromCookies(request);
     if (!session?.user?.id) {
-      console.log('세션 없음 - 401 반환');
+      console.log("세션 없음 - 401 반환");
       return NextResponse.json(
-        { error: '로그인이 필요합니다.' },
-        { status: 401 }
+        { error: "로그인이 필요합니다." },
+        { status: 401 },
       );
     }
 
     // 2. 요청 데이터 파싱
     const body = await request.json();
-    console.log('요청 데이터:', body);
-    
+    console.log("요청 데이터:", body);
+
     const { name, email, phone, address } = body;
 
     // 3. 입력 검증
     if (!name || !email) {
-      console.log('필수 필드 누락');
+      console.log("필수 필드 누락");
       return NextResponse.json(
-        { error: '이름과 이메일은 필수입니다.' },
-        { status: 400 }
+        { error: "이름과 이메일은 필수입니다." },
+        { status: 400 },
       );
     }
 
@@ -144,8 +152,8 @@ export async function PUT(request: NextRequest) {
       where: { userId: session.user.id },
       data: {
         name: name,
-        phone: phone || '',
-        updatedAt: new Date()
+        phone: phone || "",
+        updatedAt: new Date(),
       },
       include: {
         user: {
@@ -156,10 +164,10 @@ export async function PUT(request: NextRequest) {
             phone: true,
             role: true,
             createdAt: true,
-            updatedAt: true
-          }
-        }
-      }
+            updatedAt: true,
+          },
+        },
+      },
     });
 
     // 5. 사용자 정보 업데이트
@@ -168,41 +176,49 @@ export async function PUT(request: NextRequest) {
       data: {
         name: name,
         email: email,
-        phone: phone || '',
-        updatedAt: new Date()
-      }
+        phone: phone || "",
+        updatedAt: new Date(),
+      },
     });
 
-    console.log('학생 프로필 수정 성공:', updatedStudent.id);
+    console.log("학생 프로필 수정 성공:", updatedStudent.id);
 
     // 6. 응답 반환
     return NextResponse.json({
       success: true,
-      message: '프로필이 성공적으로 수정되었습니다.',
+      message: "프로필이 성공적으로 수정되었습니다.",
       student: {
         id: updatedStudent.id,
         name: updatedStudent.name,
         email: updatedUser.email,
-        phone: updatedStudent.phone || '',
-        address: '', // 실제로는 주소 필드 필요
+        phone: updatedStudent.phone || "",
+        address: "", // 실제로는 주소 필드 필요
         level: updatedStudent.level,
         points: updatedStudent.points,
         joinDate: updatedStudent.joinDate,
-        lastModified: updatedStudent.updatedAt
-      }
+        lastModified: updatedStudent.updatedAt,
+      },
     });
-
   } catch (error) {
-    console.error('=== 학생 프로필 수정 API 오류 ===');
-    console.error('오류 타입:', error instanceof Error ? error.constructor.name : typeof error);
-    console.error('오류 메시지:', error instanceof Error ? error.message : String(error));
-    console.error('오류 스택:', error instanceof Error ? error.stack : 'No stack trace');
-    
+    console.error("=== 학생 프로필 수정 API 오류 ===");
+    console.error(
+      "오류 타입:",
+      error instanceof Error ? error.constructor.name : typeof error,
+    );
+    console.error(
+      "오류 메시지:",
+      error instanceof Error ? error.message : String(error),
+    );
+    console.error(
+      "오류 스택:",
+      error instanceof Error ? error.stack : "No stack trace",
+    );
+
     return NextResponse.json(
-      { error: '프로필 수정 중 오류가 발생했습니다.' },
-      { status: 500 }
+      { error: "프로필 수정 중 오류가 발생했습니다." },
+      { status: 500 },
     );
   } finally {
     await prisma.$disconnect();
   }
-} 
+}

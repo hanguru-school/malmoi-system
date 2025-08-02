@@ -2,7 +2,7 @@ export interface StudentIdentifier {
   id: string;
   studentId: string;
   identifierCode: string;
-  identifierType: 'qr' | 'barcode';
+  identifierType: "qr" | "barcode";
   createdAt: Date;
   updatedAt: Date;
   isActive: boolean;
@@ -15,7 +15,7 @@ export interface StudentIdentifierHistory {
   studentId: string;
   oldIdentifierCode?: string;
   newIdentifierCode: string;
-  reason: 'initial' | 'reissue' | 'system_update';
+  reason: "initial" | "reissue" | "system_update";
   issuedBy: string; // admin ID
   issuedAt: Date;
   notes?: string;
@@ -68,7 +68,7 @@ export interface RecentReservation {
   time: string;
   teacher: string;
   subject: string;
-  status: 'upcoming' | 'completed' | 'cancelled';
+  status: "upcoming" | "completed" | "cancelled";
 }
 
 export interface RecentNote {
@@ -77,4 +77,4 @@ export interface RecentNote {
   date: string;
   hasAudio: boolean;
   duration: string;
-} 
+}

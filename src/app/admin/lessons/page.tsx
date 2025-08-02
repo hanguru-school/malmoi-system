@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import ComingSoonPage from '@/components/ComingSoonPage';
+import ComingSoonPage from "@/components/ComingSoonPage";
 
 export default function AdminLessonsPage() {
   return (
@@ -11,4 +11,4 @@ export default function AdminLessonsPage() {
       backText="관리자 홈으로"
     />
   );
-} 
+}

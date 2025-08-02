@@ -1,33 +1,33 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { useRouter } from 'next/navigation';
+import React from "react";
+import { useRouter } from "next/navigation";
 
 export default function AdminDashboard() {
   const router = useRouter();
 
   const rolePages = [
     {
-      title: '학생 대시보드',
-      description: '학생 페이지로 이동하여 학생 기능을 확인합니다',
-      path: '/student/dashboard',
-      color: 'bg-blue-500 hover:bg-blue-600',
-      icon: '👨‍🎓'
+      title: "학생 대시보드",
+      description: "학생 페이지로 이동하여 학생 기능을 확인합니다",
+      path: "/student/dashboard",
+      color: "bg-blue-500 hover:bg-blue-600",
+      icon: "👨‍🎓",
     },
     {
-      title: '선생님 대시보드',
-      description: '선생님 페이지로 이동하여 선생님 기능을 확인합니다',
-      path: '/teacher/dashboard',
-      color: 'bg-green-500 hover:bg-green-600',
-      icon: '👨‍🏫'
+      title: "선생님 대시보드",
+      description: "선생님 페이지로 이동하여 선생님 기능을 확인합니다",
+      path: "/teacher/dashboard",
+      color: "bg-green-500 hover:bg-green-600",
+      icon: "👨‍🏫",
     },
     {
-      title: '직원 대시보드',
-      description: '직원 페이지로 이동하여 직원 기능을 확인합니다',
-      path: '/staff/home',
-      color: 'bg-purple-500 hover:bg-purple-600',
-      icon: '👨‍💼'
-    }
+      title: "직원 대시보드",
+      description: "직원 페이지로 이동하여 직원 기능을 확인합니다",
+      path: "/staff/home",
+      color: "bg-purple-500 hover:bg-purple-600",
+      icon: "👨‍💼",
+    },
   ];
 
   return (
@@ -60,9 +60,7 @@ export default function AdminDashboard() {
                     {page.title}
                   </h3>
                 </div>
-                <p className="text-gray-600 mb-4">
-                  {page.description}
-                </p>
+                <p className="text-gray-600 mb-4">{page.description}</p>
                 <button
                   onClick={() => router.push(page.path)}
                   className={`w-full ${page.color} text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200`}
@@ -83,13 +81,13 @@ export default function AdminDashboard() {
             </h3>
             <div className="space-y-3">
               <button
-                onClick={() => router.push('/admin/students')}
+                onClick={() => router.push("/admin/students")}
                 className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
               >
                 학생 목록
               </button>
               <button
-                onClick={() => router.push('/admin/student-management')}
+                onClick={() => router.push("/admin/student-management")}
                 className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
               >
                 학생 관리
@@ -104,13 +102,13 @@ export default function AdminDashboard() {
             </h3>
             <div className="space-y-3">
               <button
-                onClick={() => router.push('/admin/teachers')}
+                onClick={() => router.push("/admin/teachers")}
                 className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
               >
                 선생님 목록
               </button>
               <button
-                onClick={() => router.push('/admin/teacher-management')}
+                onClick={() => router.push("/admin/teacher-management")}
                 className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
               >
                 선생님 관리
@@ -125,13 +123,13 @@ export default function AdminDashboard() {
             </h3>
             <div className="space-y-3">
               <button
-                onClick={() => router.push('/admin/settings')}
+                onClick={() => router.push("/admin/settings")}
                 className="w-full bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
               >
                 시스템 설정
               </button>
               <button
-                onClick={() => router.push('/admin/analytics')}
+                onClick={() => router.push("/admin/analytics")}
                 className="w-full bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
               >
                 분석 대시보드
@@ -146,13 +144,13 @@ export default function AdminDashboard() {
             </h3>
             <div className="space-y-3">
               <button
-                onClick={() => router.push('/admin/reservations')}
+                onClick={() => router.push("/admin/reservations")}
                 className="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
               >
                 예약 목록
               </button>
               <button
-                onClick={() => router.push('/admin/calendar')}
+                onClick={() => router.push("/admin/calendar")}
                 className="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
               >
                 캘린더 보기
@@ -167,13 +165,13 @@ export default function AdminDashboard() {
             </h3>
             <div className="space-y-3">
               <button
-                onClick={() => router.push('/admin/courses')}
+                onClick={() => router.push("/admin/courses")}
                 className="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
               >
                 과정 관리
               </button>
               <button
-                onClick={() => router.push('/admin/curriculum')}
+                onClick={() => router.push("/admin/curriculum")}
                 className="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
               >
                 커리큘럼 관리
@@ -188,13 +186,13 @@ export default function AdminDashboard() {
             </h3>
             <div className="space-y-3">
               <button
-                onClick={() => router.push('/admin/payments')}
+                onClick={() => router.push("/admin/payments")}
                 className="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
               >
                 결제 내역
               </button>
               <button
-                onClick={() => router.push('/admin/sales')}
+                onClick={() => router.push("/admin/sales")}
                 className="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
               >
                 매출 관리
@@ -205,4 +203,4 @@ export default function AdminDashboard() {
       </div>
     </div>
   );
-} 
+}

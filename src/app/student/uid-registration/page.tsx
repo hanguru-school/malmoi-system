@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { ArrowLeft, CreditCard, Plus, Trash2 } from 'lucide-react';
+import { useState } from "react";
+import Link from "next/link";
+import { ArrowLeft, CreditCard, Plus, Trash2 } from "lucide-react";
 
 interface UIDCard {
   id: string;
@@ -15,16 +15,16 @@ interface UIDCard {
 export default function StudentUIDRegistrationPage() {
   const [cards, setCards] = useState<UIDCard[]>([
     {
-      id: '1',
-      uid: '1234567890',
-      cardType: '학생증',
-      registeredAt: '2024-01-15',
-      isActive: true
-    }
+      id: "1",
+      uid: "1234567890",
+      cardType: "학생증",
+      registeredAt: "2024-01-15",
+      isActive: true,
+    },
   ]);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [newUID, setNewUID] = useState('');
-  const [newCardType, setNewCardType] = useState('');
+  const [newUID, setNewUID] = useState("");
+  const [newCardType, setNewCardType] = useState("");
 
   const handleAddCard = () => {
     if (newUID.trim() && newCardType.trim()) {
@@ -32,24 +32,26 @@ export default function StudentUIDRegistrationPage() {
         id: Date.now().toString(),
         uid: newUID.trim(),
         cardType: newCardType.trim(),
-        registeredAt: new Date().toISOString().split('T')[0],
-        isActive: true
+        registeredAt: new Date().toISOString().split("T")[0],
+        isActive: true,
       };
       setCards([...cards, newCard]);
-      setNewUID('');
-      setNewCardType('');
+      setNewUID("");
+      setNewCardType("");
       setShowAddForm(false);
     }
   };
 
   const handleRemoveCard = (id: string) => {
-    setCards(cards.filter(card => card.id !== id));
+    setCards(cards.filter((card) => card.id !== id));
   };
 
   const handleToggleActive = (id: string) => {
-    setCards(cards.map(card => 
-      card.id === id ? { ...card, isActive: !card.isActive } : card
-    ));
+    setCards(
+      cards.map((card) =>
+        card.id === id ? { ...card, isActive: !card.isActive } : card,
+      ),
+    );
   };
 
   return (
@@ -67,7 +69,9 @@ export default function StudentUIDRegistrationPage() {
 
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-4">UID 등록</h1>
-        <p className="text-gray-600">학생증이나 카드의 UID를 등록하여 출입 관리에 활용하세요</p>
+        <p className="text-gray-600">
+          학생증이나 카드의 UID를 등록하여 출입 관리에 활용하세요
+        </p>
       </div>
 
       {/* 등록된 카드 목록 */}
@@ -78,8 +82,7 @@ export default function StudentUIDRegistrationPage() {
             onClick={() => setShowAddForm(true)}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            <Plus className="w-4 h-4" />
-            새 카드 등록
+            <Plus className="w-4 h-4" />새 카드 등록
           </button>
         </div>
 
@@ -98,9 +101,13 @@ export default function StudentUIDRegistrationPage() {
                 <div className="flex items-center space-x-4">
                   <CreditCard className="w-8 h-8 text-blue-600" />
                   <div>
-                    <div className="font-medium text-gray-900">{card.cardType}</div>
+                    <div className="font-medium text-gray-900">
+                      {card.cardType}
+                    </div>
                     <div className="text-sm text-gray-600">UID: {card.uid}</div>
-                    <div className="text-xs text-gray-500">등록일: {card.registeredAt}</div>
+                    <div className="text-xs text-gray-500">
+                      등록일: {card.registeredAt}
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -108,11 +115,11 @@ export default function StudentUIDRegistrationPage() {
                     onClick={() => handleToggleActive(card.id)}
                     className={`px-3 py-1 rounded-full text-xs font-medium ${
                       card.isActive
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-gray-100 text-gray-800'
+                        ? "bg-green-100 text-green-800"
+                        : "bg-gray-100 text-gray-800"
                     }`}
                   >
-                    {card.isActive ? '활성' : '비활성'}
+                    {card.isActive ? "활성" : "비활성"}
                   </button>
                   <button
                     onClick={() => handleRemoveCard(card.id)}
@@ -131,7 +138,9 @@ export default function StudentUIDRegistrationPage() {
       {/* 새 카드 등록 폼 */}
       {showAddForm && (
         <div className="bg-white rounded-xl shadow-lg p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">새 카드 등록</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            새 카드 등록
+          </h3>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -182,7 +191,9 @@ export default function StudentUIDRegistrationPage() {
 
       {/* 사용 안내 */}
       <div className="mt-8 bg-blue-50 rounded-xl p-6">
-        <h3 className="text-lg font-semibold text-blue-900 mb-4">UID 등록 안내</h3>
+        <h3 className="text-lg font-semibold text-blue-900 mb-4">
+          UID 등록 안내
+        </h3>
         <div className="space-y-3 text-blue-800">
           <p className="text-sm">
             • UID는 카드의 고유 식별 번호로, 출입 관리 시스템에서 사용됩니다.
@@ -200,4 +211,4 @@ export default function StudentUIDRegistrationPage() {
       </div>
     </div>
   );
-} 
+}

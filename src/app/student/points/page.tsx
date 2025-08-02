@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { 
-  ArrowLeft, 
-  Star, 
-  TrendingUp, 
-  Gift, 
-  Calendar, 
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import {
+  ArrowLeft,
+  Star,
+  TrendingUp,
+  Gift,
+  Calendar,
   Award,
   Clock,
-  Target
-} from 'lucide-react';
+  Target,
+} from "lucide-react";
 
 interface PointsInfo {
   totalPoints: number;
@@ -21,7 +21,7 @@ interface PointsInfo {
   monthlyPoints: number;
   pointsHistory: Array<{
     id: string;
-    type: 'earned' | 'used';
+    type: "earned" | "used";
     amount: number;
     description: string;
     date: string;
@@ -58,64 +58,94 @@ export default function StudentPointsPage() {
         studyStreak: 7,
         monthlyPoints: 320,
         pointsHistory: [
-          { id: '1', type: 'earned', amount: 50, description: '수업 완료', date: '2024-01-15' },
-          { id: '2', type: 'earned', amount: 30, description: '숙제 제출', date: '2024-01-14' },
-          { id: '3', type: 'used', amount: -100, description: '교재 구매', date: '2024-01-13' },
-          { id: '4', type: 'earned', amount: 40, description: '테스트 완료', date: '2024-01-12' },
-          { id: '5', type: 'earned', amount: 25, description: '연속 학습', date: '2024-01-11' }
+          {
+            id: "1",
+            type: "earned",
+            amount: 50,
+            description: "수업 완료",
+            date: "2024-01-15",
+          },
+          {
+            id: "2",
+            type: "earned",
+            amount: 30,
+            description: "숙제 제출",
+            date: "2024-01-14",
+          },
+          {
+            id: "3",
+            type: "used",
+            amount: -100,
+            description: "교재 구매",
+            date: "2024-01-13",
+          },
+          {
+            id: "4",
+            type: "earned",
+            amount: 40,
+            description: "테스트 완료",
+            date: "2024-01-12",
+          },
+          {
+            id: "5",
+            type: "earned",
+            amount: 25,
+            description: "연속 학습",
+            date: "2024-01-11",
+          },
         ],
         rewards: [
           {
-            id: '1',
-            title: '무료 수업 1회',
-            description: '포인트로 무료 수업을 받을 수 있습니다',
+            id: "1",
+            title: "무료 수업 1회",
+            description: "포인트로 무료 수업을 받을 수 있습니다",
             pointsRequired: 500,
             available: true,
-            claimed: false
+            claimed: false,
           },
           {
-            id: '2',
-            title: '교재 할인권',
-            description: '다음 교재 구매 시 20% 할인',
+            id: "2",
+            title: "교재 할인권",
+            description: "다음 교재 구매 시 20% 할인",
             pointsRequired: 300,
             available: true,
-            claimed: false
+            claimed: false,
           },
           {
-            id: '3',
-            title: '특별 레슨',
-            description: '1:1 특별 레슨 30분',
+            id: "3",
+            title: "특별 레슨",
+            description: "1:1 특별 레슨 30분",
             pointsRequired: 800,
             available: false,
-            claimed: false
-          }
+            claimed: false,
+          },
         ],
         achievements: [
           {
-            id: '1',
-            title: '학습 열정가',
-            description: '7일 연속 학습',
+            id: "1",
+            title: "학습 열정가",
+            description: "7일 연속 학습",
             pointsEarned: 100,
-            achievedAt: '2024-01-10',
-            icon: '🔥'
+            achievedAt: "2024-01-10",
+            icon: "🔥",
           },
           {
-            id: '2',
-            title: '테스트 마스터',
-            description: '10회 테스트 완료',
+            id: "2",
+            title: "테스트 마스터",
+            description: "10회 테스트 완료",
             pointsEarned: 150,
-            achievedAt: '2024-01-05',
-            icon: '📝'
+            achievedAt: "2024-01-05",
+            icon: "📝",
           },
           {
-            id: '3',
-            title: '숙제 완성자',
-            description: '20회 숙제 제출',
+            id: "3",
+            title: "숙제 완성자",
+            description: "20회 숙제 제출",
             pointsEarned: 200,
-            achievedAt: '2023-12-28',
-            icon: '📚'
-          }
-        ]
+            achievedAt: "2023-12-28",
+            icon: "📚",
+          },
+        ],
       });
       setLoading(false);
     }, 1000);
@@ -156,22 +186,30 @@ export default function StudentPointsPage() {
           <Star className="w-8 h-8 text-yellow-600" />
           <h1 className="text-2xl font-bold text-gray-900">포인트 현황</h1>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <div className="text-center">
-            <div className="text-3xl font-bold text-yellow-600 mb-2">{pointsInfo.totalPoints}P</div>
+            <div className="text-3xl font-bold text-yellow-600 mb-2">
+              {pointsInfo.totalPoints}P
+            </div>
             <div className="text-sm text-gray-600">총 포인트</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-green-600 mb-2">{pointsInfo.availablePoints}P</div>
+            <div className="text-3xl font-bold text-green-600 mb-2">
+              {pointsInfo.availablePoints}P
+            </div>
             <div className="text-sm text-gray-600">사용 가능</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-blue-600 mb-2">{pointsInfo.usedPoints}P</div>
+            <div className="text-3xl font-bold text-blue-600 mb-2">
+              {pointsInfo.usedPoints}P
+            </div>
             <div className="text-sm text-gray-600">사용 완료</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-purple-600 mb-2">{pointsInfo.studyStreak}일</div>
+            <div className="text-3xl font-bold text-purple-600 mb-2">
+              {pointsInfo.studyStreak}일
+            </div>
             <div className="text-sm text-gray-600">연속 학습</div>
           </div>
         </div>
@@ -195,29 +233,39 @@ export default function StudentPointsPage() {
             <Calendar className="w-6 h-6 text-blue-600" />
             포인트 히스토리
           </h2>
-          
+
           <div className="space-y-3 max-h-96 overflow-y-auto">
             {pointsInfo.pointsHistory.map((item) => (
-              <div key={item.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+              <div
+                key={item.id}
+                className="flex items-center justify-between p-3 border border-gray-200 rounded-lg"
+              >
                 <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    item.type === 'earned' ? 'bg-green-100' : 'bg-red-100'
-                  }`}>
-                    {item.type === 'earned' ? (
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      item.type === "earned" ? "bg-green-100" : "bg-red-100"
+                    }`}
+                  >
+                    {item.type === "earned" ? (
                       <TrendingUp className="w-4 h-4 text-green-600" />
                     ) : (
                       <Gift className="w-4 h-4 text-red-600" />
                     )}
                   </div>
                   <div>
-                    <div className="font-medium text-gray-900">{item.description}</div>
+                    <div className="font-medium text-gray-900">
+                      {item.description}
+                    </div>
                     <div className="text-sm text-gray-600">{item.date}</div>
                   </div>
                 </div>
-                <div className={`font-bold ${
-                  item.type === 'earned' ? 'text-green-600' : 'text-red-600'
-                }`}>
-                  {item.type === 'earned' ? '+' : ''}{item.amount}P
+                <div
+                  className={`font-bold ${
+                    item.type === "earned" ? "text-green-600" : "text-red-600"
+                  }`}
+                >
+                  {item.type === "earned" ? "+" : ""}
+                  {item.amount}P
                 </div>
               </div>
             ))}
@@ -230,14 +278,19 @@ export default function StudentPointsPage() {
             <Gift className="w-6 h-6 text-purple-600" />
             포인트 보상
           </h2>
-          
+
           <div className="space-y-4">
             {pointsInfo.rewards.map((reward) => (
-              <div key={reward.id} className="border border-gray-200 rounded-lg p-4">
+              <div
+                key={reward.id}
+                className="border border-gray-200 rounded-lg p-4"
+              >
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="font-medium text-gray-900">{reward.title}</h3>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-600">{reward.pointsRequired}P</span>
+                    <span className="text-sm text-gray-600">
+                      {reward.pointsRequired}P
+                    </span>
                     {reward.claimed ? (
                       <Award className="w-5 h-5 text-green-600" />
                     ) : reward.available ? (
@@ -247,18 +300,24 @@ export default function StudentPointsPage() {
                     )}
                   </div>
                 </div>
-                <p className="text-sm text-gray-600 mb-3">{reward.description}</p>
-                <button 
+                <p className="text-sm text-gray-600 mb-3">
+                  {reward.description}
+                </p>
+                <button
                   className={`w-full py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
-                    reward.claimed 
-                      ? 'bg-green-100 text-green-700 cursor-default'
+                    reward.claimed
+                      ? "bg-green-100 text-green-700 cursor-default"
                       : reward.available
-                      ? 'bg-blue-600 text-white hover:bg-blue-700'
-                      : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        ? "bg-blue-600 text-white hover:bg-blue-700"
+                        : "bg-gray-100 text-gray-400 cursor-not-allowed"
                   }`}
                   disabled={!reward.available || reward.claimed}
                 >
-                  {reward.claimed ? '사용 완료' : reward.available ? '교환하기' : '포인트 부족'}
+                  {reward.claimed
+                    ? "사용 완료"
+                    : reward.available
+                      ? "교환하기"
+                      : "포인트 부족"}
                 </button>
               </div>
             ))}
@@ -272,15 +331,26 @@ export default function StudentPointsPage() {
           <Award className="w-6 h-6 text-orange-600" />
           포인트 성취
         </h2>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {pointsInfo.achievements.map((achievement) => (
-            <div key={achievement.id} className="border border-gray-200 rounded-lg p-4 text-center">
+            <div
+              key={achievement.id}
+              className="border border-gray-200 rounded-lg p-4 text-center"
+            >
               <div className="text-3xl mb-2">{achievement.icon}</div>
-              <h3 className="font-medium text-gray-900 mb-1">{achievement.title}</h3>
-              <p className="text-sm text-gray-600 mb-2">{achievement.description}</p>
-              <div className="text-lg font-bold text-yellow-600">+{achievement.pointsEarned}P</div>
-              <div className="text-xs text-gray-500 mt-1">{achievement.achievedAt}</div>
+              <h3 className="font-medium text-gray-900 mb-1">
+                {achievement.title}
+              </h3>
+              <p className="text-sm text-gray-600 mb-2">
+                {achievement.description}
+              </p>
+              <div className="text-lg font-bold text-yellow-600">
+                +{achievement.pointsEarned}P
+              </div>
+              <div className="text-xs text-gray-500 mt-1">
+                {achievement.achievedAt}
+              </div>
             </div>
           ))}
         </div>
@@ -289,22 +359,30 @@ export default function StudentPointsPage() {
       {/* 통계 카드들 */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
         <div className="bg-white rounded-xl shadow-lg p-4 text-center">
-          <div className="text-2xl font-bold text-yellow-600">{pointsInfo.studyStreak}일</div>
+          <div className="text-2xl font-bold text-yellow-600">
+            {pointsInfo.studyStreak}일
+          </div>
           <div className="text-sm text-gray-600">연속 학습</div>
         </div>
         <div className="bg-white rounded-xl shadow-lg p-4 text-center">
-          <div className="text-2xl font-bold text-green-600">{pointsInfo.monthlyPoints}</div>
+          <div className="text-2xl font-bold text-green-600">
+            {pointsInfo.monthlyPoints}
+          </div>
           <div className="text-sm text-gray-600">이번 달 획득</div>
         </div>
         <div className="bg-white rounded-xl shadow-lg p-4 text-center">
-          <div className="text-2xl font-bold text-blue-600">{pointsInfo.achievements.length}</div>
+          <div className="text-2xl font-bold text-blue-600">
+            {pointsInfo.achievements.length}
+          </div>
           <div className="text-sm text-gray-600">달성 성취</div>
         </div>
         <div className="bg-white rounded-xl shadow-lg p-4 text-center">
-          <div className="text-2xl font-bold text-purple-600">{pointsInfo.rewards.length}</div>
+          <div className="text-2xl font-bold text-purple-600">
+            {pointsInfo.rewards.length}
+          </div>
           <div className="text-sm text-gray-600">사용 가능 보상</div>
         </div>
       </div>
     </div>
   );
-} 
+}

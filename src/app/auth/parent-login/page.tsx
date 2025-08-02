@@ -1,54 +1,57 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { 
-  User, 
-  Lock, 
-  Eye, 
-  EyeOff, 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import {
+  User,
+  Lock,
+  Eye,
+  EyeOff,
   ArrowLeft,
   Users,
   Phone,
-  CheckCircle
-} from 'lucide-react';
+  CheckCircle,
+} from "lucide-react";
 
 export default function ParentLoginPage() {
   const [formData, setFormData] = useState({
-    studentId: '',
-    parentPhone: '',
-    password: ''
+    studentId: "",
+    parentPhone: "",
+    password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
       // 실제 API 호출로 대체
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       // 임시 로그인 로직
       if (formData.studentId && formData.parentPhone && formData.password) {
         // localStorage에 학부모 로그인 정보 저장
-        localStorage.setItem('parentUser', JSON.stringify({
-          studentId: formData.studentId,
-          parentPhone: formData.parentPhone,
-          loginTime: new Date().toISOString()
-        }));
-        
-        router.push('/parent/dashboard');
+        localStorage.setItem(
+          "parentUser",
+          JSON.stringify({
+            studentId: formData.studentId,
+            parentPhone: formData.parentPhone,
+            loginTime: new Date().toISOString(),
+          }),
+        );
+
+        router.push("/parent/dashboard");
       } else {
-        setError('모든 필드를 입력해주세요.');
+        setError("모든 필드를 입력해주세요.");
       }
     } catch (err) {
-      setError('로그인에 실패했습니다. 다시 시도해주세요.');
+      setError("로그인에 실패했습니다. 다시 시도해주세요.");
     } finally {
       setLoading(false);
     }
@@ -66,13 +69,15 @@ export default function ParentLoginPage() {
             <ArrowLeft className="w-4 h-4" />
             <span>메인 페이지로 돌아가기</span>
           </Link>
-          
+
           <div className="flex items-center justify-center gap-3 mb-4">
             <div className="w-12 h-12 bg-orange-600 rounded-full flex items-center justify-center">
               <Users className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">학부모 로그인</h1>
+              <h1 className="text-2xl font-bold text-gray-900">
+                학부모 로그인
+              </h1>
               <p className="text-gray-600">자녀의 학습 현황을 확인하세요</p>
             </div>
           </div>
@@ -89,7 +94,9 @@ export default function ParentLoginPage() {
                 <input
                   type="text"
                   value={formData.studentId}
-                  onChange={(e) => setFormData({ ...formData, studentId: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, studentId: e.target.value })
+                  }
                   className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   placeholder="학생 ID를 입력하세요"
                   required
@@ -106,7 +113,9 @@ export default function ParentLoginPage() {
                 <input
                   type="tel"
                   value={formData.parentPhone}
-                  onChange={(e) => setFormData({ ...formData, parentPhone: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, parentPhone: e.target.value })
+                  }
                   className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   placeholder="010-1234-5678"
                   required
@@ -121,9 +130,11 @@ export default function ParentLoginPage() {
               </label>
               <div className="relative">
                 <input
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
                   className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   placeholder="비밀번호를 입력하세요"
                   required
@@ -134,7 +145,11 @@ export default function ParentLoginPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
                 </button>
               </div>
             </div>
@@ -163,7 +178,9 @@ export default function ParentLoginPage() {
 
           <div className="mt-6 pt-6 border-t border-gray-200">
             <div className="text-center">
-              <p className="text-sm text-gray-600 mb-4">아직 계정이 없으신가요?</p>
+              <p className="text-sm text-gray-600 mb-4">
+                아직 계정이 없으신가요?
+              </p>
               <Link
                 href="/parent/register"
                 className="text-sm text-orange-600 hover:text-orange-700 font-medium"
@@ -176,7 +193,9 @@ export default function ParentLoginPage() {
 
         {/* 안내사항 */}
         <div className="mt-6 bg-orange-50 rounded-lg p-4">
-          <h3 className="font-medium text-orange-900 mb-2">학부모 로그인 안내</h3>
+          <h3 className="font-medium text-orange-900 mb-2">
+            학부모 로그인 안내
+          </h3>
           <ul className="text-sm text-orange-800 space-y-1">
             <li>• 자녀의 학생 ID가 필요합니다</li>
             <li>• 등록 시 사용한 학부모 연락처를 입력하세요</li>
@@ -188,4 +207,4 @@ export default function ParentLoginPage() {
       </div>
     </div>
   );
-} 
+}

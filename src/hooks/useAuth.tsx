@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState, useEffect, createContext, useContext } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, createContext, useContext } from "react";
+import { useRouter } from "next/navigation";
 
 interface User {
   id: string;
@@ -29,9 +29,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const checkAuth = async () => {
     try {
-      const response = await fetch('/api/auth/check', {
-        method: 'GET',
-        credentials: 'include',
+      const response = await fetch("/api/auth/check", {
+        method: "GET",
+        credentials: "include",
       });
 
       if (response.ok) {
@@ -41,7 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(null);
       }
     } catch (error) {
-      console.error('Auth check error:', error);
+      console.error("Auth check error:", error);
       setUser(null);
     } finally {
       setLoading(false);
@@ -50,10 +50,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, password }),
       });
@@ -61,28 +61,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || '로그인에 실패했습니다.');
+        throw new Error(data.error || "로그인에 실패했습니다.");
       }
 
       setUser(data.user);
       return true;
     } catch (error) {
-      console.error('Login error:', error);
+      console.error("Login error:", error);
       return false;
     }
   };
 
   const logout = async () => {
     try {
-      await fetch('/api/auth/logout', {
-        method: 'POST',
-        credentials: 'include',
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
       });
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
     } finally {
       setUser(null);
-      router.push('/auth/login');
+      router.push("/auth/login");
     }
   };
 
@@ -100,7 +100,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
-} 
+}

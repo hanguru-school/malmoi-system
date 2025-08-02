@@ -1,13 +1,16 @@
-import { Pool, PoolClient } from 'pg';
+import { Pool, PoolClient } from "pg";
 
 // AWS RDS 설정
 const rdsConfig = {
-  host: process.env.AWS_RDS_HOST || 'localhost',
-  port: parseInt(process.env.AWS_RDS_PORT || '5432'),
-  database: process.env.AWS_RDS_DATABASE || 'malmoi_system',
-  user: process.env.AWS_RDS_USERNAME || 'postgres',
-  password: process.env.AWS_RDS_PASSWORD || '',
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  host: process.env.AWS_RDS_HOST || "localhost",
+  port: parseInt(process.env.AWS_RDS_PORT || "5432"),
+  database: process.env.AWS_RDS_DATABASE || "malmoi_system",
+  user: process.env.AWS_RDS_USERNAME || "postgres",
+  password: process.env.AWS_RDS_PASSWORD || "",
+  ssl:
+    process.env.NODE_ENV === "production"
+      ? { rejectUnauthorized: false }
+      : false,
   max: 20, // 최대 연결 수
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
@@ -22,29 +25,31 @@ export function initializeDatabase() {
   if (!pool && !isInitialized) {
     try {
       // 환경 변수 체크
-      if (!process.env.AWS_RDS_HOST && process.env.NODE_ENV === 'production') {
-        console.warn('⚠️ AWS_RDS_HOST 환경 변수가 설정되지 않았습니다. 데이터베이스 연결을 건너뜁니다.');
+      if (!process.env.AWS_RDS_HOST && process.env.NODE_ENV === "production") {
+        console.warn(
+          "⚠️ AWS_RDS_HOST 환경 변수가 설정되지 않았습니다. 데이터베이스 연결을 건너뜁니다.",
+        );
         isInitialized = true;
         return null;
       }
-      
+
       pool = new Pool(rdsConfig);
-      
+
       // 연결 테스트
-      pool.on('connect', (client: any) => {
-        console.log('✅ PostgreSQL 데이터베이스에 연결되었습니다.');
+      pool.on("connect", (client: any) => {
+        console.log("✅ PostgreSQL 데이터베이스에 연결되었습니다.");
       });
-      
-      pool.on('error', (err: any) => {
-        console.error('❌ PostgreSQL 연결 오류:', err);
+
+      pool.on("error", (err: any) => {
+        console.error("❌ PostgreSQL 연결 오류:", err);
         // 연결 오류 시 풀 재설정
         pool = null;
         isInitialized = false;
       });
-      
+
       isInitialized = true;
     } catch (error) {
-      console.error('❌ 데이터베이스 초기화 오류:', error);
+      console.error("❌ 데이터베이스 초기화 오류:", error);
       isInitialized = true;
       return null;
     }
@@ -63,9 +68,9 @@ export class DatabaseService {
   // 쿼리 실행
   async query(text: string, params?: any[]) {
     if (!this.pool) {
-      throw new Error('데이터베이스 연결이 초기화되지 않았습니다.');
+      throw new Error("데이터베이스 연결이 초기화되지 않았습니다.");
     }
-    
+
     const client = await this.pool.connect();
     try {
       const result = await client.query(text, params);
@@ -78,17 +83,17 @@ export class DatabaseService {
   // 트랜잭션 실행
   async transaction(callback: (client: PoolClient) => Promise<any>) {
     if (!this.pool) {
-      throw new Error('데이터베이스 연결이 초기화되지 않았습니다.');
+      throw new Error("데이터베이스 연결이 초기화되지 않았습니다.");
     }
-    
+
     const client = await this.pool.connect();
     try {
-      await client.query('BEGIN');
+      await client.query("BEGIN");
       const result = await callback(client);
-      await client.query('COMMIT');
+      await client.query("COMMIT");
       return result;
     } catch (error) {
-      await client.query('ROLLBACK');
+      await client.query("ROLLBACK");
       throw error;
     } finally {
       client.release();
@@ -108,15 +113,15 @@ export class DatabaseService {
       VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
       RETURNING *
     `;
-    
+
     const result = await this.query(query, [
       userData.email,
       userData.name,
       userData.role,
       userData.cognitoUserId,
-      userData.passwordHash || null
+      userData.passwordHash || null,
     ]);
-    
+
     return result.rows[0];
   }
 
@@ -126,7 +131,7 @@ export class DatabaseService {
       SELECT * FROM users 
       WHERE email = $1 AND deleted_at IS NULL
     `;
-    
+
     const result = await this.query(query, [email]);
     return result.rows[0] || null;
   }
@@ -137,7 +142,7 @@ export class DatabaseService {
       SELECT * FROM users 
       WHERE id = $1 AND deleted_at IS NULL
     `;
-    
+
     const result = await this.query(query, [id]);
     return result.rows[0] || null;
   }
@@ -146,15 +151,15 @@ export class DatabaseService {
   async updateUser(id: string, updates: Record<string, any>) {
     const setClause = Object.keys(updates)
       .map((key, index) => `${key} = $${index + 2}`)
-      .join(', ');
-    
+      .join(", ");
+
     const query = `
       UPDATE users 
       SET ${setClause}, updated_at = NOW()
       WHERE id = $1 AND deleted_at IS NULL
       RETURNING *
     `;
-    
+
     const values = [id, ...Object.values(updates)];
     const result = await this.query(query, values);
     return result.rows[0];
@@ -168,7 +173,7 @@ export class DatabaseService {
       WHERE id = $1
       RETURNING *
     `;
-    
+
     const result = await this.query(query, [id]);
     return result.rows[0];
   }
@@ -187,16 +192,16 @@ export class DatabaseService {
       VALUES ($1, $2, $3, $4, $5, $6, 'confirmed', NOW(), NOW())
       RETURNING *
     `;
-    
+
     const result = await this.query(query, [
       reservationData.userId,
       reservationData.roomId,
       reservationData.startTime,
       reservationData.endTime,
       reservationData.title,
-      reservationData.description || null
+      reservationData.description || null,
     ]);
-    
+
     return result.rows[0];
   }
 
@@ -208,22 +213,27 @@ export class DatabaseService {
       JOIN rooms rm ON r.room_id = rm.id
       WHERE r.user_id = $1 AND r.deleted_at IS NULL
     `;
-    
+
     const params: any[] = [userId];
-    
+
     if (startDate && endDate) {
       query += ` AND r.start_time BETWEEN $2 AND $3`;
       params.push(startDate, endDate);
     }
-    
+
     query += ` ORDER BY r.start_time ASC`;
-    
+
     const result = await this.query(query, params);
     return result.rows;
   }
 
   // 예약 충돌 확인
-  async checkReservationConflict(roomId: string, startTime: Date, endTime: Date, excludeId?: string) {
+  async checkReservationConflict(
+    roomId: string,
+    startTime: Date,
+    endTime: Date,
+    excludeId?: string,
+  ) {
     let query = `
       SELECT COUNT(*) as conflict_count
       FROM reservations
@@ -236,14 +246,14 @@ export class DatabaseService {
           (start_time >= $2 AND end_time <= $3)
         )
     `;
-    
+
     const params: any[] = [roomId, startTime, endTime];
-    
+
     if (excludeId) {
       query += ` AND id != $4`;
       params.push(excludeId);
     }
-    
+
     const result = await this.query(query, params);
     return parseInt(result.rows[0].conflict_count) > 0;
   }
@@ -255,7 +265,7 @@ export class DatabaseService {
       WHERE is_active = true AND deleted_at IS NULL
       ORDER BY name
     `;
-    
+
     const result = await this.query(query);
     return result.rows;
   }
@@ -274,29 +284,37 @@ export class DatabaseService {
       VALUES ($1, $2, $3, $4, $5, $6, 'pending', NOW())
       RETURNING *
     `;
-    
+
     const result = await this.query(query, [
       paymentData.userId,
       paymentData.reservationId || null,
       paymentData.amount,
       paymentData.currency,
       paymentData.paymentMethod,
-      paymentData.description
+      paymentData.description,
     ]);
-    
+
     return result.rows[0];
   }
 
   // 결제 상태 업데이트
-  async updatePaymentStatus(paymentId: string, status: string, transactionId?: string) {
+  async updatePaymentStatus(
+    paymentId: string,
+    status: string,
+    transactionId?: string,
+  ) {
     const query = `
       UPDATE payments 
       SET status = $2, transaction_id = $3, updated_at = NOW()
       WHERE id = $1
       RETURNING *
     `;
-    
-    const result = await this.query(query, [paymentId, status, transactionId || null]);
+
+    const result = await this.query(query, [
+      paymentId,
+      status,
+      transactionId || null,
+    ]);
     return result.rows[0];
   }
 
@@ -310,4 +328,4 @@ export class DatabaseService {
 }
 
 // 싱글톤 인스턴스
-export const databaseService = new DatabaseService(); 
+export const databaseService = new DatabaseService();

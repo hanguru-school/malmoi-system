@@ -1,4 +1,4 @@
-import ComingSoonPage from '@/components/ComingSoonPage';
+import ComingSoonPage from "@/components/ComingSoonPage";
 
 export default function StudentListeningPage() {
   return (
@@ -9,4 +9,4 @@ export default function StudentListeningPage() {
       backText="학생 홈으로"
     />
   );
-} 
+}

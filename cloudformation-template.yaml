@@ -1,22 +1,22 @@
-AWSTemplateFormatVersion: '2010-09-09'
-Description: 'Malmoi System Infrastructure Stack'
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Malmoi System Infrastructure Stack"
 
 Parameters:
   Environment:
     Type: String
-    Default: 'production'
-    Description: 'Environment name'
+    Default: "production"
+    Description: "Environment name"
     AllowedValues:
-      - 'development'
-      - 'staging'
-      - 'production'
+      - "development"
+      - "staging"
+      - "production"
 
 Resources:
   # S3 Bucket for file storage
   FileStorageBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub 'malmoi-system-files-${Environment}'
+      BucketName: !Sub "malmoi-system-files-${Environment}"
       VersioningConfiguration:
         Status: Enabled
       PublicAccessBlockConfiguration:
@@ -38,7 +38,7 @@ Resources:
   UserPool:
     Type: AWS::Cognito::UserPool
     Properties:
-      UserPoolName: !Sub 'malmoi-system-pool-${Environment}'
+      UserPoolName: !Sub "malmoi-system-pool-${Environment}"
       AdminCreateUserConfig:
         AllowAdminCreateUserOnly: false
       AutoVerifiedAttributes:
@@ -68,7 +68,7 @@ Resources:
     Type: AWS::Cognito::UserPoolClient
     Properties:
       UserPoolId: !Ref UserPool
-      ClientName: !Sub 'malmoi-system-client-${Environment}'
+      ClientName: !Sub "malmoi-system-client-${Environment}"
       GenerateSecret: true
       ExplicitAuthFlows:
         - ALLOW_USER_PASSWORD_AUTH
@@ -81,7 +81,7 @@ Resources:
     Properties:
       Name: malmoi-system.com
       HostedZoneConfig:
-        Comment: !Sub 'malmoi-system domain for ${Environment}'
+        Comment: !Sub "malmoi-system domain for ${Environment}"
       Tags:
         - Key: Project
           Value: malmoi-system
@@ -90,25 +90,25 @@ Resources:
 
 Outputs:
   UserPoolId:
-    Description: 'Cognito User Pool ID'
+    Description: "Cognito User Pool ID"
     Value: !Ref UserPool
     Export:
-      Name: !Sub '${AWS::StackName}-UserPoolId'
+      Name: !Sub "${AWS::StackName}-UserPoolId"
 
   UserPoolClientId:
-    Description: 'Cognito User Pool Client ID'
+    Description: "Cognito User Pool Client ID"
     Value: !Ref UserPoolClient
     Export:
-      Name: !Sub '${AWS::StackName}-UserPoolClientId'
+      Name: !Sub "${AWS::StackName}-UserPoolClientId"
 
   S3BucketName:
-    Description: 'S3 Bucket Name'
+    Description: "S3 Bucket Name"
     Value: !Ref FileStorageBucket
     Export:
-      Name: !Sub '${AWS::StackName}-S3BucketName'
+      Name: !Sub "${AWS::StackName}-S3BucketName"
 
   HostedZoneId:
-    Description: 'Route 53 Hosted Zone ID'
+    Description: "Route 53 Hosted Zone ID"
     Value: !Ref HostedZone
     Export:
-      Name: !Sub '${AWS::StackName}-HostedZoneId' 
+      Name: !Sub "${AWS::StackName}-HostedZoneId"

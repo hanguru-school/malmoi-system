@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { NextRequest, NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
         hourlyRate: true,
       },
       orderBy: {
-        name: 'asc',
+        name: "asc",
       },
     });
 
@@ -21,15 +21,14 @@ export async function GET(request: NextRequest) {
       success: true,
       teachers,
     });
-
   } catch (error) {
-    console.error('선생님 목록 조회 오류:', error);
+    console.error("선생님 목록 조회 오류:", error);
     return NextResponse.json(
-      { 
-        success: false, 
-        message: '선생님 목록 조회 중 오류가 발생했습니다.' 
+      {
+        success: false,
+        message: "선생님 목록 조회 중 오류가 발생했습니다.",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -59,8 +58,8 @@ export async function POST(request: NextRequest) {
         email,
         name,
         phone,
-        role: 'TEACHER',
-        password: 'temp_password', // 실제로는 해시된 비밀번호를 생성해야 함
+        role: "TEACHER",
+        password: "temp_password", // 실제로는 해시된 비밀번호를 생성해야 함
       },
     });
 
@@ -102,10 +101,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(teacher);
   } catch (error) {
-    console.error('선생님 생성 실패:', error);
+    console.error("선생님 생성 실패:", error);
     return NextResponse.json(
-      { error: '선생님 생성에 실패했습니다.' },
-      { status: 500 }
+      { error: "선생님 생성에 실패했습니다." },
+      { status: 500 },
     );
   }
-} 
+}

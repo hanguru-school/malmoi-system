@@ -8,7 +8,8 @@ class CacheManager {
   private cache: Map<string, CacheItem<any>>;
   private defaultTTL: number;
 
-  constructor(defaultTTL: number = 5 * 60 * 1000) { // 5분 기본 TTL
+  constructor(defaultTTL: number = 5 * 60 * 1000) {
+    // 5분 기본 TTL
     this.cache = new Map();
     this.defaultTTL = defaultTTL;
   }
@@ -18,7 +19,7 @@ class CacheManager {
     const item: CacheItem<T> = {
       data,
       timestamp: Date.now(),
-      ttl: ttl || this.defaultTTL
+      ttl: ttl || this.defaultTTL,
     };
     this.cache.set(key, item);
   }
@@ -26,7 +27,7 @@ class CacheManager {
   // 캐시에서 데이터 조회
   get<T>(key: string): T | null {
     const item = this.cache.get(key);
-    
+
     if (!item) {
       return null;
     }
@@ -77,7 +78,7 @@ class CacheManager {
   } {
     return {
       size: this.cache.size,
-      keys: Array.from(this.cache.keys())
+      keys: Array.from(this.cache.keys()),
     };
   }
 }
@@ -91,40 +92,36 @@ export const cacheKeys = {
   student: (id: string) => `student:${id}`,
   studentReservations: (id: string) => `student:${id}:reservations`,
   studentProgress: (id: string) => `student:${id}:progress`,
-  
+
   // 강사 관련
   teacher: (id: string) => `teacher:${id}`,
   teacherSchedule: (id: string) => `teacher:${id}:schedule`,
   teacherAnalytics: (id: string) => `teacher:${id}:analytics`,
-  
+
   // 예약 관련
-  reservations: (date?: string) => `reservations:${date || 'all'}`,
+  reservations: (date?: string) => `reservations:${date || "all"}`,
   reservation: (id: string) => `reservation:${id}`,
-  
+
   // 통계 관련
   analytics: (type: string, params: string) => `analytics:${type}:${params}`,
   stats: (type: string) => `stats:${type}`,
-  
+
   // 백업 관련
-  backups: () => 'backups:list',
-  backupStats: () => 'backups:stats',
-  
+  backups: () => "backups:list",
+  backupStats: () => "backups:stats",
+
   // 알림 관련
   notifications: (userId: string) => `notifications:${userId}`,
-  
+
   // 결제 관련
   payments: (userId: string) => `payments:${userId}`,
-  paymentStats: () => 'payments:stats'
+  paymentStats: () => "payments:stats",
 };
 
 // 캐시 래퍼 함수들
 export const cacheUtils = {
   // 캐시된 함수 실행
-  async cached<T>(
-    key: string,
-    fn: () => Promise<T>,
-    ttl?: number
-  ): Promise<T> {
+  async cached<T>(key: string, fn: () => Promise<T>, ttl?: number): Promise<T> {
     const cached = cacheManager.get<T>(key);
     if (cached !== null) {
       return cached;
@@ -156,20 +153,23 @@ export const cacheUtils = {
 
   // 예약 관련 캐시 무효화
   invalidateReservations(): void {
-    cacheManager.deletePattern('reservations:.*');
-    cacheManager.deletePattern('analytics:.*');
+    cacheManager.deletePattern("reservations:.*");
+    cacheManager.deletePattern("analytics:.*");
   },
 
   // 통계 관련 캐시 무효화
   invalidateAnalytics(): void {
-    cacheManager.deletePattern('analytics:.*');
-    cacheManager.deletePattern('stats:.*');
-  }
+    cacheManager.deletePattern("analytics:.*");
+    cacheManager.deletePattern("stats:.*");
+  },
 };
 
 // 주기적 캐시 정리 (5분마다)
-setInterval(() => {
-  cacheManager.cleanup();
-}, 5 * 60 * 1000);
+setInterval(
+  () => {
+    cacheManager.cleanup();
+  },
+  5 * 60 * 1000,
+);
 
-export default cacheManager; 
+export default cacheManager;

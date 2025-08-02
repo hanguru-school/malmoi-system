@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { 
-  ArrowLeft, 
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import {
+  ArrowLeft,
   AlertCircle,
   Loader2,
   Save,
-  CheckCircle
-} from 'lucide-react';
-import Link from 'next/link';
+  CheckCircle,
+} from "lucide-react";
+import Link from "next/link";
 
 interface TimeSlot {
   time: string;
@@ -23,7 +23,7 @@ interface Reservation {
   teacher: string;
   teacherAssigned: boolean;
   subject: string;
-  status: 'upcoming' | 'completed' | 'cancelled';
+  status: "upcoming" | "completed" | "cancelled";
   duration: number;
   location: string;
   notes?: string;
@@ -31,8 +31,6 @@ interface Reservation {
   totalPurchasedMinutes: number;
   teacherBio?: string;
 }
-
-
 
 export default function EditReservationPage() {
   const params = useParams();
@@ -45,40 +43,64 @@ export default function EditReservationPage() {
   const [success, setSuccess] = useState(false);
 
   // 원본 예약 데이터
-  const [originalReservation, setOriginalReservation] = useState<Reservation | null>(null);
+  const [originalReservation, setOriginalReservation] =
+    useState<Reservation | null>(null);
 
   // 폼 데이터
-  const [selectedLocation, setSelectedLocation] = useState<string>('');
+  const [selectedLocation, setSelectedLocation] = useState<string>("");
   const [selectedDuration, setSelectedDuration] = useState<number>(0);
-  const [selectedDate, setSelectedDate] = useState<string>('');
-  const [selectedTime, setSelectedTime] = useState<string>('');
-  const [notes, setNotes] = useState<string>('');
+  const [selectedDate, setSelectedDate] = useState<string>("");
+  const [selectedTime, setSelectedTime] = useState<string>("");
+  const [notes, setNotes] = useState<string>("");
 
   // 시간대 관련
   const [availableTimeSlots, setAvailableTimeSlots] = useState<TimeSlot[]>([]);
-  const [hoveredTime, setHoveredTime] = useState<string>('');
+  const [hoveredTime, setHoveredTime] = useState<string>("");
 
   // 날짜 관련
-  const [minDate, setMinDate] = useState<string>('');
-  const [maxDate, setMaxDate] = useState<string>('');
+  const [minDate, setMinDate] = useState<string>("");
+  const [maxDate, setMaxDate] = useState<string>("");
 
   // 수업 시간 옵션
   const durationOptions = [
-    { duration: 60, description: '가장 기본적인 시간입니다. 초급 학생에게 적절합니다.' },
-    { duration: 90, description: '회화 레슨에 가장 적절한 수업 시간입니다. 초급부터 상급까지 빠른 레벨업에 적절합니다.' },
-    { duration: 120, description: '중급 이상의 학생에게 적절하며 다양한 실전회화를 연습할 수 있습니다.' },
-    { duration: 150, description: '특별한 목적을 가진 전문적인 수업에 적합합니다. 중급 이상에게 적절합니다.' },
-    { duration: 180, description: '특별한 목적을 가진 전문적인 수업에 적합합니다. 중급 이상에게 적절합니다.' },
-    { duration: 80, description: '기본보다 조금 더 깊이 있는 수업이 가능합니다. 초급이나 발음 등의 집중레슨에 적절합니다.' }
+    {
+      duration: 60,
+      description: "가장 기본적인 시간입니다. 초급 학생에게 적절합니다.",
+    },
+    {
+      duration: 90,
+      description:
+        "회화 레슨에 가장 적절한 수업 시간입니다. 초급부터 상급까지 빠른 레벨업에 적절합니다.",
+    },
+    {
+      duration: 120,
+      description:
+        "중급 이상의 학생에게 적절하며 다양한 실전회화를 연습할 수 있습니다.",
+    },
+    {
+      duration: 150,
+      description:
+        "특별한 목적을 가진 전문적인 수업에 적합합니다. 중급 이상에게 적절합니다.",
+    },
+    {
+      duration: 180,
+      description:
+        "특별한 목적을 가진 전문적인 수업에 적합합니다. 중급 이상에게 적절합니다.",
+    },
+    {
+      duration: 80,
+      description:
+        "기본보다 조금 더 깊이 있는 수업이 가능합니다. 초급이나 발음 등의 집중레슨에 적절합니다.",
+    },
   ];
 
   // 기존 예약 데이터 (실제로는 API에서 가져와야 함)
   const existingReservations = [
-    { date: '2024-01-15', time: '10:00', duration: 90 },
-    { date: '2024-01-15', time: '14:00', duration: 120 },
-    { date: '2024-01-15', time: '16:30', duration: 60 },
-    { date: '2024-01-16', time: '09:00', duration: 150 },
-    { date: '2024-01-16', time: '13:00', duration: 90 },
+    { date: "2024-01-15", time: "10:00", duration: 90 },
+    { date: "2024-01-15", time: "14:00", duration: 120 },
+    { date: "2024-01-15", time: "16:30", duration: 60 },
+    { date: "2024-01-16", time: "09:00", duration: 150 },
+    { date: "2024-01-16", time: "13:00", duration: 90 },
   ];
 
   useEffect(() => {
@@ -87,8 +109,8 @@ export default function EditReservationPage() {
     const threeMonthsLater = new Date();
     threeMonthsLater.setMonth(today.getMonth() + 3);
 
-    setMinDate(today.toISOString().split('T')[0]);
-    setMaxDate(threeMonthsLater.toISOString().split('T')[0]);
+    setMinDate(today.toISOString().split("T")[0]);
+    setMaxDate(threeMonthsLater.toISOString().split("T")[0]);
 
     // 데이터 로드
     loadInitialData();
@@ -97,39 +119,40 @@ export default function EditReservationPage() {
   const loadInitialData = async () => {
     try {
       setLoading(true);
-      
+
       // 실제 API 호출로 대체
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       const mockReservation: Reservation = {
         id: reservationId,
-        date: '2024-01-15',
-        time: '14:00',
-        teacher: '김선생님',
+        date: "2024-01-15",
+        time: "14:00",
+        teacher: "김선생님",
         teacherAssigned: true,
-        subject: '한국어 회화',
-        status: 'upcoming',
+        subject: "한국어 회화",
+        status: "upcoming",
         duration: 60,
-        location: '온라인',
-        notes: '일상 대화 연습을 하고 싶습니다.',
+        location: "온라인",
+        notes: "일상 대화 연습을 하고 싶습니다.",
         remainingMinutes: 300,
         totalPurchasedMinutes: 600,
-        teacherBio: '한국어 회화 강사로 10년 이상의 경력을 가지고 있습니다. 청소년 교육 경험이 풍부하며, 학생들의 목표에 맞춰 개인적인 수업을 진행합니다.'
+        teacherBio:
+          "한국어 회화 강사로 10년 이상의 경력을 가지고 있습니다. 청소년 교육 경험이 풍부하며, 학생들의 목표에 맞춰 개인적인 수업을 진행합니다.",
       };
 
       setOriginalReservation(mockReservation);
-      
+
       // 폼 데이터 초기화
       setSelectedLocation(mockReservation.location);
       setSelectedDuration(mockReservation.duration);
       setSelectedDate(mockReservation.date);
       setSelectedTime(mockReservation.time);
-      setNotes(mockReservation.notes || '');
+      setNotes(mockReservation.notes || "");
 
       setLoading(false);
     } catch (error) {
-      console.error('예약 정보 로드 실패:', error);
-      setError('예약 정보를 불러오는데 실패했습니다.');
+      console.error("예약 정보 로드 실패:", error);
+      setError("예약 정보를 불러오는데 실패했습니다.");
       setLoading(false);
     }
   };
@@ -139,37 +162,45 @@ export default function EditReservationPage() {
       if (!selectedDuration) return;
 
       // 실제 API 호출로 대체
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       // 5분 단위로 시간대 생성 (09:00 ~ 21:00)
       const slots: TimeSlot[] = [];
       for (let hour = 9; hour <= 21; hour++) {
         for (let minute = 0; minute < 60; minute += 5) {
-          const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+          const time = `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
 
           // 해당 날짜의 기존 예약 확인
-          const dayReservations = existingReservations.filter(r => r.date === selectedDate);
+          const dayReservations = existingReservations.filter(
+            (r) => r.date === selectedDate,
+          );
 
           // 현재 시간대와 겹치는 예약이 있는지 확인
-          const isConflicting = dayReservations.some(reservation => {
+          const isConflicting = dayReservations.some((reservation) => {
             const reservationStart = new Date(`2024-01-15 ${reservation.time}`);
-            const reservationEnd = new Date(reservationStart.getTime() + (reservation.duration + 10) * 60000); // +10분 준비시간
+            const reservationEnd = new Date(
+              reservationStart.getTime() + (reservation.duration + 10) * 60000,
+            ); // +10분 준비시간
             const currentStart = new Date(`2024-01-15 ${time}`);
-            const currentEnd = new Date(currentStart.getTime() + (selectedDuration + 10) * 60000); // +10분 준비시간
+            const currentEnd = new Date(
+              currentStart.getTime() + (selectedDuration + 10) * 60000,
+            ); // +10분 준비시간
 
-            return currentStart < reservationEnd && currentEnd > reservationStart;
+            return (
+              currentStart < reservationEnd && currentEnd > reservationStart
+            );
           });
 
           slots.push({
             time,
-            available: !isConflicting
+            available: !isConflicting,
           });
         }
       }
 
       setAvailableTimeSlots(slots);
     } catch (error) {
-      console.error('가능한 시간대 로드 오류:', error);
+      console.error("가능한 시간대 로드 오류:", error);
       setAvailableTimeSlots([]);
     }
   };
@@ -182,55 +213,60 @@ export default function EditReservationPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!selectedLocation || !selectedDuration || !selectedDate || !selectedTime) {
-      setError('모든 필수 항목을 입력해주세요.');
+
+    if (
+      !selectedLocation ||
+      !selectedDuration ||
+      !selectedDate ||
+      !selectedTime
+    ) {
+      setError("모든 필수 항목을 입력해주세요.");
       return;
     }
 
     try {
       setSaving(true);
       setError(null);
-      
-      // 실제 API 호출로 대체
-      await new Promise(resolve => setTimeout(resolve, 2000));
 
-      console.log('예약 수정:', {
+      // 실제 API 호출로 대체
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      console.log("예약 수정:", {
         id: reservationId,
         location: selectedLocation,
         duration: selectedDuration,
         date: selectedDate,
         time: selectedTime,
-        notes
+        notes,
       });
-      
+
       setSuccess(true);
-      
+
       // 성공 시 상세 페이지로 이동
       setTimeout(() => {
         router.push(`/student/reservations/${reservationId}`);
       }, 1500);
     } catch (error) {
-      console.error('예약 수정 실패:', error);
-      setError('예약 수정 중 오류가 발생했습니다.');
+      console.error("예약 수정 실패:", error);
+      setError("예약 수정 중 오류가 발생했습니다.");
     } finally {
       setSaving(false);
     }
   };
 
   const getDayOfWeek = (date: string) => {
-    return new Date(date).toLocaleDateString('ko-KR', { weekday: 'long' });
+    return new Date(date).toLocaleDateString("ko-KR", { weekday: "long" });
   };
 
   const hasChanges = () => {
     if (!originalReservation) return false;
-    
+
     return (
       selectedLocation !== originalReservation.location ||
       selectedDuration !== originalReservation.duration ||
       selectedDate !== originalReservation.date ||
       selectedTime !== originalReservation.time ||
-      notes !== (originalReservation.notes || '')
+      notes !== (originalReservation.notes || "")
     );
   };
 
@@ -238,13 +274,19 @@ export default function EditReservationPage() {
   const isTimeConflicting = (time: string) => {
     if (!selectedDuration) return false;
 
-    const dayReservations = existingReservations.filter(r => r.date === selectedDate);
+    const dayReservations = existingReservations.filter(
+      (r) => r.date === selectedDate,
+    );
     const currentTime = new Date(`2024-01-15 ${time}`);
 
-    return dayReservations.some(reservation => {
+    return dayReservations.some((reservation) => {
       const reservationStart = new Date(`2024-01-15 ${reservation.time}`);
-      const reservationEnd = new Date(reservationStart.getTime() + (reservation.duration + 10) * 60000);
-      const currentEnd = new Date(currentTime.getTime() + (selectedDuration + 10) * 60000);
+      const reservationEnd = new Date(
+        reservationStart.getTime() + (reservation.duration + 10) * 60000,
+      );
+      const currentEnd = new Date(
+        currentTime.getTime() + (selectedDuration + 10) * 60000,
+      );
 
       return currentTime < reservationEnd && currentEnd > reservationStart;
     });
@@ -255,7 +297,9 @@ export default function EditReservationPage() {
     if (!hoveredTime || !selectedDuration) return false;
 
     const hoverStart = new Date(`2024-01-15 ${hoveredTime}`);
-    const hoverEnd = new Date(hoverStart.getTime() + (selectedDuration + 10) * 60000);
+    const hoverEnd = new Date(
+      hoverStart.getTime() + (selectedDuration + 10) * 60000,
+    );
     const currentTime = new Date(`2024-01-15 ${time}`);
 
     return currentTime >= hoverStart && currentTime < hoverEnd;
@@ -265,12 +309,16 @@ export default function EditReservationPage() {
   const isTimeInConflictingRange = (time: string) => {
     if (!selectedDuration) return false;
 
-    const dayReservations = existingReservations.filter(r => r.date === selectedDate);
+    const dayReservations = existingReservations.filter(
+      (r) => r.date === selectedDate,
+    );
     const currentTime = new Date(`2024-01-15 ${time}`);
 
-    return dayReservations.some(reservation => {
+    return dayReservations.some((reservation) => {
       const reservationStart = new Date(`2024-01-15 ${reservation.time}`);
-      const reservationEnd = new Date(reservationStart.getTime() + (reservation.duration + 10) * 60000);
+      const reservationEnd = new Date(
+        reservationStart.getTime() + (reservation.duration + 10) * 60000,
+      );
       return currentTime >= reservationStart && currentTime < reservationEnd;
     });
   };
@@ -280,7 +328,9 @@ export default function EditReservationPage() {
     if (!selectedTime || !selectedDuration) return false;
 
     const selectedStart = new Date(`2024-01-15 ${selectedTime}`);
-    const selectedEnd = new Date(selectedStart.getTime() + (selectedDuration + 10) * 60000);
+    const selectedEnd = new Date(
+      selectedStart.getTime() + (selectedDuration + 10) * 60000,
+    );
     const currentTime = new Date(`2024-01-15 ${time}`);
 
     return currentTime >= selectedStart && currentTime < selectedEnd;
@@ -288,18 +338,18 @@ export default function EditReservationPage() {
 
   // 시간대의 상태를 결정하는 함수
   const getTimeSlotStatus = (time: string) => {
-    if (!selectedDuration) return 'disabled';
+    if (!selectedDuration) return "disabled";
 
     const isConflicting = isTimeConflicting(time);
     const isHovered = isTimeInHoveredRange(time);
     const isSelected = isTimeInSelectedRange(time);
 
     if (isSelected) {
-      return 'selected';
+      return "selected";
     } else if (isConflicting) {
-      return isHovered ? 'conflicting-hover' : 'conflicting';
+      return isHovered ? "conflicting-hover" : "conflicting";
     } else {
-      return isHovered ? 'available-hover' : 'available';
+      return isHovered ? "available-hover" : "available";
     }
   };
 
@@ -342,9 +392,7 @@ export default function EditReservationPage() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">예약 수정</h1>
-            <p className="text-lg text-gray-600">
-              예약 정보를 수정하세요
-            </p>
+            <p className="text-lg text-gray-600">예약 정보를 수정하세요</p>
           </div>
           <Link
             href={`/student/reservations/${reservationId}`}
@@ -361,8 +409,12 @@ export default function EditReservationPage() {
             <div className="flex items-center gap-3">
               <CheckCircle className="w-5 h-5 text-green-600" />
               <div>
-                <div className="font-medium text-green-800">예약이 성공적으로 수정되었습니다!</div>
-                <div className="text-sm text-green-700">잠시 후 예약 상세 페이지로 이동합니다.</div>
+                <div className="font-medium text-green-800">
+                  예약이 성공적으로 수정되었습니다!
+                </div>
+                <div className="text-sm text-green-700">
+                  잠시 후 예약 상세 페이지로 이동합니다.
+                </div>
               </div>
             </div>
           </div>
@@ -381,27 +433,31 @@ export default function EditReservationPage() {
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* 1단계: 수업 방식 선택 */}
           <div className="bg-white rounded-xl shadow-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">1. 수업 방식 선택</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              1. 수업 방식 선택
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <button
                 type="button"
-                onClick={() => setSelectedLocation('온라인')}
+                onClick={() => setSelectedLocation("온라인")}
                 className={`p-4 border-2 rounded-lg text-left transition-all ${
-                  selectedLocation === '온라인'
-                    ? 'border-blue-500 bg-blue-50 text-blue-900'
-                    : 'border-gray-200 hover:border-gray-300'
+                  selectedLocation === "온라인"
+                    ? "border-blue-500 bg-blue-50 text-blue-900"
+                    : "border-gray-200 hover:border-gray-300"
                 }`}
               >
                 <div className="font-medium">온라인</div>
-                <div className="text-sm text-gray-600 mt-1">화상회의를 통한 원격 수업</div>
+                <div className="text-sm text-gray-600 mt-1">
+                  화상회의를 통한 원격 수업
+                </div>
               </button>
               <button
                 type="button"
-                onClick={() => setSelectedLocation('오프라인')}
+                onClick={() => setSelectedLocation("오프라인")}
                 className={`p-4 border-2 rounded-lg text-left transition-all ${
-                  selectedLocation === '오프라인'
-                    ? 'border-blue-500 bg-blue-50 text-blue-900'
-                    : 'border-gray-200 hover:border-gray-300'
+                  selectedLocation === "오프라인"
+                    ? "border-blue-500 bg-blue-50 text-blue-900"
+                    : "border-gray-200 hover:border-gray-300"
                 }`}
               >
                 <div className="font-medium">오프라인</div>
@@ -412,7 +468,9 @@ export default function EditReservationPage() {
 
           {/* 2단계: 수업 시간 선택 */}
           <div className="bg-white rounded-xl shadow-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">2. 수업 시간 선택</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              2. 수업 시간 선택
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {durationOptions.map((option) => (
                 <button
@@ -421,12 +479,14 @@ export default function EditReservationPage() {
                   onClick={() => setSelectedDuration(option.duration)}
                   className={`p-4 border-2 rounded-lg text-left transition-all ${
                     selectedDuration === option.duration
-                      ? 'border-blue-500 bg-blue-50 text-blue-900'
-                      : 'border-gray-200 hover:border-gray-300'
+                      ? "border-blue-500 bg-blue-50 text-blue-900"
+                      : "border-gray-200 hover:border-gray-300"
                   }`}
                 >
                   <div className="font-medium">{option.duration}분</div>
-                  <div className="text-sm text-gray-600 mt-1">{option.description}</div>
+                  <div className="text-sm text-gray-600 mt-1">
+                    {option.description}
+                  </div>
                 </button>
               ))}
             </div>
@@ -434,7 +494,9 @@ export default function EditReservationPage() {
 
           {/* 3단계: 날짜 선택 */}
           <div className="bg-white rounded-xl shadow-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">3. 날짜 선택</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              3. 날짜 선택
+            </h2>
             <div className="max-w-md">
               <input
                 type="date"
@@ -455,26 +517,31 @@ export default function EditReservationPage() {
           {/* 4단계: 시간 선택 */}
           {selectedDate && selectedDuration && (
             <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">4. 시간 선택</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                4. 시간 선택
+              </h2>
               <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
                 {availableTimeSlots.map((slot) => {
                   const status = getTimeSlotStatus(slot.time);
-                  const isInConflictingRange = isTimeInConflictingRange(slot.time);
+                  const isInConflictingRange = isTimeInConflictingRange(
+                    slot.time,
+                  );
                   const isInHoveredRange = isTimeInHoveredRange(slot.time);
 
                   const getButtonClasses = () => {
-                    const baseClasses = "p-2 text-sm rounded transition-all duration-200 relative";
+                    const baseClasses =
+                      "p-2 text-sm rounded transition-all duration-200 relative";
 
                     switch (status) {
-                      case 'available':
+                      case "available":
                         return `${baseClasses} bg-white border border-gray-200 hover:bg-blue-50 hover:border-blue-300 text-gray-400`;
-                      case 'available-hover':
+                      case "available-hover":
                         return `${baseClasses} bg-blue-100 border border-blue-400 text-blue-800`;
-                      case 'conflicting':
+                      case "conflicting":
                         return `${baseClasses} bg-gray-100 border border-gray-300 text-gray-400 cursor-not-allowed`;
-                      case 'conflicting-hover':
+                      case "conflicting-hover":
                         return `${baseClasses} bg-orange-100 border border-orange-400 text-orange-800`;
-                      case 'selected':
+                      case "selected":
                         return `${baseClasses} bg-blue-500 text-white border-blue-500 font-medium`;
                       default:
                         return `${baseClasses} bg-gray-50 border border-gray-200 text-gray-400 cursor-not-allowed`;
@@ -486,17 +553,21 @@ export default function EditReservationPage() {
                       key={slot.time}
                       type="button"
                       disabled={!slot.available}
-                      onClick={() => slot.available && setSelectedTime(slot.time)}
+                      onClick={() =>
+                        slot.available && setSelectedTime(slot.time)
+                      }
                       onMouseEnter={() => setHoveredTime(slot.time)}
-                      onMouseLeave={() => setHoveredTime('')}
+                      onMouseLeave={() => setHoveredTime("")}
                       className={getButtonClasses()}
                     >
                       {slot.time}
-                      {isInHoveredRange && isInConflictingRange && status !== 'selected' && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="w-full h-0.5 bg-red-500 transform rotate-45"></div>
-                        </div>
-                      )}
+                      {isInHoveredRange &&
+                        isInConflictingRange &&
+                        status !== "selected" && (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="w-full h-0.5 bg-red-500 transform rotate-45"></div>
+                          </div>
+                        )}
                     </button>
                   );
                 })}
@@ -506,7 +577,9 @@ export default function EditReservationPage() {
 
           {/* 메모 */}
           <div className="bg-white rounded-xl shadow-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">메모 (선택사항)</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              메모 (선택사항)
+            </h2>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -517,35 +590,54 @@ export default function EditReservationPage() {
           </div>
 
           {/* 예약 요약 */}
-          {(selectedLocation || selectedDuration || selectedDate || selectedTime) && (
+          {(selectedLocation ||
+            selectedDuration ||
+            selectedDate ||
+            selectedTime) && (
             <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">예약 요약</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                예약 요약
+              </h2>
               <div className="space-y-4">
                 <div className="flex justify-between">
                   <span className="text-gray-600">수업 방식:</span>
-                  <span className="font-medium">{selectedLocation || '선택 안됨'}</span>
+                  <span className="font-medium">
+                    {selectedLocation || "선택 안됨"}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">수업 시간:</span>
-                  <span className="font-medium">{selectedDuration ? `${selectedDuration}분 (준비시간 10분 포함)` : '선택 안됨'}</span>
+                  <span className="font-medium">
+                    {selectedDuration
+                      ? `${selectedDuration}분 (준비시간 10분 포함)`
+                      : "선택 안됨"}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">날짜:</span>
-                  <span className="font-medium">{selectedDate || '선택 안됨'}</span>
+                  <span className="font-medium">
+                    {selectedDate || "선택 안됨"}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">시간:</span>
                   <span className="font-medium">
                     {selectedTime ? (
                       <>
-                        {selectedTime} ~ {(() => {
-                          const startTime = new Date(`2024-01-15 ${selectedTime}`);
-                          const endTime = new Date(startTime.getTime() + (selectedDuration + 10) * 60000);
+                        {selectedTime} ~{" "}
+                        {(() => {
+                          const startTime = new Date(
+                            `2024-01-15 ${selectedTime}`,
+                          );
+                          const endTime = new Date(
+                            startTime.getTime() +
+                              (selectedDuration + 10) * 60000,
+                          );
                           return endTime.toTimeString().slice(0, 5);
                         })()}
                       </>
                     ) : (
-                      '선택 안됨'
+                      "선택 안됨"
                     )}
                   </span>
                 </div>
@@ -569,7 +661,14 @@ export default function EditReservationPage() {
             </Link>
             <button
               type="submit"
-              disabled={!hasChanges() || saving || !selectedLocation || !selectedDuration || !selectedDate || !selectedTime}
+              disabled={
+                !hasChanges() ||
+                saving ||
+                !selectedLocation ||
+                !selectedDuration ||
+                !selectedDate ||
+                !selectedTime
+              }
               className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {saving ? (
@@ -589,4 +688,4 @@ export default function EditReservationPage() {
       </div>
     </div>
   );
-} 
+}

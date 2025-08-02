@@ -1,9 +1,9 @@
-import jwt from 'jsonwebtoken';
+import jwt from "jsonwebtoken";
 
-const secret = process.env.JWT_SECRET || 'default_secret_key';
+const secret = process.env.JWT_SECRET || "default_secret_key";
 
 export function generateToken(payload: object) {
-  return jwt.sign(payload, secret, { expiresIn: '7d' });
+  return jwt.sign(payload, secret, { expiresIn: "7d" });
 }
 
 export function verifyToken(token: string) {
@@ -12,4 +12,4 @@ export function verifyToken(token: string) {
   } catch {
     return null;
   }
-} 
+}

@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  MapPin, 
+import { useState, useEffect } from "react";
+import {
+  User,
+  Mail,
+  Phone,
+  MapPin,
   Camera,
   Edit,
   Save,
@@ -16,8 +16,8 @@ import {
   Calendar,
   GraduationCap,
   Award,
-  FileText
-} from 'lucide-react';
+  FileText,
+} from "lucide-react";
 
 interface TeacherProfile {
   id: string;
@@ -48,14 +48,14 @@ export default function TeacherProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwordData, setPasswordData] = useState<PasswordChange>({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   });
   const [showPassword, setShowPassword] = useState({
     current: false,
     new: false,
-    confirm: false
+    confirm: false,
   });
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -69,23 +69,23 @@ export default function TeacherProfilePage() {
       setLoading(true);
       // 실제 API 호출로 대체
       const mockProfile: TeacherProfile = {
-        id: 'T-001',
-        name: '김선생',
-        email: 'teacher@hanguru.com',
-        phone: '010-1234-5678',
-        address: '서울시 강남구 테헤란로 123',
-        birthDate: '1985-03-15',
-        specialization: '영어 회화, 문법',
+        id: "T-001",
+        name: "김선생",
+        email: "teacher@hanguru.com",
+        phone: "010-1234-5678",
+        address: "서울시 강남구 테헤란로 123",
+        birthDate: "1985-03-15",
+        specialization: "영어 회화, 문법",
         experience: 8,
-        education: '서울대학교 영어교육과',
-        certifications: ['TESOL', 'CELTA', '영어교사자격증'],
-        bio: '8년간의 영어 교육 경험을 바탕으로 학생들의 수준에 맞는 맞춤형 수업을 제공합니다. 회화와 문법을 균형있게 가르치며, 학생들의 실력 향상에 중점을 둡니다.',
-        joinDate: '2020-03-01',
-        lastModified: '2024-01-15'
+        education: "서울대학교 영어교육과",
+        certifications: ["TESOL", "CELTA", "영어교사자격증"],
+        bio: "8년간의 영어 교육 경험을 바탕으로 학생들의 수준에 맞는 맞춤형 수업을 제공합니다. 회화와 문법을 균형있게 가르치며, 학생들의 실력 향상에 중점을 둡니다.",
+        joinDate: "2020-03-01",
+        lastModified: "2024-01-15",
       };
       setProfile(mockProfile);
     } catch (error) {
-      console.error('프로필 로드 오류:', error);
+      console.error("프로필 로드 오류:", error);
     } finally {
       setLoading(false);
     }
@@ -101,12 +101,12 @@ export default function TeacherProfilePage() {
     try {
       setLoading(true);
       // 실제 API 호출로 대체
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setSuccess('프로필이 성공적으로 업데이트되었습니다.');
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      setSuccess("프로필이 성공적으로 업데이트되었습니다.");
       setIsEditing(false);
     } catch (error) {
-      setError('프로필 업데이트 중 오류가 발생했습니다.');
+      setError("프로필 업데이트 중 오류가 발생했습니다.");
     } finally {
       setLoading(false);
     }
@@ -121,29 +121,29 @@ export default function TeacherProfilePage() {
 
   const handlePasswordChange = async () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setError('새 비밀번호가 일치하지 않습니다.');
+      setError("새 비밀번호가 일치하지 않습니다.");
       return;
     }
 
     if (passwordData.newPassword.length < 8) {
-      setError('새 비밀번호는 8자 이상이어야 합니다.');
+      setError("새 비밀번호는 8자 이상이어야 합니다.");
       return;
     }
 
     try {
       setLoading(true);
       // 실제 API 호출로 대체
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setSuccess('비밀번호가 성공적으로 변경되었습니다.');
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      setSuccess("비밀번호가 성공적으로 변경되었습니다.");
       setShowPasswordModal(false);
       setPasswordData({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
       });
     } catch (error) {
-      setError('비밀번호 변경 중 오류가 발생했습니다.');
+      setError("비밀번호 변경 중 오류가 발생했습니다.");
     } finally {
       setLoading(false);
     }
@@ -158,7 +158,7 @@ export default function TeacherProfilePage() {
         if (profile) {
           setProfile({
             ...profile,
-            profileImage: e.target?.result as string
+            profileImage: e.target?.result as string,
           });
         }
       };
@@ -167,10 +167,10 @@ export default function TeacherProfilePage() {
   };
 
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    return new Date(date).toLocaleDateString("ko-KR", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
@@ -190,7 +190,9 @@ export default function TeacherProfilePage() {
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-6">
         <div className="text-center">
           <User className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">프로필을 찾을 수 없습니다</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            프로필을 찾을 수 없습니다
+          </h3>
           <p className="text-gray-600">프로필 정보를 불러올 수 없습니다.</p>
         </div>
       </div>
@@ -259,7 +261,11 @@ export default function TeacherProfilePage() {
               <div className="relative">
                 <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
                   {profile.profileImage ? (
-                    <img src={profile.profileImage} alt="프로필 사진" className="w-full h-full object-cover"/>
+                    <img
+                      src={profile.profileImage}
+                      alt="프로필 사진"
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
                     <User className="w-16 h-16 text-gray-400" />
                   )}
@@ -290,11 +296,15 @@ export default function TeacherProfilePage() {
                     <input
                       type="text"
                       value={profile.name}
-                      onChange={(e) => setProfile({...profile, name: e.target.value})}
+                      onChange={(e) =>
+                        setProfile({ ...profile, name: e.target.value })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   ) : (
-                    <div className="text-lg font-semibold text-gray-900">{profile.name}</div>
+                    <div className="text-lg font-semibold text-gray-900">
+                      {profile.name}
+                    </div>
                   )}
                 </div>
 
@@ -307,11 +317,15 @@ export default function TeacherProfilePage() {
                     <input
                       type="email"
                       value={profile.email}
-                      onChange={(e) => setProfile({...profile, email: e.target.value})}
+                      onChange={(e) =>
+                        setProfile({ ...profile, email: e.target.value })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   ) : (
-                    <div className="text-lg font-semibold text-gray-900">{profile.email}</div>
+                    <div className="text-lg font-semibold text-gray-900">
+                      {profile.email}
+                    </div>
                   )}
                 </div>
 
@@ -324,11 +338,15 @@ export default function TeacherProfilePage() {
                     <input
                       type="tel"
                       value={profile.phone}
-                      onChange={(e) => setProfile({...profile, phone: e.target.value})}
+                      onChange={(e) =>
+                        setProfile({ ...profile, phone: e.target.value })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   ) : (
-                    <div className="text-lg font-semibold text-gray-900">{profile.phone}</div>
+                    <div className="text-lg font-semibold text-gray-900">
+                      {profile.phone}
+                    </div>
                   )}
                 </div>
 
@@ -341,11 +359,15 @@ export default function TeacherProfilePage() {
                     <input
                       type="date"
                       value={profile.birthDate}
-                      onChange={(e) => setProfile({...profile, birthDate: e.target.value})}
+                      onChange={(e) =>
+                        setProfile({ ...profile, birthDate: e.target.value })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   ) : (
-                    <div className="text-lg font-semibold text-gray-900">{formatDate(profile.birthDate)}</div>
+                    <div className="text-lg font-semibold text-gray-900">
+                      {formatDate(profile.birthDate)}
+                    </div>
                   )}
                 </div>
               </div>
@@ -359,11 +381,15 @@ export default function TeacherProfilePage() {
                   <input
                     type="text"
                     value={profile.address}
-                    onChange={(e) => setProfile({...profile, address: e.target.value})}
+                    onChange={(e) =>
+                      setProfile({ ...profile, address: e.target.value })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 ) : (
-                  <div className="text-lg font-semibold text-gray-900">{profile.address}</div>
+                  <div className="text-lg font-semibold text-gray-900">
+                    {profile.address}
+                  </div>
                 )}
               </div>
             </div>
@@ -387,11 +413,15 @@ export default function TeacherProfilePage() {
                 <input
                   type="text"
                   value={profile.specialization}
-                  onChange={(e) => setProfile({...profile, specialization: e.target.value})}
+                  onChange={(e) =>
+                    setProfile({ ...profile, specialization: e.target.value })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               ) : (
-                <div className="text-lg font-semibold text-gray-900">{profile.specialization}</div>
+                <div className="text-lg font-semibold text-gray-900">
+                  {profile.specialization}
+                </div>
               )}
             </div>
 
@@ -400,7 +430,9 @@ export default function TeacherProfilePage() {
                 <FileText className="w-5 h-5 text-purple-600" />
                 <span className="text-sm text-gray-600">경력</span>
               </div>
-              <div className="text-lg font-semibold text-gray-900">{profile.experience}년</div>
+              <div className="text-lg font-semibold text-gray-900">
+                {profile.experience}년
+              </div>
             </div>
 
             <div className="space-y-3">
@@ -412,11 +444,15 @@ export default function TeacherProfilePage() {
                 <input
                   type="text"
                   value={profile.education}
-                  onChange={(e) => setProfile({...profile, education: e.target.value})}
+                  onChange={(e) =>
+                    setProfile({ ...profile, education: e.target.value })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               ) : (
-                <div className="text-lg font-semibold text-gray-900">{profile.education}</div>
+                <div className="text-lg font-semibold text-gray-900">
+                  {profile.education}
+                </div>
               )}
             </div>
 
@@ -446,7 +482,9 @@ export default function TeacherProfilePage() {
             {isEditing ? (
               <textarea
                 value={profile.bio}
-                onChange={(e) => setProfile({...profile, bio: e.target.value})}
+                onChange={(e) =>
+                  setProfile({ ...profile, bio: e.target.value })
+                }
                 rows={4}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
@@ -469,7 +507,9 @@ export default function TeacherProfilePage() {
                 <Calendar className="w-5 h-5 text-green-600" />
                 <span className="text-sm text-gray-600">가입일</span>
               </div>
-              <div className="text-lg font-semibold text-gray-900">{formatDate(profile.joinDate)}</div>
+              <div className="text-lg font-semibold text-gray-900">
+                {formatDate(profile.joinDate)}
+              </div>
             </div>
 
             <div className="space-y-3">
@@ -478,7 +518,9 @@ export default function TeacherProfilePage() {
                 <span className="text-sm text-gray-600">최종 수정일</span>
               </div>
               <div className="text-lg font-semibold text-gray-900">
-                {profile.lastModified ? formatDate(profile.lastModified) : '수정 이력 없음'}
+                {profile.lastModified
+                  ? formatDate(profile.lastModified)
+                  : "수정 이력 없음"}
               </div>
             </div>
           </div>
@@ -499,7 +541,9 @@ export default function TeacherProfilePage() {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-xl shadow-xl p-6 max-w-md w-full mx-4">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">비밀번호 변경</h3>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  비밀번호 변경
+                </h3>
                 <button
                   onClick={() => setShowPasswordModal(false)}
                   className="text-gray-400 hover:text-gray-600"
@@ -507,7 +551,7 @@ export default function TeacherProfilePage() {
                   <div className="w-5 h-5">×</div>
                 </button>
               </div>
-              
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -515,17 +559,31 @@ export default function TeacherProfilePage() {
                   </label>
                   <div className="relative">
                     <input
-                      type={showPassword.current ? 'text' : 'password'}
+                      type={showPassword.current ? "text" : "password"}
                       value={passwordData.currentPassword}
-                      onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
+                      onChange={(e) =>
+                        setPasswordData({
+                          ...passwordData,
+                          currentPassword: e.target.value,
+                        })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10"
                     />
                     <button
                       type="button"
-                      onClick={() => setShowPassword({...showPassword, current: !showPassword.current})}
+                      onClick={() =>
+                        setShowPassword({
+                          ...showPassword,
+                          current: !showPassword.current,
+                        })
+                      }
                       className="absolute right-3 top-1/2 transform -translate-y-1/2"
                     >
-                      {showPassword.current ? <EyeOff className="w-4 h-4 text-gray-400" /> : <Eye className="w-4 h-4 text-gray-400" />}
+                      {showPassword.current ? (
+                        <EyeOff className="w-4 h-4 text-gray-400" />
+                      ) : (
+                        <Eye className="w-4 h-4 text-gray-400" />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -536,17 +594,31 @@ export default function TeacherProfilePage() {
                   </label>
                   <div className="relative">
                     <input
-                      type={showPassword.new ? 'text' : 'password'}
+                      type={showPassword.new ? "text" : "password"}
                       value={passwordData.newPassword}
-                      onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                      onChange={(e) =>
+                        setPasswordData({
+                          ...passwordData,
+                          newPassword: e.target.value,
+                        })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10"
                     />
                     <button
                       type="button"
-                      onClick={() => setShowPassword({...showPassword, new: !showPassword.new})}
+                      onClick={() =>
+                        setShowPassword({
+                          ...showPassword,
+                          new: !showPassword.new,
+                        })
+                      }
                       className="absolute right-3 top-1/2 transform -translate-y-1/2"
                     >
-                      {showPassword.new ? <EyeOff className="w-4 h-4 text-gray-400" /> : <Eye className="w-4 h-4 text-gray-400" />}
+                      {showPassword.new ? (
+                        <EyeOff className="w-4 h-4 text-gray-400" />
+                      ) : (
+                        <Eye className="w-4 h-4 text-gray-400" />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -557,22 +629,36 @@ export default function TeacherProfilePage() {
                   </label>
                   <div className="relative">
                     <input
-                      type={showPassword.confirm ? 'text' : 'password'}
+                      type={showPassword.confirm ? "text" : "password"}
                       value={passwordData.confirmPassword}
-                      onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                      onChange={(e) =>
+                        setPasswordData({
+                          ...passwordData,
+                          confirmPassword: e.target.value,
+                        })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10"
                     />
                     <button
                       type="button"
-                      onClick={() => setShowPassword({...showPassword, confirm: !showPassword.confirm})}
+                      onClick={() =>
+                        setShowPassword({
+                          ...showPassword,
+                          confirm: !showPassword.confirm,
+                        })
+                      }
                       className="absolute right-3 top-1/2 transform -translate-y-1/2"
                     >
-                      {showPassword.confirm ? <EyeOff className="w-4 h-4 text-gray-400" /> : <Eye className="w-4 h-4 text-gray-400" />}
+                      {showPassword.confirm ? (
+                        <EyeOff className="w-4 h-4 text-gray-400" />
+                      ) : (
+                        <Eye className="w-4 h-4 text-gray-400" />
+                      )}
                     </button>
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex justify-end gap-3 mt-6">
                 <button
                   onClick={() => setShowPasswordModal(false)}
@@ -594,4 +680,4 @@ export default function TeacherProfilePage() {
       </div>
     </div>
   );
-} 
+}

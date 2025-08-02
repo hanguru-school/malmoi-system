@@ -1,7 +1,14 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { Star, Search, MessageSquare, User, Send, CheckCircle } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import {
+  Star,
+  Search,
+  MessageSquare,
+  User,
+  Send,
+  CheckCircle,
+} from "lucide-react";
 
 interface Review {
   id: string;
@@ -32,8 +39,8 @@ interface Lesson {
   studentId: string;
   date: Date;
   duration: number;
-  type: 'online' | 'offline';
-  status: 'completed' | 'cancelled' | 'no-show';
+  type: "online" | "offline";
+  status: "completed" | "cancelled" | "no-show";
 }
 
 interface Student {
@@ -48,14 +55,14 @@ export default function TeacherReviewsPage() {
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedRating, setSelectedRating] = useState<number>(0);
   const [showResponseModal, setShowResponseModal] = useState(false);
   const [selectedReview, setSelectedReview] = useState<Review | null>(null);
-  const [responseText, setResponseText] = useState('');
-  
+  const [responseText, setResponseText] = useState("");
+
   // Mock teacher ID - 실제 구현에서는 로그인된 선생님 ID 사용
-  const currentTeacherId = 'teacher1';
+  const currentTeacherId = "teacher1";
 
   useEffect(() => {
     initializeMockData();
@@ -63,83 +70,101 @@ export default function TeacherReviewsPage() {
 
   const initializeMockData = () => {
     const mockStudents: Student[] = [
-      { id: 'student1', name: '김학생', level: 'A', email: 'student1@example.com' },
-      { id: 'student2', name: '이학생', level: 'B', email: 'student2@example.com' },
-      { id: 'student3', name: '박학생', level: 'C', email: 'student3@example.com' }
+      {
+        id: "student1",
+        name: "김학생",
+        level: "A",
+        email: "student1@example.com",
+      },
+      {
+        id: "student2",
+        name: "이학생",
+        level: "B",
+        email: "student2@example.com",
+      },
+      {
+        id: "student3",
+        name: "박학생",
+        level: "C",
+        email: "student3@example.com",
+      },
     ];
 
     const mockLessons: Lesson[] = [
       {
-        id: 'lesson1',
-        title: '중급 회화 수업',
-        teacherId: 'teacher1',
-        studentId: 'student1',
+        id: "lesson1",
+        title: "중급 회화 수업",
+        teacherId: "teacher1",
+        studentId: "student1",
         date: new Date(Date.now() - 24 * 60 * 60 * 1000),
         duration: 60,
-        type: 'online',
-        status: 'completed'
+        type: "online",
+        status: "completed",
       },
       {
-        id: 'lesson2',
-        title: '기초 문법 수업',
-        teacherId: 'teacher1',
-        studentId: 'student2',
+        id: "lesson2",
+        title: "기초 문법 수업",
+        teacherId: "teacher1",
+        studentId: "student2",
         date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
         duration: 60,
-        type: 'offline',
-        status: 'completed'
+        type: "offline",
+        status: "completed",
       },
       {
-        id: 'lesson3',
-        title: '고급 읽기 수업',
-        teacherId: 'teacher2', // 다른 선생님 수업
-        studentId: 'student3',
+        id: "lesson3",
+        title: "고급 읽기 수업",
+        teacherId: "teacher2", // 다른 선생님 수업
+        studentId: "student3",
         date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
         duration: 90,
-        type: 'online',
-        status: 'completed'
-      }
+        type: "online",
+        status: "completed",
+      },
     ];
 
     const mockReviews: Review[] = [
       {
-        id: 'review1',
-        lessonId: 'lesson1',
-        studentId: 'student1',
-        teacherId: 'teacher1',
+        id: "review1",
+        lessonId: "lesson1",
+        studentId: "student1",
+        teacherId: "teacher1",
         rating: 5,
-        comment: '매우 유익한 수업이었습니다. 선생님이 설명을 잘 해주셔서 이해하기 쉬웠어요.',
+        comment:
+          "매우 유익한 수업이었습니다. 선생님이 설명을 잘 해주셔서 이해하기 쉬웠어요.",
         categories: {
           teaching: 5,
           materials: 4,
           communication: 5,
-          overall: 5
+          overall: 5,
         },
         isPublic: true,
         isGoogleReview: true,
         createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-        adminResponse: '좋은 피드백 감사합니다. 더 나은 수업을 위해 노력하겠습니다.',
+        adminResponse:
+          "좋은 피드백 감사합니다. 더 나은 수업을 위해 노력하겠습니다.",
         adminResponseDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-        teacherResponse: '열심히 공부하시는 모습이 보기 좋았습니다. 다음 수업에서도 좋은 성과 기대합니다!',
-        teacherResponseDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000)
+        teacherResponse:
+          "열심히 공부하시는 모습이 보기 좋았습니다. 다음 수업에서도 좋은 성과 기대합니다!",
+        teacherResponseDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
       },
       {
-        id: 'review2',
-        lessonId: 'lesson2',
-        studentId: 'student2',
-        teacherId: 'teacher1',
+        id: "review2",
+        lessonId: "lesson2",
+        studentId: "student2",
+        teacherId: "teacher1",
         rating: 4,
-        comment: '기초부터 차근차근 설명해주셔서 좋았습니다.',
+        comment: "기초부터 차근차근 설명해주셔서 좋았습니다.",
         categories: {
           teaching: 4,
           materials: 5,
           communication: 4,
-          overall: 4
+          overall: 4,
         },
         isPublic: false,
         isGoogleReview: false,
-        createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000)
-      }
+        createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
+      },
     ];
 
     setStudents(mockStudents);
@@ -148,26 +173,30 @@ export default function TeacherReviewsPage() {
   };
 
   // 현재 선생님의 리뷰만 필터링
-  const teacherReviews = reviews.filter(review => review.teacherId === currentTeacherId);
+  const teacherReviews = reviews.filter(
+    (review) => review.teacherId === currentTeacherId,
+  );
 
   const getStudentName = (studentId: string) => {
-    return students.find(s => s.id === studentId)?.name || 'Unknown';
+    return students.find((s) => s.id === studentId)?.name || "Unknown";
   };
 
   const getLessonTitle = (lessonId: string) => {
-    return lessons.find(l => l.id === lessonId)?.title || 'Unknown';
+    return lessons.find((l) => l.id === lessonId)?.title || "Unknown";
   };
 
-  const filteredReviews = teacherReviews.filter(review => {
-    const lesson = lessons.find(l => l.id === review.lessonId);
-    const student = students.find(s => s.id === review.studentId);
+  const filteredReviews = teacherReviews.filter((review) => {
+    const lesson = lessons.find((l) => l.id === review.lessonId);
+    const student = students.find((s) => s.id === review.studentId);
 
-    const matchesSearch = searchTerm === '' || 
+    const matchesSearch =
+      searchTerm === "" ||
       student?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       lesson?.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       review.comment.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesRating = selectedRating === 0 || review.rating === selectedRating;
+    const matchesRating =
+      selectedRating === 0 || review.rating === selectedRating;
 
     return matchesSearch && matchesRating;
   });
@@ -176,21 +205,23 @@ export default function TeacherReviewsPage() {
     if (!selectedReview || !responseText.trim()) return;
 
     setLoading(true);
-    
+
     // 실제 구현에서는 API 호출
-    setReviews(prev => prev.map(review => 
-      review.id === selectedReview.id 
-        ? { 
-            ...review, 
-            teacherResponse: responseText,
-            teacherResponseDate: new Date()
-          }
-        : review
-    ));
+    setReviews((prev) =>
+      prev.map((review) =>
+        review.id === selectedReview.id
+          ? {
+              ...review,
+              teacherResponse: responseText,
+              teacherResponseDate: new Date(),
+            }
+          : review,
+      ),
+    );
 
     setShowResponseModal(false);
     setSelectedReview(null);
-    setResponseText('');
+    setResponseText("");
     setLoading(false);
   };
 
@@ -198,10 +229,10 @@ export default function TeacherReviewsPage() {
     return (
       <div className="flex space-x-1">
         {[1, 2, 3, 4, 5].map((star) => (
-          <Star 
+          <Star
             key={star}
             className={`w-4 h-4 ${
-              star <= rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
+              star <= rating ? "text-yellow-400 fill-current" : "text-gray-300"
             }`}
           />
         ))}
@@ -211,15 +242,20 @@ export default function TeacherReviewsPage() {
 
   const getAverageRating = () => {
     if (teacherReviews.length === 0) return 0;
-    const total = teacherReviews.reduce((sum, review) => sum + review.rating, 0);
+    const total = teacherReviews.reduce(
+      (sum, review) => sum + review.rating,
+      0,
+    );
     return (total / teacherReviews.length).toFixed(1);
   };
 
   const getReviewStats = () => {
     const total = teacherReviews.length;
-    const publicReviews = teacherReviews.filter(r => r.isPublic).length;
-    const googleReviews = teacherReviews.filter(r => r.isGoogleReview).length;
-    const respondedReviews = teacherReviews.filter(r => r.teacherResponse).length;
+    const publicReviews = teacherReviews.filter((r) => r.isPublic).length;
+    const googleReviews = teacherReviews.filter((r) => r.isGoogleReview).length;
+    const respondedReviews = teacherReviews.filter(
+      (r) => r.teacherResponse,
+    ).length;
 
     return { total, publicReviews, googleReviews, respondedReviews };
   };
@@ -231,8 +267,12 @@ export default function TeacherReviewsPage() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">내 수업 리뷰</h1>
-          <p className="text-gray-600">학생들이 남긴 수업 피드백을 확인하고 답변할 수 있습니다</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            내 수업 리뷰
+          </h1>
+          <p className="text-gray-600">
+            학생들이 남긴 수업 피드백을 확인하고 답변할 수 있습니다
+          </p>
         </div>
 
         {/* Statistics */}
@@ -244,11 +284,13 @@ export default function TeacherReviewsPage() {
               </div>
               <div className="ml-4">
                 <p className="text-sm text-gray-600">총 리뷰</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {stats.total}
+                </p>
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex items-center">
               <div className="p-2 bg-green-100 rounded-lg">
@@ -256,11 +298,13 @@ export default function TeacherReviewsPage() {
               </div>
               <div className="ml-4">
                 <p className="text-sm text-gray-600">평균 평점</p>
-                <p className="text-2xl font-bold text-gray-900">{getAverageRating()}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {getAverageRating()}
+                </p>
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex items-center">
               <div className="p-2 bg-yellow-100 rounded-lg">
@@ -268,11 +312,13 @@ export default function TeacherReviewsPage() {
               </div>
               <div className="ml-4">
                 <p className="text-sm text-gray-600">Google 리뷰</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.googleReviews}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {stats.googleReviews}
+                </p>
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex items-center">
               <div className="p-2 bg-purple-100 rounded-lg">
@@ -280,7 +326,9 @@ export default function TeacherReviewsPage() {
               </div>
               <div className="ml-4">
                 <p className="text-sm text-gray-600">답변 완료</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.respondedReviews}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {stats.respondedReviews}
+                </p>
               </div>
             </div>
           </div>
@@ -301,7 +349,7 @@ export default function TeacherReviewsPage() {
                 />
               </div>
             </div>
-            
+
             <select
               value={selectedRating}
               onChange={(e) => setSelectedRating(Number(e.target.value))}
@@ -322,11 +370,11 @@ export default function TeacherReviewsPage() {
           <div className="p-6 border-b border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900">리뷰 목록</h2>
           </div>
-          
+
           <div className="divide-y divide-gray-200">
             {filteredReviews.map((review) => {
-              const lesson = lessons.find(l => l.id === review.lessonId);
-              const student = students.find(s => s.id === review.studentId);
+              const lesson = lessons.find((l) => l.id === review.lessonId);
+              const student = students.find((s) => s.id === review.studentId);
 
               return (
                 <div key={review.id} className="p-6">
@@ -343,21 +391,23 @@ export default function TeacherReviewsPage() {
                           </span>
                         </div>
                       </div>
-                      
+
                       <div className="text-sm text-gray-600 space-y-1">
-                        <p>학생: {student?.name} (레벨 {student?.level})</p>
+                        <p>
+                          학생: {student?.name} (레벨 {student?.level})
+                        </p>
                         <p>수업일: {lesson?.date.toLocaleDateString()}</p>
                         <p>작성일: {review.createdAt.toLocaleDateString()}</p>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center space-x-2">
                       {review.isGoogleReview && (
                         <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
                           Google 리뷰 반영
                         </span>
                       )}
-                      
+
                       {!review.teacherResponse && (
                         <button
                           onClick={() => {
@@ -372,36 +422,46 @@ export default function TeacherReviewsPage() {
                       )}
                     </div>
                   </div>
-                  
+
                   {/* Review Content */}
                   <div className="mb-4">
                     <p className="text-gray-700">{review.comment}</p>
                   </div>
-                  
+
                   {/* Category Ratings */}
                   <div className="grid grid-cols-3 gap-4 mb-4 text-sm">
                     <div>
                       <span className="text-gray-500">수업 진행:</span>
-                      <div className="flex">{renderStars(review.categories.teaching)}</div>
+                      <div className="flex">
+                        {renderStars(review.categories.teaching)}
+                      </div>
                     </div>
                     <div>
                       <span className="text-gray-500">교재/자료:</span>
-                      <div className="flex">{renderStars(review.categories.materials)}</div>
+                      <div className="flex">
+                        {renderStars(review.categories.materials)}
+                      </div>
                     </div>
                     <div>
                       <span className="text-gray-500">소통:</span>
-                      <div className="flex">{renderStars(review.categories.communication)}</div>
+                      <div className="flex">
+                        {renderStars(review.categories.communication)}
+                      </div>
                     </div>
                   </div>
-                  
+
                   {/* Admin Response */}
                   {review.adminResponse && (
                     <div className="bg-green-50 p-3 rounded-lg mb-3">
                       <div className="flex items-center space-x-2 mb-2">
                         <User className="w-4 h-4 text-green-500" />
-                        <span className="text-sm font-medium text-green-700">관리자 답변</span>
+                        <span className="text-sm font-medium text-green-700">
+                          관리자 답변
+                        </span>
                       </div>
-                      <p className="text-sm text-green-800">{review.adminResponse}</p>
+                      <p className="text-sm text-green-800">
+                        {review.adminResponse}
+                      </p>
                       {review.adminResponseDate && (
                         <p className="text-xs text-green-600 mt-1">
                           {review.adminResponseDate.toLocaleDateString()}
@@ -409,15 +469,19 @@ export default function TeacherReviewsPage() {
                       )}
                     </div>
                   )}
-                  
+
                   {/* Teacher Response */}
                   {review.teacherResponse && (
                     <div className="bg-blue-50 p-3 rounded-lg">
                       <div className="flex items-center space-x-2 mb-2">
                         <MessageSquare className="w-4 h-4 text-blue-500" />
-                        <span className="text-sm font-medium text-blue-700">내 답변</span>
+                        <span className="text-sm font-medium text-blue-700">
+                          내 답변
+                        </span>
                       </div>
-                      <p className="text-sm text-blue-800">{review.teacherResponse}</p>
+                      <p className="text-sm text-blue-800">
+                        {review.teacherResponse}
+                      </p>
                       {review.teacherResponseDate && (
                         <p className="text-xs text-blue-600 mt-1">
                           {review.teacherResponseDate.toLocaleDateString()}
@@ -429,7 +493,7 @@ export default function TeacherReviewsPage() {
               );
             })}
           </div>
-          
+
           {filteredReviews.length === 0 && (
             <div className="p-6 text-center text-gray-500">
               조건에 맞는 리뷰가 없습니다.
@@ -443,7 +507,7 @@ export default function TeacherReviewsPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
             <h2 className="text-xl font-semibold mb-4">학생에게 답변하기</h2>
-            
+
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 답변 내용
@@ -456,13 +520,13 @@ export default function TeacherReviewsPage() {
                 placeholder="학생에게 답변할 내용을 작성해주세요..."
               />
             </div>
-            
+
             <div className="flex justify-end space-x-3">
               <button
                 onClick={() => {
                   setShowResponseModal(false);
                   setSelectedReview(null);
-                  setResponseText('');
+                  setResponseText("");
                 }}
                 className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
               >
@@ -482,4 +546,4 @@ export default function TeacherReviewsPage() {
       )}
     </div>
   );
-} 
+}

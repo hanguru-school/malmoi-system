@@ -1,8 +1,20 @@
-'use client';
+"use client";
 
-import { Home, RefreshCw, Filter, Download, Users, Calendar, TrendingUp, BarChart3, BookOpen, Clock, MessageSquare } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import {
+  Home,
+  RefreshCw,
+  Filter,
+  Download,
+  Users,
+  Calendar,
+  TrendingUp,
+  BarChart3,
+  BookOpen,
+  Clock,
+  MessageSquare,
+} from "lucide-react";
+import { useState, useEffect } from "react";
+import Link from "next/link";
 
 interface AnalyticsData {
   bookingStats: Record<string, unknown>;
@@ -17,41 +29,47 @@ interface AnalyticsData {
 }
 
 export default function AnalyticsPage() {
-  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(
+    null,
+  );
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('overview');
-  const [dateRange, setDateRange] = useState('month');
+  const [activeTab, setActiveTab] = useState("overview");
+  const [dateRange, setDateRange] = useState("month");
   const [showFilterModal, setShowFilterModal] = useState(false);
 
   // 통계 데이터 조회
   const fetchAnalytics = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/analytics?type=comprehensive');
+      const response = await fetch("/api/analytics?type=comprehensive");
       const data = await response.json();
-      
+
       if (data.success) {
         setAnalyticsData(data.data);
       }
     } catch (error) {
-      console.error('통계 데이터 조회 실패:', error);
+      console.error("통계 데이터 조회 실패:", error);
     } finally {
       setLoading(false);
     }
   };
 
   // 데이터 내보내기
-  const exportData = async (format: 'csv' | 'excel' | 'json') => {
+  const exportData = async (format: "csv" | "excel" | "json") => {
     try {
-      const response = await fetch(`/api/analytics?type=comprehensive&format=${format}`);
-      
-      if (format === 'json') {
+      const response = await fetch(
+        `/api/analytics?type=comprehensive&format=${format}`,
+      );
+
+      if (format === "json") {
         const data = await response.json();
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const blob = new Blob([JSON.stringify(data, null, 2)], {
+          type: "application/json",
+        });
         const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         link.href = url;
-        link.download = `analytics_${new Date().toISOString().split('T')[0]}.json`;
+        link.download = `analytics_${new Date().toISOString().split("T")[0]}.json`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -59,16 +77,16 @@ export default function AnalyticsPage() {
       } else {
         const blob = await response.blob();
         const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         link.href = url;
-        link.download = `analytics_${new Date().toISOString().split('T')[0]}.${format}`;
+        link.download = `analytics_${new Date().toISOString().split("T")[0]}.${format}`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
       }
     } catch (error) {
-      console.error('데이터 내보내기 실패:', error);
+      console.error("데이터 내보내기 실패:", error);
     }
   };
 
@@ -130,10 +148,12 @@ export default function AnalyticsPage() {
               disabled={loading}
               className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
             >
-              <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw
+                className={`w-5 h-5 ${loading ? "animate-spin" : ""}`}
+              />
               데이터 새로고침
             </button>
-            
+
             <button
               onClick={() => setShowFilterModal(true)}
               className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
@@ -141,24 +161,24 @@ export default function AnalyticsPage() {
               <Filter className="w-5 h-5" />
               필터 설정
             </button>
-            
+
             <div className="flex gap-2">
               <button
-                onClick={() => exportData('csv')}
+                onClick={() => exportData("csv")}
                 className="flex items-center gap-2 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
               >
                 <Download className="w-5 h-5" />
                 CSV
               </button>
               <button
-                onClick={() => exportData('excel')}
+                onClick={() => exportData("excel")}
                 className="flex items-center gap-2 px-4 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
               >
                 <Download className="w-5 h-5" />
                 Excel
               </button>
               <button
-                onClick={() => exportData('json')}
+                onClick={() => exportData("json")}
                 className="flex items-center gap-2 px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
               >
                 <Download className="w-5 h-5" />
@@ -174,39 +194,48 @@ export default function AnalyticsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">총 학생 수</p>
-                <p className="text-2xl font-bold text-gray-900">{analyticsData.summary.totalStudents}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {analyticsData.summary.totalStudents}
+                </p>
               </div>
               <Users className="w-8 h-8 text-blue-600" />
             </div>
           </div>
-          
+
           <div className="bg-white rounded-xl shadow-lg p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">총 수업 수</p>
-                <p className="text-2xl font-bold text-gray-900">{analyticsData.summary.totalClasses}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {analyticsData.summary.totalClasses}
+                </p>
               </div>
               <Calendar className="w-8 h-8 text-green-600" />
             </div>
           </div>
-          
+
           <div className="bg-white rounded-xl shadow-lg p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">평균 출석률</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {Math.round(analyticsData.summary.averageAttendanceRate * 100)}%
+                  {Math.round(
+                    analyticsData.summary.averageAttendanceRate * 100,
+                  )}
+                  %
                 </p>
               </div>
               <TrendingUp className="w-8 h-8 text-purple-600" />
             </div>
           </div>
-          
+
           <div className="bg-white rounded-xl shadow-lg p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">활성 학생</p>
-                <p className="text-2xl font-bold text-gray-900">{analyticsData.summary.activeStudents}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {analyticsData.summary.activeStudents}
+                </p>
               </div>
               <Users className="w-8 h-8 text-orange-600" />
             </div>
@@ -217,17 +246,19 @@ export default function AnalyticsPage() {
           {/* 탭 네비게이션 */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">분석 카테고리</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                분석 카테고리
+              </h2>
               <div className="space-y-2">
                 {[
-                  { id: 'overview', name: '개요', icon: BarChart3 },
-                  { id: 'booking', name: '예약 통계', icon: Calendar },
-                  { id: 'student', name: '학생 분석', icon: Users },
-                  { id: 'homework', name: '숙제 통계', icon: BookOpen },
-                  { id: 'level', name: '레벨 분석', icon: TrendingUp },
-                  { id: 'time', name: '시간 패턴', icon: Clock },
-                  { id: 'review', name: '리뷰 분석', icon: MessageSquare },
-                  { id: 'automation', name: '자동화 통계', icon: RefreshCw },
+                  { id: "overview", name: "개요", icon: BarChart3 },
+                  { id: "booking", name: "예약 통계", icon: Calendar },
+                  { id: "student", name: "학생 분석", icon: Users },
+                  { id: "homework", name: "숙제 통계", icon: BookOpen },
+                  { id: "level", name: "레벨 분석", icon: TrendingUp },
+                  { id: "time", name: "시간 패턴", icon: Clock },
+                  { id: "review", name: "리뷰 분석", icon: MessageSquare },
+                  { id: "automation", name: "자동화 통계", icon: RefreshCw },
                 ].map((tab) => {
                   const Icon = tab.icon;
                   return (
@@ -236,8 +267,8 @@ export default function AnalyticsPage() {
                       onClick={() => setActiveTab(tab.id)}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                         activeTab === tab.id
-                          ? 'bg-blue-100 text-blue-700'
-                          : 'text-gray-600 hover:bg-gray-100'
+                          ? "bg-blue-100 text-blue-700"
+                          : "text-gray-600 hover:bg-gray-100"
                       }`}
                     >
                       <Icon className="w-5 h-5" />
@@ -252,46 +283,69 @@ export default function AnalyticsPage() {
           {/* 분석 내용 */}
           <div className="lg:col-span-3">
             <div className="bg-white rounded-xl shadow-lg p-6">
-              {activeTab === 'overview' && (
+              {activeTab === "overview" && (
                 <div className="space-y-6">
                   <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
                     <BarChart3 className="w-6 h-6" />
                     전체 개요
                   </h2>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <h3 className="font-medium text-gray-900 mb-3">예약 현황</h3>
+                      <h3 className="font-medium text-gray-900 mb-3">
+                        예약 현황
+                      </h3>
                       <div className="space-y-2">
                         <div className="flex justify-between">
                           <span className="text-gray-600">총 예약</span>
-                          <span className="font-medium">{analyticsData.bookingStats.totalBookings}</span>
+                          <span className="font-medium">
+                            {analyticsData.bookingStats.totalBookings}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">완료된 수업</span>
-                          <span className="font-medium">{analyticsData.bookingStats.completedClasses}</span>
+                          <span className="font-medium">
+                            {analyticsData.bookingStats.completedClasses}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">취소된 예약</span>
-                          <span className="font-medium">{analyticsData.bookingStats.cancelledBookings}</span>
+                          <span className="font-medium">
+                            {analyticsData.bookingStats.cancelledBookings}
+                          </span>
                         </div>
                       </div>
                     </div>
-                    
+
                     <div>
-                      <h3 className="font-medium text-gray-900 mb-3">학습 현황</h3>
+                      <h3 className="font-medium text-gray-900 mb-3">
+                        학습 현황
+                      </h3>
                       <div className="space-y-2">
                         <div className="flex justify-between">
                           <span className="text-gray-600">숙제 완료율</span>
-                          <span className="font-medium">{Math.round(analyticsData.homeworkStats.completionRate * 100)}%</span>
+                          <span className="font-medium">
+                            {Math.round(
+                              analyticsData.homeworkStats.completionRate * 100,
+                            )}
+                            %
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">정답률</span>
-                          <span className="font-medium">{Math.round(analyticsData.homeworkStats.correctAnswerRate * 100)}%</span>
+                          <span className="font-medium">
+                            {Math.round(
+                              analyticsData.homeworkStats.correctAnswerRate *
+                                100,
+                            )}
+                            %
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">평균 별점</span>
-                          <span className="font-medium">{analyticsData.reviewStats.averageRating.toFixed(1)}</span>
+                          <span className="font-medium">
+                            {analyticsData.reviewStats.averageRating.toFixed(1)}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -299,44 +353,60 @@ export default function AnalyticsPage() {
                 </div>
               )}
 
-              {activeTab === 'booking' && (
+              {activeTab === "booking" && (
                 <div className="space-y-6">
                   <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
                     <Calendar className="w-6 h-6" />
                     예약 통계
                   </h2>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <h3 className="font-medium text-gray-900 mb-3">예약 현황</h3>
+                      <h3 className="font-medium text-gray-900 mb-3">
+                        예약 현황
+                      </h3>
                       <div className="space-y-2">
                         <div className="flex justify-between">
                           <span className="text-gray-600">총 예약 수</span>
-                          <span className="font-medium">{analyticsData.bookingStats.totalBookings}</span>
+                          <span className="font-medium">
+                            {analyticsData.bookingStats.totalBookings}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">완료된 수업</span>
-                          <span className="font-medium">{analyticsData.bookingStats.completedClasses}</span>
+                          <span className="font-medium">
+                            {analyticsData.bookingStats.completedClasses}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">취소된 예약</span>
-                          <span className="font-medium">{analyticsData.bookingStats.cancelledBookings}</span>
+                          <span className="font-medium">
+                            {analyticsData.bookingStats.cancelledBookings}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">당일 취소</span>
-                          <span className="font-medium">{analyticsData.bookingStats.sameDayCancellations}</span>
+                          <span className="font-medium">
+                            {analyticsData.bookingStats.sameDayCancellations}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">미수강</span>
-                          <span className="font-medium">{analyticsData.bookingStats.noShowBookings}</span>
+                          <span className="font-medium">
+                            {analyticsData.bookingStats.noShowBookings}
+                          </span>
                         </div>
                       </div>
                     </div>
-                    
+
                     <div>
-                      <h3 className="font-medium text-gray-900 mb-3">선생님별 수업 수</h3>
+                      <h3 className="font-medium text-gray-900 mb-3">
+                        선생님별 수업 수
+                      </h3>
                       <div className="space-y-2">
-                        {Object.entries(analyticsData.bookingStats.teacherClassCounts).map(([teacher, count]) => (
+                        {Object.entries(
+                          analyticsData.bookingStats.teacherClassCounts,
+                        ).map(([teacher, count]) => (
                           <div key={teacher} className="flex justify-between">
                             <span className="text-gray-600">{teacher}</span>
                             <span className="font-medium">{count}</span>
@@ -348,13 +418,13 @@ export default function AnalyticsPage() {
                 </div>
               )}
 
-              {activeTab === 'student' && (
+              {activeTab === "student" && (
                 <div className="space-y-6">
                   <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
                     <Users className="w-6 h-6" />
                     학생 분석
                   </h2>
-                  
+
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>
@@ -370,10 +440,16 @@ export default function AnalyticsPage() {
                         {analyticsData.studentStats.map((student) => (
                           <tr key={student.studentId} className="border-b">
                             <td className="py-2">{student.studentId}</td>
-                            <td className="py-2">{student.totalClassHours}분</td>
-                            <td className="py-2">{Math.round(student.attendanceRate * 100)}%</td>
+                            <td className="py-2">
+                              {student.totalClassHours}분
+                            </td>
+                            <td className="py-2">
+                              {Math.round(student.attendanceRate * 100)}%
+                            </td>
                             <td className="py-2">{student.level}</td>
-                            <td className="py-2">{student.daysSinceLastClass}일 전</td>
+                            <td className="py-2">
+                              {student.daysSinceLastClass}일 전
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -382,36 +458,55 @@ export default function AnalyticsPage() {
                 </div>
               )}
 
-              {activeTab === 'homework' && (
+              {activeTab === "homework" && (
                 <div className="space-y-6">
                   <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
                     <BookOpen className="w-6 h-6" />
                     숙제 통계
                   </h2>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <h3 className="font-medium text-gray-900 mb-3">전체 현황</h3>
+                      <h3 className="font-medium text-gray-900 mb-3">
+                        전체 현황
+                      </h3>
                       <div className="space-y-2">
                         <div className="flex justify-between">
                           <span className="text-gray-600">총 숙제 수</span>
-                          <span className="font-medium">{analyticsData.homeworkStats.totalAssignments}</span>
+                          <span className="font-medium">
+                            {analyticsData.homeworkStats.totalAssignments}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">완료율</span>
-                          <span className="font-medium">{Math.round(analyticsData.homeworkStats.completionRate * 100)}%</span>
+                          <span className="font-medium">
+                            {Math.round(
+                              analyticsData.homeworkStats.completionRate * 100,
+                            )}
+                            %
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">정답률</span>
-                          <span className="font-medium">{Math.round(analyticsData.homeworkStats.correctAnswerRate * 100)}%</span>
+                          <span className="font-medium">
+                            {Math.round(
+                              analyticsData.homeworkStats.correctAnswerRate *
+                                100,
+                            )}
+                            %
+                          </span>
                         </div>
                       </div>
                     </div>
-                    
+
                     <div>
-                      <h3 className="font-medium text-gray-900 mb-3">오답 유형별</h3>
+                      <h3 className="font-medium text-gray-900 mb-3">
+                        오답 유형별
+                      </h3>
                       <div className="space-y-2">
-                        {Object.entries(analyticsData.homeworkStats.errorTypeStats).map(([type, count]) => (
+                        {Object.entries(
+                          analyticsData.homeworkStats.errorTypeStats,
+                        ).map(([type, count]) => (
                           <div key={type} className="flex justify-between">
                             <span className="text-gray-600">{type}</span>
                             <span className="font-medium">{count}</span>
@@ -423,18 +518,22 @@ export default function AnalyticsPage() {
                 </div>
               )}
 
-              {activeTab === 'level' && (
+              {activeTab === "level" && (
                 <div className="space-y-6">
                   <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
                     <TrendingUp className="w-6 h-6" />
                     레벨 분석
                   </h2>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <h3 className="font-medium text-gray-900 mb-3">레벨별 학생 분포</h3>
+                      <h3 className="font-medium text-gray-900 mb-3">
+                        레벨별 학생 분포
+                      </h3>
                       <div className="space-y-2">
-                        {Object.entries(analyticsData.levelStats.levelDistribution).map(([level, count]) => (
+                        {Object.entries(
+                          analyticsData.levelStats.levelDistribution,
+                        ).map(([level, count]) => (
                           <div key={level} className="flex justify-between">
                             <span className="text-gray-600">{level}</span>
                             <span className="font-medium">{count}명</span>
@@ -442,11 +541,15 @@ export default function AnalyticsPage() {
                         ))}
                       </div>
                     </div>
-                    
+
                     <div>
-                      <h3 className="font-medium text-gray-900 mb-3">레벨업 평균 시간</h3>
+                      <h3 className="font-medium text-gray-900 mb-3">
+                        레벨업 평균 시간
+                      </h3>
                       <div className="space-y-2">
-                        {Object.entries(analyticsData.levelStats.averageLevelUpTime).map(([level, days]) => (
+                        {Object.entries(
+                          analyticsData.levelStats.averageLevelUpTime,
+                        ).map(([level, days]) => (
                           <div key={level} className="flex justify-between">
                             <span className="text-gray-600">{level}</span>
                             <span className="font-medium">{days}일</span>
@@ -458,18 +561,22 @@ export default function AnalyticsPage() {
                 </div>
               )}
 
-              {activeTab === 'time' && (
+              {activeTab === "time" && (
                 <div className="space-y-6">
                   <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
                     <Clock className="w-6 h-6" />
                     시간 패턴 분석
                   </h2>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <h3 className="font-medium text-gray-900 mb-3">요일별 예약 분포</h3>
+                      <h3 className="font-medium text-gray-900 mb-3">
+                        요일별 예약 분포
+                      </h3>
                       <div className="space-y-2">
-                        {Object.entries(analyticsData.timeAnalysis.weekdayDistribution).map(([day, count]) => (
+                        {Object.entries(
+                          analyticsData.timeAnalysis.weekdayDistribution,
+                        ).map(([day, count]) => (
                           <div key={day} className="flex justify-between">
                             <span className="text-gray-600">{day}</span>
                             <span className="font-medium">{count}</span>
@@ -477,48 +584,64 @@ export default function AnalyticsPage() {
                         ))}
                       </div>
                     </div>
-                    
+
                     <div>
-                      <h3 className="font-medium text-gray-900 mb-3">피크 시간대</h3>
+                      <h3 className="font-medium text-gray-900 mb-3">
+                        피크 시간대
+                      </h3>
                       <div className="space-y-2">
-                        {analyticsData.timeAnalysis.peakHours.map((hour, index) => (
-                          <div key={hour} className="flex justify-between">
-                            <span className="text-gray-600">{index + 1}위</span>
-                            <span className="font-medium">{hour}</span>
-                          </div>
-                        ))}
+                        {analyticsData.timeAnalysis.peakHours.map(
+                          (hour, index) => (
+                            <div key={hour} className="flex justify-between">
+                              <span className="text-gray-600">
+                                {index + 1}위
+                              </span>
+                              <span className="font-medium">{hour}</span>
+                            </div>
+                          ),
+                        )}
                       </div>
                     </div>
                   </div>
                 </div>
               )}
 
-              {activeTab === 'review' && (
+              {activeTab === "review" && (
                 <div className="space-y-6">
                   <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
                     <MessageSquare className="w-6 h-6" />
                     리뷰 분석
                   </h2>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <h3 className="font-medium text-gray-900 mb-3">리뷰 현황</h3>
+                      <h3 className="font-medium text-gray-900 mb-3">
+                        리뷰 현황
+                      </h3>
                       <div className="space-y-2">
                         <div className="flex justify-between">
                           <span className="text-gray-600">총 리뷰 수</span>
-                          <span className="font-medium">{analyticsData.reviewStats.totalReviews}</span>
+                          <span className="font-medium">
+                            {analyticsData.reviewStats.totalReviews}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">평균 별점</span>
-                          <span className="font-medium">{analyticsData.reviewStats.averageRating.toFixed(1)}</span>
+                          <span className="font-medium">
+                            {analyticsData.reviewStats.averageRating.toFixed(1)}
+                          </span>
                         </div>
                       </div>
                     </div>
-                    
+
                     <div>
-                      <h3 className="font-medium text-gray-900 mb-3">별점 분포</h3>
+                      <h3 className="font-medium text-gray-900 mb-3">
+                        별점 분포
+                      </h3>
                       <div className="space-y-2">
-                        {Object.entries(analyticsData.reviewStats.ratingDistribution).map(([rating, count]) => (
+                        {Object.entries(
+                          analyticsData.reviewStats.ratingDistribution,
+                        ).map(([rating, count]) => (
                           <div key={rating} className="flex justify-between">
                             <span className="text-gray-600">{rating}점</span>
                             <span className="font-medium">{count}개</span>
@@ -530,36 +653,56 @@ export default function AnalyticsPage() {
                 </div>
               )}
 
-              {activeTab === 'automation' && (
+              {activeTab === "automation" && (
                 <div className="space-y-6">
                   <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
                     <RefreshCw className="w-6 h-6" />
                     자동화 통계
                   </h2>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <h3 className="font-medium text-gray-900 mb-3">자동화 현황</h3>
+                      <h3 className="font-medium text-gray-900 mb-3">
+                        자동화 현황
+                      </h3>
                       <div className="space-y-2">
                         <div className="flex justify-between">
                           <span className="text-gray-600">총 리마인드</span>
-                          <span className="font-medium">{analyticsData.automationStats.totalReminders}</span>
+                          <span className="font-medium">
+                            {analyticsData.automationStats.totalReminders}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">응답률</span>
-                          <span className="font-medium">{Math.round(analyticsData.automationStats.reminderResponseRate * 100)}%</span>
+                          <span className="font-medium">
+                            {Math.round(
+                              analyticsData.automationStats
+                                .reminderResponseRate * 100,
+                            )}
+                            %
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">발송 성공률</span>
-                          <span className="font-medium">{Math.round(analyticsData.automationStats.messageDeliverySuccess * 100)}%</span>
+                          <span className="font-medium">
+                            {Math.round(
+                              analyticsData.automationStats
+                                .messageDeliverySuccess * 100,
+                            )}
+                            %
+                          </span>
                         </div>
                       </div>
                     </div>
-                    
+
                     <div>
-                      <h3 className="font-medium text-gray-900 mb-3">트리거별 발송</h3>
+                      <h3 className="font-medium text-gray-900 mb-3">
+                        트리거별 발송
+                      </h3>
                       <div className="space-y-2">
-                        {Object.entries(analyticsData.automationStats.automationTriggers).map(([trigger, count]) => (
+                        {Object.entries(
+                          analyticsData.automationStats.automationTriggers,
+                        ).map(([trigger, count]) => (
                           <div key={trigger} className="flex justify-between">
                             <span className="text-gray-600">{trigger}</span>
                             <span className="font-medium">{count}</span>
@@ -578,10 +721,14 @@ export default function AnalyticsPage() {
         {showFilterModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-xl p-6 max-w-md mx-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">필터 설정</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                필터 설정
+              </h3>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">기간</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    기간
+                  </label>
                   <select
                     value={dateRange}
                     onChange={(e) => setDateRange(e.target.value)}
@@ -617,4 +764,4 @@ export default function AnalyticsPage() {
       </div>
     </div>
   );
-} 
+}

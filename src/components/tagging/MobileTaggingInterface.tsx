@@ -1,36 +1,53 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { 
-  CheckCircle, 
-  XCircle, 
+import { useState, useEffect } from "react";
+import {
+  CheckCircle,
+  XCircle,
   Smartphone,
   ArrowLeft,
-  Home
-} from 'lucide-react';
-import { useRouter } from 'next/navigation';
+  Home,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface TaggingResult {
   success: boolean;
   message: string;
-  action: 'attendance' | 'consultation' | 'purchase' | 'other' | 'checkout' | 'already_tagged';
+  action:
+    | "attendance"
+    | "consultation"
+    | "purchase"
+    | "other"
+    | "checkout"
+    | "already_tagged";
   data?: any;
   showPopup?: boolean;
-  popupType?: 'attendance_confirm' | 'no_reservation' | 'checkout_confirm' | 'multiple_tag' | 'registration';
+  popupType?:
+    | "attendance_confirm"
+    | "no_reservation"
+    | "checkout_confirm"
+    | "multiple_tag"
+    | "registration";
 }
 
 interface MobileTaggingInterfaceProps {
   uid: string;
-  deviceType: 'smartphone';
+  deviceType: "smartphone";
   location: string;
 }
 
-export default function MobileTaggingInterface({ uid, deviceType, location }: MobileTaggingInterfaceProps) {
+export default function MobileTaggingInterface({
+  uid,
+  deviceType,
+  location,
+}: MobileTaggingInterfaceProps) {
   const router = useRouter();
   const [isWaiting, setIsWaiting] = useState(false);
-  const [taggingResult, setTaggingResult] = useState<TaggingResult | null>(null);
+  const [taggingResult, setTaggingResult] = useState<TaggingResult | null>(
+    null,
+  );
   const [showPopup, setShowPopup] = useState(false);
-  const [popupType, setPopupType] = useState<string>('');
+  const [popupType, setPopupType] = useState<string>("");
   const [popupData, setPopupData] = useState<any>(null);
 
   // 자동 태깅 처리
@@ -42,17 +59,17 @@ export default function MobileTaggingInterface({ uid, deviceType, location }: Mo
 
   const processTagging = async () => {
     setIsWaiting(true);
-    
+
     try {
-      const response = await fetch('/api/tagging/process', {
-        method: 'POST',
+      const response = await fetch("/api/tagging/process", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           uid,
           deviceType,
-          location
+          location,
         }),
       });
 
@@ -60,17 +77,16 @@ export default function MobileTaggingInterface({ uid, deviceType, location }: Mo
       setTaggingResult(result);
 
       if (result.showPopup) {
-        setPopupType(result.popupType || '');
+        setPopupType(result.popupType || "");
         setPopupData(result.data);
         setShowPopup(true);
       }
-
     } catch (error) {
-      console.error('Tagging error:', error);
+      console.error("Tagging error:", error);
       setTaggingResult({
         success: false,
-        message: '태깅 처리 중 오류가 발생했습니다.',
-        action: 'other'
+        message: "태깅 처리 중 오류가 발생했습니다.",
+        action: "other",
       });
     } finally {
       setIsWaiting(false);
@@ -81,15 +97,15 @@ export default function MobileTaggingInterface({ uid, deviceType, location }: Mo
     if (!popupData?.reservation?.id) return;
 
     try {
-      const response = await fetch('/api/tagging/confirm-attendance', {
-        method: 'POST',
+      const response = await fetch("/api/tagging/confirm-attendance", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           uid,
           reservationId: popupData.reservation.id,
-          points: 10
+          points: 10,
         }),
       });
 
@@ -97,20 +113,20 @@ export default function MobileTaggingInterface({ uid, deviceType, location }: Mo
       setTaggingResult(result);
       setShowPopup(false);
     } catch (error) {
-      console.error('Attendance confirmation error:', error);
+      console.error("Attendance confirmation error:", error);
     }
   };
 
   const handleNoReservationAttendance = async () => {
     try {
-      const response = await fetch('/api/tagging/confirm-attendance', {
-        method: 'POST',
+      const response = await fetch("/api/tagging/confirm-attendance", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           uid,
-          points: 5
+          points: 5,
         }),
       });
 
@@ -118,7 +134,7 @@ export default function MobileTaggingInterface({ uid, deviceType, location }: Mo
       setTaggingResult(result);
       setShowPopup(false);
     } catch (error) {
-      console.error('Attendance confirmation error:', error);
+      console.error("Attendance confirmation error:", error);
     }
   };
 
@@ -127,8 +143,8 @@ export default function MobileTaggingInterface({ uid, deviceType, location }: Mo
     setShowPopup(false);
     setTaggingResult({
       success: true,
-      message: '퇴근이 확인되었습니다.',
-      action: 'checkout'
+      message: "퇴근이 확인되었습니다.",
+      action: "checkout",
     });
   };
 
@@ -138,7 +154,7 @@ export default function MobileTaggingInterface({ uid, deviceType, location }: Mo
   };
 
   const handleGoHome = () => {
-    router.push('/');
+    router.push("/");
   };
 
   return (
@@ -174,9 +190,13 @@ export default function MobileTaggingInterface({ uid, deviceType, location }: Mo
 
         {/* 결과 표시 */}
         {taggingResult && !isWaiting && (
-          <div className={`bg-white rounded-2xl shadow-xl p-6 mb-4 ${
-            taggingResult.success ? 'border-l-4 border-green-500' : 'border-l-4 border-red-500'
-          }`}>
+          <div
+            className={`bg-white rounded-2xl shadow-xl p-6 mb-4 ${
+              taggingResult.success
+                ? "border-l-4 border-green-500"
+                : "border-l-4 border-red-500"
+            }`}
+          >
             <div className="flex items-center gap-3 mb-4">
               {taggingResult.success ? (
                 <CheckCircle className="w-6 h-6 text-green-600" />
@@ -184,11 +204,11 @@ export default function MobileTaggingInterface({ uid, deviceType, location }: Mo
                 <XCircle className="w-6 h-6 text-red-600" />
               )}
               <h3 className="text-lg font-semibold text-gray-900">
-                {taggingResult.success ? '성공' : '오류'}
+                {taggingResult.success ? "성공" : "오류"}
               </h3>
             </div>
             <p className="text-gray-700 mb-4">{taggingResult.message}</p>
-            
+
             {taggingResult.data && (
               <div className="p-4 bg-gray-50 rounded-lg">
                 <h4 className="font-medium text-gray-900 mb-2">상세 정보</h4>
@@ -222,7 +242,9 @@ export default function MobileTaggingInterface({ uid, deviceType, location }: Mo
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600">시간:</span>
-              <span className="text-gray-900">{new Date().toLocaleString()}</span>
+              <span className="text-gray-900">
+                {new Date().toLocaleString()}
+              </span>
             </div>
           </div>
         </div>
@@ -236,7 +258,7 @@ export default function MobileTaggingInterface({ uid, deviceType, location }: Mo
             <Home className="w-5 h-5 inline mr-2" />
             홈으로 돌아가기
           </button>
-          
+
           {taggingResult?.success && (
             <button
               onClick={() => setTaggingResult(null)}
@@ -253,21 +275,23 @@ export default function MobileTaggingInterface({ uid, deviceType, location }: Mo
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl p-6 w-full max-w-sm">
             <h3 className="text-xl font-semibold text-gray-900 mb-4">
-              {popupType === 'attendance_confirm' && '출석 확인'}
-              {popupType === 'no_reservation' && '예약 없음'}
-              {popupType === 'checkout_confirm' && '퇴근 확인'}
-              {popupType === 'registration' && 'UID 등록'}
+              {popupType === "attendance_confirm" && "출석 확인"}
+              {popupType === "no_reservation" && "예약 없음"}
+              {popupType === "checkout_confirm" && "퇴근 확인"}
+              {popupType === "registration" && "UID 등록"}
             </h3>
-            
+
             <p className="text-gray-700 mb-6">
-              {popupType === 'attendance_confirm' && '出席を確認 / その他'}
-              {popupType === 'no_reservation' && '本日の予約がありません。出席を記録しますか？'}
-              {popupType === 'checkout_confirm' && '퇴근하시겠습니까?'}
-              {popupType === 'registration' && '새로운 UID가 등록되었습니다. 사용자 정보를 입력해주세요.'}
+              {popupType === "attendance_confirm" && "出席を確認 / その他"}
+              {popupType === "no_reservation" &&
+                "本日の予約がありません。出席を記録しますか？"}
+              {popupType === "checkout_confirm" && "퇴근하시겠습니까?"}
+              {popupType === "registration" &&
+                "새로운 UID가 등록되었습니다. 사용자 정보를 입력해주세요."}
             </p>
 
             <div className="space-y-3">
-              {popupType === 'attendance_confirm' && (
+              {popupType === "attendance_confirm" && (
                 <>
                   <button
                     onClick={handleAttendanceConfirm}
@@ -283,8 +307,8 @@ export default function MobileTaggingInterface({ uid, deviceType, location }: Mo
                   </button>
                 </>
               )}
-              
-              {popupType === 'no_reservation' && (
+
+              {popupType === "no_reservation" && (
                 <>
                   <button
                     onClick={handleNoReservationAttendance}
@@ -300,8 +324,8 @@ export default function MobileTaggingInterface({ uid, deviceType, location }: Mo
                   </button>
                 </>
               )}
-              
-              {popupType === 'checkout_confirm' && (
+
+              {popupType === "checkout_confirm" && (
                 <>
                   <button
                     onClick={handleCheckoutConfirm}
@@ -317,8 +341,8 @@ export default function MobileTaggingInterface({ uid, deviceType, location }: Mo
                   </button>
                 </>
               )}
-              
-              {popupType === 'registration' && (
+
+              {popupType === "registration" && (
                 <>
                   <button
                     onClick={handleRegistration}
@@ -340,4 +364,4 @@ export default function MobileTaggingInterface({ uid, deviceType, location }: Mo
       )}
     </div>
   );
-} 
+}

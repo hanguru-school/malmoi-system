@@ -1,23 +1,23 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { 
-  BookOpen, 
-  Mail, 
-  Lock, 
-  Eye, 
-  EyeOff, 
-  ArrowRight, 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  BookOpen,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  ArrowRight,
   UserPlus,
   Languages,
   Users,
   GraduationCap,
   Building,
   User,
-  Shield
-} from 'lucide-react';
-import { useLanguage } from '@/contexts/LanguageContext';
+  Shield,
+} from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // 다국어 텍스트 정의
 const translations = {
@@ -47,13 +47,13 @@ const translations = {
       reservation: "簡単なレッスン予約",
       materials: "レッスン資料管理",
       progress: "学習進捗追跡",
-      communication: "先生とのコミュニケーション"
+      communication: "先生とのコミュニケーション",
     },
     stats: {
       students: "活発な生徒",
       classes: "完了したレッスン",
-      satisfaction: "平均満足度"
-    }
+      satisfaction: "平均満足度",
+    },
   },
   ko: {
     title: "한국어교실MalMoi",
@@ -81,37 +81,37 @@ const translations = {
       reservation: "간편한 수업 예약",
       materials: "수업 자료 관리",
       progress: "학습 진도 추적",
-      communication: "선생님과 소통"
+      communication: "선생님과 소통",
     },
     stats: {
       students: "활발한 학생들",
       classes: "완료된 수업",
-      satisfaction: "평균 만족도"
-    }
-  }
+      satisfaction: "평균 만족도",
+    },
+  },
 };
 
 export default function LoginPage() {
   const router = useRouter();
   const { language, toggleLanguage } = useLanguage();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  
+  const [error, setError] = useState("");
+
   const t = translations[language];
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
+    setError("");
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, password }),
       });
@@ -119,7 +119,7 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || '로그인에 실패했습니다.');
+        setError(data.error || "로그인에 실패했습니다.");
         return;
       }
 
@@ -127,18 +127,17 @@ export default function LoginPage() {
       if (data.dashboardPath) {
         router.push(data.dashboardPath);
       } else {
-        router.push('/student');
+        router.push("/student");
       }
-      
     } catch (error) {
-      setError('로그인에 실패했습니다. 다시 시도해주세요.');
+      setError("로그인에 실패했습니다. 다시 시도해주세요.");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleRegister = () => {
-    router.push('/auth/register');
+    router.push("/auth/register");
   };
 
   return (
@@ -155,10 +154,8 @@ export default function LoginPage() {
           <h2 className="text-xl font-semibold text-gray-700 mb-2">
             {t.subtitle}
           </h2>
-          <p className="text-gray-600">
-            {t.description}
-          </p>
-          
+          <p className="text-gray-600">{t.description}</p>
+
           {/* Language Toggle */}
           <div className="mt-4">
             <button
@@ -166,7 +163,7 @@ export default function LoginPage() {
               className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 mx-auto"
             >
               <Languages className="w-4 h-4" />
-              {language === 'ja' ? '한국어' : '日本語'}
+              {language === "ja" ? "한국어" : "日本語"}
             </button>
           </div>
         </div>
@@ -175,7 +172,10 @@ export default function LoginPage() {
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 {t.emailLabel}
               </label>
               <div className="relative">
@@ -197,7 +197,10 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 {t.passwordLabel}
               </label>
               <div className="relative">
@@ -207,7 +210,7 @@ export default function LoginPage() {
                 <input
                   id="password"
                   name="password"
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   required
                   value={password}
@@ -230,9 +233,7 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <div className="text-red-600 text-sm text-center">
-                {error}
-              </div>
+              <div className="text-red-600 text-sm text-center">{error}</div>
             )}
 
             <div>
@@ -267,9 +268,7 @@ export default function LoginPage() {
 
           {/* Register Button */}
           <div className="text-center">
-            <p className="text-sm text-gray-600 mb-4">
-              {t.noAccount}
-            </p>
+            <p className="text-sm text-gray-600 mb-4">{t.noAccount}</p>
             <button
               onClick={handleRegister}
               className="inline-flex items-center gap-2 px-6 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
@@ -283,58 +282,58 @@ export default function LoginPage() {
         {/* Quick Login Options */}
         <div className="bg-white rounded-2xl shadow-xl p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">
-            {language === 'ja' ? 'クイックログイン' : '빠른 로그인'}
+            {language === "ja" ? "クイックログイン" : "빠른 로그인"}
           </h3>
-          
+
           <div className="grid grid-cols-1 gap-3">
             <button
               onClick={() => {
-                setEmail('student@example.com');
-                setPassword('password123');
+                setEmail("student@example.com");
+                setPassword("password123");
               }}
               className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <Users className="w-5 h-5 text-blue-600" />
               <span className="text-sm font-medium">{t.studentLogin}</span>
             </button>
-            
+
             <button
               onClick={() => {
-                setEmail('parent@example.com');
-                setPassword('password123');
+                setEmail("parent@example.com");
+                setPassword("password123");
               }}
               className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <User className="w-5 h-5 text-green-600" />
               <span className="text-sm font-medium">{t.parentLogin}</span>
             </button>
-            
+
             <button
               onClick={() => {
-                setEmail('employee@example.com');
-                setPassword('password123');
+                setEmail("employee@example.com");
+                setPassword("password123");
               }}
               className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <Building className="w-5 h-5 text-purple-600" />
               <span className="text-sm font-medium">{t.employeeLogin}</span>
             </button>
-            
+
             <button
               onClick={() => {
-                setEmail('teacher@example.com');
-                setPassword('password123');
+                setEmail("teacher@example.com");
+                setPassword("password123");
               }}
               className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <GraduationCap className="w-5 h-5 text-orange-600" />
               <span className="text-sm font-medium">{t.teacherLogin}</span>
             </button>
-            
+
             <button
               onClick={() => {
-                setEmail('admin@example.com');
-                setPassword('password123');
+                setEmail("admin@example.com");
+                setPassword("password123");
               }}
               className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
             >
@@ -349,7 +348,7 @@ export default function LoginPage() {
           <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">
             {t.features.title}
           </h3>
-          
+
           <div className="grid grid-cols-2 gap-4">
             <div className="text-center">
               <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
@@ -357,26 +356,28 @@ export default function LoginPage() {
               </div>
               <p className="text-xs text-gray-600">{t.features.reservation}</p>
             </div>
-            
+
             <div className="text-center">
               <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-2">
                 <GraduationCap className="w-4 h-4 text-green-600" />
               </div>
               <p className="text-xs text-gray-600">{t.features.materials}</p>
             </div>
-            
+
             <div className="text-center">
               <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-2">
                 <Users className="w-4 h-4 text-purple-600" />
               </div>
               <p className="text-xs text-gray-600">{t.features.progress}</p>
             </div>
-            
+
             <div className="text-center">
               <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-2">
                 <Mail className="w-4 h-4 text-orange-600" />
               </div>
-              <p className="text-xs text-gray-600">{t.features.communication}</p>
+              <p className="text-xs text-gray-600">
+                {t.features.communication}
+              </p>
             </div>
           </div>
         </div>
@@ -399,4 +400,4 @@ export default function LoginPage() {
       </div>
     </div>
   );
-} 
+}

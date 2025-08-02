@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { ArrowLeft, QrCode, X, Maximize2 } from 'lucide-react';
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { ArrowLeft, QrCode, X, Maximize2 } from "lucide-react";
 
 export default function StaffQRDisplayPage() {
-  const [qrCodeData, setQrCodeData] = useState<string>('');
+  const [qrCodeData, setQrCodeData] = useState<string>("");
   const [showFullScreen, setShowFullScreen] = useState(false);
   const [staffInfo, setStaffInfo] = useState<{
     id: string;
@@ -17,10 +17,10 @@ export default function StaffQRDisplayPage() {
   useEffect(() => {
     // 실제로는 API에서 직원 정보를 가져와야 함
     const mockStaffInfo = {
-      id: 'ST-001',
-      name: '이직원',
-      department: '사무실',
-      position: '사무직원'
+      id: "ST-001",
+      name: "이직원",
+      department: "사무실",
+      position: "사무직원",
     };
     setStaffInfo(mockStaffInfo);
 
@@ -88,7 +88,9 @@ export default function StaffQRDisplayPage() {
 
           <div className="text-center">
             <p className="text-sm text-gray-600">QR코드 데이터</p>
-            <p className="font-mono text-sm bg-gray-100 p-2 rounded mt-1">{qrCodeData}</p>
+            <p className="font-mono text-sm bg-gray-100 p-2 rounded mt-1">
+              {qrCodeData}
+            </p>
           </div>
         </div>
       </div>
@@ -98,20 +100,36 @@ export default function StaffQRDisplayPage() {
         <h2 className="text-lg font-semibold text-gray-900 mb-4">직원 정보</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">직원 ID</label>
-            <p className="text-lg font-semibold text-gray-900">{staffInfo.id}</p>
+            <label className="block text-sm font-medium text-gray-700">
+              직원 ID
+            </label>
+            <p className="text-lg font-semibold text-gray-900">
+              {staffInfo.id}
+            </p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">이름</label>
-            <p className="text-lg font-semibold text-gray-900">{staffInfo.name}</p>
+            <label className="block text-sm font-medium text-gray-700">
+              이름
+            </label>
+            <p className="text-lg font-semibold text-gray-900">
+              {staffInfo.name}
+            </p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">부서</label>
-            <p className="text-lg font-semibold text-gray-900">{staffInfo.department}</p>
+            <label className="block text-sm font-medium text-gray-700">
+              부서
+            </label>
+            <p className="text-lg font-semibold text-gray-900">
+              {staffInfo.department}
+            </p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">직책</label>
-            <p className="text-lg font-semibold text-gray-900">{staffInfo.position}</p>
+            <label className="block text-sm font-medium text-gray-700">
+              직책
+            </label>
+            <p className="text-lg font-semibold text-gray-900">
+              {staffInfo.position}
+            </p>
           </div>
         </div>
       </div>
@@ -132,7 +150,9 @@ export default function StaffQRDisplayPage() {
         <div className="fixed inset-0 z-50 bg-black bg-opacity-75 flex items-center justify-center">
           <div className="bg-white rounded-lg p-8 max-w-2xl w-full mx-4">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">QR코드 전체화면</h2>
+              <h2 className="text-2xl font-bold text-gray-900">
+                QR코드 전체화면
+              </h2>
               <button
                 onClick={() => setShowFullScreen(false)}
                 className="p-2 text-gray-400 hover:text-gray-600"
@@ -140,7 +160,7 @@ export default function StaffQRDisplayPage() {
                 <X className="w-6 h-6" />
               </button>
             </div>
-            
+
             <div className="flex flex-col items-center space-y-6">
               {/* 큰 QR코드 이미지 */}
               <div className="w-96 h-96 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
@@ -153,7 +173,9 @@ export default function StaffQRDisplayPage() {
 
               <div className="text-center">
                 <p className="text-lg text-gray-600 mb-2">QR코드 데이터</p>
-                <p className="font-mono text-lg bg-gray-100 p-4 rounded-lg">{qrCodeData}</p>
+                <p className="font-mono text-lg bg-gray-100 p-4 rounded-lg">
+                  {qrCodeData}
+                </p>
               </div>
 
               <div className="flex gap-4">
@@ -176,4 +198,4 @@ export default function StaffQRDisplayPage() {
       )}
     </div>
   );
-} 
+}

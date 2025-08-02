@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 interface TeacherStats {
   totalClasses: number;
@@ -16,7 +16,7 @@ interface RecentClass {
   time: string;
   student: string;
   subject: string;
-  status: 'completed' | 'upcoming' | 'cancelled';
+  status: "completed" | "upcoming" | "cancelled";
 }
 
 export default function TeacherDashboard() {
@@ -25,7 +25,7 @@ export default function TeacherDashboard() {
     totalClasses: 0,
     completedClasses: 0,
     upcomingClasses: 0,
-    totalStudents: 0
+    totalStudents: 0,
   });
   const [recentClasses, setRecentClasses] = useState<RecentClass[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,37 +41,37 @@ export default function TeacherDashboard() {
         totalClasses: 45,
         completedClasses: 38,
         upcomingClasses: 7,
-        totalStudents: 12
+        totalStudents: 12,
       });
 
       setRecentClasses([
         {
-          id: '1',
-          date: '2025-08-01',
-          time: '10:00-11:30',
-          student: '김학생',
-          subject: '일본어 회화',
-          status: 'upcoming'
+          id: "1",
+          date: "2025-08-01",
+          time: "10:00-11:30",
+          student: "김학생",
+          subject: "일본어 회화",
+          status: "upcoming",
         },
         {
-          id: '2',
-          date: '2025-07-29',
-          time: '14:00-15:30',
-          student: '이학생',
-          subject: '일본어 문법',
-          status: 'completed'
+          id: "2",
+          date: "2025-07-29",
+          time: "14:00-15:30",
+          student: "이학생",
+          subject: "일본어 문법",
+          status: "completed",
         },
         {
-          id: '3',
-          date: '2025-07-25',
-          time: '16:00-17:30',
-          student: '박학생',
-          subject: '일본어 읽기',
-          status: 'completed'
-        }
+          id: "3",
+          date: "2025-07-25",
+          time: "16:00-17:30",
+          student: "박학생",
+          subject: "일본어 읽기",
+          status: "completed",
+        },
       ]);
     } catch (error) {
-      console.error('Dashboard data fetch error:', error);
+      console.error("Dashboard data fetch error:", error);
     } finally {
       setLoading(false);
     }
@@ -96,9 +96,7 @@ export default function TeacherDashboard() {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             선생님 대시보드
           </h1>
-          <p className="text-gray-600">
-            수업 일정과 학생 관리를 확인하세요.
-          </p>
+          <p className="text-gray-600">수업 일정과 학생 관리를 확인하세요.</p>
         </div>
 
         {/* 통계 카드 */}
@@ -110,7 +108,9 @@ export default function TeacherDashboard() {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">총 수업</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalClasses}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {stats.totalClasses}
+                </p>
               </div>
             </div>
           </div>
@@ -122,7 +122,9 @@ export default function TeacherDashboard() {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">완료된 수업</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.completedClasses}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {stats.completedClasses}
+                </p>
               </div>
             </div>
           </div>
@@ -134,7 +136,9 @@ export default function TeacherDashboard() {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">예정된 수업</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.upcomingClasses}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {stats.upcomingClasses}
+                </p>
               </div>
             </div>
           </div>
@@ -146,7 +150,9 @@ export default function TeacherDashboard() {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">총 학생</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalStudents}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {stats.totalStudents}
+                </p>
               </div>
             </div>
           </div>
@@ -158,11 +164,9 @@ export default function TeacherDashboard() {
             <h3 className="text-xl font-semibold text-gray-800 mb-4">
               수업 일정
             </h3>
-            <p className="text-gray-600 mb-4">
-              오늘의 수업 일정을 확인하세요.
-            </p>
+            <p className="text-gray-600 mb-4">오늘의 수업 일정을 확인하세요.</p>
             <button
-              onClick={() => router.push('/teacher/schedule')}
+              onClick={() => router.push("/teacher/schedule")}
               className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
             >
               일정 보기
@@ -173,11 +177,9 @@ export default function TeacherDashboard() {
             <h3 className="text-xl font-semibold text-gray-800 mb-4">
               학생 관리
             </h3>
-            <p className="text-gray-600 mb-4">
-              담당 학생들을 관리하세요.
-            </p>
+            <p className="text-gray-600 mb-4">담당 학생들을 관리하세요.</p>
             <button
-              onClick={() => router.push('/teacher/students')}
+              onClick={() => router.push("/teacher/students")}
               className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
             >
               학생 목록
@@ -192,7 +194,7 @@ export default function TeacherDashboard() {
               수업 노트를 작성하고 관리하세요.
             </p>
             <button
-              onClick={() => router.push('/teacher/notes')}
+              onClick={() => router.push("/teacher/notes")}
               className="w-full bg-purple-500 hover:bg-purple-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
             >
               노트 작성
@@ -208,14 +210,25 @@ export default function TeacherDashboard() {
           <div className="p-6">
             <div className="space-y-4">
               {recentClasses.map((classItem) => (
-                <div key={classItem.id} className="flex items-center p-4 border border-gray-200 rounded-lg">
-                  <div className={`p-2 rounded-lg mr-4 ${
-                    classItem.status === 'completed' ? 'bg-green-100' :
-                    classItem.status === 'upcoming' ? 'bg-blue-100' : 'bg-red-100'
-                  }`}>
+                <div
+                  key={classItem.id}
+                  className="flex items-center p-4 border border-gray-200 rounded-lg"
+                >
+                  <div
+                    className={`p-2 rounded-lg mr-4 ${
+                      classItem.status === "completed"
+                        ? "bg-green-100"
+                        : classItem.status === "upcoming"
+                          ? "bg-blue-100"
+                          : "bg-red-100"
+                    }`}
+                  >
                     <span className="text-lg">
-                      {classItem.status === 'completed' ? '✅' :
-                       classItem.status === 'upcoming' ? '📅' : '❌'}
+                      {classItem.status === "completed"
+                        ? "✅"
+                        : classItem.status === "upcoming"
+                          ? "📅"
+                          : "❌"}
                     </span>
                   </div>
                   <div className="flex-1">
@@ -226,12 +239,20 @@ export default function TeacherDashboard() {
                       {classItem.date} {classItem.time}
                     </p>
                   </div>
-                  <span className={`text-xs px-2 py-1 rounded-full ${
-                    classItem.status === 'completed' ? 'bg-green-100 text-green-800' :
-                    classItem.status === 'upcoming' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'
-                  }`}>
-                    {classItem.status === 'completed' ? '완료' :
-                     classItem.status === 'upcoming' ? '예정' : '취소'}
+                  <span
+                    className={`text-xs px-2 py-1 rounded-full ${
+                      classItem.status === "completed"
+                        ? "bg-green-100 text-green-800"
+                        : classItem.status === "upcoming"
+                          ? "bg-blue-100 text-blue-800"
+                          : "bg-red-100 text-red-800"
+                    }`}
+                  >
+                    {classItem.status === "completed"
+                      ? "완료"
+                      : classItem.status === "upcoming"
+                        ? "예정"
+                        : "취소"}
                   </span>
                 </div>
               ))}
@@ -241,4 +262,4 @@ export default function TeacherDashboard() {
       </div>
     </div>
   );
-} 
+}

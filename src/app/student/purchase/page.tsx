@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { 
-  ArrowLeft, 
-  Star, 
-  Clock, 
-  CreditCard, 
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import {
+  ArrowLeft,
+  Star,
+  Clock,
+  CreditCard,
   ShoppingCart,
-  CheckCircle
-} from 'lucide-react';
+  CheckCircle,
+} from "lucide-react";
 
 interface PurchaseOption {
   id: string;
-  type: 'points' | 'time';
+  type: "points" | "time";
   name: string;
   amount: number;
   price: number;
@@ -35,91 +35,93 @@ export default function StudentPurchasePage() {
     setTimeout(() => {
       setCurrentPoints(150);
       setCurrentTime(12);
-      
+
       setPurchaseOptions([
         // 포인트 옵션
         {
-          id: 'points-100',
-          type: 'points',
-          name: '100 포인트',
+          id: "points-100",
+          type: "points",
+          name: "100 포인트",
           amount: 100,
           price: 100, // 1엔 = 1포인트
-          description: '기본 포인트 패키지'
+          description: "기본 포인트 패키지",
         },
         {
-          id: 'points-500',
-          type: 'points',
-          name: '500 포인트',
+          id: "points-500",
+          type: "points",
+          name: "500 포인트",
           amount: 500,
           price: 500,
           originalPrice: 550,
           discount: 10,
           popular: true,
-          description: '인기 포인트 패키지 (10% 할인)'
+          description: "인기 포인트 패키지 (10% 할인)",
         },
         {
-          id: 'points-1000',
-          type: 'points',
-          name: '1000 포인트',
+          id: "points-1000",
+          type: "points",
+          name: "1000 포인트",
           amount: 1000,
           price: 1000,
           originalPrice: 1200,
           discount: 17,
-          description: '대용량 포인트 패키지 (17% 할인)'
+          description: "대용량 포인트 패키지 (17% 할인)",
         },
         // 시간 옵션
         {
-          id: 'time-10',
-          type: 'time',
-          name: '10시간',
+          id: "time-10",
+          type: "time",
+          name: "10시간",
           amount: 10,
           price: 21600, // 360불 = 21,600원
-          description: '기본 시간 패키지'
+          description: "기본 시간 패키지",
         },
         {
-          id: 'time-20',
-          type: 'time',
-          name: '20시간',
+          id: "time-20",
+          type: "time",
+          name: "20시간",
           amount: 20,
           price: 43200,
           originalPrice: 48000,
           discount: 10,
           popular: true,
-          description: '인기 시간 패키지 (10% 할인)'
+          description: "인기 시간 패키지 (10% 할인)",
         },
         {
-          id: 'time-40',
-          type: 'time',
-          name: '40시간',
+          id: "time-40",
+          type: "time",
+          name: "40시간",
           amount: 40,
           price: 86400,
           originalPrice: 96000,
           discount: 10,
-          description: '대용량 시간 패키지 (10% 할인)'
-        }
+          description: "대용량 시간 패키지 (10% 할인)",
+        },
       ]);
       setLoading(false);
     }, 1000);
   }, []);
 
   const handlePurchase = (optionId: string) => {
-    const option = purchaseOptions.find(opt => opt.id === optionId);
+    const option = purchaseOptions.find((opt) => opt.id === optionId);
     if (!option) return;
 
     // 실제 결제 로직으로 대체
-    alert(`${option.name} 구매를 진행합니다.\n가격: ${option.price.toLocaleString()}원`);
+    alert(
+      `${option.name} 구매를 진행합니다.\n가격: ${option.price.toLocaleString()}원`,
+    );
   };
 
   const formatPrice = (price: number) => {
-    return price.toLocaleString() + '원';
+    return price.toLocaleString() + "원";
   };
 
   const formatPoints = (points: number) => {
-    return points.toLocaleString() + 'P';
+    return points.toLocaleString() + "P";
   };
 
   const formatTime = (hours: number) => {
-    return hours + '시간';
+    return hours + "시간";
   };
 
   if (loading) {
@@ -128,7 +130,7 @@ export default function StudentPurchasePage() {
         <div className="animate-pulse">
           <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3, 4, 5, 6].map(i => (
+            {[1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="h-64 bg-gray-200 rounded"></div>
             ))}
           </div>
@@ -166,7 +168,9 @@ export default function StudentPurchasePage() {
         <div className="bg-white rounded-xl shadow-lg p-6">
           <div className="flex items-center gap-3 mb-4">
             <Clock className="w-8 h-8 text-blue-600" />
-            <h2 className="text-xl font-semibold text-gray-900">현재 수업 시간</h2>
+            <h2 className="text-xl font-semibold text-gray-900">
+              현재 수업 시간
+            </h2>
           </div>
           <div className="text-3xl font-bold text-blue-600 mb-2">
             {formatTime(currentTime)}
@@ -183,15 +187,15 @@ export default function StudentPurchasePage() {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {purchaseOptions
-            .filter(option => option.type === 'points')
+            .filter((option) => option.type === "points")
             .map((option) => (
               <div
                 key={option.id}
                 className={`bg-white rounded-xl shadow-lg p-6 border-2 transition-all cursor-pointer ${
                   selectedOption === option.id
-                    ? 'border-blue-500 shadow-xl'
-                    : 'border-gray-200 hover:border-gray-300'
-                } ${option.popular ? 'ring-2 ring-yellow-400' : ''}`}
+                    ? "border-blue-500 shadow-xl"
+                    : "border-gray-200 hover:border-gray-300"
+                } ${option.popular ? "ring-2 ring-yellow-400" : ""}`}
                 onClick={() => setSelectedOption(option.id)}
               >
                 {option.popular && (
@@ -199,11 +203,11 @@ export default function StudentPurchasePage() {
                     인기
                   </div>
                 )}
-                
+
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">
                   {option.name}
                 </h3>
-                
+
                 <div className="mb-4">
                   {option.originalPrice ? (
                     <div className="flex items-center gap-2">
@@ -251,15 +255,15 @@ export default function StudentPurchasePage() {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {purchaseOptions
-            .filter(option => option.type === 'time')
+            .filter((option) => option.type === "time")
             .map((option) => (
               <div
                 key={option.id}
                 className={`bg-white rounded-xl shadow-lg p-6 border-2 transition-all cursor-pointer ${
                   selectedOption === option.id
-                    ? 'border-blue-500 shadow-xl'
-                    : 'border-gray-200 hover:border-gray-300'
-                } ${option.popular ? 'ring-2 ring-yellow-400' : ''}`}
+                    ? "border-blue-500 shadow-xl"
+                    : "border-gray-200 hover:border-gray-300"
+                } ${option.popular ? "ring-2 ring-yellow-400" : ""}`}
                 onClick={() => setSelectedOption(option.id)}
               >
                 {option.popular && (
@@ -267,11 +271,11 @@ export default function StudentPurchasePage() {
                     인기
                   </div>
                 )}
-                
+
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">
                   {option.name}
                 </h3>
-                
+
                 <div className="mb-4">
                   {option.originalPrice ? (
                     <div className="flex items-center gap-2">
@@ -366,4 +370,4 @@ export default function StudentPurchasePage() {
       </div>
     </div>
   );
-} 
+}

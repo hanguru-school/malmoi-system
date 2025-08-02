@@ -19,7 +19,7 @@ class TaggingCache {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
-      ttl
+      ttl,
     });
   }
 
@@ -53,27 +53,27 @@ class TaggingCache {
 export interface TaggingDevice {
   id: string;
   name: string;
-  type: 'desktop' | 'tablet' | 'mobile';
+  type: "desktop" | "tablet" | "mobile";
   location: string;
-  capabilities: ('felica' | 'nfc' | 'qr')[];
+  capabilities: ("felica" | "nfc" | "qr")[];
   isActive: boolean;
   lastSeen?: Date;
-  connectionStatus: 'connected' | 'disconnected' | 'error';
+  connectionStatus: "connected" | "disconnected" | "error";
 }
 
 export interface TaggingLog {
   id: string;
   uid: string;
   userId: string;
-  userRole: 'student' | 'teacher' | 'staff' | 'master';
+  userRole: "student" | "teacher" | "staff" | "master";
   deviceId: string;
   deviceLocation: string;
-  taggingMethod: 'felica' | 'nfc' | 'qr';
+  taggingMethod: "felica" | "nfc" | "qr";
   timestamp: Date;
   success: boolean;
   errorMessage?: string;
   reservationId?: string;
-  attendanceStatus: 'present' | 'late' | 'early' | 'absent';
+  attendanceStatus: "present" | "late" | "early" | "absent";
   processingTime?: number; // 처리 시간 추가
   metadata: {
     ipAddress?: string;
@@ -88,7 +88,7 @@ export interface UIDRegistration {
   id: string;
   uid: string;
   userId: string;
-  deviceType: 'felica' | 'nfc' | 'smartphone' | 'ic_card';
+  deviceType: "felica" | "nfc" | "smartphone" | "ic_card";
   deviceName: string;
   isPrimary: boolean;
   isApproved: boolean;
@@ -100,7 +100,7 @@ export interface UIDRegistration {
 
 export interface TaggingFlow {
   id: string;
-  userRole: 'student' | 'teacher' | 'staff' | 'master';
+  userRole: "student" | "teacher" | "staff" | "master";
   condition: string;
   actions: TaggingAction[];
   uiConfig?: Record<string, unknown>;
@@ -108,19 +108,19 @@ export interface TaggingFlow {
 }
 
 export interface TaggingAction {
-  type: 'attendance' | 'notification' | 'reservation' | 'points' | 'custom';
+  type: "attendance" | "notification" | "reservation" | "points" | "custom";
   params: Record<string, unknown>;
   delay?: number; // 지연 시간 추가
   retryCount?: number; // 재시도 횟수
 }
 
 export interface RolePermissions {
-  role: 'student' | 'teacher' | 'staff' | 'master';
+  role: "student" | "teacher" | "staff" | "master";
   canTag: boolean;
   canViewLogs: boolean;
   canManageDevices: boolean;
   canApproveUID: boolean;
-  allowedMethods: ('felica' | 'nfc' | 'qr')[];
+  allowedMethods: ("felica" | "nfc" | "qr")[];
   maxDailyTags: number;
 }
 
@@ -137,7 +137,10 @@ class TaggingSystem {
   private readonly MAX_QUEUE_SIZE = 50; // 큐 크기 줄임
   private readonly BATCH_SIZE = 5; // 배치 크기 줄임
   private isInitialized = false;
-  private userCache = new Map<string, { userId: string; userRole: string; timestamp: number }>();
+  private userCache = new Map<
+    string,
+    { userId: string; userRole: string; timestamp: number }
+  >();
   private readonly USER_CACHE_TTL = 30 * 1000; // 30초
 
   constructor() {
@@ -148,21 +151,21 @@ class TaggingSystem {
   // 시스템 초기화
   private async initializeSystem(): Promise<void> {
     try {
-      console.log('태깅 시스템 초기화 시작...');
-      
+      console.log("태깅 시스템 초기화 시작...");
+
       // 병렬로 초기화하여 속도 향상
       await Promise.all([
         this.initializeDevices(),
         this.initializeFlows(),
         this.initializeRolePermissions(),
-        this.initializeUIDRegistrations()
+        this.initializeUIDRegistrations(),
       ]);
-      
+
       this.startPeriodicCleanup();
       this.isInitialized = true;
-      console.log('태깅 시스템 초기화 완료');
+      console.log("태깅 시스템 초기화 완료");
     } catch (error) {
-      console.error('태깅 시스템 초기화 실패:', error);
+      console.error("태깅 시스템 초기화 실패:", error);
       this.isInitialized = false;
     }
   }
@@ -195,16 +198,16 @@ class TaggingSystem {
     if (this.isProcessing || this.processingQueue.length === 0) return;
 
     this.isProcessing = true;
-    
+
     try {
       const batch = this.processingQueue.splice(0, this.BATCH_SIZE);
       // 병렬 처리로 속도 향상
-      await Promise.allSettled(batch.map(task => task()));
+      await Promise.allSettled(batch.map((task) => task()));
     } catch (error) {
-      console.error('배치 처리 중 오류:', error);
+      console.error("배치 처리 중 오류:", error);
     } finally {
       this.isProcessing = false;
-      
+
       // 큐에 남은 작업이 있으면 즉시 처리
       if (this.processingQueue.length > 0) {
         setImmediate(() => this.processQueue());
@@ -235,35 +238,35 @@ class TaggingSystem {
   private initializeDevices(): void {
     this.devices = [
       {
-        id: 'device_001',
-        name: 'Mac 태깅 리더',
-        type: 'desktop',
-        location: '1층 로비',
-        capabilities: ['felica', 'nfc'],
+        id: "device_001",
+        name: "Mac 태깅 리더",
+        type: "desktop",
+        location: "1층 로비",
+        capabilities: ["felica", "nfc"],
         isActive: true,
-        connectionStatus: 'connected',
-        lastSeen: new Date()
+        connectionStatus: "connected",
+        lastSeen: new Date(),
       },
       {
-        id: 'device_002',
-        name: 'iPad 태깅 리더',
-        type: 'tablet',
-        location: '2층 강의실',
-        capabilities: ['felica', 'nfc', 'qr'],
+        id: "device_002",
+        name: "iPad 태깅 리더",
+        type: "tablet",
+        location: "2층 강의실",
+        capabilities: ["felica", "nfc", "qr"],
         isActive: true,
-        connectionStatus: 'connected',
-        lastSeen: new Date()
+        connectionStatus: "connected",
+        lastSeen: new Date(),
       },
       {
-        id: 'device_003',
-        name: '모바일 태깅',
-        type: 'mobile',
-        location: '전체',
-        capabilities: ['nfc', 'qr'],
+        id: "device_003",
+        name: "모바일 태깅",
+        type: "mobile",
+        location: "전체",
+        capabilities: ["nfc", "qr"],
         isActive: true,
-        connectionStatus: 'connected',
-        lastSeen: new Date()
-      }
+        connectionStatus: "connected",
+        lastSeen: new Date(),
+      },
     ];
   }
 
@@ -271,44 +274,44 @@ class TaggingSystem {
     // 기본 UID 등록 데이터
     this.uidRegistrations = [
       {
-        id: 'reg_001',
-        uid: 'STUDENT1234',
-        userId: 'student_001',
-        deviceType: 'ic_card',
-        deviceName: '학생 카드',
+        id: "reg_001",
+        uid: "STUDENT1234",
+        userId: "student_001",
+        deviceType: "ic_card",
+        deviceName: "학생 카드",
         isPrimary: true,
         isApproved: true,
-        registeredAt: new Date('2024-01-01'),
+        registeredAt: new Date("2024-01-01"),
         lastUsedAt: new Date(),
         usageCount: 15,
-        lastLocation: '1층 로비'
+        lastLocation: "1층 로비",
       },
       {
-        id: 'reg_002',
-        uid: 'TEACHER5678',
-        userId: 'teacher_001',
-        deviceType: 'ic_card',
-        deviceName: '선생님 카드',
+        id: "reg_002",
+        uid: "TEACHER5678",
+        userId: "teacher_001",
+        deviceType: "ic_card",
+        deviceName: "선생님 카드",
         isPrimary: true,
         isApproved: true,
-        registeredAt: new Date('2024-01-01'),
+        registeredAt: new Date("2024-01-01"),
         lastUsedAt: new Date(),
         usageCount: 8,
-        lastLocation: '2층 강의실'
+        lastLocation: "2층 강의실",
       },
       {
-        id: 'reg_003',
-        uid: 'STAFF9012',
-        userId: 'staff_001',
-        deviceType: 'ic_card',
-        deviceName: '직원 카드',
+        id: "reg_003",
+        uid: "STAFF9012",
+        userId: "staff_001",
+        deviceType: "ic_card",
+        deviceName: "직원 카드",
         isPrimary: true,
         isApproved: true,
-        registeredAt: new Date('2024-01-01'),
+        registeredAt: new Date("2024-01-01"),
         lastUsedAt: new Date(),
         usageCount: 12,
-        lastLocation: '1층 로비'
-      }
+        lastLocation: "1층 로비",
+      },
     ];
   }
 
@@ -316,150 +319,152 @@ class TaggingSystem {
     this.flows = [
       // 학생 태깅 플로우
       {
-        id: 'student_attendance',
-        userRole: 'student',
-        condition: 'has_reservation',
+        id: "student_attendance",
+        userRole: "student",
+        condition: "has_reservation",
         priority: 1,
         actions: [
           {
-            type: 'attendance',
-            params: { status: 'present' },
-            delay: 0
+            type: "attendance",
+            params: { status: "present" },
+            delay: 0,
           },
           {
-            type: 'points',
-            params: { amount: 10, reason: '출석' },
-            delay: 1000
+            type: "points",
+            params: { amount: 10, reason: "출석" },
+            delay: 1000,
           },
           {
-            type: 'notification',
-            params: { 
-              title: '출석 확인', 
-              message: '수업 출석이 확인되었습니다.',
-              type: 'success'
+            type: "notification",
+            params: {
+              title: "출석 확인",
+              message: "수업 출석이 확인되었습니다.",
+              type: "success",
             },
-            delay: 2000
-          }
+            delay: 2000,
+          },
         ],
         uiConfig: {
           showSuccessMessage: true,
           autoClose: 3000,
-          showPoints: true
-        }
+          showPoints: true,
+        },
       },
       {
-        id: 'student_no_reservation',
-        userRole: 'student',
-        condition: 'no_reservation',
+        id: "student_no_reservation",
+        userRole: "student",
+        condition: "no_reservation",
         priority: 2,
         actions: [
           {
-            type: 'notification',
-            params: { 
-              title: '예약 없음', 
-              message: '오늘 예약된 수업이 없습니다.',
-              type: 'warning'
+            type: "notification",
+            params: {
+              title: "예약 없음",
+              message: "오늘 예약된 수업이 없습니다.",
+              type: "warning",
             },
-            delay: 0
-          }
+            delay: 0,
+          },
         ],
         uiConfig: {
           showManualAttendance: true,
-          showOptions: true
-        }
+          showOptions: true,
+        },
       },
       // 선생님 태깅 플로우
       {
-        id: 'teacher_checkin',
-        userRole: 'teacher',
-        condition: 'checkin',
+        id: "teacher_checkin",
+        userRole: "teacher",
+        condition: "checkin",
         priority: 1,
         actions: [
           {
-            type: 'attendance',
-            params: { status: 'present', type: 'teacher' },
-            delay: 0
+            type: "attendance",
+            params: { status: "present", type: "teacher" },
+            delay: 0,
           },
           {
-            type: 'notification',
-            params: { 
-              title: '출근 확인', 
-              message: '출근이 확인되었습니다.',
-              type: 'success'
+            type: "notification",
+            params: {
+              title: "출근 확인",
+              message: "출근이 확인되었습니다.",
+              type: "success",
             },
-            delay: 1000
-          }
-        ]
+            delay: 1000,
+          },
+        ],
       },
       // 직원 태깅 플로우
       {
-        id: 'staff_checkin',
-        userRole: 'staff',
-        condition: 'checkin',
+        id: "staff_checkin",
+        userRole: "staff",
+        condition: "checkin",
         priority: 1,
         actions: [
           {
-            type: 'attendance',
-            params: { status: 'present', type: 'staff' },
-            delay: 0
+            type: "attendance",
+            params: { status: "present", type: "staff" },
+            delay: 0,
           },
           {
-            type: 'notification',
-            params: { 
-              title: '출근 확인', 
-              message: '출근이 확인되었습니다.',
-              type: 'success'
+            type: "notification",
+            params: {
+              title: "출근 확인",
+              message: "출근이 확인되었습니다.",
+              type: "success",
             },
-            delay: 1000
-          }
-        ]
-      }
+            delay: 1000,
+          },
+        ],
+      },
     ];
   }
 
   private initializeRolePermissions(): void {
     this.rolePermissions = [
       {
-        role: 'student',
+        role: "student",
         canTag: true,
         canViewLogs: false,
         canManageDevices: false,
         canApproveUID: false,
-        allowedMethods: ['nfc', 'qr'],
-        maxDailyTags: 5
+        allowedMethods: ["nfc", "qr"],
+        maxDailyTags: 5,
       },
       {
-        role: 'teacher',
+        role: "teacher",
         canTag: true,
         canViewLogs: true,
         canManageDevices: false,
         canApproveUID: false,
-        allowedMethods: ['felica', 'nfc', 'qr'],
-        maxDailyTags: 10
+        allowedMethods: ["felica", "nfc", "qr"],
+        maxDailyTags: 10,
       },
       {
-        role: 'staff',
+        role: "staff",
         canTag: true,
         canViewLogs: true,
         canManageDevices: true,
         canApproveUID: true,
-        allowedMethods: ['felica', 'nfc', 'qr'],
-        maxDailyTags: 20
+        allowedMethods: ["felica", "nfc", "qr"],
+        maxDailyTags: 20,
       },
       {
-        role: 'master',
+        role: "master",
         canTag: true,
         canViewLogs: true,
         canManageDevices: true,
         canApproveUID: true,
-        allowedMethods: ['felica', 'nfc', 'qr'],
-        maxDailyTags: 50
-      }
+        allowedMethods: ["felica", "nfc", "qr"],
+        maxDailyTags: 50,
+      },
     ];
   }
 
   // UID로 사용자 찾기 (개선된 버전)
-  async findUserByUID(uid: string): Promise<{ userId: string; userRole: string } | null> {
+  async findUserByUID(
+    uid: string,
+  ): Promise<{ userId: string; userRole: string } | null> {
     // 캐시 확인
     const cached = this.userCache.get(uid);
     if (cached && Date.now() - cached.timestamp < this.USER_CACHE_TTL) {
@@ -467,7 +472,9 @@ class TaggingSystem {
     }
 
     // 캐시에 없으면 조회
-    const registration = this.uidRegistrations.find(r => r.uid === uid && r.isApproved);
+    const registration = this.uidRegistrations.find(
+      (r) => r.uid === uid && r.isApproved,
+    );
     if (!registration) {
       return null;
     }
@@ -484,40 +491,47 @@ class TaggingSystem {
   // 사용자 역할 조회 (실제로는 데이터베이스에서 조회)
   private getUserRole(userId: string): string {
     // 임시 로직 - 실제로는 데이터베이스에서 조회
-    if (userId.startsWith('student_')) return 'student';
-    if (userId.startsWith('teacher_')) return 'teacher';
-    if (userId.startsWith('staff_')) return 'staff';
-    if (userId.startsWith('master_')) return 'master';
-    return 'student'; // 기본값
+    if (userId.startsWith("student_")) return "student";
+    if (userId.startsWith("teacher_")) return "teacher";
+    if (userId.startsWith("staff_")) return "staff";
+    if (userId.startsWith("master_")) return "master";
+    return "student"; // 기본값
   }
 
   // 태깅 처리 (개선된 버전)
   async processTagging(
     uid: string,
     deviceId: string,
-    taggingMethod: 'felica' | 'nfc' | 'qr',
+    taggingMethod: "felica" | "nfc" | "qr",
     metadata?: {
       ipAddress?: string;
       userAgent?: string;
       coordinates?: { lat: number; lng: number };
       batteryLevel?: number;
       signalStrength?: number;
-    }
-  ): Promise<{ success: boolean; flow?: TaggingFlow; error?: string; processingTime?: number }> {
+    },
+  ): Promise<{
+    success: boolean;
+    flow?: TaggingFlow;
+    error?: string;
+    processingTime?: number;
+  }> {
     const startTime = Date.now();
 
     return new Promise((resolve) => {
       // 우선순위 높은 작업으로 큐에 추가
       this.addToQueue(async () => {
         try {
-          console.log(`태깅 처리 시작: UID=${uid}, Device=${deviceId}, Method=${taggingMethod}`);
+          console.log(
+            `태깅 처리 시작: UID=${uid}, Device=${deviceId}, Method=${taggingMethod}`,
+          );
 
           // 1. 시스템 준비 상태 확인 (캐시)
           if (!this.isSystemReady()) {
-            resolve({ 
-              success: false, 
-              error: '태깅 시스템이 초기화되지 않았습니다.',
-              processingTime: Date.now() - startTime
+            resolve({
+              success: false,
+              error: "태깅 시스템이 초기화되지 않았습니다.",
+              processingTime: Date.now() - startTime,
             });
             return;
           }
@@ -526,7 +540,7 @@ class TaggingSystem {
           const deviceCacheKey = `device_${deviceId}`;
           let device = this.cache.get<TaggingDevice>(deviceCacheKey);
           if (!device) {
-            const foundDevice = this.devices.find(d => d.id === deviceId);
+            const foundDevice = this.devices.find((d) => d.id === deviceId);
             if (foundDevice) {
               device = foundDevice;
               this.cache.set(deviceCacheKey, device, 60000); // 1분 캐시
@@ -534,10 +548,10 @@ class TaggingSystem {
           }
 
           if (!device || !device.isActive) {
-            resolve({ 
-              success: false, 
-              error: '유효하지 않은 디바이스입니다.',
-              processingTime: Date.now() - startTime
+            resolve({
+              success: false,
+              error: "유효하지 않은 디바이스입니다.",
+              processingTime: Date.now() - startTime,
             });
             return;
           }
@@ -545,19 +559,22 @@ class TaggingSystem {
           // 3. 사용자 조회 (캐시 최적화)
           const user = await this.findUserByUID(uid);
           if (!user) {
-            resolve({ 
-              success: false, 
-              error: '등록되지 않은 UID입니다.',
-              processingTime: Date.now() - startTime
+            resolve({
+              success: false,
+              error: "등록되지 않은 UID입니다.",
+              processingTime: Date.now() - startTime,
             });
             return;
           }
 
           // 4. 권한 확인 (캐시)
           const permissionsCacheKey = `permissions_${user.userRole}`;
-          let permissions = this.cache.get<RolePermissions>(permissionsCacheKey);
+          let permissions =
+            this.cache.get<RolePermissions>(permissionsCacheKey);
           if (!permissions) {
-            const foundPermissions = this.rolePermissions.find(p => p.role === user.userRole);
+            const foundPermissions = this.rolePermissions.find(
+              (p) => p.role === user.userRole,
+            );
             if (foundPermissions) {
               permissions = foundPermissions;
               this.cache.set(permissionsCacheKey, permissions, 300000); // 5분 캐시
@@ -565,26 +582,26 @@ class TaggingSystem {
           }
 
           if (!permissions || !permissions.canTag) {
-            resolve({ 
-              success: false, 
-              error: '태깅 권한이 없습니다.',
-              processingTime: Date.now() - startTime
+            resolve({
+              success: false,
+              error: "태깅 권한이 없습니다.",
+              processingTime: Date.now() - startTime,
             });
             return;
           }
 
           // 5. 일일 태깅 한도 확인 (최적화)
           const today = new Date().setHours(0, 0, 0, 0);
-          const todayTags = this.logs.filter(log => 
-            log.userId === user.userId && 
-            log.timestamp.getTime() >= today
+          const todayTags = this.logs.filter(
+            (log) =>
+              log.userId === user.userId && log.timestamp.getTime() >= today,
           );
-          
+
           if (todayTags.length >= permissions.maxDailyTags) {
-            resolve({ 
-              success: false, 
-              error: '오늘의 태깅 한도를 초과했습니다.',
-              processingTime: Date.now() - startTime
+            resolve({
+              success: false,
+              error: "오늘의 태깅 한도를 초과했습니다.",
+              processingTime: Date.now() - startTime,
             });
             return;
           }
@@ -593,16 +610,19 @@ class TaggingSystem {
           const conditionCacheKey = `condition_${user.userId}_${user.userRole}`;
           let condition = this.cache.get<string>(conditionCacheKey);
           if (!condition) {
-            condition = await this.determineTaggingCondition(user.userId, user.userRole);
+            condition = await this.determineTaggingCondition(
+              user.userId,
+              user.userRole,
+            );
             this.cache.set(conditionCacheKey, condition, 60000); // 1분 캐시
           }
-          
+
           // 7. 해당하는 플로우 찾기 (캐시)
           const flowCacheKey = `flow_${user.userRole}_${condition}`;
           let flow = this.cache.get<TaggingFlow>(flowCacheKey);
           if (!flow) {
-            const applicableFlows = this.flows.filter(f => 
-              f.userRole === user.userRole && f.condition === condition
+            const applicableFlows = this.flows.filter(
+              (f) => f.userRole === user.userRole && f.condition === condition,
             );
             flow = applicableFlows.sort((a, b) => b.priority - a.priority)[0];
             if (flow) {
@@ -611,10 +631,10 @@ class TaggingSystem {
           }
 
           if (!flow) {
-            resolve({ 
-              success: false, 
-              error: '적절한 태깅 플로우를 찾을 수 없습니다.',
-              processingTime: Date.now() - startTime
+            resolve({
+              success: false,
+              error: "적절한 태깅 플로우를 찾을 수 없습니다.",
+              processingTime: Date.now() - startTime,
             });
             return;
           }
@@ -624,7 +644,11 @@ class TaggingSystem {
             id: `log_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             uid,
             userId: user.userId,
-            userRole: user.userRole as 'student' | 'teacher' | 'staff' | 'master',
+            userRole: user.userRole as
+              | "student"
+              | "teacher"
+              | "staff"
+              | "master",
             deviceId,
             deviceLocation: device.location,
             taggingMethod,
@@ -634,8 +658,8 @@ class TaggingSystem {
             processingTime: Date.now() - startTime,
             metadata: {
               ...metadata,
-              signalStrength: metadata?.signalStrength || 0
-            }
+              signalStrength: metadata?.signalStrength || 0,
+            },
           };
 
           // 로그를 비동기로 추가 (성능 향상)
@@ -645,7 +669,9 @@ class TaggingSystem {
 
           // 9. UID 사용 통계 업데이트 (비동기)
           setImmediate(() => {
-            const registration = this.uidRegistrations.find(r => r.uid === uid);
+            const registration = this.uidRegistrations.find(
+              (r) => r.uid === uid,
+            );
             if (registration) {
               registration.lastUsedAt = new Date();
               registration.usageCount = (registration.usageCount || 0) + 1;
@@ -659,17 +685,17 @@ class TaggingSystem {
           });
 
           console.log(`태깅 처리 완료: ${flow.id}`);
-          resolve({ 
-            success: true, 
+          resolve({
+            success: true,
             flow,
-            processingTime: Date.now() - startTime
+            processingTime: Date.now() - startTime,
           });
         } catch (error) {
-          console.error('Tagging processing error:', error);
-          resolve({ 
-            success: false, 
-            error: '태깅 처리 중 오류가 발생했습니다.',
-            processingTime: Date.now() - startTime
+          console.error("Tagging processing error:", error);
+          resolve({
+            success: false,
+            error: "태깅 처리 중 오류가 발생했습니다.",
+            processingTime: Date.now() - startTime,
           });
         }
       }, 1); // 높은 우선순위
@@ -677,28 +703,37 @@ class TaggingSystem {
   }
 
   // 비동기 액션 실행 - 지연 제거
-  private async executeActionsAsync(actions: TaggingAction[], userId: string, log: TaggingLog): Promise<void> {
+  private async executeActionsAsync(
+    actions: TaggingAction[],
+    userId: string,
+    log: TaggingLog,
+  ): Promise<void> {
     // 모든 액션을 병렬로 실행하여 지연 최소화
     const actionPromises = actions.map(async (action) => {
       try {
         // 지연이 있는 경우에만 대기
         if (action.delay && action.delay > 0) {
-          await new Promise(resolve => setTimeout(resolve, action.delay));
+          await new Promise((resolve) => setTimeout(resolve, action.delay));
         }
-        
+
         await this.executeAction(action, userId, log);
       } catch (error) {
         console.error(`Action execution failed: ${action.type}`, error);
-        
+
         // 재시도 로직 (빠른 재시도)
         if (action.retryCount && action.retryCount > 0) {
           for (let i = 0; i < action.retryCount; i++) {
             try {
-              await new Promise(resolve => setTimeout(resolve, 500 * (i + 1))); // 더 빠른 재시도
+              await new Promise((resolve) =>
+                setTimeout(resolve, 500 * (i + 1)),
+              ); // 더 빠른 재시도
               await this.executeAction(action, userId, log);
               break;
             } catch (retryError) {
-              console.error(`Retry ${i + 1} failed for action ${action.type}:`, retryError);
+              console.error(
+                `Retry ${i + 1} failed for action ${action.type}:`,
+                retryError,
+              );
             }
           }
         }
@@ -710,25 +745,29 @@ class TaggingSystem {
   }
 
   // 액션 실행
-  private async executeAction(action: TaggingAction, userId: string, log: TaggingLog): Promise<void> {
+  private async executeAction(
+    action: TaggingAction,
+    userId: string,
+    log: TaggingLog,
+  ): Promise<void> {
     switch (action.type) {
-      case 'attendance':
+      case "attendance":
         console.log(`출석 처리: ${userId}`);
         // 실제 출석 처리 로직
         break;
-      case 'notification':
+      case "notification":
         console.log(`알림 전송: ${action.params.title}`);
         // 실제 알림 전송 로직
         break;
-      case 'points':
+      case "points":
         console.log(`포인트 적립: ${action.params.amount}`);
         // 실제 포인트 적립 로직
         break;
-      case 'reservation':
+      case "reservation":
         console.log(`예약 처리: ${userId}`);
         // 실제 예약 처리 로직
         break;
-      case 'custom':
+      case "custom":
         console.log(`커스텀 액션: ${action.params}`);
         // 커스텀 액션 처리
         break;
@@ -736,14 +775,17 @@ class TaggingSystem {
   }
 
   // 태깅 조건 판단
-  private async determineTaggingCondition(userId: string, userRole: string): Promise<string> {
-    if (userRole === 'student') {
+  private async determineTaggingCondition(
+    userId: string,
+    userRole: string,
+  ): Promise<string> {
+    if (userRole === "student") {
       const hasReservation = await this.checkStudentReservation(userId);
-      return hasReservation ? 'has_reservation' : 'no_reservation';
-    } else if (userRole === 'teacher' || userRole === 'staff') {
-      return 'checkin';
+      return hasReservation ? "has_reservation" : "no_reservation";
+    } else if (userRole === "teacher" || userRole === "staff") {
+      return "checkin";
     }
-    return 'default';
+    return "default";
   }
 
   // 학생 예약 확인
@@ -754,36 +796,43 @@ class TaggingSystem {
   }
 
   // 출석 상태 판단
-  private async determineAttendanceStatus(userId: string): Promise<'present' | 'late' | 'early' | 'absent'> {
+  private async determineAttendanceStatus(
+    userId: string,
+  ): Promise<"present" | "late" | "early" | "absent"> {
     const now = new Date();
     const hour = now.getHours();
-    
-    if (hour < 9) return 'early';
-    if (hour >= 9 && hour <= 10) return 'present';
-    if (hour > 10) return 'late';
-    return 'absent';
+
+    if (hour < 9) return "early";
+    if (hour >= 9 && hour <= 10) return "present";
+    if (hour > 10) return "late";
+    return "absent";
   }
 
   // UID 등록
-  async registerUID(uid: string, userId: string, deviceType: string, deviceName: string): Promise<boolean> {
+  async registerUID(
+    uid: string,
+    userId: string,
+    deviceType: string,
+    deviceName: string,
+  ): Promise<boolean> {
     try {
       const registration: UIDRegistration = {
         id: `reg_${Date.now()}`,
         uid,
         userId,
-        deviceType: deviceType as 'felica' | 'nfc' | 'smartphone' | 'ic_card',
+        deviceType: deviceType as "felica" | "nfc" | "smartphone" | "ic_card",
         deviceName,
         isPrimary: false,
         isApproved: false,
         registeredAt: new Date(),
-        usageCount: 0
+        usageCount: 0,
       };
 
       this.uidRegistrations.push(registration);
       console.log(`UID 등록 완료: ${uid}`);
       return true;
     } catch (error) {
-      console.error('UID 등록 실패:', error);
+      console.error("UID 등록 실패:", error);
       return false;
     }
   }
@@ -791,7 +840,7 @@ class TaggingSystem {
   // UID 승인
   async approveUID(uid: string): Promise<boolean> {
     try {
-      const registration = this.uidRegistrations.find(r => r.uid === uid);
+      const registration = this.uidRegistrations.find((r) => r.uid === uid);
       if (registration) {
         registration.isApproved = true;
         console.log(`UID 승인 완료: ${uid}`);
@@ -799,7 +848,7 @@ class TaggingSystem {
       }
       return false;
     } catch (error) {
-      console.error('UID 승인 실패:', error);
+      console.error("UID 승인 실패:", error);
       return false;
     }
   }
@@ -815,19 +864,19 @@ class TaggingSystem {
     let logs = this.logs;
 
     if (filters?.userId) {
-      logs = logs.filter(log => log.userId === filters.userId);
+      logs = logs.filter((log) => log.userId === filters.userId);
     }
     if (filters?.userRole) {
-      logs = logs.filter(log => log.userRole === filters.userRole);
+      logs = logs.filter((log) => log.userRole === filters.userRole);
     }
     if (filters?.startDate) {
-      logs = logs.filter(log => log.timestamp >= filters.startDate!);
+      logs = logs.filter((log) => log.timestamp >= filters.startDate!);
     }
     if (filters?.endDate) {
-      logs = logs.filter(log => log.timestamp <= filters.endDate!);
+      logs = logs.filter((log) => log.timestamp <= filters.endDate!);
     }
     if (filters?.deviceId) {
-      logs = logs.filter(log => log.deviceId === filters.deviceId);
+      logs = logs.filter((log) => log.deviceId === filters.deviceId);
     }
 
     return logs.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
@@ -835,18 +884,18 @@ class TaggingSystem {
 
   // 권한 확인
   checkPermission(role: string, page: string, functionName?: string): boolean {
-    const permissions = this.rolePermissions.find(p => p.role === role);
+    const permissions = this.rolePermissions.find((p) => p.role === role);
     if (!permissions) return false;
 
     // 페이지별 권한 체크
     switch (page) {
-      case 'tagging':
+      case "tagging":
         return permissions.canTag;
-      case 'logs':
+      case "logs":
         return permissions.canViewLogs;
-      case 'devices':
+      case "devices":
         return permissions.canManageDevices;
-      case 'uid_approval':
+      case "uid_approval":
         return permissions.canApproveUID;
       default:
         return false;
@@ -854,16 +903,19 @@ class TaggingSystem {
   }
 
   // 데이터 접근 권한 확인
-  checkDataAccess(role: string, dataType: 'own' | 'students' | 'teachers' | 'staff' | 'system'): boolean {
+  checkDataAccess(
+    role: string,
+    dataType: "own" | "students" | "teachers" | "staff" | "system",
+  ): boolean {
     switch (role) {
-      case 'master':
+      case "master":
         return true; // 모든 데이터 접근 가능
-      case 'staff':
-        return dataType !== 'system';
-      case 'teacher':
-        return dataType === 'own' || dataType === 'students';
-      case 'student':
-        return dataType === 'own';
+      case "staff":
+        return dataType !== "system";
+      case "teacher":
+        return dataType === "own" || dataType === "students";
+      case "student":
+        return dataType === "own";
       default:
         return false;
     }
@@ -871,7 +923,7 @@ class TaggingSystem {
 
   // 디바이스 목록 조회
   getDevices(): TaggingDevice[] {
-    return this.devices.filter(d => d.isActive);
+    return this.devices.filter((d) => d.isActive);
   }
 
   /**
@@ -879,12 +931,14 @@ class TaggingSystem {
    */
   getUIDRegistrations(userId?: string): UIDRegistration[] {
     let registrations = this.uidRegistrations;
-    
+
     if (userId) {
-      registrations = registrations.filter(r => r.userId === userId);
+      registrations = registrations.filter((r) => r.userId === userId);
     }
 
-    return registrations.sort((a, b) => b.registeredAt.getTime() - a.registeredAt.getTime());
+    return registrations.sort(
+      (a, b) => b.registeredAt.getTime() - a.registeredAt.getTime(),
+    );
   }
 
   /**
@@ -904,24 +958,25 @@ class TaggingSystem {
     let logs = this.logs;
 
     if (filters?.startDate) {
-      logs = logs.filter(log => log.timestamp >= filters.startDate!);
+      logs = logs.filter((log) => log.timestamp >= filters.startDate!);
     }
     if (filters?.endDate) {
-      logs = logs.filter(log => log.timestamp <= filters.endDate!);
+      logs = logs.filter((log) => log.timestamp <= filters.endDate!);
     }
     if (filters?.userRole) {
-      logs = logs.filter(log => log.userRole === filters.userRole);
+      logs = logs.filter((log) => log.userRole === filters.userRole);
     }
 
     const totalTagging = logs.length;
-    const successCount = logs.filter(log => log.success).length;
-    const successRate = totalTagging > 0 ? (successCount / totalTagging) * 100 : 0;
+    const successCount = logs.filter((log) => log.success).length;
+    const successRate =
+      totalTagging > 0 ? (successCount / totalTagging) * 100 : 0;
 
     const byMethod: Record<string, number> = {};
     const byRole: Record<string, number> = {};
     const byDevice: Record<string, number> = {};
 
-    logs.forEach(log => {
+    logs.forEach((log) => {
       byMethod[log.taggingMethod] = (byMethod[log.taggingMethod] || 0) + 1;
       byRole[log.userRole] = (byRole[log.userRole] || 0) + 1;
       byDevice[log.deviceId] = (byDevice[log.deviceId] || 0) + 1;
@@ -932,7 +987,7 @@ class TaggingSystem {
       successRate,
       byMethod,
       byRole,
-      byDevice
+      byDevice,
     };
   }
 
@@ -950,10 +1005,10 @@ class TaggingSystem {
     return {
       isReady: this.isInitialized,
       deviceCount: this.devices.length,
-      activeDeviceCount: this.devices.filter(d => d.isActive).length,
+      activeDeviceCount: this.devices.filter((d) => d.isActive).length,
       totalLogs: this.logs.length,
       cacheSize: 0, // 캐시 크기 계산 로직 필요
-      queueSize: this.processingQueue.length
+      queueSize: this.processingQueue.length,
     };
   }
 }
@@ -962,6 +1017,6 @@ class TaggingSystem {
 export const taggingSystem = new TaggingSystem();
 
 // 전역에서 사용할 수 있도록 window 객체에 추가 (개발 환경에서만)
-if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
   (window as any).taggingSystem = taggingSystem;
-} 
+}

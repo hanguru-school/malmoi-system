@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { 
-  Search, 
-  Star, 
-  MessageSquare, 
-  ThumbsUp, 
+import { useState, useEffect } from "react";
+import {
+  Search,
+  Star,
+  MessageSquare,
+  ThumbsUp,
   AlertTriangle,
   User,
   Calendar,
   Eye,
-  Reply
-} from 'lucide-react';
+  Reply,
+} from "lucide-react";
 
 interface Review {
   id: string;
@@ -23,7 +23,7 @@ interface Review {
   reviewDate: string;
   rating: number;
   content: string;
-  replyStatus: 'no_reply' | 'replied';
+  replyStatus: "no_reply" | "replied";
   adminReply?: string;
   replyDate?: string;
   isLiked: boolean;
@@ -37,17 +37,17 @@ export default function ReviewManagementPage() {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showReplyModal, setShowReplyModal] = useState(false);
   const [selectedReview, setSelectedReview] = useState<Review | null>(null);
-  
+
   // 필터 상태
-  const [ratingFilter, setRatingFilter] = useState<string>('all');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [teacherFilter, setTeacherFilter] = useState<string>('all');
-  const [courseFilter, setCourseFilter] = useState<string>('all');
-  const [dateFilter, setDateFilter] = useState<string>('all');
-  const [searchTerm, setSearchTerm] = useState('');
-  
+  const [ratingFilter, setRatingFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [teacherFilter, setTeacherFilter] = useState<string>("all");
+  const [courseFilter, setCourseFilter] = useState<string>("all");
+  const [dateFilter, setDateFilter] = useState<string>("all");
+  const [searchTerm, setSearchTerm] = useState("");
+
   // 답변 입력
-  const [replyContent, setReplyContent] = useState('');
+  const [replyContent, setReplyContent] = useState("");
 
   useEffect(() => {
     fetchReviews();
@@ -59,70 +59,75 @@ export default function ReviewManagementPage() {
       // 실제 API 호출로 대체
       const mockReviews: Review[] = [
         {
-          id: '1',
-          authorName: '김학생',
-          authorUid: 'ST001',
-          classDate: '2024-01-15',
-          courseName: '초급 한국어',
-          teacherName: '이선생님',
-          reviewDate: '2024-01-16',
+          id: "1",
+          authorName: "김학생",
+          authorUid: "ST001",
+          classDate: "2024-01-15",
+          courseName: "초급 한국어",
+          teacherName: "이선생님",
+          reviewDate: "2024-01-16",
           rating: 5,
-          content: '매우 만족스러운 수업이었습니다. 선생님이 친절하고 이해하기 쉽게 설명해주셔서 감사합니다. 다음 수업도 기대됩니다!',
-          replyStatus: 'no_reply',
+          content:
+            "매우 만족스러운 수업이었습니다. 선생님이 친절하고 이해하기 쉽게 설명해주셔서 감사합니다. 다음 수업도 기대됩니다!",
+          replyStatus: "no_reply",
           isLiked: false,
-          isFlagged: false
+          isFlagged: false,
         },
         {
-          id: '2',
-          authorName: '박학생',
-          authorUid: 'ST002',
-          classDate: '2024-01-14',
-          courseName: '중급 한국어',
-          teacherName: '김선생님',
-          reviewDate: '2024-01-15',
+          id: "2",
+          authorName: "박학생",
+          authorUid: "ST002",
+          classDate: "2024-01-14",
+          courseName: "중급 한국어",
+          teacherName: "김선생님",
+          reviewDate: "2024-01-15",
           rating: 4,
-          content: '수업 내용은 좋았지만, 조금 더 천천히 설명해주시면 좋겠습니다. 전반적으로 만족합니다.',
-          replyStatus: 'replied',
-          adminReply: '박학생님, 피드백 감사합니다. 다음 수업부터는 더 천천히 설명하도록 하겠습니다. 꾸준히 함께 공부해요!',
-          replyDate: '2024-01-16',
+          content:
+            "수업 내용은 좋았지만, 조금 더 천천히 설명해주시면 좋겠습니다. 전반적으로 만족합니다.",
+          replyStatus: "replied",
+          adminReply:
+            "박학생님, 피드백 감사합니다. 다음 수업부터는 더 천천히 설명하도록 하겠습니다. 꾸준히 함께 공부해요!",
+          replyDate: "2024-01-16",
           isLiked: true,
-          isFlagged: false
+          isFlagged: false,
         },
         {
-          id: '3',
-          authorName: '이학생',
-          authorUid: 'ST003',
-          classDate: '2024-01-13',
-          courseName: '고급 한국어',
-          teacherName: '최선생님',
-          reviewDate: '2024-01-14',
+          id: "3",
+          authorName: "이학생",
+          authorUid: "ST003",
+          classDate: "2024-01-13",
+          courseName: "고급 한국어",
+          teacherName: "최선생님",
+          reviewDate: "2024-01-14",
           rating: 3,
-          content: '수업이 너무 어려웠습니다. 제 수준에 맞지 않는 것 같아요.',
-          replyStatus: 'no_reply',
+          content: "수업이 너무 어려웠습니다. 제 수준에 맞지 않는 것 같아요.",
+          replyStatus: "no_reply",
           isLiked: false,
           isFlagged: true,
-          flaggedReason: '부정적인 리뷰'
+          flaggedReason: "부정적인 리뷰",
         },
         {
-          id: '4',
-          authorName: '최학생',
-          authorUid: 'ST004',
-          classDate: '2024-01-12',
-          courseName: '초급 한국어',
-          teacherName: '이선생님',
-          reviewDate: '2024-01-13',
+          id: "4",
+          authorName: "최학생",
+          authorUid: "ST004",
+          classDate: "2024-01-12",
+          courseName: "초급 한국어",
+          teacherName: "이선생님",
+          reviewDate: "2024-01-13",
           rating: 5,
-          content: '정말 재미있고 유익한 수업이었습니다. 한국어에 대한 흥미가 더욱 생겼어요!',
-          replyStatus: 'replied',
-          adminReply: '최학생님, 좋은 리뷰 감사합니다! 한국어 학습에 대한 열정이 느껴져서 기쁩니다. 앞으로도 함께 즐겁게 공부해요!',
-          replyDate: '2024-01-14',
+          content:
+            "정말 재미있고 유익한 수업이었습니다. 한국어에 대한 흥미가 더욱 생겼어요!",
+          replyStatus: "replied",
+          adminReply:
+            "최학생님, 좋은 리뷰 감사합니다! 한국어 학습에 대한 열정이 느껴져서 기쁩니다. 앞으로도 함께 즐겁게 공부해요!",
+          replyDate: "2024-01-14",
           isLiked: true,
-          isFlagged: false
-        }
+          isFlagged: false,
+        },
       ];
       setReviews(mockReviews);
     } catch (error) {
-      console.error('리뷰 목록 로딩 실패:', error);
+      console.error("리뷰 목록 로딩 실패:", error);
     } finally {
       setIsLoading(false);
     }
@@ -131,59 +136,62 @@ export default function ReviewManagementPage() {
   const handleReplySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedReview) return;
-    
+
     try {
-      const response = await fetch(`/api/admin/reviews/${selectedReview.id}/reply`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `/api/admin/reviews/${selectedReview.id}/reply`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ reply: replyContent }),
         },
-        body: JSON.stringify({ reply: replyContent }),
-      });
+      );
 
       if (response.ok) {
         await fetchReviews();
         setShowReplyModal(false);
         setSelectedReview(null);
-        setReplyContent('');
-        alert('답변이 등록되었습니다.');
+        setReplyContent("");
+        alert("답변이 등록되었습니다.");
       } else {
-        alert('답변 등록에 실패했습니다.');
+        alert("답변 등록에 실패했습니다.");
       }
     } catch (error) {
-      alert('답변 등록 중 오류가 발생했습니다.');
+      alert("답변 등록 중 오류가 발생했습니다.");
     }
   };
 
   const handleLikeToggle = async (reviewId: string) => {
     try {
       const response = await fetch(`/api/admin/reviews/${reviewId}/like`, {
-        method: 'PUT',
+        method: "PUT",
       });
 
       if (response.ok) {
         await fetchReviews();
       } else {
-        alert('좋아요 상태 변경에 실패했습니다.');
+        alert("좋아요 상태 변경에 실패했습니다.");
       }
     } catch (error) {
-      alert('좋아요 상태 변경 중 오류가 발생했습니다.');
+      alert("좋아요 상태 변경 중 오류가 발생했습니다.");
     }
   };
 
   const handleFlagToggle = async (reviewId: string) => {
     try {
       const response = await fetch(`/api/admin/reviews/${reviewId}/flag`, {
-        method: 'PUT',
+        method: "PUT",
       });
 
       if (response.ok) {
         await fetchReviews();
       } else {
-        alert('플래그 상태 변경에 실패했습니다.');
+        alert("플래그 상태 변경에 실패했습니다.");
       }
     } catch (error) {
-      alert('플래그 상태 변경 중 오류가 발생했습니다.');
+      alert("플래그 상태 변경 중 오류가 발생했습니다.");
     }
   };
 
@@ -191,78 +199,97 @@ export default function ReviewManagementPage() {
     return Array.from({ length: 5 }, (_, i) => (
       <Star
         key={i}
-        className={`w-4 h-4 ${i < rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
+        className={`w-4 h-4 ${i < rating ? "text-yellow-400 fill-current" : "text-gray-300"}`}
       />
     ));
   };
 
-  const getReplyStatusColor = (status: Review['replyStatus']) => {
+  const getReplyStatusColor = (status: Review["replyStatus"]) => {
     switch (status) {
-      case 'replied':
-        return 'bg-green-100 text-green-800';
-      case 'no_reply':
-        return 'bg-yellow-100 text-yellow-800';
+      case "replied":
+        return "bg-green-100 text-green-800";
+      case "no_reply":
+        return "bg-yellow-100 text-yellow-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
-  const getReplyStatusText = (status: Review['replyStatus']) => {
+  const getReplyStatusText = (status: Review["replyStatus"]) => {
     switch (status) {
-      case 'replied':
-        return '답변완료';
-      case 'no_reply':
-        return '미답변';
+      case "replied":
+        return "답변완료";
+      case "no_reply":
+        return "미답변";
       default:
-        return '알 수 없음';
+        return "알 수 없음";
     }
   };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit'
+    return date.toLocaleDateString("ko-KR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
     });
   };
 
-  const filteredReviews = reviews.filter(review => {
-    const matchesSearch = 
+  const filteredReviews = reviews.filter((review) => {
+    const matchesSearch =
       review.authorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       review.authorUid.toLowerCase().includes(searchTerm.toLowerCase()) ||
       review.content.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesRating = ratingFilter === 'all' || review.rating.toString() === ratingFilter;
-    const matchesStatus = statusFilter === 'all' || review.replyStatus === statusFilter;
-    const matchesTeacher = teacherFilter === 'all' || review.teacherName === teacherFilter;
-    const matchesCourse = courseFilter === 'all' || review.courseName === courseFilter;
-    
+
+    const matchesRating =
+      ratingFilter === "all" || review.rating.toString() === ratingFilter;
+    const matchesStatus =
+      statusFilter === "all" || review.replyStatus === statusFilter;
+    const matchesTeacher =
+      teacherFilter === "all" || review.teacherName === teacherFilter;
+    const matchesCourse =
+      courseFilter === "all" || review.courseName === courseFilter;
+
     let matchesDate = true;
-    if (dateFilter !== 'all') {
+    if (dateFilter !== "all") {
       const reviewDate = new Date(review.reviewDate);
       const now = new Date();
-      const diffDays = Math.floor((now.getTime() - reviewDate.getTime()) / (1000 * 60 * 60 * 24));
-      
+      const diffDays = Math.floor(
+        (now.getTime() - reviewDate.getTime()) / (1000 * 60 * 60 * 24),
+      );
+
       switch (dateFilter) {
-        case 'today':
+        case "today":
           matchesDate = diffDays === 0;
           break;
-        case 'week':
+        case "week":
           matchesDate = diffDays <= 7;
           break;
-        case 'month':
+        case "month":
           matchesDate = diffDays <= 30;
           break;
       }
     }
-    
-    return matchesSearch && matchesRating && matchesStatus && matchesTeacher && matchesCourse && matchesDate;
+
+    return (
+      matchesSearch &&
+      matchesRating &&
+      matchesStatus &&
+      matchesTeacher &&
+      matchesCourse &&
+      matchesDate
+    );
   });
 
-  const teachers = Array.from(new Set(reviews.map(review => review.teacherName)));
-  const courses = Array.from(new Set(reviews.map(review => review.courseName)));
-  const noReplyCount = reviews.filter(r => r.replyStatus === 'no_reply').length;
+  const teachers = Array.from(
+    new Set(reviews.map((review) => review.teacherName)),
+  );
+  const courses = Array.from(
+    new Set(reviews.map((review) => review.courseName)),
+  );
+  const noReplyCount = reviews.filter(
+    (r) => r.replyStatus === "no_reply",
+  ).length;
 
   return (
     <div className="p-6">
@@ -286,7 +313,9 @@ export default function ReviewManagementPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">미답변</p>
-              <p className="text-2xl font-bold text-yellow-600">{noReplyCount}</p>
+              <p className="text-2xl font-bold text-yellow-600">
+                {noReplyCount}
+              </p>
             </div>
             <AlertTriangle className="w-8 h-8 text-yellow-600" />
           </div>
@@ -296,7 +325,9 @@ export default function ReviewManagementPage() {
             <div>
               <p className="text-sm text-gray-600">평균 평점</p>
               <p className="text-2xl font-bold text-green-600">
-                {(reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)}
+                {(
+                  reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+                ).toFixed(1)}
               </p>
             </div>
             <Star className="w-8 h-8 text-green-600" />
@@ -307,7 +338,7 @@ export default function ReviewManagementPage() {
             <div>
               <p className="text-sm text-gray-600">좋아요</p>
               <p className="text-2xl font-bold text-purple-600">
-                {reviews.filter(r => r.isLiked).length}
+                {reviews.filter((r) => r.isLiked).length}
               </p>
             </div>
             <ThumbsUp className="w-8 h-8 text-purple-600" />
@@ -329,7 +360,7 @@ export default function ReviewManagementPage() {
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            
+
             <select
               value={ratingFilter}
               onChange={(e) => setRatingFilter(e.target.value)}
@@ -342,7 +373,7 @@ export default function ReviewManagementPage() {
               <option value="2">2점</option>
               <option value="1">1점</option>
             </select>
-            
+
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
@@ -352,7 +383,7 @@ export default function ReviewManagementPage() {
               <option value="no_reply">미답변</option>
               <option value="replied">답변완료</option>
             </select>
-            
+
             <select
               value={teacherFilter}
               onChange={(e) => setTeacherFilter(e.target.value)}
@@ -360,10 +391,12 @@ export default function ReviewManagementPage() {
             >
               <option value="all">전체 선생님</option>
               {teachers.map((teacher) => (
-                <option key={teacher} value={teacher}>{teacher}</option>
+                <option key={teacher} value={teacher}>
+                  {teacher}
+                </option>
               ))}
             </select>
-            
+
             <select
               value={courseFilter}
               onChange={(e) => setCourseFilter(e.target.value)}
@@ -371,10 +404,12 @@ export default function ReviewManagementPage() {
             >
               <option value="all">전체 코스</option>
               {courses.map((course) => (
-                <option key={course} value={course}>{course}</option>
+                <option key={course} value={course}>
+                  {course}
+                </option>
               ))}
             </select>
-            
+
             <select
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value)}
@@ -392,9 +427,11 @@ export default function ReviewManagementPage() {
       {/* 리뷰 목록 */}
       <div className="bg-white rounded-lg shadow">
         <div className="p-6 border-b">
-          <h2 className="text-lg font-semibold">리뷰 목록 ({filteredReviews.length}개)</h2>
+          <h2 className="text-lg font-semibold">
+            리뷰 목록 ({filteredReviews.length}개)
+          </h2>
         </div>
-        
+
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -402,7 +439,9 @@ export default function ReviewManagementPage() {
         ) : filteredReviews.length === 0 ? (
           <div className="text-center py-12">
             <MessageSquare className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">리뷰가 없습니다</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              리뷰가 없습니다
+            </h3>
             <p className="text-gray-600">검색 조건을 변경해보세요.</p>
           </div>
         ) : (
@@ -415,7 +454,9 @@ export default function ReviewManagementPage() {
                       <div className="flex items-center space-x-1">
                         {getRatingStars(review.rating)}
                       </div>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getReplyStatusColor(review.replyStatus)}`}>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${getReplyStatusColor(review.replyStatus)}`}
+                      >
                         {getReplyStatusText(review.replyStatus)}
                       </span>
                       {review.isFlagged && (
@@ -424,15 +465,19 @@ export default function ReviewManagementPage() {
                         </span>
                       )}
                     </div>
-                    
+
                     <div className="mb-3">
-                      <p className="text-gray-900 line-clamp-2">{review.content}</p>
+                      <p className="text-gray-900 line-clamp-2">
+                        {review.content}
+                      </p>
                     </div>
-                    
+
                     <div className="flex items-center space-x-4 text-sm text-gray-500">
                       <div className="flex items-center space-x-1">
                         <User className="w-4 h-4" />
-                        <span>{review.authorName} ({review.authorUid})</span>
+                        <span>
+                          {review.authorName} ({review.authorUid})
+                        </span>
                       </div>
                       <div className="flex items-center space-x-1">
                         <Calendar className="w-4 h-4" />
@@ -447,7 +492,7 @@ export default function ReviewManagementPage() {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2 ml-4">
                     <button
                       onClick={() => {
@@ -458,11 +503,11 @@ export default function ReviewManagementPage() {
                     >
                       <Eye className="w-4 h-4" />
                     </button>
-                    {review.replyStatus === 'no_reply' && (
+                    {review.replyStatus === "no_reply" && (
                       <button
                         onClick={() => {
                           setSelectedReview(review);
-                          setReplyContent('');
+                          setReplyContent("");
                           setShowReplyModal(true);
                         }}
                         className="p-2 text-green-600 hover:bg-green-100 rounded-lg"
@@ -473,9 +518,9 @@ export default function ReviewManagementPage() {
                     <button
                       onClick={() => handleLikeToggle(review.id)}
                       className={`p-2 rounded-lg ${
-                        review.isLiked 
-                          ? 'text-purple-600 bg-purple-100' 
-                          : 'text-gray-600 hover:bg-gray-100'
+                        review.isLiked
+                          ? "text-purple-600 bg-purple-100"
+                          : "text-gray-600 hover:bg-gray-100"
                       }`}
                     >
                       <ThumbsUp className="w-4 h-4" />
@@ -483,9 +528,9 @@ export default function ReviewManagementPage() {
                     <button
                       onClick={() => handleFlagToggle(review.id)}
                       className={`p-2 rounded-lg ${
-                        review.isFlagged 
-                          ? 'text-red-600 bg-red-100' 
-                          : 'text-gray-600 hover:bg-gray-100'
+                        review.isFlagged
+                          ? "text-red-600 bg-red-100"
+                          : "text-gray-600 hover:bg-gray-100"
                       }`}
                     >
                       <AlertTriangle className="w-4 h-4" />
@@ -520,7 +565,9 @@ export default function ReviewManagementPage() {
                   <div className="p-2 bg-gray-50 rounded border">
                     <div className="flex items-center space-x-1">
                       {getRatingStars(selectedReview.rating)}
-                      <span className="ml-2 text-sm text-gray-600">({selectedReview.rating}/5)</span>
+                      <span className="ml-2 text-sm text-gray-600">
+                        ({selectedReview.rating}/5)
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -550,7 +597,9 @@ export default function ReviewManagementPage() {
                   리뷰 내용
                 </label>
                 <div className="p-3 bg-gray-50 rounded border">
-                  <p className="text-gray-900 whitespace-pre-wrap">{selectedReview.content}</p>
+                  <p className="text-gray-900 whitespace-pre-wrap">
+                    {selectedReview.content}
+                  </p>
                 </div>
               </div>
 
@@ -560,9 +609,13 @@ export default function ReviewManagementPage() {
                     관리자 답변
                   </label>
                   <div className="p-3 bg-blue-50 rounded border">
-                    <p className="text-gray-900 whitespace-pre-wrap">{selectedReview.adminReply}</p>
+                    <p className="text-gray-900 whitespace-pre-wrap">
+                      {selectedReview.adminReply}
+                    </p>
                     <div className="text-xs text-gray-500 mt-2">
-                      답변일: {selectedReview.replyDate && formatDate(selectedReview.replyDate)}
+                      답변일:{" "}
+                      {selectedReview.replyDate &&
+                        formatDate(selectedReview.replyDate)}
                     </div>
                   </div>
                 </div>
@@ -574,17 +627,19 @@ export default function ReviewManagementPage() {
                     플래그 사유
                   </label>
                   <div className="p-2 bg-red-50 rounded border">
-                    <p className="text-red-800">{selectedReview.flaggedReason}</p>
+                    <p className="text-red-800">
+                      {selectedReview.flaggedReason}
+                    </p>
                   </div>
                 </div>
               )}
 
               <div className="flex justify-end space-x-3 pt-4">
-                {selectedReview.replyStatus === 'no_reply' && (
+                {selectedReview.replyStatus === "no_reply" && (
                   <button
                     onClick={() => {
                       setShowDetailModal(false);
-                      setReplyContent('');
+                      setReplyContent("");
                       setShowReplyModal(true);
                     }}
                     className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
@@ -619,7 +674,9 @@ export default function ReviewManagementPage() {
                     <div className="flex items-center space-x-1">
                       {getRatingStars(selectedReview.rating)}
                     </div>
-                    <span className="text-sm text-gray-600">by {selectedReview.authorName}</span>
+                    <span className="text-sm text-gray-600">
+                      by {selectedReview.authorName}
+                    </span>
                   </div>
                   <p className="text-gray-900">{selectedReview.content}</p>
                 </div>
@@ -660,4 +717,4 @@ export default function ReviewManagementPage() {
       )}
     </div>
   );
-} 
+}

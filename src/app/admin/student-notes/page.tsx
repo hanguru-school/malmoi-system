@@ -1,20 +1,20 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
-import { 
-  ArrowLeft, 
-  Search, 
-  Edit, 
-  Eye, 
+import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+import {
+  ArrowLeft,
+  Search,
+  Edit,
+  Eye,
   Download,
   User,
   Star,
   X,
   Mic,
   MicOff,
-  Trash2
-} from 'lucide-react';
+  Trash2,
+} from "lucide-react";
 
 interface StudentNote {
   id: string;
@@ -65,16 +65,18 @@ interface AudioFile {
 export default function AdminStudentNotesPage() {
   const [notes, setNotes] = useState<StudentNote[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedStudent, setSelectedStudent] = useState('');
-  const [selectedTeacher, setSelectedTeacher] = useState('');
-  const [selectedDate, setSelectedDate] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedStudent, setSelectedStudent] = useState("");
+  const [selectedTeacher, setSelectedTeacher] = useState("");
+  const [selectedDate, setSelectedDate] = useState("");
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [selectedNote, setSelectedNote] = useState<StudentNote | null>(null);
   const [editingNote, setEditingNote] = useState<StudentNote | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [audioFiles, setAudioFiles] = useState<AudioFile[]>([]);
-  const [currentAudioFile, setCurrentAudioFile] = useState<AudioFile | null>(null);
+  const [currentAudioFile, setCurrentAudioFile] = useState<AudioFile | null>(
+    null,
+  );
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
 
@@ -83,18 +85,19 @@ export default function AdminStudentNotesPage() {
     setTimeout(() => {
       const mockNotes: StudentNote[] = [
         {
-          id: '1',
-          studentName: '김학생',
-          teacherName: '이선생님',
-          date: '2024-01-16',
-          subject: '문법',
-          content: '<h2>오늘의 수업 내용</h2><p>안녕하세요! 오늘은 한국어 기초 문법을 배워보겠습니다.</p><h3>1. 인사말</h3><ul><li>안녕하세요 - Hello</li><li>안녕히 가세요 - Goodbye</li><li>감사합니다 - Thank you</li></ul>',
-          todayLesson: '기초 문법 - 인사말과 자기소개',
-          nextLesson: '기초 문법 - 숫자와 시간 표현',
+          id: "1",
+          studentName: "김학생",
+          teacherName: "이선생님",
+          date: "2024-01-16",
+          subject: "문법",
+          content:
+            "<h2>오늘의 수업 내용</h2><p>안녕하세요! 오늘은 한국어 기초 문법을 배워보겠습니다.</p><h3>1. 인사말</h3><ul><li>안녕하세요 - Hello</li><li>안녕히 가세요 - Goodbye</li><li>감사합니다 - Thank you</li></ul>",
+          todayLesson: "기초 문법 - 인사말과 자기소개",
+          nextLesson: "기초 문법 - 숫자와 시간 표현",
           homework: {
             hasHomework: true,
-            teacherHomework: '다음 수업 준비물 준비',
-            studentHomework: '인사말 연습하기'
+            teacherHomework: "다음 수업 준비물 준비",
+            studentHomework: "인사말 연습하기",
           },
           evaluation: {
             participation: 4,
@@ -106,47 +109,49 @@ export default function AdminStudentNotesPage() {
             listening: 3,
             reading: 4,
             writing: 3,
-            comments: '전반적으로 좋은 수업이었습니다. 발음 부분에서 더 연습이 필요합니다.',
-            participationComment: '적극적으로 참여했습니다.',
-            understandingComment: '개념을 잘 이해했습니다.',
-            pronunciationComment: '발음 교정이 필요합니다.',
-            grammarComment: '문법 규칙을 잘 적용했습니다.',
-            vocabularyComment: '새로운 단어를 잘 기억했습니다.',
-            speakingComment: '자연스럽게 대화했습니다.',
-            listeningComment: '듣기 이해도가 좋습니다.',
-            readingComment: '읽기 속도가 개선되었습니다.',
-            writingComment: '문장 구성이 좋습니다.'
+            comments:
+              "전반적으로 좋은 수업이었습니다. 발음 부분에서 더 연습이 필요합니다.",
+            participationComment: "적극적으로 참여했습니다.",
+            understandingComment: "개념을 잘 이해했습니다.",
+            pronunciationComment: "발음 교정이 필요합니다.",
+            grammarComment: "문법 규칙을 잘 적용했습니다.",
+            vocabularyComment: "새로운 단어를 잘 기억했습니다.",
+            speakingComment: "자연스럽게 대화했습니다.",
+            listeningComment: "듣기 이해도가 좋습니다.",
+            readingComment: "읽기 속도가 개선되었습니다.",
+            writingComment: "문장 구성이 좋습니다.",
           },
           audioFiles: [
             {
-              id: '1',
-              name: '수업 내용 1',
-              url: '/audio/lesson1.mp3',
+              id: "1",
+              name: "수업 내용 1",
+              url: "/audio/lesson1.mp3",
               duration: 120,
-              transcript: '오늘은 한국어 기초 문법을 배워보겠습니다.'
+              transcript: "오늘은 한국어 기초 문법을 배워보겠습니다.",
             },
             {
-              id: '2',
-              name: '수업 내용 2',
-              url: '/audio/lesson2.mp3',
+              id: "2",
+              name: "수업 내용 2",
+              url: "/audio/lesson2.mp3",
               duration: 180,
-              transcript: '인사말과 자기소개에 대해 학습했습니다.'
-            }
-          ]
+              transcript: "인사말과 자기소개에 대해 학습했습니다.",
+            },
+          ],
         },
         {
-          id: '2',
-          studentName: '이학생',
-          teacherName: '박선생님',
-          date: '2024-01-16',
-          subject: '회화',
-          content: '<h2>오늘의 수업 내용</h2><p>일상 대화 연습을 진행했습니다.</p><h3>1. 자기소개</h3><p>저는 [이름]입니다. 만나서 반갑습니다.</p>',
-          todayLesson: '일상 대화 - 자기소개',
-          nextLesson: '일상 대화 - 취미 이야기',
+          id: "2",
+          studentName: "이학생",
+          teacherName: "박선생님",
+          date: "2024-01-16",
+          subject: "회화",
+          content:
+            "<h2>오늘의 수업 내용</h2><p>일상 대화 연습을 진행했습니다.</p><h3>1. 자기소개</h3><p>저는 [이름]입니다. 만나서 반갑습니다.</p>",
+          todayLesson: "일상 대화 - 자기소개",
+          nextLesson: "일상 대화 - 취미 이야기",
           homework: {
             hasHomework: false,
-            teacherHomework: '',
-            studentHomework: ''
+            teacherHomework: "",
+            studentHomework: "",
           },
           evaluation: {
             participation: 5,
@@ -158,39 +163,42 @@ export default function AdminStudentNotesPage() {
             listening: 4,
             reading: 3,
             writing: 3,
-            comments: '회화 능력이 뛰어납니다. 문법 기초를 더 다져야 합니다.',
-            participationComment: '매우 적극적으로 참여했습니다.',
-            understandingComment: '대화 내용을 잘 이해했습니다.',
-            pronunciationComment: '발음이 매우 좋습니다.',
-            grammarComment: '문법 오류가 있습니다.',
-            vocabularyComment: '어휘 사용이 자연스럽습니다.',
-            speakingComment: '자연스러운 대화가 가능합니다.',
-            listeningComment: '듣기 능력이 우수합니다.',
-            readingComment: '읽기 속도가 느립니다.',
-            writingComment: '쓰기 연습이 필요합니다.'
+            comments: "회화 능력이 뛰어납니다. 문법 기초를 더 다져야 합니다.",
+            participationComment: "매우 적극적으로 참여했습니다.",
+            understandingComment: "대화 내용을 잘 이해했습니다.",
+            pronunciationComment: "발음이 매우 좋습니다.",
+            grammarComment: "문법 오류가 있습니다.",
+            vocabularyComment: "어휘 사용이 자연스럽습니다.",
+            speakingComment: "자연스러운 대화가 가능합니다.",
+            listeningComment: "듣기 능력이 우수합니다.",
+            readingComment: "읽기 속도가 느립니다.",
+            writingComment: "쓰기 연습이 필요합니다.",
           },
-          audioFiles: []
-        }
+          audioFiles: [],
+        },
       ];
       setNotes(mockNotes);
       setLoading(false);
     }, 1000);
   }, []);
 
-  const filteredNotes = notes.filter(note => {
-    const matchesSearch = note.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         note.teacherName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         note.subject.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStudent = !selectedStudent || note.studentName === selectedStudent;
-    const matchesTeacher = !selectedTeacher || note.teacherName === selectedTeacher;
+  const filteredNotes = notes.filter((note) => {
+    const matchesSearch =
+      note.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      note.teacherName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      note.subject.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStudent =
+      !selectedStudent || note.studentName === selectedStudent;
+    const matchesTeacher =
+      !selectedTeacher || note.teacherName === selectedTeacher;
     const matchesDate = !selectedDate || note.date === selectedDate;
-    
+
     return matchesSearch && matchesStudent && matchesTeacher && matchesDate;
   });
 
-  const students = [...new Set(notes.map(note => note.studentName))];
-  const teachers = [...new Set(notes.map(note => note.teacherName))];
-  const dates = [...new Set(notes.map(note => note.date))];
+  const students = [...new Set(notes.map((note) => note.studentName))];
+  const teachers = [...new Set(notes.map((note) => note.teacherName))];
+  const dates = [...new Set(notes.map((note) => note.date))];
 
   const openNoteModal = (note: StudentNote) => {
     setSelectedNote(note);
@@ -201,28 +209,28 @@ export default function AdminStudentNotesPage() {
 
   const saveNote = async () => {
     if (!editingNote) return;
-    
+
     try {
       // 실제 API 호출로 대체
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       const updatedNote = {
         ...editingNote,
-        audioFiles: audioFiles
+        audioFiles: audioFiles,
       };
-      
-      setNotes(prev => prev.map(note => 
-        note.id === updatedNote.id ? updatedNote : note
-      ));
-      
+
+      setNotes((prev) =>
+        prev.map((note) => (note.id === updatedNote.id ? updatedNote : note)),
+      );
+
       setShowNoteModal(false);
-      alert('노트가 저장되었습니다.');
+      alert("노트가 저장되었습니다.");
     } catch (error) {
-      alert('저장에 실패했습니다.');
+      alert("저장에 실패했습니다.");
     }
   };
 
-  const getAverageScore = (evaluation: StudentNote['evaluation']) => {
+  const getAverageScore = (evaluation: StudentNote["evaluation"]) => {
     const scores = [
       evaluation.participation,
       evaluation.understanding,
@@ -232,7 +240,7 @@ export default function AdminStudentNotesPage() {
       evaluation.speaking,
       evaluation.listening,
       evaluation.reading,
-      evaluation.writing
+      evaluation.writing,
     ];
     return Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
   };
@@ -250,26 +258,28 @@ export default function AdminStudentNotesPage() {
       };
 
       mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+        const audioBlob = new Blob(audioChunksRef.current, {
+          type: "audio/wav",
+        });
         const audioUrl = URL.createObjectURL(audioBlob);
-        
+
         const newAudioFile: AudioFile = {
           id: Date.now().toString(),
           name: `음성 녹음 ${audioFiles.length + 1}`,
           url: audioUrl,
           duration: Math.round(audioBlob.size / 1000), // 간단한 duration 계산
-          transcript: ''
+          transcript: "",
         };
-        
-        setAudioFiles(prev => [...prev, newAudioFile]);
+
+        setAudioFiles((prev) => [...prev, newAudioFile]);
         setCurrentAudioFile(newAudioFile);
       };
 
       mediaRecorder.start();
       setIsRecording(true);
     } catch (error) {
-      console.error('음성 녹음을 시작할 수 없습니다:', error);
-      alert('마이크 권한이 필요합니다.');
+      console.error("음성 녹음을 시작할 수 없습니다:", error);
+      alert("마이크 권한이 필요합니다.");
     }
   };
 
@@ -277,28 +287,32 @@ export default function AdminStudentNotesPage() {
   const stopRecording = () => {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
-      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+      mediaRecorderRef.current.stream
+        .getTracks()
+        .forEach((track) => track.stop());
       setIsRecording(false);
     }
   };
 
   // 음성 파일 삭제
   const deleteAudioFile = (audioId: string) => {
-    setAudioFiles(prev => prev.filter(audio => audio.id !== audioId));
+    setAudioFiles((prev) => prev.filter((audio) => audio.id !== audioId));
   };
 
   // 음성 파일 이름 변경
   const updateAudioFileName = (audioId: string, name: string) => {
-    setAudioFiles(prev => prev.map(audio => 
-      audio.id === audioId ? { ...audio, name } : audio
-    ));
+    setAudioFiles((prev) =>
+      prev.map((audio) => (audio.id === audioId ? { ...audio, name } : audio)),
+    );
   };
 
   // 음성 파일 트랜스크립트 업데이트
   const updateAudioTranscript = (audioId: string, transcript: string) => {
-    setAudioFiles(prev => prev.map(audio => 
-      audio.id === audioId ? { ...audio, transcript } : audio
-    ));
+    setAudioFiles((prev) =>
+      prev.map((audio) =>
+        audio.id === audioId ? { ...audio, transcript } : audio,
+      ),
+    );
   };
 
   if (loading) {
@@ -341,46 +355,52 @@ export default function AdminStudentNotesPage() {
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
-          
+
           <select
             value={selectedStudent}
             onChange={(e) => setSelectedStudent(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="">모든 학생</option>
-            {students.map(student => (
-              <option key={student} value={student}>{student}</option>
+            {students.map((student) => (
+              <option key={student} value={student}>
+                {student}
+              </option>
             ))}
           </select>
-          
+
           <select
             value={selectedTeacher}
             onChange={(e) => setSelectedTeacher(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="">모든 선생님</option>
-            {teachers.map(teacher => (
-              <option key={teacher} value={teacher}>{teacher}</option>
+            {teachers.map((teacher) => (
+              <option key={teacher} value={teacher}>
+                {teacher}
+              </option>
             ))}
           </select>
-          
+
           <select
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="">모든 날짜</option>
-            {dates.map(date => (
-              <option key={date} value={date}>{date}</option>
+            {dates.map((date) => (
+              <option key={date} value={date}>
+                {date}
+              </option>
             ))}
           </select>
-          
+
           <button
             onClick={() => {
-              setSearchTerm('');
-              setSelectedStudent('');
-              setSelectedTeacher('');
-              setSelectedDate('');
+              setSearchTerm("");
+              setSelectedStudent("");
+              setSelectedTeacher("");
+              setSelectedDate("");
             }}
             className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
           >
@@ -396,7 +416,7 @@ export default function AdminStudentNotesPage() {
             수업 노트 목록 ({filteredNotes.length}개)
           </h2>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50">
@@ -433,7 +453,9 @@ export default function AdminStudentNotesPage() {
                   <td className="px-4 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <User className="w-4 h-4 text-gray-400 mr-2" />
-                      <span className="text-sm font-medium text-gray-900">{note.studentName}</span>
+                      <span className="text-sm font-medium text-gray-900">
+                        {note.studentName}
+                      </span>
                     </div>
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -448,21 +470,25 @@ export default function AdminStudentNotesPage() {
                   <td className="px-4 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <Star className="w-4 h-4 text-yellow-500 mr-1" />
-                      <span className="text-sm text-gray-900">{getAverageScore(note.evaluation)}/5</span>
+                      <span className="text-sm text-gray-900">
+                        {getAverageScore(note.evaluation)}/5
+                      </span>
                     </div>
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      note.homework.hasHomework 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-gray-100 text-gray-800'
-                    }`}>
-                      {note.homework.hasHomework ? '있음' : '없음'}
+                    <span
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        note.homework.hasHomework
+                          ? "bg-green-100 text-green-800"
+                          : "bg-gray-100 text-gray-800"
+                      }`}
+                    >
+                      {note.homework.hasHomework ? "있음" : "없음"}
                     </span>
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap">
                     <span className="text-sm text-gray-900">
-                      {(note.audioFiles?.length || 0)}개
+                      {note.audioFiles?.length || 0}개
                     </span>
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
@@ -486,7 +512,7 @@ export default function AdminStudentNotesPage() {
                       </button>
                       <button
                         onClick={() => {
-                          const printWindow = window.open('', '_blank');
+                          const printWindow = window.open("", "_blank");
                           if (printWindow) {
                             printWindow.document.write(`
                               <html>
@@ -536,7 +562,7 @@ export default function AdminStudentNotesPage() {
           <div className="bg-white rounded-lg p-6 w-full max-w-6xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">
-                {editingNote ? '노트 편집' : '노트 보기'}
+                {editingNote ? "노트 편집" : "노트 보기"}
               </h3>
               <button
                 onClick={() => {
@@ -556,13 +582,15 @@ export default function AdminStudentNotesPage() {
                 {/* 음성 파일 관리 */}
                 <div className="bg-gray-50 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-4">
-                    <h4 className="font-medium text-gray-900">음성 파일 관리</h4>
+                    <h4 className="font-medium text-gray-900">
+                      음성 파일 관리
+                    </h4>
                     <button
                       onClick={isRecording ? stopRecording : startRecording}
                       className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                        isRecording 
-                          ? 'bg-red-600 text-white hover:bg-red-700' 
-                          : 'bg-blue-600 text-white hover:bg-blue-700'
+                        isRecording
+                          ? "bg-red-600 text-white hover:bg-red-700"
+                          : "bg-blue-600 text-white hover:bg-blue-700"
                       }`}
                     >
                       {isRecording ? (
@@ -582,12 +610,17 @@ export default function AdminStudentNotesPage() {
                   {audioFiles.length > 0 && (
                     <div className="space-y-3">
                       {audioFiles.map((audio) => (
-                        <div key={audio.id} className="bg-white rounded-lg p-3 border">
+                        <div
+                          key={audio.id}
+                          className="bg-white rounded-lg p-3 border"
+                        >
                           <div className="flex items-center justify-between mb-2">
                             <input
                               type="text"
                               value={audio.name}
-                              onChange={(e) => updateAudioFileName(audio.id, e.target.value)}
+                              onChange={(e) =>
+                                updateAudioFileName(audio.id, e.target.value)
+                              }
                               className="font-medium text-gray-900 bg-transparent border-none focus:ring-0"
                             />
                             <button
@@ -602,12 +635,17 @@ export default function AdminStudentNotesPage() {
                               <source src={audio.url} type="audio/wav" />
                             </audio>
                             <span className="text-sm text-gray-500">
-                              {Math.floor(audio.duration / 60)}:{(audio.duration % 60).toString().padStart(2, '0')}
+                              {Math.floor(audio.duration / 60)}:
+                              {(audio.duration % 60)
+                                .toString()
+                                .padStart(2, "0")}
                             </span>
                           </div>
                           <textarea
                             value={audio.transcript}
-                            onChange={(e) => updateAudioTranscript(audio.id, e.target.value)}
+                            onChange={(e) =>
+                              updateAudioTranscript(audio.id, e.target.value)
+                            }
                             placeholder="음성 내용을 텍스트로 입력하세요..."
                             className="w-full h-20 p-2 border border-gray-300 rounded resize-none text-sm"
                           />
@@ -619,53 +657,69 @@ export default function AdminStudentNotesPage() {
 
                 {/* 편집 가능한 내용 */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">수업 내용</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    수업 내용
+                  </label>
                   <textarea
-                    value={editingNote.content.replace(/<[^>]*>/g, '')}
-                    onChange={(e) => setEditingNote({
-                      ...editingNote,
-                      content: e.target.value
-                    })}
+                    value={editingNote.content.replace(/<[^>]*>/g, "")}
+                    onChange={(e) =>
+                      setEditingNote({
+                        ...editingNote,
+                        content: e.target.value,
+                      })
+                    }
                     className="w-full h-32 p-2 border border-gray-300 rounded resize-none"
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">오늘 낸 레슨</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      오늘 낸 레슨
+                    </label>
                     <textarea
                       value={editingNote.todayLesson}
-                      onChange={(e) => setEditingNote({
-                        ...editingNote,
-                        todayLesson: e.target.value
-                      })}
+                      onChange={(e) =>
+                        setEditingNote({
+                          ...editingNote,
+                          todayLesson: e.target.value,
+                        })
+                      }
                       className="w-full h-20 p-2 border border-gray-300 rounded resize-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">다음 레슨</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      다음 레슨
+                    </label>
                     <textarea
                       value={editingNote.nextLesson}
-                      onChange={(e) => setEditingNote({
-                        ...editingNote,
-                        nextLesson: e.target.value
-                      })}
+                      onChange={(e) =>
+                        setEditingNote({
+                          ...editingNote,
+                          nextLesson: e.target.value,
+                        })
+                      }
                       className="w-full h-20 p-2 border border-gray-300 rounded resize-none"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">전체 평가 코멘트</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    전체 평가 코멘트
+                  </label>
                   <textarea
                     value={editingNote.evaluation.comments}
-                    onChange={(e) => setEditingNote({
-                      ...editingNote,
-                      evaluation: {
-                        ...editingNote.evaluation,
-                        comments: e.target.value
-                      }
-                    })}
+                    onChange={(e) =>
+                      setEditingNote({
+                        ...editingNote,
+                        evaluation: {
+                          ...editingNote.evaluation,
+                          comments: e.target.value,
+                        },
+                      })
+                    }
                     className="w-full h-20 p-2 border border-gray-300 rounded resize-none"
                   />
                 </div>
@@ -693,62 +747,89 @@ export default function AdminStudentNotesPage() {
                 {/* 읽기 전용 내용 */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                   <div>
-                    <span className="text-sm font-medium text-gray-700">학생:</span>
+                    <span className="text-sm font-medium text-gray-700">
+                      학생:
+                    </span>
                     <p className="text-gray-900">{selectedNote?.studentName}</p>
                   </div>
                   <div>
-                    <span className="text-sm font-medium text-gray-700">선생님:</span>
+                    <span className="text-sm font-medium text-gray-700">
+                      선생님:
+                    </span>
                     <p className="text-gray-900">{selectedNote?.teacherName}</p>
                   </div>
                   <div>
-                    <span className="text-sm font-medium text-gray-700">날짜:</span>
+                    <span className="text-sm font-medium text-gray-700">
+                      날짜:
+                    </span>
                     <p className="text-gray-900">{selectedNote?.date}</p>
                   </div>
                 </div>
 
                 {/* 음성 파일 목록 */}
-                {selectedNote?.audioFiles && selectedNote.audioFiles.length > 0 && (
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-2">음성 파일</h4>
-                    <div className="space-y-3">
-                      {selectedNote.audioFiles.map((audio) => (
-                        <div key={audio.id} className="bg-gray-50 rounded-lg p-3">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="font-medium text-gray-900">{audio.name}</span>
-                            <span className="text-sm text-gray-500">
-                              {Math.floor(audio.duration / 60)}:{(audio.duration % 60).toString().padStart(2, '0')}
-                            </span>
-                          </div>
-                          <audio controls className="w-full mb-2">
-                            <source src={audio.url} type="audio/wav" />
-                          </audio>
-                          {audio.transcript && (
-                            <div>
-                              <span className="text-sm font-medium text-gray-700">트랜스크립트:</span>
-                              <p className="text-sm text-gray-700 mt-1">{audio.transcript}</p>
+                {selectedNote?.audioFiles &&
+                  selectedNote.audioFiles.length > 0 && (
+                    <div>
+                      <h4 className="font-medium text-gray-900 mb-2">
+                        음성 파일
+                      </h4>
+                      <div className="space-y-3">
+                        {selectedNote.audioFiles.map((audio) => (
+                          <div
+                            key={audio.id}
+                            className="bg-gray-50 rounded-lg p-3"
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="font-medium text-gray-900">
+                                {audio.name}
+                              </span>
+                              <span className="text-sm text-gray-500">
+                                {Math.floor(audio.duration / 60)}:
+                                {(audio.duration % 60)
+                                  .toString()
+                                  .padStart(2, "0")}
+                              </span>
                             </div>
-                          )}
-                        </div>
-                      ))}
+                            <audio controls className="w-full mb-2">
+                              <source src={audio.url} type="audio/wav" />
+                            </audio>
+                            {audio.transcript && (
+                              <div>
+                                <span className="text-sm font-medium text-gray-700">
+                                  트랜스크립트:
+                                </span>
+                                <p className="text-sm text-gray-700 mt-1">
+                                  {audio.transcript}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
                 <div>
                   <h4 className="font-medium text-gray-900 mb-2">수업 내용</h4>
-                  <div 
+                  <div
                     className="p-4 bg-gray-50 rounded-lg"
-                    dangerouslySetInnerHTML={{ __html: selectedNote?.content || '' }}
+                    dangerouslySetInnerHTML={{
+                      __html: selectedNote?.content || "",
+                    }}
                   />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <h4 className="font-medium text-gray-900 mb-2">오늘 낸 레슨</h4>
+                    <h4 className="font-medium text-gray-900 mb-2">
+                      오늘 낸 레슨
+                    </h4>
                     <p className="text-gray-700">{selectedNote?.todayLesson}</p>
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900 mb-2">다음 레슨</h4>
+                    <h4 className="font-medium text-gray-900 mb-2">
+                      다음 레슨
+                    </h4>
                     <p className="text-gray-700">{selectedNote?.nextLesson}</p>
                   </div>
                 </div>
@@ -758,12 +839,20 @@ export default function AdminStudentNotesPage() {
                     <h4 className="font-medium text-gray-900 mb-2">숙제</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <span className="text-sm font-medium text-gray-700">선생님 숙제:</span>
-                        <p className="text-gray-700">{selectedNote.homework.teacherHomework}</p>
+                        <span className="text-sm font-medium text-gray-700">
+                          선생님 숙제:
+                        </span>
+                        <p className="text-gray-700">
+                          {selectedNote.homework.teacherHomework}
+                        </p>
                       </div>
                       <div>
-                        <span className="text-sm font-medium text-gray-700">학생 숙제:</span>
-                        <p className="text-gray-700">{selectedNote.homework.studentHomework}</p>
+                        <span className="text-sm font-medium text-gray-700">
+                          학생 숙제:
+                        </span>
+                        <p className="text-gray-700">
+                          {selectedNote.homework.studentHomework}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -773,26 +862,30 @@ export default function AdminStudentNotesPage() {
                   <h4 className="font-medium text-gray-900 mb-2">수업 평가</h4>
                   <div className="grid grid-cols-3 gap-4 mb-4">
                     {[
-                      { key: 'participation', label: '참여도' },
-                      { key: 'understanding', label: '이해도' },
-                      { key: 'pronunciation', label: '발음' },
-                      { key: 'grammar', label: '문법' },
-                      { key: 'vocabulary', label: '어휘' },
-                      { key: 'speaking', label: '회화' },
-                      { key: 'listening', label: '듣기' },
-                      { key: 'reading', label: '읽기' },
-                      { key: 'writing', label: '쓰기' }
+                      { key: "participation", label: "참여도" },
+                      { key: "understanding", label: "이해도" },
+                      { key: "pronunciation", label: "발음" },
+                      { key: "grammar", label: "문법" },
+                      { key: "vocabulary", label: "어휘" },
+                      { key: "speaking", label: "회화" },
+                      { key: "listening", label: "듣기" },
+                      { key: "reading", label: "읽기" },
+                      { key: "writing", label: "쓰기" },
                     ].map((item) => (
                       <div key={item.key} className="text-center">
-                        <div className="text-sm text-gray-600">{item.label}</div>
+                        <div className="text-sm text-gray-600">
+                          {item.label}
+                        </div>
                         <div className="flex justify-center gap-1 mt-1">
                           {[1, 2, 3, 4, 5].map((star) => (
                             <Star
                               key={star}
                               className={`w-3 h-3 ${
-                                (selectedNote?.evaluation[item.key as keyof typeof selectedNote.evaluation] as number) >= star
-                                  ? 'text-yellow-500 fill-current'
-                                  : 'text-gray-300'
+                                (selectedNote?.evaluation[
+                                  item.key as keyof typeof selectedNote.evaluation
+                                ] as number) >= star
+                                  ? "text-yellow-500 fill-current"
+                                  : "text-gray-300"
                               }`}
                             />
                           ))}
@@ -800,10 +893,14 @@ export default function AdminStudentNotesPage() {
                       </div>
                     ))}
                   </div>
-                  
+
                   <div>
-                    <h5 className="font-medium text-gray-900 mb-2">전체 평가 코멘트</h5>
-                    <p className="text-gray-700">{selectedNote?.evaluation.comments}</p>
+                    <h5 className="font-medium text-gray-900 mb-2">
+                      전체 평가 코멘트
+                    </h5>
+                    <p className="text-gray-700">
+                      {selectedNote?.evaluation.comments}
+                    </p>
                   </div>
                 </div>
 
@@ -826,4 +923,4 @@ export default function AdminStudentNotesPage() {
       )}
     </div>
   );
-} 
+}

@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { 
-  Home, 
-  Search, 
-  Save, 
-  Mic, 
-  Play, 
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import {
+  Home,
+  Search,
+  Save,
+  Mic,
+  Play,
   Pause,
   AlertCircle,
-  X
-} from 'lucide-react';
+  X,
+} from "lucide-react";
 
 interface Student {
   id: string;
@@ -45,7 +45,7 @@ interface CurriculumItem {
   id: string;
   title: string;
   category: string;
-  status: 'not_started' | 'in_progress' | 'completed' | 'review_needed';
+  status: "not_started" | "in_progress" | "completed" | "review_needed";
   explanationCount: number;
   lastExplained?: string;
 }
@@ -71,7 +71,7 @@ export default function TeacherLessonNotesPage() {
   const [lessonNote, setLessonNote] = useState<LessonNote | null>(null);
   const [curriculum, setCurriculum] = useState<Curriculum | null>(null);
   const [loading, setLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [showTodayOnly, setShowTodayOnly] = useState(true);
   const [isRecording, setIsRecording] = useState(false);
   const [showSessionTimeout, setShowSessionTimeout] = useState(false);
@@ -81,20 +81,24 @@ export default function TeacherLessonNotesPage() {
   const fetchStudents = async () => {
     try {
       setLoading(true);
-      const teacherId = localStorage.getItem('teacherId') || 'T-001'; // 실제로는 인증 시스템에서 가져옴
-      const response = await fetch(`/api/teacher/students?teacherId=${teacherId}`);
+      const teacherId = localStorage.getItem("teacherId") || "T-001"; // 실제로는 인증 시스템에서 가져옴
+      const response = await fetch(
+        `/api/teacher/students?teacherId=${teacherId}`,
+      );
       const data = await response.json();
-      
+
       if (data.success) {
         setStudents(data.students);
         // 당일 수업 학생 자동 선택
-        const todayStudent = data.students.find((s: Student) => s.hasTodayLesson);
+        const todayStudent = data.students.find(
+          (s: Student) => s.hasTodayLesson,
+        );
         if (todayStudent) {
           setSelectedStudent(todayStudent);
         }
       }
     } catch (error) {
-      console.error('학생 목록 조회 실패:', error);
+      console.error("학생 목록 조회 실패:", error);
     } finally {
       setLoading(false);
     }
@@ -103,15 +107,17 @@ export default function TeacherLessonNotesPage() {
   // 레슨 노트 조회
   const fetchLessonNote = async (studentId: string) => {
     try {
-      const teacherId = localStorage.getItem('teacherId') || 'T-001';
-      const response = await fetch(`/api/teacher/lesson-notes/${studentId}?teacherId=${teacherId}`);
+      const teacherId = localStorage.getItem("teacherId") || "T-001";
+      const response = await fetch(
+        `/api/teacher/lesson-notes/${studentId}?teacherId=${teacherId}`,
+      );
       const data = await response.json();
-      
+
       if (data.success) {
         setLessonNote(data.note);
       }
     } catch (error) {
-      console.error('레슨 노트 조회 실패:', error);
+      console.error("레슨 노트 조회 실패:", error);
     }
   };
 
@@ -120,12 +126,12 @@ export default function TeacherLessonNotesPage() {
     try {
       const response = await fetch(`/api/teacher/curriculum/${level}`);
       const data = await response.json();
-      
+
       if (data.success) {
         setCurriculum(data.curriculum);
       }
     } catch (error) {
-      console.error('커리큘럼 조회 실패:', error);
+      console.error("커리큘럼 조회 실패:", error);
     }
   };
 
@@ -142,23 +148,26 @@ export default function TeacherLessonNotesPage() {
 
     try {
       setLoading(true);
-      const response = await fetch(`/api/teacher/lesson-notes/${lessonNote.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `/api/teacher/lesson-notes/${lessonNote.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(lessonNote),
         },
-        body: JSON.stringify(lessonNote),
-      });
-      
+      );
+
       const data = await response.json();
-      
+
       if (data.success) {
-        alert('노트가 저장되었습니다');
+        alert("노트가 저장되었습니다");
       } else {
-        alert('노트 저장 실패');
+        alert("노트 저장 실패");
       }
     } catch (error) {
-      alert('노트 저장 중 오류 발생');
+      alert("노트 저장 중 오류 발생");
     } finally {
       setLoading(false);
     }
@@ -171,7 +180,7 @@ export default function TeacherLessonNotesPage() {
   };
 
   // 필터링된 학생 목록
-  const filteredStudents = students.filter(student => {
+  const filteredStudents = students.filter((student) => {
     if (searchTerm) {
       return student.name.toLowerCase().includes(searchTerm.toLowerCase());
     }
@@ -188,7 +197,7 @@ export default function TeacherLessonNotesPage() {
       const now = new Date();
       const timeDiff = now.getTime() - lessonTime.getTime();
       const minutesDiff = Math.floor(timeDiff / (1000 * 60));
-      
+
       if (minutesDiff > 10 && minutesDiff % 10 === 0) {
         setShowSessionTimeout(true);
       }
@@ -205,9 +214,7 @@ export default function TeacherLessonNotesPage() {
         {/* 헤더 */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">
-              레슨 노트
-            </h1>
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">레슨 노트</h1>
             <p className="text-lg text-gray-600">
               학생별 수업 기록 및 커리큘럼 관리
             </p>
@@ -234,7 +241,7 @@ export default function TeacherLessonNotesPage() {
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
-            
+
             <div className="flex items-center gap-2">
               <input
                 type="checkbox"
@@ -247,11 +254,11 @@ export default function TeacherLessonNotesPage() {
                 오늘 수업 학생만
               </label>
             </div>
-            
+
             <div className="text-sm text-gray-600">
               총 {filteredStudents.length}명의 학생
             </div>
-            
+
             <button
               onClick={() => setShowStudentSelector(true)}
               className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
@@ -266,12 +273,16 @@ export default function TeacherLessonNotesPage() {
           <div className="space-y-6">
             {/* 학생 목록 */}
             <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">학생 목록</h2>
-              
+              <h2 className="text-xl font-bold text-gray-900 mb-4">
+                학생 목록
+              </h2>
+
               {loading ? (
                 <div className="text-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                  <p className="text-gray-600 mt-2">학생 목록을 불러오는 중...</p>
+                  <p className="text-gray-600 mt-2">
+                    학생 목록을 불러오는 중...
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-2 max-h-96 overflow-y-auto">
@@ -281,18 +292,25 @@ export default function TeacherLessonNotesPage() {
                       onClick={() => handleStudentSelect(student)}
                       className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
                         selectedStudent?.id === student.id
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 hover:border-gray-300'
+                          ? "border-blue-500 bg-blue-50"
+                          : "border-gray-200 hover:border-gray-300"
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="font-semibold text-gray-900">{student.name}</h3>
-                          <p className="text-sm text-gray-600">레벨 {student.level}</p>
+                          <h3 className="font-semibold text-gray-900">
+                            {student.name}
+                          </h3>
+                          <p className="text-sm text-gray-600">
+                            레벨 {student.level}
+                          </p>
                         </div>
                         <div className="text-right">
                           <p className="text-xs text-gray-500">
-                            마지막 수업: {new Date(student.lastLessonDate).toLocaleDateString()}
+                            마지막 수업:{" "}
+                            {new Date(
+                              student.lastLessonDate,
+                            ).toLocaleDateString()}
                           </p>
                           {student.hasTodayLesson && (
                             <span className="inline-block px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
@@ -333,7 +351,12 @@ export default function TeacherLessonNotesPage() {
                       <input
                         type="text"
                         value={lessonNote.title}
-                        onChange={(e) => setLessonNote({...lessonNote, title: e.target.value})}
+                        onChange={(e) =>
+                          setLessonNote({
+                            ...lessonNote,
+                            title: e.target.value,
+                          })
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
@@ -344,7 +367,12 @@ export default function TeacherLessonNotesPage() {
                       </label>
                       <textarea
                         value={lessonNote.content}
-                        onChange={(e) => setLessonNote({...lessonNote, content: e.target.value})}
+                        onChange={(e) =>
+                          setLessonNote({
+                            ...lessonNote,
+                            content: e.target.value,
+                          })
+                        }
                         rows={6}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                       />
@@ -356,7 +384,12 @@ export default function TeacherLessonNotesPage() {
                       </label>
                       <textarea
                         value={lessonNote.review}
-                        onChange={(e) => setLessonNote({...lessonNote, review: e.target.value})}
+                        onChange={(e) =>
+                          setLessonNote({
+                            ...lessonNote,
+                            review: e.target.value,
+                          })
+                        }
                         rows={3}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                       />
@@ -368,7 +401,12 @@ export default function TeacherLessonNotesPage() {
                       </label>
                       <textarea
                         value={lessonNote.homework}
-                        onChange={(e) => setLessonNote({...lessonNote, homework: e.target.value})}
+                        onChange={(e) =>
+                          setLessonNote({
+                            ...lessonNote,
+                            homework: e.target.value,
+                          })
+                        }
                         rows={3}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                       />
@@ -379,15 +417,19 @@ export default function TeacherLessonNotesPage() {
                       <button
                         onClick={toggleRecording}
                         className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
-                          isRecording 
-                            ? 'bg-red-600 text-white hover:bg-red-700' 
-                            : 'bg-gray-600 text-white hover:bg-gray-700'
+                          isRecording
+                            ? "bg-red-600 text-white hover:bg-red-700"
+                            : "bg-gray-600 text-white hover:bg-gray-700"
                         }`}
                       >
-                        {isRecording ? <Pause className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-                        {isRecording ? '녹음 중지' : '음성 녹음'}
+                        {isRecording ? (
+                          <Pause className="w-4 h-4" />
+                        ) : (
+                          <Mic className="w-4 h-4" />
+                        )}
+                        {isRecording ? "녹음 중지" : "음성 녹음"}
                       </button>
-                      
+
                       {lessonNote.audioUrl && (
                         <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
                           <Play className="w-4 h-4" />
@@ -410,29 +452,50 @@ export default function TeacherLessonNotesPage() {
             {/* 커리큘럼 */}
             {selectedStudent && curriculum && (
               <div className="bg-white rounded-xl shadow-lg p-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">커리큘럼</h2>
-                
+                <h2 className="text-xl font-bold text-gray-900 mb-4">
+                  커리큘럼
+                </h2>
+
                 <div className="space-y-3">
                   {curriculum.items.map((item) => (
-                    <div key={item.id} className="p-4 border border-gray-200 rounded-lg">
+                    <div
+                      key={item.id}
+                      className="p-4 border border-gray-200 rounded-lg"
+                    >
                       <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-semibold text-gray-900">{item.title}</h3>
-                        <span className={`px-2 py-1 text-xs rounded-full ${
-                          item.status === 'completed' ? 'bg-green-100 text-green-800' :
-                          item.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
-                          item.status === 'review_needed' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
-                          {item.status === 'completed' ? '완료' :
-                           item.status === 'in_progress' ? '진행중' :
-                           item.status === 'review_needed' ? '복습 필요' : '시작 전'}
+                        <h3 className="font-semibold text-gray-900">
+                          {item.title}
+                        </h3>
+                        <span
+                          className={`px-2 py-1 text-xs rounded-full ${
+                            item.status === "completed"
+                              ? "bg-green-100 text-green-800"
+                              : item.status === "in_progress"
+                                ? "bg-blue-100 text-blue-800"
+                                : item.status === "review_needed"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : "bg-gray-100 text-gray-800"
+                          }`}
+                        >
+                          {item.status === "completed"
+                            ? "완료"
+                            : item.status === "in_progress"
+                              ? "진행중"
+                              : item.status === "review_needed"
+                                ? "복습 필요"
+                                : "시작 전"}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-600 mb-2">{item.category}</p>
+                      <p className="text-sm text-gray-600 mb-2">
+                        {item.category}
+                      </p>
                       <div className="flex items-center gap-4 text-xs text-gray-500">
                         <span>설명 횟수: {item.explanationCount}회</span>
                         {item.lastExplained && (
-                          <span>마지막 설명: {new Date(item.lastExplained).toLocaleDateString()}</span>
+                          <span>
+                            마지막 설명:{" "}
+                            {new Date(item.lastExplained).toLocaleDateString()}
+                          </span>
                         )}
                       </div>
                     </div>
@@ -444,25 +507,39 @@ export default function TeacherLessonNotesPage() {
             {/* 학습 분석 */}
             {selectedStudent && (
               <div className="bg-white rounded-xl shadow-lg p-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">학습 분석</h2>
-                
+                <h2 className="text-xl font-bold text-gray-900 mb-4">
+                  학습 분석
+                </h2>
+
                 <div className="space-y-4">
                   <div className="p-4 bg-blue-50 rounded-lg">
-                    <h3 className="font-semibold text-blue-900 mb-2">자주 설명한 항목</h3>
+                    <h3 className="font-semibold text-blue-900 mb-2">
+                      자주 설명한 항목
+                    </h3>
                     <div className="flex flex-wrap gap-2">
-                      {['기본 문법', '발음 연습', '회화 패턴'].map((item, index) => (
-                        <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
-                          {item}
-                        </span>
-                      ))}
+                      {["기본 문법", "발음 연습", "회화 패턴"].map(
+                        (item, index) => (
+                          <span
+                            key={index}
+                            className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full"
+                          >
+                            {item}
+                          </span>
+                        ),
+                      )}
                     </div>
                   </div>
 
                   <div className="p-4 bg-yellow-50 rounded-lg">
-                    <h3 className="font-semibold text-yellow-900 mb-2">최근 설명하지 않은 항목</h3>
+                    <h3 className="font-semibold text-yellow-900 mb-2">
+                      최근 설명하지 않은 항목
+                    </h3>
                     <div className="flex flex-wrap gap-2">
-                      {['고급 문법', '작문 연습'].map((item, index) => (
-                        <span key={index} className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">
+                      {["고급 문법", "작문 연습"].map((item, index) => (
+                        <span
+                          key={index}
+                          className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full"
+                        >
                           {item}
                         </span>
                       ))}
@@ -470,7 +547,9 @@ export default function TeacherLessonNotesPage() {
                   </div>
 
                   <div className="p-4 bg-green-50 rounded-lg">
-                    <h3 className="font-semibold text-green-900 mb-2">추천 사항</h3>
+                    <h3 className="font-semibold text-green-900 mb-2">
+                      추천 사항
+                    </h3>
                     <ul className="text-sm text-green-800 space-y-1">
                       <li>• 고급 문법 복습 필요</li>
                       <li>• 작문 연습 강화</li>
@@ -489,7 +568,9 @@ export default function TeacherLessonNotesPage() {
             <div className="bg-white rounded-xl p-6 max-w-md mx-4">
               <div className="flex items-center gap-3 mb-4">
                 <AlertCircle className="w-6 h-6 text-yellow-600" />
-                <h3 className="text-lg font-semibold text-gray-900">수업 시간 알림</h3>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  수업 시간 알림
+                </h3>
               </div>
               <p className="text-gray-600 mb-4">
                 수업이 10분 이상 진행되었습니다. 학생의 집중도를 확인해주세요.
@@ -509,7 +590,9 @@ export default function TeacherLessonNotesPage() {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-xl p-6 max-w-2xl mx-4 max-h-96 overflow-y-auto">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">학생 선택</h3>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  학생 선택
+                </h3>
                 <button
                   onClick={() => setShowStudentSelector(false)}
                   className="text-gray-400 hover:text-gray-600"
@@ -517,7 +600,7 @@ export default function TeacherLessonNotesPage() {
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              
+
               <div className="space-y-2">
                 {filteredStudents.map((student) => (
                   <div
@@ -530,8 +613,12 @@ export default function TeacherLessonNotesPage() {
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <h4 className="font-semibold text-gray-900">{student.name}</h4>
-                        <p className="text-sm text-gray-600">레벨 {student.level}</p>
+                        <h4 className="font-semibold text-gray-900">
+                          {student.name}
+                        </h4>
+                        <p className="text-sm text-gray-600">
+                          레벨 {student.level}
+                        </p>
                       </div>
                       {student.hasTodayLesson && (
                         <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
@@ -548,4 +635,4 @@ export default function TeacherLessonNotesPage() {
       </div>
     </div>
   );
-} 
+}

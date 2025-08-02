@@ -1,21 +1,32 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 export interface TaggingResult {
   success: boolean;
   message: string;
-  action: 'attendance' | 'consultation' | 'purchase' | 'other' | 'checkout' | 'already_tagged';
+  action:
+    | "attendance"
+    | "consultation"
+    | "purchase"
+    | "other"
+    | "checkout"
+    | "already_tagged";
   data?: any;
   showPopup?: boolean;
-  popupType?: 'attendance_confirm' | 'no_reservation' | 'checkout_confirm' | 'multiple_tag' | 'registration';
+  popupType?:
+    | "attendance_confirm"
+    | "no_reservation"
+    | "checkout_confirm"
+    | "multiple_tag"
+    | "registration";
 }
 
 export interface UIDRegistration {
   id: string;
   uid: string;
   userId?: string;
-  userType: 'student' | 'staff' | 'teacher';
+  userType: "student" | "staff" | "teacher";
   isRegistered: boolean;
   createdAt: Date;
   lastUsedAt: Date;
@@ -25,25 +36,25 @@ export interface TaggingLog {
   id: string;
   uid: string;
   userId?: string;
-  userType: 'student' | 'staff' | 'teacher';
-  action: 'attendance' | 'checkout' | 'consultation' | 'purchase' | 'other';
+  userType: "student" | "staff" | "teacher";
+  action: "attendance" | "checkout" | "consultation" | "purchase" | "other";
   timestamp: Date;
   reservationId?: string;
   pointsEarned?: number;
   notes?: string;
-  deviceType: 'ipad' | 'mac' | 'smartphone';
+  deviceType: "ipad" | "mac" | "smartphone";
   location: string;
 }
 
 export interface AttendanceRecord {
   id: string;
   userId: string;
-  userType: 'student' | 'staff' | 'teacher';
+  userType: "student" | "staff" | "teacher";
   date: Date;
   checkInTime: Date;
   checkOutTime?: Date;
   totalHours?: number;
-  status: 'present' | 'absent' | 'late';
+  status: "present" | "absent" | "late";
   pointsEarned?: number;
   notes?: string;
 }
@@ -65,13 +76,13 @@ class UIDTaggingSystem {
    */
   async processTagging(
     uid: string,
-    deviceType: 'ipad' | 'mac' | 'smartphone',
-    location: string
+    deviceType: "ipad" | "mac" | "smartphone",
+    location: string,
   ): Promise<TaggingResult> {
     try {
       // 1. UID 등록 확인
       const uidRegistration = await this.getUIDRegistration(uid);
-      
+
       if (!uidRegistration) {
         // 신규 UID 등록
         return this.handleNewUID(uid, deviceType, location);
@@ -88,40 +99,39 @@ class UIDTaggingSystem {
         include: {
           student: true,
           staff: true,
-          teacher: true
-        }
+          teacher: true,
+        },
       });
 
       if (!user) {
         return {
           success: false,
-          message: '사용자 정보를 찾을 수 없습니다.',
-          action: 'other'
+          message: "사용자 정보를 찾을 수 없습니다.",
+          action: "other",
         };
       }
 
       // 4. 사용자 타입별 처리
       switch (user.role) {
-        case 'STUDENT':
+        case "STUDENT":
           return this.handleStudentTagging(uid, user, deviceType, location);
-        case 'STAFF':
+        case "STAFF":
           return this.handleStaffTagging(uid, user, deviceType, location);
-        case 'TEACHER':
+        case "TEACHER":
           return this.handleTeacherTagging(uid, user, deviceType, location);
         default:
           return {
             success: false,
-            message: '지원하지 않는 사용자 타입입니다.',
-            action: 'other'
+            message: "지원하지 않는 사용자 타입입니다.",
+            action: "other",
           };
       }
-
     } catch (error) {
-      console.error('Tagging error:', error);
+      console.error("Tagging error:", error);
       return {
         success: false,
-        message: '태깅 처리 중 오류가 발생했습니다.',
-        action: 'other'
+        message: "태깅 처리 중 오류가 발생했습니다.",
+        action: "other",
       };
     }
   }
@@ -131,28 +141,28 @@ class UIDTaggingSystem {
    */
   private async handleNewUID(
     uid: string,
-    deviceType: 'ipad' | 'mac' | 'smartphone',
-    location: string
+    deviceType: "ipad" | "mac" | "smartphone",
+    location: string,
   ): Promise<TaggingResult> {
     // UID 등록 - 임시 사용자 ID 생성
     const tempUserId = `temp_${Date.now()}`;
-    
+
     await prisma.uIDTag.create({
       data: {
         uid,
         userId: tempUserId,
-        tagType: 'REGISTRATION',
-        deviceId: null
-      }
+        tagType: "REGISTRATION",
+        deviceId: null,
+      },
     });
 
     return {
       success: true,
-      message: '새로운 UID가 등록되었습니다.',
-      action: 'other',
+      message: "새로운 UID가 등록되었습니다.",
+      action: "other",
       showPopup: true,
-      popupType: 'registration',
-      data: { uid }
+      popupType: "registration",
+      data: { uid },
     };
   }
 
@@ -161,16 +171,16 @@ class UIDTaggingSystem {
    */
   private async handleUnregisteredUser(
     uid: string,
-    deviceType: 'ipad' | 'mac' | 'smartphone',
-    location: string
+    deviceType: "ipad" | "mac" | "smartphone",
+    location: string,
   ): Promise<TaggingResult> {
     return {
       success: true,
-      message: '사용자 정보를 등록해주세요.',
-      action: 'other',
+      message: "사용자 정보를 등록해주세요.",
+      action: "other",
       showPopup: true,
-      popupType: 'registration',
-      data: { uid }
+      popupType: "registration",
+      data: { uid },
     };
   }
 
@@ -180,8 +190,8 @@ class UIDTaggingSystem {
   private async handleStudentTagging(
     uid: string,
     user: any,
-    deviceType: 'ipad' | 'mac' | 'smartphone',
-    location: string
+    deviceType: "ipad" | "mac" | "smartphone",
+    location: string,
   ): Promise<TaggingResult> {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -191,17 +201,17 @@ class UIDTaggingSystem {
       where: {
         userId: user.id,
         timestamp: {
-          gte: today
+          gte: today,
         },
-        type: 'ATTENDANCE'
-      }
+        type: "ATTENDANCE",
+      },
     });
 
     if (todayTagging) {
       return {
         success: true,
-        message: 'すでに本日の記録があります',
-        action: 'already_tagged'
+        message: "すでに本日の記録があります",
+        action: "already_tagged",
       };
     }
 
@@ -211,38 +221,38 @@ class UIDTaggingSystem {
         studentId: user.student?.id,
         date: {
           gte: today,
-          lt: new Date(today.getTime() + 24 * 60 * 60 * 1000)
+          lt: new Date(today.getTime() + 24 * 60 * 60 * 1000),
         },
-        status: 'CONFIRMED'
+        status: "CONFIRMED",
       },
       include: {
         teacher: true,
-        student: true
-      }
+        student: true,
+      },
     });
 
     if (todayReservation) {
       // 예약이 있는 경우
       return {
         success: true,
-        message: '出席を確認 / その他',
-        action: 'attendance',
+        message: "出席を確認 / その他",
+        action: "attendance",
         showPopup: true,
-        popupType: 'attendance_confirm',
+        popupType: "attendance_confirm",
         data: {
           reservation: todayReservation,
-          user
-        }
+          user,
+        },
       };
     } else {
       // 예약이 없는 경우
       return {
         success: true,
-        message: '本日の予約がありません。出席を記録しますか？',
-        action: 'attendance',
+        message: "本日の予約がありません。出席を記録しますか？",
+        action: "attendance",
         showPopup: true,
-        popupType: 'no_reservation',
-        data: { user }
+        popupType: "no_reservation",
+        data: { user },
       };
     }
   }
@@ -253,8 +263,8 @@ class UIDTaggingSystem {
   private async handleStaffTagging(
     uid: string,
     user: any,
-    deviceType: 'ipad' | 'mac' | 'smartphone',
-    location: string
+    deviceType: "ipad" | "mac" | "smartphone",
+    location: string,
   ): Promise<TaggingResult> {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -263,8 +273,8 @@ class UIDTaggingSystem {
     const todayAttendance = await prisma.staffWorkLog.findFirst({
       where: {
         staffId: user.staff?.id,
-        date: today
-      }
+        date: today,
+      },
     });
 
     if (!todayAttendance) {
@@ -274,17 +284,17 @@ class UIDTaggingSystem {
           staffId: user.staff?.id,
           date: today,
           startTime: new Date(),
-          workTitle: '출근',
-          workContent: '출근 태깅',
-          workType: 'OTHER'
-        }
+          workTitle: "출근",
+          workContent: "출근 태깅",
+          workType: "OTHER",
+        },
       });
 
       return {
         success: true,
-        message: '출근이 확인되었습니다.',
-        action: 'attendance',
-        data: { workLog }
+        message: "출근이 확인되었습니다.",
+        action: "attendance",
+        data: { workLog },
       };
     } else {
       // 퇴근 처리
@@ -297,11 +307,11 @@ class UIDTaggingSystem {
         // 30분 이내 - 확인 팝업
         return {
           success: true,
-          message: '퇴근하시겠습니까?',
-          action: 'checkout',
+          message: "퇴근하시겠습니까?",
+          action: "checkout",
           showPopup: true,
-          popupType: 'checkout_confirm',
-          data: { workLog: todayAttendance }
+          popupType: "checkout_confirm",
+          data: { workLog: todayAttendance },
         };
       } else {
         // 30분 초과 - 자동 퇴근
@@ -309,15 +319,15 @@ class UIDTaggingSystem {
           where: { id: todayAttendance.id },
           data: {
             endTime: now,
-            workContent: '퇴근 태깅'
-          }
+            workContent: "퇴근 태깅",
+          },
         });
 
         return {
           success: true,
-          message: '퇴勤処理が完了しました',
-          action: 'checkout',
-          data: { workLog: todayAttendance }
+          message: "퇴勤処理が完了しました",
+          action: "checkout",
+          data: { workLog: todayAttendance },
         };
       }
     }
@@ -329,8 +339,8 @@ class UIDTaggingSystem {
   private async handleTeacherTagging(
     uid: string,
     user: any,
-    deviceType: 'ipad' | 'mac' | 'smartphone',
-    location: string
+    deviceType: "ipad" | "mac" | "smartphone",
+    location: string,
   ): Promise<TaggingResult> {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -339,8 +349,8 @@ class UIDTaggingSystem {
     const todayAttendance = await prisma.teacherAttendance.findFirst({
       where: {
         teacherId: user.teacher?.id,
-        date: today
-      }
+        date: today,
+      },
     });
 
     if (!todayAttendance) {
@@ -350,30 +360,30 @@ class UIDTaggingSystem {
           teacherId: user.teacher?.id,
           date: today,
           checkInTime: new Date(),
-          status: 'PRESENT'
-        }
+          status: "PRESENT",
+        },
       });
 
       return {
         success: true,
-        message: '출근이 확인되었습니다.',
-        action: 'attendance',
-        data: { attendance }
+        message: "출근이 확인되었습니다.",
+        action: "attendance",
+        data: { attendance },
       };
     } else {
       // 퇴근 처리
       await prisma.teacherAttendance.update({
         where: { id: todayAttendance.id },
         data: {
-          checkOutTime: new Date()
-        }
+          checkOutTime: new Date(),
+        },
       });
 
       return {
         success: true,
-        message: '퇴근이 확인되었습니다.',
-        action: 'checkout',
-        data: { attendance: todayAttendance }
+        message: "퇴근이 확인되었습니다.",
+        action: "checkout",
+        data: { attendance: todayAttendance },
       };
     }
   }
@@ -384,28 +394,28 @@ class UIDTaggingSystem {
   async confirmAttendance(
     uid: string,
     reservationId?: string,
-    points: number = 10
+    points: number = 10,
   ): Promise<TaggingResult> {
     try {
       const uidRegistration = await this.getUIDRegistration(uid);
       if (!uidRegistration?.userId) {
         return {
           success: false,
-          message: '등록되지 않은 UID입니다.',
-          action: 'other'
+          message: "등록되지 않은 UID입니다.",
+          action: "other",
         };
       }
 
       const user = await prisma.user.findUnique({
         where: { id: uidRegistration.userId },
-        include: { student: true }
+        include: { student: true },
       });
 
       if (!user) {
         return {
           success: false,
-          message: '사용자 정보를 찾을 수 없습니다.',
-          action: 'other'
+          message: "사용자 정보를 찾을 수 없습니다.",
+          action: "other",
         };
       }
 
@@ -413,7 +423,7 @@ class UIDTaggingSystem {
       if (reservationId) {
         await prisma.reservation.update({
           where: { id: reservationId },
-          data: { status: 'ATTENDED' }
+          data: { status: "ATTENDED" },
         });
       }
 
@@ -423,9 +433,9 @@ class UIDTaggingSystem {
           where: { id: user.student.id },
           data: {
             points: {
-              increment: points
-            }
-          }
+              increment: points,
+            },
+          },
         });
       }
 
@@ -433,25 +443,24 @@ class UIDTaggingSystem {
       await prisma.taggingLog.create({
         data: {
           userId: user.id,
-          type: 'ATTENDANCE',
+          type: "ATTENDANCE",
           location: location.toString(),
-          timestamp: new Date()
-        }
+          timestamp: new Date(),
+        },
       });
 
       return {
         success: true,
-        message: '출석이 확인되었습니다.',
-        action: 'attendance',
-        data: { pointsEarned: points }
+        message: "출석이 확인되었습니다.",
+        action: "attendance",
+        data: { pointsEarned: points },
       };
-
     } catch (error) {
-      console.error('Attendance confirmation error:', error);
+      console.error("Attendance confirmation error:", error);
       return {
         success: false,
-        message: '출석 확인 중 오류가 발생했습니다.',
-        action: 'other'
+        message: "출석 확인 중 오류가 발생했습니다.",
+        action: "other",
       };
     }
   }
@@ -459,9 +468,11 @@ class UIDTaggingSystem {
   /**
    * UID 등록 정보 조회
    */
-  private async getUIDRegistration(uid: string): Promise<UIDRegistration | null> {
+  private async getUIDRegistration(
+    uid: string,
+  ): Promise<UIDRegistration | null> {
     const uidTag = await prisma.uIDTag.findFirst({
-      where: { uid }
+      where: { uid },
     });
 
     if (!uidTag) return null;
@@ -470,28 +481,32 @@ class UIDTaggingSystem {
       id: uidTag.id,
       uid: uidTag.uid,
       userId: uidTag.userId,
-      userType: 'student', // 기본값
+      userType: "student", // 기본값
       isRegistered: uidTag.userId !== `temp_${Date.now()}`,
       createdAt: uidTag.taggedAt,
-      lastUsedAt: uidTag.taggedAt
+      lastUsedAt: uidTag.taggedAt,
     };
   }
 
   /**
    * UID와 사용자 연결
    */
-  async linkUIDToUser(uid: string, userId: string, userType: 'student' | 'staff' | 'teacher'): Promise<boolean> {
+  async linkUIDToUser(
+    uid: string,
+    userId: string,
+    userType: "student" | "staff" | "teacher",
+  ): Promise<boolean> {
     try {
       await prisma.uIDTag.updateMany({
         where: { uid },
         data: {
           userId,
-          tagType: 'CHECK_IN'
-        }
+          tagType: "CHECK_IN",
+        },
       });
       return true;
     } catch (error) {
-      console.error('UID linking error:', error);
+      console.error("UID linking error:", error);
       return false;
     }
   }
@@ -502,14 +517,14 @@ class UIDTaggingSystem {
   async getTaggingStats(
     startDate: Date,
     endDate: Date,
-    userType?: 'student' | 'staff' | 'teacher',
-    action?: string
+    userType?: "student" | "staff" | "teacher",
+    action?: string,
   ) {
     const where: any = {
       timestamp: {
         gte: startDate,
-        lte: endDate
-      }
+        lte: endDate,
+      },
     };
 
     if (action) where.type = action;
@@ -521,15 +536,15 @@ class UIDTaggingSystem {
           include: {
             student: true,
             staff: true,
-            teacher: true
-          }
-        }
+            teacher: true,
+          },
+        },
       },
-      orderBy: { timestamp: 'desc' }
+      orderBy: { timestamp: "desc" },
     });
 
     return logs;
   }
 }
 
-export default UIDTaggingSystem; 
+export default UIDTaggingSystem;

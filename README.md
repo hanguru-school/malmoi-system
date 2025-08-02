@@ -7,10 +7,12 @@ A comprehensive booking and management system for educational institutions, buil
 This project is configured for **direct deployment to production** via Vercel with automatic deployments from GitHub.
 
 ### Live Site
+
 - **Production URL**: https://app.hanguru.school
 - **Health Check**: https://app.hanguru.school/api/health
 
 ### Automatic Deployment
+
 - Push to `main` branch triggers automatic deployment
 - GitHub Actions runs tests and builds
 - Vercel deploys to production immediately
@@ -19,6 +21,7 @@ This project is configured for **direct deployment to production** via Vercel wi
 ## 🏗️ Architecture
 
 ### Tech Stack
+
 - **Frontend**: Next.js 15 with App Router
 - **Backend**: Next.js API Routes
 - **Database**: PostgreSQL (AWS RDS)
@@ -28,6 +31,7 @@ This project is configured for **direct deployment to production** via Vercel wi
 - **ORM**: Prisma
 
 ### Key Features
+
 - Role-based access control (Admin, Student, Teacher, Staff)
 - Real-time booking system
 - File upload and management
@@ -38,11 +42,13 @@ This project is configured for **direct deployment to production** via Vercel wi
 ## 🛠️ Development Setup
 
 ### Prerequisites
+
 - Node.js 18+
 - npm or yarn
 - Git
 
 ### Local Development
+
 ```bash
 # Clone repository
 git clone https://github.com/hanguru-school/malmoi-system.git
@@ -63,6 +69,7 @@ npm run dev
 ```
 
 ### Available Scripts
+
 ```bash
 npm run dev          # Start development server
 npm run build        # Build for production
@@ -90,18 +97,21 @@ src/
 ## 🔐 Authentication
 
 ### User Roles
+
 - **Admin**: Full system access
 - **Student**: Booking and learning features
 - **Teacher**: Class management
 - **Staff**: Administrative tasks
 
 ### Login Credentials
+
 - **Admin**: admin@hanguru.school / admin123
 - **Student**: hp9419@gmail.com / gtbtyj
 
 ## 🚀 Deployment
 
 ### Production Deployment
+
 The project is configured for automatic deployment to production:
 
 1. **Push to main branch**
@@ -110,7 +120,9 @@ The project is configured for automatic deployment to production:
 4. **Live site** updated at https://app.hanguru.school
 
 ### Environment Variables
+
 All production environment variables are configured in Vercel:
+
 - Database connection
 - AWS credentials
 - Cognito configuration
@@ -119,11 +131,13 @@ All production environment variables are configured in Vercel:
 ## 📊 Monitoring
 
 ### Health Checks
+
 - Production health: https://app.hanguru.school/api/health
 - Database connectivity monitoring
 - AWS service status
 
 ### Performance
+
 - Vercel Analytics
 - Database performance monitoring
 - Error tracking
@@ -131,12 +145,14 @@ All production environment variables are configured in Vercel:
 ## 🔧 Configuration
 
 ### Key Files
+
 - `vercel.json` - Vercel deployment configuration
 - `next.config.ts` - Next.js production optimizations
 - `prisma/schema.prisma` - Database schema
 - `.github/workflows/deploy.yml` - CI/CD pipeline
 
 ### Environment Variables
+
 ```env
 # Database
 DATABASE_URL=postgresql://...
@@ -158,6 +174,7 @@ SESSION_SECRET=your-session-secret
 ## 🛡️ Security
 
 ### Security Features
+
 - HTTPS enforced
 - Security headers configured
 - Role-based access control
@@ -165,6 +182,7 @@ SESSION_SECRET=your-session-secret
 - CORS properly configured
 
 ### Best Practices
+
 - Environment variables for secrets
 - Input validation
 - SQL injection prevention
@@ -173,6 +191,7 @@ SESSION_SECRET=your-session-secret
 ## 📈 Performance
 
 ### Optimizations
+
 - SWC minification
 - Bundle splitting
 - Image optimization
@@ -180,6 +199,7 @@ SESSION_SECRET=your-session-secret
 - Static generation where possible
 
 ### Monitoring
+
 - Core Web Vitals
 - API response times
 - Database performance
@@ -188,12 +208,14 @@ SESSION_SECRET=your-session-secret
 ## 🔄 Development Workflow
 
 ### Local Development
+
 1. Make changes locally
 2. Test with `npm run dev`
 3. Run linting and type checks
 4. Commit and push to main
 
 ### Production Deployment
+
 1. Push to main branch
 2. GitHub Actions automatically runs
 3. Vercel deploys to production
@@ -204,6 +226,7 @@ SESSION_SECRET=your-session-secret
 ### Common Issues
 
 #### Build Failures
+
 ```bash
 # Check TypeScript errors
 npm run type-check
@@ -216,6 +239,7 @@ npm install
 ```
 
 #### Database Issues
+
 ```bash
 # Reset database
 npx prisma migrate reset
@@ -225,6 +249,7 @@ npx prisma generate
 ```
 
 #### Deployment Issues
+
 - Check Vercel deployment logs
 - Verify environment variables
 - Review GitHub Actions workflow
@@ -232,13 +257,16 @@ npx prisma generate
 ## 📞 Support
 
 ### Resources
+
 - [Vercel Documentation](https://vercel.com/docs)
 - [Next.js Documentation](https://nextjs.org/docs)
 - [Prisma Documentation](https://www.prisma.io/docs)
 - [AWS Documentation](https://docs.aws.amazon.com/)
 
 ### Contact
+
 For production issues:
+
 1. Check Vercel deployment logs
 2. Review GitHub Actions workflow
 3. Monitor AWS CloudWatch metrics

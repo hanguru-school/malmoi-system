@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useAuth } from '@/hooks/useAuth';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -10,10 +10,10 @@ interface ProtectedRouteProps {
   redirectTo?: string;
 }
 
-export default function ProtectedRoute({ 
-  children, 
-  allowedRoles = [], 
-  redirectTo 
+export default function ProtectedRoute({
+  children,
+  allowedRoles = [],
+  redirectTo,
 }: ProtectedRouteProps) {
   const { user, loading } = useAuth();
   const router = useRouter();
@@ -22,7 +22,7 @@ export default function ProtectedRoute({
     if (!loading) {
       // 로그인되지 않은 경우
       if (!user) {
-        router.push('/auth/login');
+        router.push("/auth/login");
         return;
       }
 
@@ -65,19 +65,19 @@ export default function ProtectedRoute({
 // 권한에 따른 대시보드 경로 결정
 function getDashboardPath(role: string): string {
   switch (role) {
-    case 'ADMIN':
-    case 'MASTER':
-      return '/admin';
-    case 'TEACHER':
-      return '/teacher';
-    case 'STAFF':
-      return '/staff';
-    case 'EMPLOYEE':
-      return '/employee';
-    case 'PARENT':
-      return '/parent';
-    case 'STUDENT':
+    case "ADMIN":
+    case "MASTER":
+      return "/admin";
+    case "TEACHER":
+      return "/teacher";
+    case "STAFF":
+      return "/staff";
+    case "EMPLOYEE":
+      return "/employee";
+    case "PARENT":
+      return "/parent";
+    case "STUDENT":
     default:
-      return '/student';
+      return "/student";
   }
-} 
+}

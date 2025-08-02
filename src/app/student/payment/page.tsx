@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { 
-  CreditCard, 
-  Coins, 
-  Clock, 
-  CheckCircle, 
+import React, { useState, useEffect } from "react";
+import {
+  CreditCard,
+  Coins,
+  Clock,
+  CheckCircle,
   AlertCircle,
   ShoppingCart,
-  Star
-} from 'lucide-react';
+  Star,
+} from "lucide-react";
 
 interface PaymentPlan {
   id: string;
@@ -26,7 +26,7 @@ interface PaymentPlan {
 interface PaymentRule {
   id: string;
   name: string;
-  type: 'percentage' | 'fixed';
+  type: "percentage" | "fixed";
   value: number;
   minAmount?: number;
   maxAmount?: number;
@@ -38,79 +38,79 @@ const PaymentPage = () => {
   const [paymentRules, setPaymentRules] = useState<PaymentRule[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<PaymentPlan | null>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState('card');
+  const [paymentMethod, setPaymentMethod] = useState("card");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Mock data
     const mockPaymentPlans: PaymentPlan[] = [
       {
-        id: '1',
-        name: '기본 패키지',
+        id: "1",
+        name: "기본 패키지",
         hours: 10,
         price: 150000,
         points: 7500,
-        description: '10시간 수업 + 기본 포인트 적립'
+        description: "10시간 수업 + 기본 포인트 적립",
       },
       {
-        id: '2',
-        name: '인기 패키지',
+        id: "2",
+        name: "인기 패키지",
         hours: 20,
         price: 280000,
         originalPrice: 300000,
         discount: 7,
         points: 14000,
         popular: true,
-        description: '20시간 수업 + 보너스 포인트 적립'
+        description: "20시간 수업 + 보너스 포인트 적립",
       },
       {
-        id: '3',
-        name: '프리미엄 패키지',
+        id: "3",
+        name: "프리미엄 패키지",
         hours: 40,
         price: 500000,
         originalPrice: 600000,
         discount: 17,
         points: 25000,
-        description: '40시간 수업 + 최대 포인트 적립'
+        description: "40시간 수업 + 최대 포인트 적립",
       },
       {
-        id: '4',
-        name: '단일 수업',
+        id: "4",
+        name: "단일 수업",
         hours: 1,
         price: 20000,
         points: 1000,
-        description: '1시간 단일 수업'
-      }
+        description: "1시간 단일 수업",
+      },
     ];
 
     const mockPaymentRules: PaymentRule[] = [
       {
-        id: '1',
-        name: '기본 적립률',
-        type: 'percentage',
+        id: "1",
+        name: "기본 적립률",
+        type: "percentage",
         value: 5,
         minAmount: 10000,
         maxAmount: 0,
-        isActive: true
+        isActive: true,
       },
       {
-        id: '2',
-        name: '고액 결제 보너스',
-        type: 'fixed',
+        id: "2",
+        name: "고액 결제 보너스",
+        type: "fixed",
         value: 500,
         minAmount: 100000,
         maxAmount: 0,
-        isActive: true
+        isActive: true,
       },
       {
-        id: '3',
-        name: '첫 결제 보너스',
-        type: 'fixed',
+        id: "3",
+        name: "첫 결제 보너스",
+        type: "fixed",
         value: 1000,
         minAmount: 0,
         maxAmount: 0,
-        isActive: true
-      }
+        isActive: true,
+      },
     ];
 
     setPaymentPlans(mockPaymentPlans);
@@ -120,25 +120,33 @@ const PaymentPage = () => {
 
   const calculatePoints = (price: number): number => {
     let totalPoints = 0;
-    
+
     // 기본 적립률 적용
-    const basicRule = paymentRules.find(rule => rule.name === '기본 적립률');
+    const basicRule = paymentRules.find((rule) => rule.name === "기본 적립률");
     if (basicRule && basicRule.isActive) {
       totalPoints += Math.floor(price * (basicRule.value / 100));
     }
-    
+
     // 고액 결제 보너스
-    const bonusRule = paymentRules.find(rule => rule.name === '고액 결제 보너스');
-    if (bonusRule && bonusRule.isActive && price >= (bonusRule.minAmount || 0)) {
+    const bonusRule = paymentRules.find(
+      (rule) => rule.name === "고액 결제 보너스",
+    );
+    if (
+      bonusRule &&
+      bonusRule.isActive &&
+      price >= (bonusRule.minAmount || 0)
+    ) {
       totalPoints += bonusRule.value;
     }
-    
+
     // 첫 결제 보너스 (실제로는 사용자 정보를 확인해야 함)
-    const firstPaymentRule = paymentRules.find(rule => rule.name === '첫 결제 보너스');
+    const firstPaymentRule = paymentRules.find(
+      (rule) => rule.name === "첫 결제 보너스",
+    );
     if (firstPaymentRule && firstPaymentRule.isActive) {
       totalPoints += firstPaymentRule.value;
     }
-    
+
     return totalPoints;
   };
 
@@ -150,7 +158,9 @@ const PaymentPage = () => {
   const handlePayment = () => {
     if (selectedPlan) {
       // 교실에서 결제 안내
-      alert('인터넷 결제 시스템은 현재 준비 중입니다.\n결제는 교실에서 직접 해주시기 바랍니다.');
+      alert(
+        "인터넷 결제 시스템은 현재 준비 중입니다.\n결제는 교실에서 직접 해주시기 바랍니다.",
+      );
       setShowPaymentModal(false);
       setSelectedPlan(null);
     }
@@ -169,7 +179,9 @@ const PaymentPage = () => {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">수업 결제</h1>
-        <p className="text-gray-600">원하는 수업 패키지를 선택하고 결제하세요</p>
+        <p className="text-gray-600">
+          원하는 수업 패키지를 선택하고 결제하세요
+        </p>
       </div>
 
       {/* 포인트 적립 안내 */}
@@ -179,35 +191,36 @@ const PaymentPage = () => {
           포인트 적립 안내
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {paymentRules.filter(rule => rule.isActive).map((rule) => (
-            <div key={rule.id} className="bg-white p-4 rounded-lg border">
-              <div className="flex items-center gap-2 mb-2">
-                <Star className="w-4 h-4 text-yellow-600" />
-                <h3 className="font-medium text-gray-900">{rule.name}</h3>
+          {paymentRules
+            .filter((rule) => rule.isActive)
+            .map((rule) => (
+              <div key={rule.id} className="bg-white p-4 rounded-lg border">
+                <div className="flex items-center gap-2 mb-2">
+                  <Star className="w-4 h-4 text-yellow-600" />
+                  <h3 className="font-medium text-gray-900">{rule.name}</h3>
+                </div>
+                <p className="text-sm text-gray-600">
+                  {rule.type === "percentage"
+                    ? `결제 금액의 ${rule.value}% 적립`
+                    : `${rule.value}P 적립`}
+                  {rule.minAmount && rule.minAmount > 0 && (
+                    <span className="block text-xs text-gray-500 mt-1">
+                      최소 {rule.minAmount.toLocaleString()}원 이상
+                    </span>
+                  )}
+                </p>
               </div>
-              <p className="text-sm text-gray-600">
-                {rule.type === 'percentage' 
-                  ? `결제 금액의 ${rule.value}% 적립`
-                  : `${rule.value}P 적립`
-                }
-                {rule.minAmount && rule.minAmount > 0 && (
-                  <span className="block text-xs text-gray-500 mt-1">
-                    최소 {rule.minAmount.toLocaleString()}원 이상
-                  </span>
-                )}
-              </p>
-            </div>
-          ))}
+            ))}
         </div>
       </div>
 
       {/* 결제 패키지 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {paymentPlans.map((plan) => (
-          <div 
-            key={plan.id} 
+          <div
+            key={plan.id}
             className={`bg-white rounded-lg shadow-sm border p-6 relative ${
-              plan.popular ? 'ring-2 ring-blue-500' : ''
+              plan.popular ? "ring-2 ring-blue-500" : ""
             }`}
           >
             {plan.popular && (
@@ -217,9 +230,11 @@ const PaymentPage = () => {
                 </span>
               </div>
             )}
-            
+
             <div className="text-center mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">{plan.name}</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                {plan.name}
+              </h3>
               <div className="flex items-center justify-center gap-2 mb-2">
                 <Clock className="w-4 h-4 text-blue-600" />
                 <span className="text-sm text-gray-600">{plan.hours}시간</span>
@@ -251,8 +266,8 @@ const PaymentPage = () => {
               onClick={() => handleSelectPlan(plan)}
               className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${
                 plan.popular
-                  ? 'bg-blue-600 text-white hover:bg-blue-700'
-                  : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
+                  ? "bg-blue-600 text-white hover:bg-blue-700"
+                  : "bg-gray-100 text-gray-900 hover:bg-gray-200"
               }`}
             >
               선택하기
@@ -265,29 +280,43 @@ const PaymentPage = () => {
       {showPaymentModal && selectedPlan && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">결제 정보</h3>
-            
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              결제 정보
+            </h3>
+
             <div className="space-y-4 mb-6">
               <div className="p-4 bg-gray-50 rounded-lg">
-                <h4 className="font-medium text-gray-900 mb-2">{selectedPlan.name}</h4>
+                <h4 className="font-medium text-gray-900 mb-2">
+                  {selectedPlan.name}
+                </h4>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-600">수업 시간:</span>
-                    <span className="font-medium">{selectedPlan.hours}시간</span>
+                    <span className="font-medium">
+                      {selectedPlan.hours}시간
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">결제 금액:</span>
-                    <span className="font-medium">{selectedPlan.price.toLocaleString()}원</span>
+                    <span className="font-medium">
+                      {selectedPlan.price.toLocaleString()}원
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">적립 포인트:</span>
-                    <span className="font-medium text-green-600">{selectedPlan.points}P</span>
+                    <span className="font-medium text-green-600">
+                      {selectedPlan.points}P
+                    </span>
                   </div>
                   {selectedPlan.originalPrice && (
                     <div className="flex justify-between">
                       <span className="text-gray-600">할인 금액:</span>
                       <span className="font-medium text-red-600">
-                        -{(selectedPlan.originalPrice - selectedPlan.price).toLocaleString()}원
+                        -
+                        {(
+                          selectedPlan.originalPrice - selectedPlan.price
+                        ).toLocaleString()}
+                        원
                       </span>
                     </div>
                   )}
@@ -295,13 +324,15 @@ const PaymentPage = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">결제 방법</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  결제 방법
+                </label>
                 <div className="space-y-2">
                   <label className="flex items-center gap-2">
                     <input
                       type="radio"
                       value="card"
-                      checked={paymentMethod === 'card'}
+                      checked={paymentMethod === "card"}
                       onChange={(e) => setPaymentMethod(e.target.value)}
                       className="text-blue-600"
                     />
@@ -312,7 +343,7 @@ const PaymentPage = () => {
                     <input
                       type="radio"
                       value="transfer"
-                      checked={paymentMethod === 'transfer'}
+                      checked={paymentMethod === "transfer"}
                       onChange={(e) => setPaymentMethod(e.target.value)}
                       className="text-blue-600"
                     />
@@ -370,4 +401,4 @@ const PaymentPage = () => {
   );
 };
 
-export default PaymentPage; 
+export default PaymentPage;

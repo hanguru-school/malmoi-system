@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Lock, Mail, Smartphone, Fingerprint, Eye, EyeOff } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Lock, Mail, Smartphone, Fingerprint, Eye, EyeOff } from "lucide-react";
 
 interface LoginMethod {
-  type: 'email' | 'passcode' | 'biometric';
+  type: "email" | "passcode" | "biometric";
   label: string;
   icon: React.ReactNode;
   description: string;
@@ -14,81 +14,84 @@ interface LoginMethod {
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const [loginMethod, setLoginMethod] = useState<'email' | 'passcode' | 'biometric'>('email');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [passcode, setPasscode] = useState('');
+  const [loginMethod, setLoginMethod] = useState<
+    "email" | "passcode" | "biometric"
+  >("email");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [passcode, setPasscode] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [hasLoginHistory, setHasLoginHistory] = useState(false);
   const [isBiometricAvailable, setIsBiometricAvailable] = useState(false);
 
   useEffect(() => {
     // 로그인 이력 확인
-    const loginHistory = localStorage.getItem('adminLoginHistory');
+    const loginHistory = localStorage.getItem("adminLoginHistory");
     if (loginHistory) {
       setHasLoginHistory(true);
-      setLoginMethod('passcode');
+      setLoginMethod("passcode");
     }
 
     // 생체인식 사용 가능 여부 확인
     if (window.PublicKeyCredential) {
-      PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
-        .then((available) => {
+      PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable().then(
+        (available) => {
           setIsBiometricAvailable(available);
-        });
+        },
+      );
     }
   }, []);
 
   const loginMethods: LoginMethod[] = [
     {
-      type: 'email',
-      label: '이메일 로그인',
+      type: "email",
+      label: "이메일 로그인",
       icon: <Mail className="w-5 h-5" />,
-      description: '이메일과 비밀번호로 로그인'
+      description: "이메일과 비밀번호로 로그인",
     },
     {
-      type: 'passcode',
-      label: '패스코드 로그인',
+      type: "passcode",
+      label: "패스코드 로그인",
       icon: <Smartphone className="w-5 h-5" />,
-      description: '4자리 숫자로 간편 로그인',
-      disabled: !hasLoginHistory
+      description: "4자리 숫자로 간편 로그인",
+      disabled: !hasLoginHistory,
     },
     {
-      type: 'biometric',
-      label: '생체인식 로그인',
+      type: "biometric",
+      label: "생체인식 로그인",
       icon: <Fingerprint className="w-5 h-5" />,
-      description: '지문 또는 얼굴 인식으로 로그인',
-      disabled: !isBiometricAvailable
-    }
+      description: "지문 또는 얼굴 인식으로 로그인",
+      disabled: !isBiometricAvailable,
+    },
   ];
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
+    setError("");
 
     try {
       // 실제 API 호출로 대체
-      const response = await fetch('/api/admin/login', {
-        method: 'POST',
+      const response = await fetch("/api/admin/login", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, password }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        localStorage.setItem('adminToken', data.token);
-        localStorage.setItem('adminLoginHistory', 'true');
-        router.push('/admin/calendar');
+        localStorage.setItem("adminToken", data.token);
+        localStorage.setItem("adminLoginHistory", "true");
+        router.push("/admin/calendar");
       } else {
-        setError('이메일 또는 비밀번호가 올바르지 않습니다.');
+        setError("이메일 또는 비밀번호가 올바르지 않습니다.");
       }
     } catch (error) {
-      setError('로그인 중 오류가 발생했습니다.');
+      setError("로그인 중 오류가 발생했습니다.");
     } finally {
       setIsLoading(false);
     }
@@ -97,26 +100,26 @@ export default function AdminLoginPage() {
   const handlePasscodeLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
+    setError("");
 
     try {
-      const response = await fetch('/api/admin/login/passcode', {
-        method: 'POST',
+      const response = await fetch("/api/admin/login/passcode", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ passcode }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        localStorage.setItem('adminToken', data.token);
-        router.push('/admin/calendar');
+        localStorage.setItem("adminToken", data.token);
+        router.push("/admin/calendar");
       } else {
-        setError('패스코드가 올바르지 않습니다.');
+        setError("패스코드가 올바르지 않습니다.");
       }
     } catch (error) {
-      setError('로그인 중 오류가 발생했습니다.');
+      setError("로그인 중 오류가 발생했습니다.");
     } finally {
       setIsLoading(false);
     }
@@ -124,23 +127,23 @@ export default function AdminLoginPage() {
 
   const handleBiometricLogin = async () => {
     setIsLoading(true);
-    setError('');
+    setError("");
 
     try {
       // WebAuthn API를 사용한 생체인식 인증
-      const response = await fetch('/api/admin/login/biometric', {
-        method: 'POST',
+      const response = await fetch("/api/admin/login/biometric", {
+        method: "POST",
       });
 
       if (response.ok) {
         const data = await response.json();
-        localStorage.setItem('adminToken', data.token);
-        router.push('/admin/calendar');
+        localStorage.setItem("adminToken", data.token);
+        router.push("/admin/calendar");
       } else {
-        setError('생체인식 인증에 실패했습니다.');
+        setError("생체인식 인증에 실패했습니다.");
       }
     } catch (error) {
-      setError('생체인식 로그인 중 오류가 발생했습니다.');
+      setError("생체인식 로그인 중 오류가 발생했습니다.");
     } finally {
       setIsLoading(false);
     }
@@ -148,11 +151,14 @@ export default function AdminLoginPage() {
 
   const renderLoginForm = () => {
     switch (loginMethod) {
-      case 'email':
+      case "email":
         return (
           <form onSubmit={handleEmailLogin} className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 이메일
               </label>
               <input
@@ -165,12 +171,15 @@ export default function AdminLoginPage() {
               />
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 비밀번호
               </label>
               <div className="relative">
                 <input
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   id="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -182,7 +191,11 @@ export default function AdminLoginPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2"
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4 text-gray-500" /> : <Eye className="w-4 h-4 text-gray-500" />}
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4 text-gray-500" />
+                  ) : (
+                    <Eye className="w-4 h-4 text-gray-500" />
+                  )}
                 </button>
               </div>
             </div>
@@ -191,23 +204,28 @@ export default function AdminLoginPage() {
               disabled={isLoading}
               className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? '로그인 중...' : '로그인'}
+              {isLoading ? "로그인 중..." : "로그인"}
             </button>
           </form>
         );
 
-      case 'passcode':
+      case "passcode":
         return (
           <form onSubmit={handlePasscodeLogin} className="space-y-4">
             <div>
-              <label htmlFor="passcode" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="passcode"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 4자리 패스코드
               </label>
               <input
                 type="password"
                 id="passcode"
                 value={passcode}
-                onChange={(e) => setPasscode(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                onChange={(e) =>
+                  setPasscode(e.target.value.replace(/\D/g, "").slice(0, 4))
+                }
                 maxLength={4}
                 pattern="[0-9]{4}"
                 className="w-full px-3 py-2 text-center text-2xl tracking-widest border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -219,12 +237,12 @@ export default function AdminLoginPage() {
               disabled={isLoading}
               className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? '로그인 중...' : '로그인'}
+              {isLoading ? "로그인 중..." : "로그인"}
             </button>
           </form>
         );
 
-      case 'biometric':
+      case "biometric":
         return (
           <div className="space-y-4">
             <div className="text-center">
@@ -236,7 +254,7 @@ export default function AdminLoginPage() {
               disabled={isLoading}
               className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? '인증 중...' : '생체인식 로그인'}
+              {isLoading ? "인증 중..." : "생체인식 로그인"}
             </button>
           </div>
         );
@@ -270,16 +288,18 @@ export default function AdminLoginPage() {
               disabled={method.disabled}
               className={`w-full flex items-center p-3 border rounded-lg transition-colors ${
                 loginMethod === method.type
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200 hover:border-gray-300'
-              } ${method.disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  ? "border-blue-500 bg-blue-50"
+                  : "border-gray-200 hover:border-gray-300"
+              } ${method.disabled ? "opacity-50 cursor-not-allowed" : ""}`}
             >
               <div className="flex-shrink-0 mr-3 text-gray-500">
                 {method.icon}
               </div>
               <div className="flex-1 text-left">
                 <div className="font-medium text-gray-900">{method.label}</div>
-                <div className="text-sm text-gray-500">{method.description}</div>
+                <div className="text-sm text-gray-500">
+                  {method.description}
+                </div>
               </div>
             </button>
           ))}
@@ -295,11 +315,11 @@ export default function AdminLoginPage() {
 
           {renderLoginForm()}
 
-          {loginMethod === 'passcode' && (
+          {loginMethod === "passcode" && (
             <div className="mt-4 text-center">
               <button
                 type="button"
-                onClick={() => setLoginMethod('email')}
+                onClick={() => setLoginMethod("email")}
                 className="text-sm text-blue-600 hover:text-blue-500"
               >
                 이메일로 로그인하기
@@ -310,4 +330,4 @@ export default function AdminLoginPage() {
       </div>
     </div>
   );
-} 
+}

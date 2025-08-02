@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { NextRequest, NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 interface Passport {
   id: string;
   userId: string;
-  type: 'time' | 'count';
+  type: "time" | "count";
   totalAmount: number;
   usedAmount: number;
   remainingAmount: number;
@@ -22,7 +22,7 @@ interface Coupon {
   id: string;
   userId: string;
   code: string;
-  type: 'discount' | 'free' | 'bonus';
+  type: "discount" | "free" | "bonus";
   value: number;
   isUsed: boolean;
   expiresAt: Date;
@@ -33,12 +33,12 @@ interface Coupon {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
+    const userId = searchParams.get("userId");
 
     if (!userId) {
       return NextResponse.json(
-        { error: '사용자 ID가 필요합니다.' },
-        { status: 400 }
+        { error: "사용자 ID가 필요합니다." },
+        { status: 400 },
       );
     }
 
@@ -79,15 +79,14 @@ export async function GET(request: NextRequest) {
       success: true,
       data: {
         passports: passports || [],
-        coupons: coupons || []
-      }
+        coupons: coupons || [],
+      },
     });
-
   } catch (error) {
-    console.error('Passport API error:', error);
+    console.error("Passport API error:", error);
     return NextResponse.json(
-      { error: '정기권 정보 조회 중 오류가 발생했습니다.' },
-      { status: 500 }
+      { error: "정기권 정보 조회 중 오류가 발생했습니다." },
+      { status: 500 },
     );
   }
 }
@@ -98,8 +97,8 @@ export async function POST(request: NextRequest) {
 
     if (!userId || !type || !totalAmount || !expiresAt) {
       return NextResponse.json(
-        { error: '필수 정보가 누락되었습니다.' },
-        { status: 400 }
+        { error: "필수 정보가 누락되었습니다." },
+        { status: 400 },
       );
     }
 
@@ -107,26 +106,25 @@ export async function POST(request: NextRequest) {
     const passport: Passport = {
       id: `passport_${Date.now()}`,
       userId,
-      type: type as 'time' | 'count',
+      type: type as "time" | "count",
       totalAmount,
       usedAmount: 0,
       remainingAmount: totalAmount,
       expiresAt: new Date(expiresAt),
       isActive: true,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     return NextResponse.json({
       success: true,
-      data: passport
+      data: passport,
     });
-
   } catch (error) {
-    console.error('Passport creation error:', error);
+    console.error("Passport creation error:", error);
     return NextResponse.json(
-      { error: '정기권 생성 중 오류가 발생했습니다.' },
-      { status: 500 }
+      { error: "정기권 생성 중 오류가 발생했습니다." },
+      { status: 500 },
     );
   }
 }
@@ -137,8 +135,8 @@ export async function PUT(request: NextRequest) {
 
     if (!passportId || usedAmount === undefined) {
       return NextResponse.json(
-        { error: '정기권 ID와 사용량이 필요합니다.' },
-        { status: 400 }
+        { error: "정기권 ID와 사용량이 필요합니다." },
+        { status: 400 },
       );
     }
 
@@ -147,19 +145,18 @@ export async function PUT(request: NextRequest) {
       id: passportId,
       usedAmount,
       remainingAmount: 0, // 실제로는 계산 필요
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     return NextResponse.json({
       success: true,
-      data: updatedPassport
+      data: updatedPassport,
     });
-
   } catch (error) {
-    console.error('Passport update error:', error);
+    console.error("Passport update error:", error);
     return NextResponse.json(
-      { error: '정기권 업데이트 중 오류가 발생했습니다.' },
-      { status: 500 }
+      { error: "정기권 업데이트 중 오류가 발생했습니다." },
+      { status: 500 },
     );
   }
-} 
+}

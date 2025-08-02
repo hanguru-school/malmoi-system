@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { NextRequest, NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -18,8 +18,8 @@ export async function PUT(request: NextRequest) {
 
     if (!admin) {
       return NextResponse.json(
-        { error: '관리자를 찾을 수 없습니다.' },
-        { status: 404 }
+        { error: "관리자를 찾을 수 없습니다." },
+        { status: 404 },
       );
     }
 
@@ -47,10 +47,10 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json(updatedAdmin);
   } catch (error) {
-    console.error('프로필 수정 실패:', error);
+    console.error("프로필 수정 실패:", error);
     return NextResponse.json(
-      { error: '프로필 수정에 실패했습니다.' },
-      { status: 500 }
+      { error: "프로필 수정에 실패했습니다." },
+      { status: 500 },
     );
   }
-} 
+}

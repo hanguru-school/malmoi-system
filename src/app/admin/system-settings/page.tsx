@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { 
-  Monitor, 
-  Smartphone, 
-  Tablet, 
-  Globe, 
-  Clock, 
-  Bell, 
+import { useState, useEffect } from "react";
+import {
+  Monitor,
+  Smartphone,
+  Tablet,
+  Globe,
+  Clock,
+  Bell,
   Zap,
   Save,
   Download,
   Upload,
-  Activity
-} from 'lucide-react';
+  Activity,
+} from "lucide-react";
 
 interface SystemSettings {
   deviceOptimization: {
@@ -34,7 +34,7 @@ interface SystemSettings {
     };
   };
   language: {
-    defaultLanguage: 'ja' | 'ko';
+    defaultLanguage: "ja" | "ko";
     autoDetect: boolean;
     availableLanguages: string[];
   };
@@ -81,7 +81,14 @@ export default function AdminSystemSettingsPage() {
   const [settings, setSettings] = useState<SystemSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<'device' | 'language' | 'timezone' | 'notifications' | 'performance' | 'analytics'>('device');
+  const [activeTab, setActiveTab] = useState<
+    | "device"
+    | "language"
+    | "timezone"
+    | "notifications"
+    | "performance"
+    | "analytics"
+  >("device");
 
   useEffect(() => {
     // 실제 API 호출로 대체
@@ -91,61 +98,61 @@ export default function AdminSystemSettingsPage() {
           mobile: {
             uiScale: 1.0,
             showAdvancedFeatures: false,
-            priorityFeatures: ['예약', '노트', '숙제', '리뷰']
+            priorityFeatures: ["예약", "노트", "숙제", "리뷰"],
           },
           tablet: {
             uiScale: 1.2,
             showAdvancedFeatures: true,
-            priorityFeatures: ['수업 진행', '커리큘럼', '학생 관리', '통계']
+            priorityFeatures: ["수업 진행", "커리큘럼", "학생 관리", "통계"],
           },
           desktop: {
             uiScale: 1.0,
             showAdvancedFeatures: true,
-            priorityFeatures: ['관리 기능', '통계', '설정', '백업']
-          }
+            priorityFeatures: ["관리 기능", "통계", "설정", "백업"],
+          },
         },
         language: {
-          defaultLanguage: 'ja',
+          defaultLanguage: "ja",
           autoDetect: true,
-          availableLanguages: ['ja', 'ko', 'en']
+          availableLanguages: ["ja", "ko", "en"],
         },
         timezone: {
-          defaultTimezone: 'Asia/Tokyo',
+          defaultTimezone: "Asia/Tokyo",
           autoSync: true,
-          dateFormat: 'YYYY-MM-DD',
-          timeFormat: 'HH:mm'
+          dateFormat: "YYYY-MM-DD",
+          timeFormat: "HH:mm",
         },
         notifications: {
           students: {
             lessonReminder: true,
             noReservationAlert: true,
             reviewRequest: true,
-            homeworkReminder: true
+            homeworkReminder: true,
           },
           teachers: {
             workReminder: true,
             scheduleSummary: true,
-            attendanceAlert: true
+            attendanceAlert: true,
           },
           admins: {
             systemAlerts: true,
             performanceReports: true,
-            backupNotifications: true
-          }
+            backupNotifications: true,
+          },
         },
         performance: {
           enableCaching: true,
           cacheExpiration: 3600,
           imageCompression: true,
           audioCompression: true,
-          lazyLoading: true
+          lazyLoading: true,
         },
         analytics: {
           enableTracking: true,
           trackUserBehavior: true,
           generateReports: true,
-          dataRetention: 365
-        }
+          dataRetention: 365,
+        },
       };
 
       setSettings(mockSettings);
@@ -156,19 +163,19 @@ export default function AdminSystemSettingsPage() {
   const handleSave = async () => {
     setSaving(true);
     // 실제 API 호출로 대체
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
     setSaving(false);
-    alert('설정이 저장되었습니다.');
+    alert("설정이 저장되었습니다.");
   };
 
   const handleExport = () => {
     if (!settings) return;
     const dataStr = JSON.stringify(settings, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const dataBlob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
-    link.download = 'system-settings.json';
+    link.download = "system-settings.json";
     link.click();
   };
 
@@ -181,9 +188,9 @@ export default function AdminSystemSettingsPage() {
       try {
         const importedSettings = JSON.parse(e.target?.result as string);
         setSettings(importedSettings);
-        alert('설정이 가져와졌습니다.');
+        alert("설정이 가져와졌습니다.");
       } catch (error) {
-        alert('설정 파일을 읽을 수 없습니다.');
+        alert("설정 파일을 읽을 수 없습니다.");
       }
     };
     reader.readAsText(file);
@@ -217,7 +224,7 @@ export default function AdminSystemSettingsPage() {
           className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
         >
           <Save className="w-4 h-4" />
-          {saving ? '저장 중...' : '설정 저장'}
+          {saving ? "저장 중..." : "설정 저장"}
         </button>
         <button
           onClick={handleExport}
@@ -243,66 +250,66 @@ export default function AdminSystemSettingsPage() {
         <div className="border-b border-gray-200">
           <nav className="flex space-x-8 px-6">
             <button
-              onClick={() => setActiveTab('device')}
+              onClick={() => setActiveTab("device")}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'device'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                activeTab === "device"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               }`}
             >
               <Monitor className="w-4 h-4 inline mr-2" />
               기기 최적화
             </button>
             <button
-              onClick={() => setActiveTab('language')}
+              onClick={() => setActiveTab("language")}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'language'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                activeTab === "language"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               }`}
             >
               <Globe className="w-4 h-4 inline mr-2" />
               언어 설정
             </button>
             <button
-              onClick={() => setActiveTab('timezone')}
+              onClick={() => setActiveTab("timezone")}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'timezone'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                activeTab === "timezone"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               }`}
             >
               <Clock className="w-4 h-4 inline mr-2" />
               시간대 설정
             </button>
             <button
-              onClick={() => setActiveTab('notifications')}
+              onClick={() => setActiveTab("notifications")}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'notifications'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                activeTab === "notifications"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               }`}
             >
               <Bell className="w-4 h-4 inline mr-2" />
               알림 설정
             </button>
             <button
-              onClick={() => setActiveTab('performance')}
+              onClick={() => setActiveTab("performance")}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'performance'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                activeTab === "performance"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               }`}
             >
               <Zap className="w-4 h-4 inline mr-2" />
               성능 최적화
             </button>
             <button
-              onClick={() => setActiveTab('analytics')}
+              onClick={() => setActiveTab("analytics")}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'analytics'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                activeTab === "analytics"
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               }`}
             >
               <Activity className="w-4 h-4 inline mr-2" />
@@ -312,17 +319,21 @@ export default function AdminSystemSettingsPage() {
         </div>
 
         <div className="p-6">
-          {activeTab === 'device' && (
+          {activeTab === "device" && (
             <div className="space-y-8">
-              <h3 className="text-lg font-semibold text-gray-900">기기별 최적화 설정</h3>
-              
+              <h3 className="text-lg font-semibold text-gray-900">
+                기기별 최적화 설정
+              </h3>
+
               {/* 모바일 설정 */}
               <div className="border border-gray-200 rounded-lg p-6">
                 <div className="flex items-center gap-3 mb-4">
                   <Smartphone className="w-6 h-6 text-blue-600" />
-                  <h4 className="text-lg font-medium text-gray-900">모바일 (핸드폰)</h4>
+                  <h4 className="text-lg font-medium text-gray-900">
+                    모바일 (핸드폰)
+                  </h4>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -334,38 +345,45 @@ export default function AdminSystemSettingsPage() {
                       max="1.4"
                       step="0.1"
                       value={settings.deviceOptimization.mobile.uiScale}
-                      onChange={(e) => setSettings({
-                        ...settings,
-                        deviceOptimization: {
-                          ...settings.deviceOptimization,
-                          mobile: {
-                            ...settings.deviceOptimization.mobile,
-                            uiScale: parseFloat(e.target.value)
-                          }
-                        }
-                      })}
+                      onChange={(e) =>
+                        setSettings({
+                          ...settings,
+                          deviceOptimization: {
+                            ...settings.deviceOptimization,
+                            mobile: {
+                              ...settings.deviceOptimization.mobile,
+                              uiScale: parseFloat(e.target.value),
+                            },
+                          },
+                        })
+                      }
                       className="w-full"
                     />
                     <div className="text-sm text-gray-600 mt-1">
                       현재: {settings.deviceOptimization.mobile.uiScale}x
                     </div>
                   </div>
-                  
+
                   <div>
                     <label className="flex items-center">
                       <input
                         type="checkbox"
-                        checked={settings.deviceOptimization.mobile.showAdvancedFeatures}
-                        onChange={(e) => setSettings({
-                          ...settings,
-                          deviceOptimization: {
-                            ...settings.deviceOptimization,
-                            mobile: {
-                              ...settings.deviceOptimization.mobile,
-                              showAdvancedFeatures: e.target.checked
-                            }
-                          }
-                        })}
+                        checked={
+                          settings.deviceOptimization.mobile
+                            .showAdvancedFeatures
+                        }
+                        onChange={(e) =>
+                          setSettings({
+                            ...settings,
+                            deviceOptimization: {
+                              ...settings.deviceOptimization,
+                              mobile: {
+                                ...settings.deviceOptimization.mobile,
+                                showAdvancedFeatures: e.target.checked,
+                              },
+                            },
+                          })
+                        }
                         className="mr-2"
                       />
                       <span className="text-sm font-medium text-gray-700">
@@ -382,7 +400,7 @@ export default function AdminSystemSettingsPage() {
                   <Tablet className="w-6 h-6 text-green-600" />
                   <h4 className="text-lg font-medium text-gray-900">태블릿</h4>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -394,38 +412,45 @@ export default function AdminSystemSettingsPage() {
                       max="1.4"
                       step="0.1"
                       value={settings.deviceOptimization.tablet.uiScale}
-                      onChange={(e) => setSettings({
-                        ...settings,
-                        deviceOptimization: {
-                          ...settings.deviceOptimization,
-                          tablet: {
-                            ...settings.deviceOptimization.tablet,
-                            uiScale: parseFloat(e.target.value)
-                          }
-                        }
-                      })}
+                      onChange={(e) =>
+                        setSettings({
+                          ...settings,
+                          deviceOptimization: {
+                            ...settings.deviceOptimization,
+                            tablet: {
+                              ...settings.deviceOptimization.tablet,
+                              uiScale: parseFloat(e.target.value),
+                            },
+                          },
+                        })
+                      }
                       className="w-full"
                     />
                     <div className="text-sm text-gray-600 mt-1">
                       현재: {settings.deviceOptimization.tablet.uiScale}x
                     </div>
                   </div>
-                  
+
                   <div>
                     <label className="flex items-center">
                       <input
                         type="checkbox"
-                        checked={settings.deviceOptimization.tablet.showAdvancedFeatures}
-                        onChange={(e) => setSettings({
-                          ...settings,
-                          deviceOptimization: {
-                            ...settings.deviceOptimization,
-                            tablet: {
-                              ...settings.deviceOptimization.tablet,
-                              showAdvancedFeatures: e.target.checked
-                            }
-                          }
-                        })}
+                        checked={
+                          settings.deviceOptimization.tablet
+                            .showAdvancedFeatures
+                        }
+                        onChange={(e) =>
+                          setSettings({
+                            ...settings,
+                            deviceOptimization: {
+                              ...settings.deviceOptimization,
+                              tablet: {
+                                ...settings.deviceOptimization.tablet,
+                                showAdvancedFeatures: e.target.checked,
+                              },
+                            },
+                          })
+                        }
                         className="mr-2"
                       />
                       <span className="text-sm font-medium text-gray-700">
@@ -440,9 +465,11 @@ export default function AdminSystemSettingsPage() {
               <div className="border border-gray-200 rounded-lg p-6">
                 <div className="flex items-center gap-3 mb-4">
                   <Monitor className="w-6 h-6 text-purple-600" />
-                  <h4 className="text-lg font-medium text-gray-900">데스크톱 (PC)</h4>
+                  <h4 className="text-lg font-medium text-gray-900">
+                    데스크톱 (PC)
+                  </h4>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -454,38 +481,45 @@ export default function AdminSystemSettingsPage() {
                       max="1.4"
                       step="0.1"
                       value={settings.deviceOptimization.desktop.uiScale}
-                      onChange={(e) => setSettings({
-                        ...settings,
-                        deviceOptimization: {
-                          ...settings.deviceOptimization,
-                          desktop: {
-                            ...settings.deviceOptimization.desktop,
-                            uiScale: parseFloat(e.target.value)
-                          }
-                        }
-                      })}
+                      onChange={(e) =>
+                        setSettings({
+                          ...settings,
+                          deviceOptimization: {
+                            ...settings.deviceOptimization,
+                            desktop: {
+                              ...settings.deviceOptimization.desktop,
+                              uiScale: parseFloat(e.target.value),
+                            },
+                          },
+                        })
+                      }
                       className="w-full"
                     />
                     <div className="text-sm text-gray-600 mt-1">
                       현재: {settings.deviceOptimization.desktop.uiScale}x
                     </div>
                   </div>
-                  
+
                   <div>
                     <label className="flex items-center">
                       <input
                         type="checkbox"
-                        checked={settings.deviceOptimization.desktop.showAdvancedFeatures}
-                        onChange={(e) => setSettings({
-                          ...settings,
-                          deviceOptimization: {
-                            ...settings.deviceOptimization,
-                            desktop: {
-                              ...settings.deviceOptimization.desktop,
-                              showAdvancedFeatures: e.target.checked
-                            }
-                          }
-                        })}
+                        checked={
+                          settings.deviceOptimization.desktop
+                            .showAdvancedFeatures
+                        }
+                        onChange={(e) =>
+                          setSettings({
+                            ...settings,
+                            deviceOptimization: {
+                              ...settings.deviceOptimization,
+                              desktop: {
+                                ...settings.deviceOptimization.desktop,
+                                showAdvancedFeatures: e.target.checked,
+                              },
+                            },
+                          })
+                        }
                         className="mr-2"
                       />
                       <span className="text-sm font-medium text-gray-700">
@@ -498,10 +532,10 @@ export default function AdminSystemSettingsPage() {
             </div>
           )}
 
-          {activeTab === 'language' && (
+          {activeTab === "language" && (
             <div className="space-y-6">
               <h3 className="text-lg font-semibold text-gray-900">언어 설정</h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -509,32 +543,36 @@ export default function AdminSystemSettingsPage() {
                   </label>
                   <select
                     value={settings.language.defaultLanguage}
-                    onChange={(e) => setSettings({
-                      ...settings,
-                      language: {
-                        ...settings.language,
-                        defaultLanguage: e.target.value as 'ja' | 'ko'
-                      }
-                    })}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        language: {
+                          ...settings.language,
+                          defaultLanguage: e.target.value as "ja" | "ko",
+                        },
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="ja">日本語</option>
                     <option value="ko">한국어</option>
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="flex items-center">
                     <input
                       type="checkbox"
                       checked={settings.language.autoDetect}
-                      onChange={(e) => setSettings({
-                        ...settings,
-                        language: {
-                          ...settings.language,
-                          autoDetect: e.target.checked
-                        }
-                      })}
+                      onChange={(e) =>
+                        setSettings({
+                          ...settings,
+                          language: {
+                            ...settings.language,
+                            autoDetect: e.target.checked,
+                          },
+                        })
+                      }
                       className="mr-2"
                     />
                     <span className="text-sm font-medium text-gray-700">
@@ -546,10 +584,12 @@ export default function AdminSystemSettingsPage() {
             </div>
           )}
 
-          {activeTab === 'timezone' && (
+          {activeTab === "timezone" && (
             <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-gray-900">시간대 설정</h3>
-              
+              <h3 className="text-lg font-semibold text-gray-900">
+                시간대 설정
+              </h3>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -557,13 +597,15 @@ export default function AdminSystemSettingsPage() {
                   </label>
                   <select
                     value={settings.timezone.defaultTimezone}
-                    onChange={(e) => setSettings({
-                      ...settings,
-                      timezone: {
-                        ...settings.timezone,
-                        defaultTimezone: e.target.value
-                      }
-                    })}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        timezone: {
+                          ...settings.timezone,
+                          defaultTimezone: e.target.value,
+                        },
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="Asia/Tokyo">Asia/Tokyo (JST)</option>
@@ -571,19 +613,21 @@ export default function AdminSystemSettingsPage() {
                     <option value="UTC">UTC</option>
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="flex items-center">
                     <input
                       type="checkbox"
                       checked={settings.timezone.autoSync}
-                      onChange={(e) => setSettings({
-                        ...settings,
-                        timezone: {
-                          ...settings.timezone,
-                          autoSync: e.target.checked
-                        }
-                      })}
+                      onChange={(e) =>
+                        setSettings({
+                          ...settings,
+                          timezone: {
+                            ...settings.timezone,
+                            autoSync: e.target.checked,
+                          },
+                        })
+                      }
                       className="mr-2"
                     />
                     <span className="text-sm font-medium text-gray-700">
@@ -595,85 +639,97 @@ export default function AdminSystemSettingsPage() {
             </div>
           )}
 
-          {activeTab === 'notifications' && (
+          {activeTab === "notifications" && (
             <div className="space-y-6">
               <h3 className="text-lg font-semibold text-gray-900">알림 설정</h3>
-              
+
               {/* 학생 알림 */}
               <div className="border border-gray-200 rounded-lg p-6">
-                <h4 className="text-lg font-medium text-gray-900 mb-4">학생 알림</h4>
+                <h4 className="text-lg font-medium text-gray-900 mb-4">
+                  학생 알림
+                </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <label className="flex items-center">
                     <input
                       type="checkbox"
                       checked={settings.notifications.students.lessonReminder}
-                      onChange={(e) => setSettings({
-                        ...settings,
-                        notifications: {
-                          ...settings.notifications,
-                          students: {
-                            ...settings.notifications.students,
-                            lessonReminder: e.target.checked
-                          }
-                        }
-                      })}
+                      onChange={(e) =>
+                        setSettings({
+                          ...settings,
+                          notifications: {
+                            ...settings.notifications,
+                            students: {
+                              ...settings.notifications.students,
+                              lessonReminder: e.target.checked,
+                            },
+                          },
+                        })
+                      }
                       className="mr-2"
                     />
                     <span className="text-sm text-gray-700">수업 리마인드</span>
                   </label>
-                  
+
                   <label className="flex items-center">
                     <input
                       type="checkbox"
-                      checked={settings.notifications.students.noReservationAlert}
-                      onChange={(e) => setSettings({
-                        ...settings,
-                        notifications: {
-                          ...settings.notifications,
-                          students: {
-                            ...settings.notifications.students,
-                            noReservationAlert: e.target.checked
-                          }
-                        }
-                      })}
+                      checked={
+                        settings.notifications.students.noReservationAlert
+                      }
+                      onChange={(e) =>
+                        setSettings({
+                          ...settings,
+                          notifications: {
+                            ...settings.notifications,
+                            students: {
+                              ...settings.notifications.students,
+                              noReservationAlert: e.target.checked,
+                            },
+                          },
+                        })
+                      }
                       className="mr-2"
                     />
                     <span className="text-sm text-gray-700">미예약 알림</span>
                   </label>
-                  
+
                   <label className="flex items-center">
                     <input
                       type="checkbox"
                       checked={settings.notifications.students.reviewRequest}
-                      onChange={(e) => setSettings({
-                        ...settings,
-                        notifications: {
-                          ...settings.notifications,
-                          students: {
-                            ...settings.notifications.students,
-                            reviewRequest: e.target.checked
-                          }
-                        }
-                      })}
+                      onChange={(e) =>
+                        setSettings({
+                          ...settings,
+                          notifications: {
+                            ...settings.notifications,
+                            students: {
+                              ...settings.notifications.students,
+                              reviewRequest: e.target.checked,
+                            },
+                          },
+                        })
+                      }
                       className="mr-2"
                     />
                     <span className="text-sm text-gray-700">리뷰 요청</span>
                   </label>
-                  
+
                   <label className="flex items-center">
                     <input
                       type="checkbox"
                       checked={settings.notifications.students.homeworkReminder}
-                      onChange={(e) => setSettings({
-                        ...settings,
-                        notifications: {
-                          ...settings.notifications,
-                          students: {
-                            ...settings.notifications.students,
-                            homeworkReminder: e.target.checked
-                          }
-                        }
-                      })}
+                      onChange={(e) =>
+                        setSettings({
+                          ...settings,
+                          notifications: {
+                            ...settings.notifications,
+                            students: {
+                              ...settings.notifications.students,
+                              homeworkReminder: e.target.checked,
+                            },
+                          },
+                        })
+                      }
                       className="mr-2"
                     />
                     <span className="text-sm text-gray-700">숙제 리마인드</span>
@@ -683,60 +739,68 @@ export default function AdminSystemSettingsPage() {
 
               {/* 선생님 알림 */}
               <div className="border border-gray-200 rounded-lg p-6">
-                <h4 className="text-lg font-medium text-gray-900 mb-4">선생님 알림</h4>
+                <h4 className="text-lg font-medium text-gray-900 mb-4">
+                  선생님 알림
+                </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <label className="flex items-center">
                     <input
                       type="checkbox"
                       checked={settings.notifications.teachers.workReminder}
-                      onChange={(e) => setSettings({
-                        ...settings,
-                        notifications: {
-                          ...settings.notifications,
-                          teachers: {
-                            ...settings.notifications.teachers,
-                            workReminder: e.target.checked
-                          }
-                        }
-                      })}
+                      onChange={(e) =>
+                        setSettings({
+                          ...settings,
+                          notifications: {
+                            ...settings.notifications,
+                            teachers: {
+                              ...settings.notifications.teachers,
+                              workReminder: e.target.checked,
+                            },
+                          },
+                        })
+                      }
                       className="mr-2"
                     />
                     <span className="text-sm text-gray-700">출근 리마인드</span>
                   </label>
-                  
+
                   <label className="flex items-center">
                     <input
                       type="checkbox"
                       checked={settings.notifications.teachers.scheduleSummary}
-                      onChange={(e) => setSettings({
-                        ...settings,
-                        notifications: {
-                          ...settings.notifications,
-                          teachers: {
-                            ...settings.notifications.teachers,
-                            scheduleSummary: e.target.checked
-                          }
-                        }
-                      })}
+                      onChange={(e) =>
+                        setSettings({
+                          ...settings,
+                          notifications: {
+                            ...settings.notifications,
+                            teachers: {
+                              ...settings.notifications.teachers,
+                              scheduleSummary: e.target.checked,
+                            },
+                          },
+                        })
+                      }
                       className="mr-2"
                     />
                     <span className="text-sm text-gray-700">일정 요약</span>
                   </label>
-                  
+
                   <label className="flex items-center">
                     <input
                       type="checkbox"
                       checked={settings.notifications.teachers.attendanceAlert}
-                      onChange={(e) => setSettings({
-                        ...settings,
-                        notifications: {
-                          ...settings.notifications,
-                          teachers: {
-                            ...settings.notifications.teachers,
-                            attendanceAlert: e.target.checked
-                          }
-                        }
-                      })}
+                      onChange={(e) =>
+                        setSettings({
+                          ...settings,
+                          notifications: {
+                            ...settings.notifications,
+                            teachers: {
+                              ...settings.notifications.teachers,
+                              attendanceAlert: e.target.checked,
+                            },
+                          },
+                        })
+                      }
                       className="mr-2"
                     />
                     <span className="text-sm text-gray-700">출석 알림</span>
@@ -746,29 +810,35 @@ export default function AdminSystemSettingsPage() {
             </div>
           )}
 
-          {activeTab === 'performance' && (
+          {activeTab === "performance" && (
             <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-gray-900">성능 최적화</h3>
-              
+              <h3 className="text-lg font-semibold text-gray-900">
+                성능 최적화
+              </h3>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="flex items-center">
                     <input
                       type="checkbox"
                       checked={settings.performance.enableCaching}
-                      onChange={(e) => setSettings({
-                        ...settings,
-                        performance: {
-                          ...settings.performance,
-                          enableCaching: e.target.checked
-                        }
-                      })}
+                      onChange={(e) =>
+                        setSettings({
+                          ...settings,
+                          performance: {
+                            ...settings.performance,
+                            enableCaching: e.target.checked,
+                          },
+                        })
+                      }
                       className="mr-2"
                     />
-                    <span className="text-sm font-medium text-gray-700">캐싱 활성화</span>
+                    <span className="text-sm font-medium text-gray-700">
+                      캐싱 활성화
+                    </span>
                   </label>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     캐시 만료 시간 (초)
@@ -776,133 +846,159 @@ export default function AdminSystemSettingsPage() {
                   <input
                     type="number"
                     value={settings.performance.cacheExpiration}
-                    onChange={(e) => setSettings({
-                      ...settings,
-                      performance: {
-                        ...settings.performance,
-                        cacheExpiration: parseInt(e.target.value)
-                      }
-                    })}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        performance: {
+                          ...settings.performance,
+                          cacheExpiration: parseInt(e.target.value),
+                        },
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
-                
+
                 <div>
                   <label className="flex items-center">
                     <input
                       type="checkbox"
                       checked={settings.performance.imageCompression}
-                      onChange={(e) => setSettings({
-                        ...settings,
-                        performance: {
-                          ...settings.performance,
-                          imageCompression: e.target.checked
-                        }
-                      })}
+                      onChange={(e) =>
+                        setSettings({
+                          ...settings,
+                          performance: {
+                            ...settings.performance,
+                            imageCompression: e.target.checked,
+                          },
+                        })
+                      }
                       className="mr-2"
                     />
-                    <span className="text-sm font-medium text-gray-700">이미지 압축</span>
+                    <span className="text-sm font-medium text-gray-700">
+                      이미지 압축
+                    </span>
                   </label>
                 </div>
-                
+
                 <div>
                   <label className="flex items-center">
                     <input
                       type="checkbox"
                       checked={settings.performance.audioCompression}
-                      onChange={(e) => setSettings({
-                        ...settings,
-                        performance: {
-                          ...settings.performance,
-                          audioCompression: e.target.checked
-                        }
-                      })}
+                      onChange={(e) =>
+                        setSettings({
+                          ...settings,
+                          performance: {
+                            ...settings.performance,
+                            audioCompression: e.target.checked,
+                          },
+                        })
+                      }
                       className="mr-2"
                     />
-                    <span className="text-sm font-medium text-gray-700">오디오 압축</span>
+                    <span className="text-sm font-medium text-gray-700">
+                      오디오 압축
+                    </span>
                   </label>
                 </div>
-                
+
                 <div>
                   <label className="flex items-center">
                     <input
                       type="checkbox"
                       checked={settings.performance.lazyLoading}
-                      onChange={(e) => setSettings({
-                        ...settings,
-                        performance: {
-                          ...settings.performance,
-                          lazyLoading: e.target.checked
-                        }
-                      })}
+                      onChange={(e) =>
+                        setSettings({
+                          ...settings,
+                          performance: {
+                            ...settings.performance,
+                            lazyLoading: e.target.checked,
+                          },
+                        })
+                      }
                       className="mr-2"
                     />
-                    <span className="text-sm font-medium text-gray-700">지연 로딩</span>
+                    <span className="text-sm font-medium text-gray-700">
+                      지연 로딩
+                    </span>
                   </label>
                 </div>
               </div>
             </div>
           )}
 
-          {activeTab === 'analytics' && (
+          {activeTab === "analytics" && (
             <div className="space-y-6">
               <h3 className="text-lg font-semibold text-gray-900">분석 설정</h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="flex items-center">
                     <input
                       type="checkbox"
                       checked={settings.analytics.enableTracking}
-                      onChange={(e) => setSettings({
-                        ...settings,
-                        analytics: {
-                          ...settings.analytics,
-                          enableTracking: e.target.checked
-                        }
-                      })}
+                      onChange={(e) =>
+                        setSettings({
+                          ...settings,
+                          analytics: {
+                            ...settings.analytics,
+                            enableTracking: e.target.checked,
+                          },
+                        })
+                      }
                       className="mr-2"
                     />
-                    <span className="text-sm font-medium text-gray-700">사용자 행동 추적</span>
+                    <span className="text-sm font-medium text-gray-700">
+                      사용자 행동 추적
+                    </span>
                   </label>
                 </div>
-                
+
                 <div>
                   <label className="flex items-center">
                     <input
                       type="checkbox"
                       checked={settings.analytics.trackUserBehavior}
-                      onChange={(e) => setSettings({
-                        ...settings,
-                        analytics: {
-                          ...settings.analytics,
-                          trackUserBehavior: e.target.checked
-                        }
-                      })}
+                      onChange={(e) =>
+                        setSettings({
+                          ...settings,
+                          analytics: {
+                            ...settings.analytics,
+                            trackUserBehavior: e.target.checked,
+                          },
+                        })
+                      }
                       className="mr-2"
                     />
-                    <span className="text-sm font-medium text-gray-700">사용자 행동 분석</span>
+                    <span className="text-sm font-medium text-gray-700">
+                      사용자 행동 분석
+                    </span>
                   </label>
                 </div>
-                
+
                 <div>
                   <label className="flex items-center">
                     <input
                       type="checkbox"
                       checked={settings.analytics.generateReports}
-                      onChange={(e) => setSettings({
-                        ...settings,
-                        analytics: {
-                          ...settings.analytics,
-                          generateReports: e.target.checked
-                        }
-                      })}
+                      onChange={(e) =>
+                        setSettings({
+                          ...settings,
+                          analytics: {
+                            ...settings.analytics,
+                            generateReports: e.target.checked,
+                          },
+                        })
+                      }
                       className="mr-2"
                     />
-                    <span className="text-sm font-medium text-gray-700">자동 리포트 생성</span>
+                    <span className="text-sm font-medium text-gray-700">
+                      자동 리포트 생성
+                    </span>
                   </label>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     데이터 보관 기간 (일)
@@ -910,13 +1006,15 @@ export default function AdminSystemSettingsPage() {
                   <input
                     type="number"
                     value={settings.analytics.dataRetention}
-                    onChange={(e) => setSettings({
-                      ...settings,
-                      analytics: {
-                        ...settings.analytics,
-                        dataRetention: parseInt(e.target.value)
-                      }
-                    })}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        analytics: {
+                          ...settings.analytics,
+                          dataRetention: parseInt(e.target.value),
+                        },
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
@@ -927,4 +1025,4 @@ export default function AdminSystemSettingsPage() {
       </div>
     </div>
   );
-} 
+}

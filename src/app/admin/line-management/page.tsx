@@ -1,7 +1,14 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { Users, CheckCircle, XCircle, Search, Send, RefreshCw } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import {
+  Users,
+  CheckCircle,
+  XCircle,
+  Search,
+  Send,
+  RefreshCw,
+} from "lucide-react";
 
 interface LINEUser {
   uid: string;
@@ -9,7 +16,7 @@ interface LINEUser {
   lineUserId?: string;
   isLinked: boolean;
   lastActivity?: string;
-  notificationFrequency: 'daily' | 'weekly' | 'monthly' | 'custom';
+  notificationFrequency: "daily" | "weekly" | "monthly" | "custom";
   reminderEnabled: boolean;
 }
 
@@ -17,95 +24,99 @@ interface NotificationTemplate {
   id: string;
   name: string;
   content: string;
-  type: 'reminder' | 'review' | 'homework' | 'general';
+  type: "reminder" | "review" | "homework" | "general";
 }
 
 export default function LINEManagementPage() {
   const [users, setUsers] = useState<LINEUser[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<LINEUser[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState<'all' | 'linked' | 'unlinked'>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState<
+    "all" | "linked" | "unlinked"
+  >("all");
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-  const [notificationTemplates, setNotificationTemplates] = useState<NotificationTemplate[]>([]);
+  const [notificationTemplates, setNotificationTemplates] = useState<
+    NotificationTemplate[]
+  >([]);
   const [showSendModal, setShowSendModal] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState('');
-  const [customMessage, setCustomMessage] = useState('');
+  const [selectedTemplate, setSelectedTemplate] = useState("");
+  const [customMessage, setCustomMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
   // Mock data initialization
   useEffect(() => {
     const initializeData = async () => {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       const mockUsers: LINEUser[] = [
         {
-          uid: 'STU001',
-          name: '김학생',
-          lineUserId: 'U1234567890abcdef',
+          uid: "STU001",
+          name: "김학생",
+          lineUserId: "U1234567890abcdef",
           isLinked: true,
-          lastActivity: '2024-01-15 14:30',
-          notificationFrequency: 'weekly',
-          reminderEnabled: true
+          lastActivity: "2024-01-15 14:30",
+          notificationFrequency: "weekly",
+          reminderEnabled: true,
         },
         {
-          uid: 'STU002',
-          name: '이학생',
-          lineUserId: 'U2345678901bcdef',
+          uid: "STU002",
+          name: "이학생",
+          lineUserId: "U2345678901bcdef",
           isLinked: true,
-          lastActivity: '2024-01-14 16:20',
-          notificationFrequency: 'daily',
-          reminderEnabled: true
+          lastActivity: "2024-01-14 16:20",
+          notificationFrequency: "daily",
+          reminderEnabled: true,
         },
         {
-          uid: 'STU003',
-          name: '박학생',
+          uid: "STU003",
+          name: "박학생",
           isLinked: false,
-          notificationFrequency: 'weekly',
-          reminderEnabled: false
+          notificationFrequency: "weekly",
+          reminderEnabled: false,
         },
         {
-          uid: 'STU004',
-          name: '최학생',
-          lineUserId: 'U3456789012cdef',
+          uid: "STU004",
+          name: "최학생",
+          lineUserId: "U3456789012cdef",
           isLinked: true,
-          lastActivity: '2024-01-13 10:15',
-          notificationFrequency: 'monthly',
-          reminderEnabled: true
+          lastActivity: "2024-01-13 10:15",
+          notificationFrequency: "monthly",
+          reminderEnabled: true,
         },
         {
-          uid: 'STU005',
-          name: '정학생',
+          uid: "STU005",
+          name: "정학생",
           isLinked: false,
-          notificationFrequency: 'weekly',
-          reminderEnabled: false
-        }
+          notificationFrequency: "weekly",
+          reminderEnabled: false,
+        },
       ];
 
       const mockTemplates: NotificationTemplate[] = [
         {
-          id: '1',
-          name: '수업 리마인드',
-          content: '내일 오후 2시 수업이 있습니다. 준비물을 챙겨주세요!',
-          type: 'reminder'
+          id: "1",
+          name: "수업 리마인드",
+          content: "내일 오후 2시 수업이 있습니다. 준비물을 챙겨주세요!",
+          type: "reminder",
         },
         {
-          id: '2',
-          name: '리뷰 요청',
-          content: '수업이 끝났습니다. 수업 후기를 작성해주세요!',
-          type: 'review'
+          id: "2",
+          name: "리뷰 요청",
+          content: "수업이 끝났습니다. 수업 후기를 작성해주세요!",
+          type: "review",
         },
         {
-          id: '3',
-          name: '숙제 알림',
-          content: '숙제 제출 기한이 다가왔습니다. 확인해주세요!',
-          type: 'homework'
+          id: "3",
+          name: "숙제 알림",
+          content: "숙제 제출 기한이 다가왔습니다. 확인해주세요!",
+          type: "homework",
         },
         {
-          id: '4',
-          name: '월말 예약 알림',
-          content: '이번 달 예약이 부족합니다. 추가 예약을 고려해보세요!',
-          type: 'general'
-        }
+          id: "4",
+          name: "월말 예약 알림",
+          content: "이번 달 예약이 부족합니다. 추가 예약을 고려해보세요!",
+          type: "general",
+        },
       ];
 
       setUsers(mockUsers);
@@ -122,17 +133,18 @@ export default function LINEManagementPage() {
     let filtered = users;
 
     // Filter by status
-    if (filterStatus === 'linked') {
-      filtered = filtered.filter(user => user.isLinked);
-    } else if (filterStatus === 'unlinked') {
-      filtered = filtered.filter(user => !user.isLinked);
+    if (filterStatus === "linked") {
+      filtered = filtered.filter((user) => user.isLinked);
+    } else if (filterStatus === "unlinked") {
+      filtered = filtered.filter((user) => !user.isLinked);
     }
 
     // Filter by search term
     if (searchTerm) {
-      filtered = filtered.filter(user => 
-        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.uid.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        (user) =>
+          user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.uid.toLowerCase().includes(searchTerm.toLowerCase()),
       );
     }
 
@@ -140,10 +152,8 @@ export default function LINEManagementPage() {
   }, [users, searchTerm, filterStatus]);
 
   const handleUserSelect = (uid: string) => {
-    setSelectedUsers(prev => 
-      prev.includes(uid) 
-        ? prev.filter(id => id !== uid)
-        : [...prev, uid]
+    setSelectedUsers((prev) =>
+      prev.includes(uid) ? prev.filter((id) => id !== uid) : [...prev, uid],
     );
   };
 
@@ -151,38 +161,45 @@ export default function LINEManagementPage() {
     if (selectedUsers.length === filteredUsers.length) {
       setSelectedUsers([]);
     } else {
-      setSelectedUsers(filteredUsers.map(user => user.uid));
+      setSelectedUsers(filteredUsers.map((user) => user.uid));
     }
   };
 
   const handleSendNotification = () => {
     if (selectedUsers.length === 0) return;
 
-    const message = selectedTemplate 
-      ? notificationTemplates.find(t => t.id === selectedTemplate)?.content || customMessage
+    const message = selectedTemplate
+      ? notificationTemplates.find((t) => t.id === selectedTemplate)?.content ||
+        customMessage
       : customMessage;
 
     // Mock sending notification
-    console.log('Sending notification to:', selectedUsers, 'Message:', message);
-    
+    console.log("Sending notification to:", selectedUsers, "Message:", message);
+
     // Reset form
     setShowSendModal(false);
-    setSelectedTemplate('');
-    setCustomMessage('');
+    setSelectedTemplate("");
+    setCustomMessage("");
     setSelectedUsers([]);
   };
 
   const handleLinkUser = (uid: string) => {
     // Mock linking user
-    setUsers(prev => prev.map(user => 
-      user.uid === uid 
-        ? { ...user, isLinked: true, lineUserId: 'U' + Math.random().toString(36).substr(2, 9) }
-        : user
-    ));
+    setUsers((prev) =>
+      prev.map((user) =>
+        user.uid === uid
+          ? {
+              ...user,
+              isLinked: true,
+              lineUserId: "U" + Math.random().toString(36).substr(2, 9),
+            }
+          : user,
+      ),
+    );
   };
 
-  const getLinkedCount = () => users.filter(user => user.isLinked).length;
-  const getUnlinkedCount = () => users.filter(user => !user.isLinked).length;
+  const getLinkedCount = () => users.filter((user) => user.isLinked).length;
+  const getUnlinkedCount = () => users.filter((user) => !user.isLinked).length;
 
   if (isLoading) {
     return (
@@ -200,8 +217,12 @@ export default function LINEManagementPage() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">LINE 연동 관리</h1>
-          <p className="text-gray-600">LINE 연동 상태를 관리하고 알림을 발송할 수 있습니다.</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            LINE 연동 관리
+          </h1>
+          <p className="text-gray-600">
+            LINE 연동 상태를 관리하고 알림을 발송할 수 있습니다.
+          </p>
         </div>
 
         {/* Statistics Cards */}
@@ -213,11 +234,13 @@ export default function LINEManagementPage() {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">전체 사용자</p>
-                <p className="text-2xl font-bold text-gray-900">{users.length}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {users.length}
+                </p>
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center">
               <div className="p-2 bg-green-100 rounded-lg">
@@ -225,11 +248,13 @@ export default function LINEManagementPage() {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">연동 완료</p>
-                <p className="text-2xl font-bold text-gray-900">{getLinkedCount()}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {getLinkedCount()}
+                </p>
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center">
               <div className="p-2 bg-yellow-100 rounded-lg">
@@ -237,7 +262,9 @@ export default function LINEManagementPage() {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">미연동</p>
-                <p className="text-2xl font-bold text-gray-900">{getUnlinkedCount()}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {getUnlinkedCount()}
+                </p>
               </div>
             </div>
           </div>
@@ -258,10 +285,14 @@ export default function LINEManagementPage() {
                     className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
-                
+
                 <select
                   value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value as 'all' | 'linked' | 'unlinked')}
+                  onChange={(e) =>
+                    setFilterStatus(
+                      e.target.value as "all" | "linked" | "unlinked",
+                    )
+                  }
                   className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="all">전체</option>
@@ -269,7 +300,7 @@ export default function LINEManagementPage() {
                   <option value="unlinked">미연동</option>
                 </select>
               </div>
-              
+
               <div className="flex gap-2">
                 <button
                   onClick={() => setShowSendModal(true)}
@@ -279,7 +310,7 @@ export default function LINEManagementPage() {
                   <Send className="w-4 h-4 mr-2" />
                   알림 발송 ({selectedUsers.length})
                 </button>
-                
+
                 <button
                   onClick={() => window.location.reload()}
                   className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
@@ -299,7 +330,10 @@ export default function LINEManagementPage() {
                   <th className="px-6 py-3 text-left">
                     <input
                       type="checkbox"
-                      checked={selectedUsers.length === filteredUsers.length && filteredUsers.length > 0}
+                      checked={
+                        selectedUsers.length === filteredUsers.length &&
+                        filteredUsers.length > 0
+                      }
                       onChange={handleSelectAll}
                       className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
@@ -334,7 +368,9 @@ export default function LINEManagementPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
-                        <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {user.name}
+                        </div>
                         <div className="text-sm text-gray-500">{user.uid}</div>
                       </div>
                     </td>
@@ -352,21 +388,23 @@ export default function LINEManagementPage() {
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {user.lastActivity || '-'}
+                      {user.lastActivity || "-"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center space-x-2">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          user.reminderEnabled 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-gray-100 text-gray-800'
-                        }`}>
-                          {user.reminderEnabled ? '활성화' : '비활성화'}
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            user.reminderEnabled
+                              ? "bg-green-100 text-green-800"
+                              : "bg-gray-100 text-gray-800"
+                          }`}
+                        >
+                          {user.reminderEnabled ? "활성화" : "비활성화"}
                         </span>
                         <span className="text-sm text-gray-500">
-                          {user.notificationFrequency === 'daily' && '매일'}
-                          {user.notificationFrequency === 'weekly' && '주 1회'}
-                          {user.notificationFrequency === 'monthly' && '월 1회'}
+                          {user.notificationFrequency === "daily" && "매일"}
+                          {user.notificationFrequency === "weekly" && "주 1회"}
+                          {user.notificationFrequency === "monthly" && "월 1회"}
                         </span>
                       </div>
                     </td>
@@ -393,8 +431,10 @@ export default function LINEManagementPage() {
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
           <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">알림 발송</h3>
-              
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                알림 발송
+              </h3>
+
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   템플릿 선택
@@ -405,14 +445,14 @@ export default function LINEManagementPage() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="">직접 입력</option>
-                  {notificationTemplates.map(template => (
+                  {notificationTemplates.map((template) => (
                     <option key={template.id} value={template.id}>
                       {template.name}
                     </option>
                   ))}
                 </select>
               </div>
-              
+
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   메시지 내용
@@ -425,13 +465,13 @@ export default function LINEManagementPage() {
                   placeholder="발송할 메시지를 입력하세요..."
                 />
               </div>
-              
+
               <div className="mb-4">
                 <p className="text-sm text-gray-600">
                   선택된 사용자: {selectedUsers.length}명
                 </p>
               </div>
-              
+
               <div className="flex justify-end space-x-3">
                 <button
                   onClick={() => setShowSendModal(false)}
@@ -452,4 +492,4 @@ export default function LINEManagementPage() {
       )}
     </div>
   );
-} 
+}

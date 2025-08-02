@@ -1,28 +1,28 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { 
-  QrCode, 
-  Copy, 
+import { useState, useEffect } from "react";
+import {
+  QrCode,
+  Copy,
   Search,
   Plus,
   CheckCircle,
   XCircle,
   ArrowLeft,
-  RotateCcw
-} from 'lucide-react';
-import Link from 'next/link';
-import { useAuth } from '@/hooks/useAuth';
-import { StudentIdentifier } from '@/types/student';
-import { generateUniqueIdentifier } from '@/utils/identifierUtils';
-import StudentQRCode from '@/components/student/StudentQRCode';
+  RotateCcw,
+} from "lucide-react";
+import Link from "next/link";
+import { useAuth } from "@/hooks/useAuth";
+import { StudentIdentifier } from "@/types/student";
+import { generateUniqueIdentifier } from "@/utils/identifierUtils";
+import StudentQRCode from "@/components/student/StudentQRCode";
 
 interface Student {
   id: string;
   name: string;
   email: string;
   department: string;
-  status: 'active' | 'inactive' | 'graduated';
+  status: "active" | "inactive" | "graduated";
   registrationDate: Date;
   identifier?: StudentIdentifier;
 }
@@ -32,75 +32,77 @@ export default function StudentIdentifiersPage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive' | 'graduated'>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState<
+    "all" | "active" | "inactive" | "graduated"
+  >("all");
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [showQRModal, setShowQRModal] = useState(false);
   const [showReissueModal, setShowReissueModal] = useState(false);
-  const [reissueReason, setReissueReason] = useState('');
+  const [reissueReason, setReissueReason] = useState("");
   const [copied, setCopied] = useState<string | null>(null);
 
   // 모의 데이터 로딩
   useEffect(() => {
     const loadStudents = async () => {
       setLoading(true);
-      
+
       // 모의 학생 데이터
       const mockStudents: Student[] = [
         {
-          id: 'student-001',
-          name: '김철수',
-          email: 'kim@example.com',
-          department: '영어학과',
-          status: 'active',
-          registrationDate: new Date('2024-01-01'),
+          id: "student-001",
+          name: "김철수",
+          email: "kim@example.com",
+          department: "영어학과",
+          status: "active",
+          registrationDate: new Date("2024-01-01"),
           identifier: {
-            id: 'id-001',
-            studentId: 'student-001',
+            id: "id-001",
+            studentId: "student-001",
             identifierCode: generateUniqueIdentifier(),
-            identifierType: 'qr',
-            createdAt: new Date('2024-01-01'),
-            updatedAt: new Date('2024-01-01'),
+            identifierType: "qr",
+            createdAt: new Date("2024-01-01"),
+            updatedAt: new Date("2024-01-01"),
             isActive: true,
-            usageCount: 15
-          }
+            usageCount: 15,
+          },
         },
         {
-          id: 'student-002',
-          name: '이영희',
-          email: 'lee@example.com',
-          department: '일본어학과',
-          status: 'active',
-          registrationDate: new Date('2024-01-05'),
+          id: "student-002",
+          name: "이영희",
+          email: "lee@example.com",
+          department: "일본어학과",
+          status: "active",
+          registrationDate: new Date("2024-01-05"),
           identifier: {
-            id: 'id-002',
-            studentId: 'student-002',
+            id: "id-002",
+            studentId: "student-002",
             identifierCode: generateUniqueIdentifier(),
-            identifierType: 'qr',
-            createdAt: new Date('2024-01-05'),
-            updatedAt: new Date('2024-01-05'),
+            identifierType: "qr",
+            createdAt: new Date("2024-01-05"),
+            updatedAt: new Date("2024-01-05"),
             isActive: true,
-            usageCount: 8
-          }
+            usageCount: 8,
+          },
         },
         {
-          id: 'student-003',
-          name: '박민수',
-          email: 'park@example.com',
-          department: '중국어학과',
-          status: 'inactive',
-          registrationDate: new Date('2023-12-01'),
+          id: "student-003",
+          name: "박민수",
+          email: "park@example.com",
+          department: "중국어학과",
+          status: "inactive",
+          registrationDate: new Date("2023-12-01"),
           identifier: {
-            id: 'id-003',
-            studentId: 'student-003',
+            id: "id-003",
+            studentId: "student-003",
             identifierCode: generateUniqueIdentifier(),
-            identifierType: 'qr',
-            createdAt: new Date('2023-12-01'),
-            updatedAt: new Date('2023-12-01'),
+            identifierType: "qr",
+            createdAt: new Date("2023-12-01"),
+            updatedAt: new Date("2023-12-01"),
             isActive: false,
-            usageCount: 25
-          }
-        }
+            usageCount: 25,
+          },
+        },
       ];
 
       setStudents(mockStudents);
@@ -116,17 +118,18 @@ export default function StudentIdentifiersPage() {
     let filtered = students;
 
     // 상태 필터링
-    if (filterStatus !== 'all') {
-      filtered = filtered.filter(student => student.status === filterStatus);
+    if (filterStatus !== "all") {
+      filtered = filtered.filter((student) => student.status === filterStatus);
     }
 
     // 검색어 필터링
     if (searchTerm) {
-      filtered = filtered.filter(student => 
-        student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        student.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        student.identifier?.identifierCode.includes(searchTerm)
+      filtered = filtered.filter(
+        (student) =>
+          student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          student.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          student.identifier?.identifierCode.includes(searchTerm),
       );
     }
 
@@ -139,18 +142,20 @@ export default function StudentIdentifiersPage() {
       id: `id-${Date.now()}`,
       studentId,
       identifierCode: generateUniqueIdentifier(),
-      identifierType: 'qr',
+      identifierType: "qr",
       createdAt: new Date(),
       updatedAt: new Date(),
       isActive: true,
-      usageCount: 0
+      usageCount: 0,
     };
 
-    setStudents(prev => prev.map(student => 
-      student.id === studentId 
-        ? { ...student, identifier: newIdentifier }
-        : student
-    ));
+    setStudents((prev) =>
+      prev.map((student) =>
+        student.id === studentId
+          ? { ...student, identifier: newIdentifier }
+          : student,
+      ),
+    );
   };
 
   // 식별번호 재발급
@@ -159,37 +164,41 @@ export default function StudentIdentifiersPage() {
       id: `id-${Date.now()}`,
       studentId,
       identifierCode: generateUniqueIdentifier(),
-      identifierType: 'qr',
+      identifierType: "qr",
       createdAt: new Date(),
       updatedAt: new Date(),
       isActive: true,
-      usageCount: 0
+      usageCount: 0,
     };
 
-    setStudents(prev => prev.map(student => 
-      student.id === studentId 
-        ? { ...student, identifier: newIdentifier }
-        : student
-    ));
+    setStudents((prev) =>
+      prev.map((student) =>
+        student.id === studentId
+          ? { ...student, identifier: newIdentifier }
+          : student,
+      ),
+    );
 
     setShowReissueModal(false);
-    setReissueReason('');
+    setReissueReason("");
   };
 
   // 식별번호 비활성화
   const deactivateIdentifier = async (studentId: string) => {
-    setStudents(prev => prev.map(student => 
-      student.id === studentId && student.identifier
-        ? { 
-            ...student, 
-            identifier: { 
-              ...student.identifier, 
-              isActive: false,
-              updatedAt: new Date()
+    setStudents((prev) =>
+      prev.map((student) =>
+        student.id === studentId && student.identifier
+          ? {
+              ...student,
+              identifier: {
+                ...student.identifier,
+                isActive: false,
+                updatedAt: new Date(),
+              },
             }
-          }
-        : student
-    ));
+          : student,
+      ),
+    );
   };
 
   // 식별번호 복사
@@ -199,27 +208,35 @@ export default function StudentIdentifiersPage() {
       setCopied(identifierCode);
       setTimeout(() => setCopied(null), 2000);
     } catch (error) {
-      console.error('Failed to copy identifier:', error);
+      console.error("Failed to copy identifier:", error);
     }
   };
 
   // 상태별 색상
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'text-green-600 bg-green-100';
-      case 'inactive': return 'text-yellow-600 bg-yellow-100';
-      case 'graduated': return 'text-gray-600 bg-gray-100';
-      default: return 'text-gray-600 bg-gray-100';
+      case "active":
+        return "text-green-600 bg-green-100";
+      case "inactive":
+        return "text-yellow-600 bg-yellow-100";
+      case "graduated":
+        return "text-gray-600 bg-gray-100";
+      default:
+        return "text-gray-600 bg-gray-100";
     }
   };
 
   // 상태별 텍스트
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'active': return '활성';
-      case 'inactive': return '비활성';
-      case 'graduated': return '졸업';
-      default: return '알 수 없음';
+      case "active":
+        return "활성";
+      case "inactive":
+        return "비활성";
+      case "graduated":
+        return "졸업";
+      default:
+        return "알 수 없음";
     }
   };
 
@@ -237,7 +254,9 @@ export default function StudentIdentifiersPage() {
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">학생 고유 식별번호 관리</h1>
+            <h1 className="text-3xl font-bold text-gray-900">
+              학생 고유 식별번호 관리
+            </h1>
             <p className="text-gray-600 mt-2">
               학생들의 QR코드 식별번호를 관리하고 발급할 수 있습니다.
             </p>
@@ -270,7 +289,11 @@ export default function StudentIdentifiersPage() {
           <div className="flex gap-2">
             <select
               value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value as 'all' | 'active' | 'inactive' | 'graduated')}
+              onChange={(e) =>
+                setFilterStatus(
+                  e.target.value as "all" | "active" | "inactive" | "graduated",
+                )
+              }
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">전체 상태</option>
@@ -313,9 +336,15 @@ export default function StudentIdentifiersPage() {
                 <tr key={student.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
-                      <div className="text-sm font-medium text-gray-900">{student.name}</div>
-                      <div className="text-sm text-gray-500">{student.email}</div>
-                      <div className="text-sm text-gray-500">{student.department}</div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {student.name}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {student.email}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {student.department}
+                      </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -325,7 +354,9 @@ export default function StudentIdentifiersPage() {
                           {student.identifier.identifierCode}
                         </span>
                         <button
-                          onClick={() => copyIdentifier(student.identifier!.identifierCode)}
+                          onClick={() =>
+                            copyIdentifier(student.identifier!.identifierCode)
+                          }
                           className="p-1 text-gray-400 hover:text-gray-600"
                           title="식별번호 복사"
                         >
@@ -341,16 +372,20 @@ export default function StudentIdentifiersPage() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-2">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(student.status)}`}>
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(student.status)}`}
+                      >
                         {getStatusText(student.status)}
                       </span>
                       {student.identifier && (
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          student.identifier.isActive 
-                            ? 'text-green-600 bg-green-100' 
-                            : 'text-red-600 bg-red-100'
-                        }`}>
-                          {student.identifier.isActive ? '활성' : '비활성'}
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            student.identifier.isActive
+                              ? "text-green-600 bg-green-100"
+                              : "text-red-600 bg-red-100"
+                          }`}
+                        >
+                          {student.identifier.isActive ? "활성" : "비활성"}
                         </span>
                       )}
                     </div>
@@ -359,10 +394,11 @@ export default function StudentIdentifiersPage() {
                     {student.identifier ? student.identifier.usageCount : 0}회
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {student.identifier 
-                      ? new Date(student.identifier.createdAt).toLocaleDateString()
-                      : '-'
-                    }
+                    {student.identifier
+                      ? new Date(
+                          student.identifier.createdAt,
+                        ).toLocaleDateString()
+                      : "-"}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex items-center gap-2">
@@ -451,14 +487,14 @@ export default function StudentIdentifiersPage() {
                   studentName: selectedStudent.name,
                   studentEmail: selectedStudent.email,
                   department: selectedStudent.department,
-                  currentLevel: '중급',
+                  currentLevel: "중급",
                   points: 1000,
                   totalClasses: 10,
                   completedClasses: 8,
                   studyStreak: 5,
                   averageScore: 85,
                   createdAt: selectedStudent.identifier.createdAt,
-                  version: '1.0'
+                  version: "1.0",
                 }}
                 size={200}
                 showActions={true}
@@ -490,7 +526,8 @@ export default function StudentIdentifiersPage() {
             </div>
             <div className="mb-4">
               <p className="text-sm text-gray-600 mb-2">
-                <strong>{selectedStudent.name}</strong> 학생의 식별번호를 재발급합니다.
+                <strong>{selectedStudent.name}</strong> 학생의 식별번호를
+                재발급합니다.
               </p>
               <p className="text-xs text-gray-500 mb-4">
                 기존 식별번호는 비활성화되고 새로운 식별번호가 발급됩니다.
@@ -525,4 +562,4 @@ export default function StudentIdentifiersPage() {
       )}
     </div>
   );
-} 
+}

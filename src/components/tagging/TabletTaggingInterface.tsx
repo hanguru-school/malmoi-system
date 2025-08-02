@@ -1,52 +1,68 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { 
-  CheckCircle, 
-  XCircle, 
-  AlertCircle, 
-  User, 
+import { useState } from "react";
+import {
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  User,
   Clock,
   Smartphone,
   Tablet,
-  Monitor
-} from 'lucide-react';
+  Monitor,
+} from "lucide-react";
 
 interface TaggingResult {
   success: boolean;
   message: string;
-  action: 'attendance' | 'consultation' | 'purchase' | 'other' | 'checkout' | 'already_tagged';
+  action:
+    | "attendance"
+    | "consultation"
+    | "purchase"
+    | "other"
+    | "checkout"
+    | "already_tagged";
   data?: any;
   showPopup?: boolean;
-  popupType?: 'attendance_confirm' | 'no_reservation' | 'checkout_confirm' | 'multiple_tag' | 'registration';
+  popupType?:
+    | "attendance_confirm"
+    | "no_reservation"
+    | "checkout_confirm"
+    | "multiple_tag"
+    | "registration";
 }
 
 interface TabletTaggingInterfaceProps {
-  deviceType: 'ipad' | 'mac';
+  deviceType: "ipad" | "mac";
   location: string;
 }
 
-export default function TabletTaggingInterface({ deviceType, location }: TabletTaggingInterfaceProps) {
+export default function TabletTaggingInterface({
+  deviceType,
+  location,
+}: TabletTaggingInterfaceProps) {
   const [isWaiting, setIsWaiting] = useState(false);
-  const [taggingResult, setTaggingResult] = useState<TaggingResult | null>(null);
+  const [taggingResult, setTaggingResult] = useState<TaggingResult | null>(
+    null,
+  );
   const [showPopup, setShowPopup] = useState(false);
-  const [popupType, setPopupType] = useState<string>('');
+  const [popupType, setPopupType] = useState<string>("");
   const [popupData, setPopupData] = useState<any>(null);
 
   // NFC/FeliCa 읽기 시뮬레이션
   const simulateTagging = async (uid: string) => {
     setIsWaiting(true);
-    
+
     try {
-      const response = await fetch('/api/tagging/process', {
-        method: 'POST',
+      const response = await fetch("/api/tagging/process", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           uid,
           deviceType,
-          location
+          location,
         }),
       });
 
@@ -54,17 +70,16 @@ export default function TabletTaggingInterface({ deviceType, location }: TabletT
       setTaggingResult(result);
 
       if (result.showPopup) {
-        setPopupType(result.popupType || '');
+        setPopupType(result.popupType || "");
         setPopupData(result.data);
         setShowPopup(true);
       }
-
     } catch (error) {
-      console.error('Tagging error:', error);
+      console.error("Tagging error:", error);
       setTaggingResult({
         success: false,
-        message: '태깅 처리 중 오류가 발생했습니다.',
-        action: 'other'
+        message: "태깅 처리 중 오류가 발생했습니다.",
+        action: "other",
       });
     } finally {
       setIsWaiting(false);
@@ -75,15 +90,15 @@ export default function TabletTaggingInterface({ deviceType, location }: TabletT
     if (!popupData?.reservation?.id) return;
 
     try {
-      const response = await fetch('/api/tagging/confirm-attendance', {
-        method: 'POST',
+      const response = await fetch("/api/tagging/confirm-attendance", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           uid: popupData.uid,
           reservationId: popupData.reservation.id,
-          points: 10
+          points: 10,
         }),
       });
 
@@ -91,20 +106,20 @@ export default function TabletTaggingInterface({ deviceType, location }: TabletT
       setTaggingResult(result);
       setShowPopup(false);
     } catch (error) {
-      console.error('Attendance confirmation error:', error);
+      console.error("Attendance confirmation error:", error);
     }
   };
 
   const handleNoReservationAttendance = async () => {
     try {
-      const response = await fetch('/api/tagging/confirm-attendance', {
-        method: 'POST',
+      const response = await fetch("/api/tagging/confirm-attendance", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           uid: popupData?.uid,
-          points: 5
+          points: 5,
         }),
       });
 
@@ -112,7 +127,7 @@ export default function TabletTaggingInterface({ deviceType, location }: TabletT
       setTaggingResult(result);
       setShowPopup(false);
     } catch (error) {
-      console.error('Attendance confirmation error:', error);
+      console.error("Attendance confirmation error:", error);
     }
   };
 
@@ -121,22 +136,22 @@ export default function TabletTaggingInterface({ deviceType, location }: TabletT
     setShowPopup(false);
     setTaggingResult({
       success: true,
-      message: '퇴근이 확인되었습니다.',
-      action: 'checkout'
+      message: "퇴근이 확인되었습니다.",
+      action: "checkout",
     });
   };
 
   const handleRegistration = () => {
     // UID 등록 페이지로 이동
-    window.open(`/tagging/register?uid=${popupData?.uid}`, '_blank');
+    window.open(`/tagging/register?uid=${popupData?.uid}`, "_blank");
     setShowPopup(false);
   };
 
   const getDeviceIcon = () => {
     switch (deviceType) {
-      case 'ipad':
+      case "ipad":
         return <Tablet className="w-8 h-8" />;
-      case 'mac':
+      case "mac":
         return <Monitor className="w-8 h-8" />;
       default:
         return <Smartphone className="w-8 h-8" />;
@@ -155,7 +170,7 @@ export default function TabletTaggingInterface({ deviceType, location }: TabletT
             </h1>
           </div>
           <p className="text-gray-600">
-            {deviceType === 'ipad' ? 'iPad' : 'Mac'} - {location}
+            {deviceType === "ipad" ? "iPad" : "Mac"} - {location}
           </p>
         </div>
 
@@ -185,31 +200,33 @@ export default function TabletTaggingInterface({ deviceType, location }: TabletT
 
         {/* 테스트 버튼 */}
         <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">테스트 태깅</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            테스트 태깅
+          </h3>
           <div className="grid grid-cols-2 gap-4">
             <button
-              onClick={() => simulateTagging('student_001')}
+              onClick={() => simulateTagging("student_001")}
               className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <User className="w-6 h-6 text-blue-600 mb-2" />
               <div className="text-sm font-medium">학생 태깅</div>
             </button>
             <button
-              onClick={() => simulateTagging('staff_001')}
+              onClick={() => simulateTagging("staff_001")}
               className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <Clock className="w-6 h-6 text-green-600 mb-2" />
               <div className="text-sm font-medium">직원 태깅</div>
             </button>
             <button
-              onClick={() => simulateTagging('new_uid_001')}
+              onClick={() => simulateTagging("new_uid_001")}
               className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <AlertCircle className="w-6 h-6 text-orange-600 mb-2" />
               <div className="text-sm font-medium">신규 UID</div>
             </button>
             <button
-              onClick={() => simulateTagging('already_tagged_001')}
+              onClick={() => simulateTagging("already_tagged_001")}
               className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <XCircle className="w-6 h-6 text-red-600 mb-2" />
@@ -220,9 +237,13 @@ export default function TabletTaggingInterface({ deviceType, location }: TabletT
 
         {/* 결과 표시 */}
         {taggingResult && (
-          <div className={`bg-white rounded-2xl shadow-xl p-8 ${
-            taggingResult.success ? 'border-l-4 border-green-500' : 'border-l-4 border-red-500'
-          }`}>
+          <div
+            className={`bg-white rounded-2xl shadow-xl p-8 ${
+              taggingResult.success
+                ? "border-l-4 border-green-500"
+                : "border-l-4 border-red-500"
+            }`}
+          >
             <div className="flex items-center gap-3 mb-4">
               {taggingResult.success ? (
                 <CheckCircle className="w-6 h-6 text-green-600" />
@@ -230,7 +251,7 @@ export default function TabletTaggingInterface({ deviceType, location }: TabletT
                 <XCircle className="w-6 h-6 text-red-600" />
               )}
               <h3 className="text-lg font-semibold text-gray-900">
-                {taggingResult.success ? '성공' : '오류'}
+                {taggingResult.success ? "성공" : "오류"}
               </h3>
             </div>
             <p className="text-gray-700">{taggingResult.message}</p>
@@ -250,21 +271,23 @@ export default function TabletTaggingInterface({ deviceType, location }: TabletT
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl p-8 max-w-md mx-4">
             <h3 className="text-xl font-semibold text-gray-900 mb-4">
-              {popupType === 'attendance_confirm' && '출석 확인'}
-              {popupType === 'no_reservation' && '예약 없음'}
-              {popupType === 'checkout_confirm' && '퇴근 확인'}
-              {popupType === 'registration' && 'UID 등록'}
+              {popupType === "attendance_confirm" && "출석 확인"}
+              {popupType === "no_reservation" && "예약 없음"}
+              {popupType === "checkout_confirm" && "퇴근 확인"}
+              {popupType === "registration" && "UID 등록"}
             </h3>
-            
+
             <p className="text-gray-700 mb-6">
-              {popupType === 'attendance_confirm' && '出席を確認 / その他'}
-              {popupType === 'no_reservation' && '本日の予約がありません。出席を記録しますか？'}
-              {popupType === 'checkout_confirm' && '퇴근하시겠습니까?'}
-              {popupType === 'registration' && '새로운 UID가 등록되었습니다. 사용자 정보를 입력해주세요.'}
+              {popupType === "attendance_confirm" && "出席を確認 / その他"}
+              {popupType === "no_reservation" &&
+                "本日の予約がありません。出席を記録しますか？"}
+              {popupType === "checkout_confirm" && "퇴근하시겠습니까?"}
+              {popupType === "registration" &&
+                "새로운 UID가 등록되었습니다. 사용자 정보를 입력해주세요."}
             </p>
 
             <div className="flex gap-3">
-              {popupType === 'attendance_confirm' && (
+              {popupType === "attendance_confirm" && (
                 <>
                   <button
                     onClick={handleAttendanceConfirm}
@@ -280,8 +303,8 @@ export default function TabletTaggingInterface({ deviceType, location }: TabletT
                   </button>
                 </>
               )}
-              
-              {popupType === 'no_reservation' && (
+
+              {popupType === "no_reservation" && (
                 <>
                   <button
                     onClick={handleNoReservationAttendance}
@@ -297,8 +320,8 @@ export default function TabletTaggingInterface({ deviceType, location }: TabletT
                   </button>
                 </>
               )}
-              
-              {popupType === 'checkout_confirm' && (
+
+              {popupType === "checkout_confirm" && (
                 <>
                   <button
                     onClick={handleCheckoutConfirm}
@@ -314,8 +337,8 @@ export default function TabletTaggingInterface({ deviceType, location }: TabletT
                   </button>
                 </>
               )}
-              
-              {popupType === 'registration' && (
+
+              {popupType === "registration" && (
                 <>
                   <button
                     onClick={handleRegistration}
@@ -337,4 +360,4 @@ export default function TabletTaggingInterface({ deviceType, location }: TabletT
       )}
     </div>
   );
-} 
+}

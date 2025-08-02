@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { 
-  ArrowLeft, 
-  Clock, 
-  Calendar, 
-  Play, 
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import {
+  ArrowLeft,
+  Clock,
+  Calendar,
+  Play,
   TrendingUp,
-  AlertCircle
-} from 'lucide-react';
+  AlertCircle,
+} from "lucide-react";
 
 interface TimeInfo {
   totalHours: number;
@@ -19,7 +19,7 @@ interface TimeInfo {
   nextExpiry: string;
   timeHistory: Array<{
     id: string;
-    type: 'used' | 'added';
+    type: "used" | "added";
     hours: number;
     description: string;
     date: string;
@@ -38,7 +38,7 @@ interface TimeInfo {
     hours: number;
     price: number;
     expiryDate: string;
-    status: 'active' | 'expired' | 'upcoming';
+    status: "active" | "expired" | "upcoming";
   }>;
 }
 
@@ -54,66 +54,96 @@ export default function StudentTimePage() {
         remainingHours: 8,
         usedHours: 12,
         monthlyHours: 4,
-        nextExpiry: '2024-02-15',
+        nextExpiry: "2024-02-15",
         timeHistory: [
-          { id: '1', type: 'used', hours: -1, description: '영어 회화 수업', date: '2024-01-15' },
-          { id: '2', type: 'used', hours: -1, description: '문법 수업', date: '2024-01-12' },
-          { id: '3', type: 'added', hours: 10, description: '패키지 구매', date: '2024-01-10' },
-          { id: '4', type: 'used', hours: -1, description: '회화 수업', date: '2024-01-08' },
-          { id: '5', type: 'used', hours: -1, description: '듣기 수업', date: '2024-01-05' }
+          {
+            id: "1",
+            type: "used",
+            hours: -1,
+            description: "영어 회화 수업",
+            date: "2024-01-15",
+          },
+          {
+            id: "2",
+            type: "used",
+            hours: -1,
+            description: "문법 수업",
+            date: "2024-01-12",
+          },
+          {
+            id: "3",
+            type: "added",
+            hours: 10,
+            description: "패키지 구매",
+            date: "2024-01-10",
+          },
+          {
+            id: "4",
+            type: "used",
+            hours: -1,
+            description: "회화 수업",
+            date: "2024-01-08",
+          },
+          {
+            id: "5",
+            type: "used",
+            hours: -1,
+            description: "듣기 수업",
+            date: "2024-01-05",
+          },
         ],
         upcomingClasses: [
           {
-            id: '1',
-            date: '2024-01-18',
-            time: '14:00',
+            id: "1",
+            date: "2024-01-18",
+            time: "14:00",
             duration: 60,
-            teacher: '김선생님',
-            subject: '영어 회화'
+            teacher: "김선생님",
+            subject: "영어 회화",
           },
           {
-            id: '2',
-            date: '2024-01-20',
-            time: '16:00',
+            id: "2",
+            date: "2024-01-20",
+            time: "16:00",
             duration: 60,
-            teacher: '이선생님',
-            subject: '문법'
+            teacher: "이선생님",
+            subject: "문법",
           },
           {
-            id: '3',
-            date: '2024-01-22',
-            time: '15:00',
+            id: "3",
+            date: "2024-01-22",
+            time: "15:00",
             duration: 60,
-            teacher: '박선생님',
-            subject: '듣기'
-          }
+            teacher: "박선생님",
+            subject: "듣기",
+          },
         ],
         packages: [
           {
-            id: '1',
-            name: '기본 패키지',
+            id: "1",
+            name: "기본 패키지",
             hours: 10,
             price: 200000,
-            expiryDate: '2024-02-15',
-            status: 'active'
+            expiryDate: "2024-02-15",
+            status: "active",
           },
           {
-            id: '2',
-            name: '프리미엄 패키지',
+            id: "2",
+            name: "프리미엄 패키지",
             hours: 20,
             price: 350000,
-            expiryDate: '2024-03-15',
-            status: 'upcoming'
+            expiryDate: "2024-03-15",
+            status: "upcoming",
           },
           {
-            id: '3',
-            name: '스탠다드 패키지',
+            id: "3",
+            name: "스탠다드 패키지",
             hours: 5,
             price: 100000,
-            expiryDate: '2024-01-10',
-            status: 'expired'
-          }
-        ]
+            expiryDate: "2024-01-10",
+            status: "expired",
+          },
+        ],
       });
       setLoading(false);
     }, 1000);
@@ -154,18 +184,24 @@ export default function StudentTimePage() {
           <Clock className="w-8 h-8 text-green-600" />
           <h1 className="text-2xl font-bold text-gray-900">수업 시간 현황</h1>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="text-center">
-            <div className="text-3xl font-bold text-green-600 mb-2">{timeInfo.remainingHours}시간</div>
+            <div className="text-3xl font-bold text-green-600 mb-2">
+              {timeInfo.remainingHours}시간
+            </div>
             <div className="text-sm text-gray-600">남은 시간</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-blue-600 mb-2">{timeInfo.usedHours}시간</div>
+            <div className="text-3xl font-bold text-blue-600 mb-2">
+              {timeInfo.usedHours}시간
+            </div>
             <div className="text-sm text-gray-600">사용 완료</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-orange-600 mb-2">{timeInfo.totalHours}시간</div>
+            <div className="text-3xl font-bold text-orange-600 mb-2">
+              {timeInfo.totalHours}시간
+            </div>
             <div className="text-sm text-gray-600">총 시간</div>
           </div>
         </div>
@@ -174,12 +210,16 @@ export default function StudentTimePage() {
         <div className="mt-6">
           <div className="flex justify-between text-sm text-gray-600 mb-2">
             <span>시간 사용률</span>
-            <span>{Math.round((timeInfo.usedHours / timeInfo.totalHours) * 100)}%</span>
+            <span>
+              {Math.round((timeInfo.usedHours / timeInfo.totalHours) * 100)}%
+            </span>
           </div>
           <div className="bg-gray-200 rounded-full h-3">
-            <div 
+            <div
               className="bg-green-600 h-3 rounded-full transition-all duration-300"
-              style={{ width: `${(timeInfo.usedHours / timeInfo.totalHours) * 100}%` }}
+              style={{
+                width: `${(timeInfo.usedHours / timeInfo.totalHours) * 100}%`,
+              }}
             />
           </div>
         </div>
@@ -200,7 +240,13 @@ export default function StudentTimePage() {
           <div className="flex items-center gap-2">
             <AlertCircle className="w-5 h-5 text-yellow-600" />
             <span className="text-sm text-yellow-800">
-              다음 만료일: {timeInfo.nextExpiry} (약 {Math.ceil((new Date(timeInfo.nextExpiry).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))}일 남음)
+              다음 만료일: {timeInfo.nextExpiry} (약{" "}
+              {Math.ceil(
+                (new Date(timeInfo.nextExpiry).getTime() -
+                  new Date().getTime()) /
+                  (1000 * 60 * 60 * 24),
+              )}
+              일 남음)
             </span>
           </div>
         </div>
@@ -213,29 +259,39 @@ export default function StudentTimePage() {
             <Calendar className="w-6 h-6 text-blue-600" />
             시간 사용 내역
           </h2>
-          
+
           <div className="space-y-3 max-h-96 overflow-y-auto">
             {timeInfo.timeHistory.map((item) => (
-              <div key={item.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+              <div
+                key={item.id}
+                className="flex items-center justify-between p-3 border border-gray-200 rounded-lg"
+              >
                 <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    item.type === 'added' ? 'bg-green-100' : 'bg-red-100'
-                  }`}>
-                    {item.type === 'added' ? (
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      item.type === "added" ? "bg-green-100" : "bg-red-100"
+                    }`}
+                  >
+                    {item.type === "added" ? (
                       <TrendingUp className="w-4 h-4 text-green-600" />
                     ) : (
                       <Play className="w-4 h-4 text-red-600" />
                     )}
                   </div>
                   <div>
-                    <div className="font-medium text-gray-900">{item.description}</div>
+                    <div className="font-medium text-gray-900">
+                      {item.description}
+                    </div>
                     <div className="text-sm text-gray-600">{item.date}</div>
                   </div>
                 </div>
-                <div className={`font-bold ${
-                  item.type === 'added' ? 'text-green-600' : 'text-red-600'
-                }`}>
-                  {item.type === 'added' ? '+' : ''}{item.hours}시간
+                <div
+                  className={`font-bold ${
+                    item.type === "added" ? "text-green-600" : "text-red-600"
+                  }`}
+                >
+                  {item.type === "added" ? "+" : ""}
+                  {item.hours}시간
                 </div>
               </div>
             ))}
@@ -248,16 +304,25 @@ export default function StudentTimePage() {
             <Calendar className="w-6 h-6 text-purple-600" />
             예정된 수업
           </h2>
-          
+
           <div className="space-y-3">
             {timeInfo.upcomingClasses.map((classItem) => (
-              <div key={classItem.id} className="border border-gray-200 rounded-lg p-4">
+              <div
+                key={classItem.id}
+                className="border border-gray-200 rounded-lg p-4"
+              >
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-medium text-gray-900">{classItem.subject}</h3>
-                  <div className="text-sm text-gray-600">{classItem.duration}분</div>
+                  <h3 className="font-medium text-gray-900">
+                    {classItem.subject}
+                  </h3>
+                  <div className="text-sm text-gray-600">
+                    {classItem.duration}분
+                  </div>
                 </div>
                 <div className="flex items-center justify-between text-sm text-gray-600">
-                  <span>{classItem.date} {classItem.time}</span>
+                  <span>
+                    {classItem.date} {classItem.time}
+                  </span>
                   <span>{classItem.teacher}</span>
                 </div>
                 <div className="mt-2 flex gap-2">
@@ -280,18 +345,26 @@ export default function StudentTimePage() {
           <TrendingUp className="w-6 h-6 text-orange-600" />
           수업 패키지
         </h2>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {timeInfo.packages.map((pkg) => (
             <div key={pkg.id} className="border border-gray-200 rounded-lg p-4">
               <div className="flex items-center justify-between mb-2">
                 <h3 className="font-medium text-gray-900">{pkg.name}</h3>
-                <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  pkg.status === 'active' ? 'bg-green-100 text-green-700' :
-                  pkg.status === 'upcoming' ? 'bg-blue-100 text-blue-700' :
-                  'bg-gray-100 text-gray-700'
-                }`}>
-                  {pkg.status === 'active' ? '활성' : pkg.status === 'upcoming' ? '예정' : '만료'}
+                <div
+                  className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    pkg.status === "active"
+                      ? "bg-green-100 text-green-700"
+                      : pkg.status === "upcoming"
+                        ? "bg-blue-100 text-blue-700"
+                        : "bg-gray-100 text-gray-700"
+                  }`}
+                >
+                  {pkg.status === "active"
+                    ? "활성"
+                    : pkg.status === "upcoming"
+                      ? "예정"
+                      : "만료"}
                 </div>
               </div>
               <div className="space-y-2 text-sm text-gray-600">
@@ -299,7 +372,7 @@ export default function StudentTimePage() {
                 <div>가격: {pkg.price.toLocaleString()}원</div>
                 <div>만료일: {pkg.expiryDate}</div>
               </div>
-              {pkg.status === 'active' && (
+              {pkg.status === "active" && (
                 <button className="w-full mt-3 py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm">
                   패키지 사용
                 </button>
@@ -312,22 +385,30 @@ export default function StudentTimePage() {
       {/* 통계 카드들 */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
         <div className="bg-white rounded-xl shadow-lg p-4 text-center">
-          <div className="text-2xl font-bold text-green-600">{timeInfo.remainingHours}시간</div>
+          <div className="text-2xl font-bold text-green-600">
+            {timeInfo.remainingHours}시간
+          </div>
           <div className="text-sm text-gray-600">사용 가능</div>
         </div>
         <div className="bg-white rounded-xl shadow-lg p-4 text-center">
-          <div className="text-2xl font-bold text-blue-600">{timeInfo.monthlyHours}시간</div>
+          <div className="text-2xl font-bold text-blue-600">
+            {timeInfo.monthlyHours}시간
+          </div>
           <div className="text-sm text-gray-600">이번 달 사용</div>
         </div>
         <div className="bg-white rounded-xl shadow-lg p-4 text-center">
-          <div className="text-2xl font-bold text-orange-600">{timeInfo.upcomingClasses.length}회</div>
+          <div className="text-2xl font-bold text-orange-600">
+            {timeInfo.upcomingClasses.length}회
+          </div>
           <div className="text-sm text-gray-600">예정 수업</div>
         </div>
         <div className="bg-white rounded-xl shadow-lg p-4 text-center">
-          <div className="text-2xl font-bold text-purple-600">{timeInfo.packages.filter(p => p.status === 'active').length}개</div>
+          <div className="text-2xl font-bold text-purple-600">
+            {timeInfo.packages.filter((p) => p.status === "active").length}개
+          </div>
           <div className="text-sm text-gray-600">활성 패키지</div>
         </div>
       </div>
     </div>
   );
-} 
+}

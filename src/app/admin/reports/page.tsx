@@ -1,19 +1,35 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { Search, Plus, FileText, Download, Eye, Trash2, Calendar, User, XCircle } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import {
+  Search,
+  Plus,
+  FileText,
+  Download,
+  Eye,
+  Trash2,
+  Calendar,
+  User,
+  XCircle,
+} from "lucide-react";
 
 interface Report {
   id: string;
   title: string;
-  type: 'student' | 'teacher' | 'financial' | 'course' | 'attendance' | 'custom';
-  status: 'draft' | 'published' | 'archived';
+  type:
+    | "student"
+    | "teacher"
+    | "financial"
+    | "course"
+    | "attendance"
+    | "custom";
+  status: "draft" | "published" | "archived";
   author: string;
   createdAt: string;
   updatedAt: string;
   description: string;
   dataRange: string;
-  format: 'pdf' | 'excel' | 'csv';
+  format: "pdf" | "excel" | "csv";
   size: string;
   downloadCount: number;
 }
@@ -30,186 +46,203 @@ interface ReportTemplate {
 const AdminReportsPage = () => {
   const [reports, setReports] = useState<Report[]>([]);
   const [templates, setTemplates] = useState<ReportTemplate[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [typeFilter, setTypeFilter] = useState<string>('all');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [showNewReportModal, setShowNewReportModal] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [newReportData, setNewReportData] = useState({
-    title: '',
-    type: 'student' as Report['type'],
-    description: '',
-    dataRange: '',
-    format: 'pdf' as Report['format']
+    title: "",
+    type: "student" as Report["type"],
+    description: "",
+    dataRange: "",
+    format: "pdf" as Report["format"],
   });
 
   // Mock data
   useEffect(() => {
     const mockReports: Report[] = [
       {
-        id: '1',
-        title: '2024년 1월 학생 현황 보고서',
-        type: 'student',
-        status: 'published',
-        author: '김관리자',
-        createdAt: '2024-01-15',
-        updatedAt: '2024-01-15',
-        description: '2024년 1월 학생 등록, 출석, 성과 현황',
-        dataRange: '2024-01-01 ~ 2024-01-31',
-        format: 'pdf',
-        size: '2.3MB',
-        downloadCount: 15
+        id: "1",
+        title: "2024년 1월 학생 현황 보고서",
+        type: "student",
+        status: "published",
+        author: "김관리자",
+        createdAt: "2024-01-15",
+        updatedAt: "2024-01-15",
+        description: "2024년 1월 학생 등록, 출석, 성과 현황",
+        dataRange: "2024-01-01 ~ 2024-01-31",
+        format: "pdf",
+        size: "2.3MB",
+        downloadCount: 15,
       },
       {
-        id: '2',
-        title: '2024년 1월 재무 보고서',
-        type: 'financial',
-        status: 'published',
-        author: '이관리자',
-        createdAt: '2024-01-16',
-        updatedAt: '2024-01-16',
-        description: '2024년 1월 매출, 지출, 수익성 분석',
-        dataRange: '2024-01-01 ~ 2024-01-31',
-        format: 'excel',
-        size: '1.8MB',
-        downloadCount: 8
+        id: "2",
+        title: "2024년 1월 재무 보고서",
+        type: "financial",
+        status: "published",
+        author: "이관리자",
+        createdAt: "2024-01-16",
+        updatedAt: "2024-01-16",
+        description: "2024년 1월 매출, 지출, 수익성 분석",
+        dataRange: "2024-01-01 ~ 2024-01-31",
+        format: "excel",
+        size: "1.8MB",
+        downloadCount: 8,
       },
       {
-        id: '3',
-        title: '선생님 성과 평가 보고서',
-        type: 'teacher',
-        status: 'draft',
-        author: '박관리자',
-        createdAt: '2024-01-17',
-        updatedAt: '2024-01-17',
-        description: '선생님별 수업 성과 및 학생 만족도',
-        dataRange: '2024-01-01 ~ 2024-01-31',
-        format: 'pdf',
-        size: '3.1MB',
-        downloadCount: 0
+        id: "3",
+        title: "선생님 성과 평가 보고서",
+        type: "teacher",
+        status: "draft",
+        author: "박관리자",
+        createdAt: "2024-01-17",
+        updatedAt: "2024-01-17",
+        description: "선생님별 수업 성과 및 학생 만족도",
+        dataRange: "2024-01-01 ~ 2024-01-31",
+        format: "pdf",
+        size: "3.1MB",
+        downloadCount: 0,
       },
       {
-        id: '4',
-        title: '코스별 수강생 분석',
-        type: 'course',
-        status: 'published',
-        author: '최관리자',
-        createdAt: '2024-01-18',
-        updatedAt: '2024-01-18',
-        description: '코스별 수강생 현황 및 성과 분석',
-        dataRange: '2024-01-01 ~ 2024-01-31',
-        format: 'csv',
-        size: '0.9MB',
-        downloadCount: 12
+        id: "4",
+        title: "코스별 수강생 분석",
+        type: "course",
+        status: "published",
+        author: "최관리자",
+        createdAt: "2024-01-18",
+        updatedAt: "2024-01-18",
+        description: "코스별 수강생 현황 및 성과 분석",
+        dataRange: "2024-01-01 ~ 2024-01-31",
+        format: "csv",
+        size: "0.9MB",
+        downloadCount: 12,
       },
       {
-        id: '5',
-        title: '출석률 통계 보고서',
-        type: 'attendance',
-        status: 'archived',
-        author: '정관리자',
-        createdAt: '2024-01-10',
-        updatedAt: '2024-01-10',
-        description: '월별 출석률 및 결석 사유 분석',
-        dataRange: '2023-12-01 ~ 2023-12-31',
-        format: 'pdf',
-        size: '1.5MB',
-        downloadCount: 25
-      }
+        id: "5",
+        title: "출석률 통계 보고서",
+        type: "attendance",
+        status: "archived",
+        author: "정관리자",
+        createdAt: "2024-01-10",
+        updatedAt: "2024-01-10",
+        description: "월별 출석률 및 결석 사유 분석",
+        dataRange: "2023-12-01 ~ 2023-12-31",
+        format: "pdf",
+        size: "1.5MB",
+        downloadCount: 25,
+      },
     ];
 
     const mockTemplates: ReportTemplate[] = [
       {
-        id: '1',
-        name: '월간 학생 현황 보고서',
-        type: 'student',
-        description: '월별 학생 등록, 출석, 성과 현황을 포함한 표준 보고서',
-        category: '학생 관리',
-        isDefault: true
+        id: "1",
+        name: "월간 학생 현황 보고서",
+        type: "student",
+        description: "월별 학생 등록, 출석, 성과 현황을 포함한 표준 보고서",
+        category: "학생 관리",
+        isDefault: true,
       },
       {
-        id: '2',
-        name: '재무 성과 보고서',
-        type: 'financial',
-        description: '매출, 지출, 수익성 분석을 포함한 재무 보고서',
-        category: '재무 관리',
-        isDefault: true
+        id: "2",
+        name: "재무 성과 보고서",
+        type: "financial",
+        description: "매출, 지출, 수익성 분석을 포함한 재무 보고서",
+        category: "재무 관리",
+        isDefault: true,
       },
       {
-        id: '3',
-        name: '선생님 평가 보고서',
-        type: 'teacher',
-        description: '선생님별 수업 성과 및 학생 만족도 평가',
-        category: '인사 관리',
-        isDefault: false
+        id: "3",
+        name: "선생님 평가 보고서",
+        type: "teacher",
+        description: "선생님별 수업 성과 및 학생 만족도 평가",
+        category: "인사 관리",
+        isDefault: false,
       },
       {
-        id: '4',
-        name: '코스 분석 보고서',
-        type: 'course',
-        description: '코스별 수강생 현황 및 성과 분석',
-        category: '코스 관리',
-        isDefault: true
+        id: "4",
+        name: "코스 분석 보고서",
+        type: "course",
+        description: "코스별 수강생 현황 및 성과 분석",
+        category: "코스 관리",
+        isDefault: true,
       },
       {
-        id: '5',
-        name: '출석 통계 보고서',
-        type: 'attendance',
-        description: '출석률 및 결석 사유 분석',
-        category: '학습 관리',
-        isDefault: false
-      }
+        id: "5",
+        name: "출석 통계 보고서",
+        type: "attendance",
+        description: "출석률 및 결석 사유 분석",
+        category: "학습 관리",
+        isDefault: false,
+      },
     ];
 
     setReports(mockReports);
     setTemplates(mockTemplates);
   }, []);
 
-  const filteredReports = reports.filter(report => {
-    const matchesSearch = report.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         report.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         report.author.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = typeFilter === 'all' || report.type === typeFilter;
-    const matchesStatus = statusFilter === 'all' || report.status === statusFilter;
-    
+  const filteredReports = reports.filter((report) => {
+    const matchesSearch =
+      report.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      report.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      report.author.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesType = typeFilter === "all" || report.type === typeFilter;
+    const matchesStatus =
+      statusFilter === "all" || report.status === statusFilter;
+
     return matchesSearch && matchesType && matchesStatus;
   });
 
   const reportStats = {
     total: reports.length,
-    published: reports.filter(r => r.status === 'published').length,
-    draft: reports.filter(r => r.status === 'draft').length,
-    archived: reports.filter(r => r.status === 'archived').length
+    published: reports.filter((r) => r.status === "published").length,
+    draft: reports.filter((r) => r.status === "draft").length,
+    archived: reports.filter((r) => r.status === "archived").length,
   };
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'student': return 'bg-blue-100 text-blue-800';
-      case 'teacher': return 'bg-green-100 text-green-800';
-      case 'financial': return 'bg-purple-100 text-purple-800';
-      case 'course': return 'bg-orange-100 text-orange-800';
-      case 'attendance': return 'bg-red-100 text-red-800';
-      case 'custom': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "student":
+        return "bg-blue-100 text-blue-800";
+      case "teacher":
+        return "bg-green-100 text-green-800";
+      case "financial":
+        return "bg-purple-100 text-purple-800";
+      case "course":
+        return "bg-orange-100 text-orange-800";
+      case "attendance":
+        return "bg-red-100 text-red-800";
+      case "custom":
+        return "bg-gray-100 text-gray-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'published': return 'bg-green-100 text-green-800';
-      case 'draft': return 'bg-yellow-100 text-yellow-800';
-      case 'archived': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "published":
+        return "bg-green-100 text-green-800";
+      case "draft":
+        return "bg-yellow-100 text-yellow-800";
+      case "archived":
+        return "bg-gray-100 text-gray-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getFormatIcon = (format: string) => {
     switch (format) {
-      case 'pdf': return <FileText className="h-4 w-4 text-red-500" />;
-      case 'excel': return <FileText className="h-4 w-4 text-green-500" />;
-      case 'csv': return <FileText className="h-4 w-4 text-blue-500" />;
-      default: return <FileText className="h-4 w-4 text-gray-500" />;
+      case "pdf":
+        return <FileText className="h-4 w-4 text-red-500" />;
+      case "excel":
+        return <FileText className="h-4 w-4 text-green-500" />;
+      case "csv":
+        return <FileText className="h-4 w-4 text-blue-500" />;
+      default:
+        return <FileText className="h-4 w-4 text-gray-500" />;
     }
   };
 
@@ -218,37 +251,39 @@ const AdminReportsPage = () => {
       const newReport: Report = {
         id: Date.now().toString(),
         ...newReportData,
-        status: 'draft',
-        author: '현재 관리자',
-        createdAt: new Date().toISOString().split('T')[0],
-        updatedAt: new Date().toISOString().split('T')[0],
-        size: '0KB',
-        downloadCount: 0
+        status: "draft",
+        author: "현재 관리자",
+        createdAt: new Date().toISOString().split("T")[0],
+        updatedAt: new Date().toISOString().split("T")[0],
+        size: "0KB",
+        downloadCount: 0,
       };
-      
+
       setReports([...reports, newReport]);
       setShowNewReportModal(false);
       setNewReportData({
-        title: '',
-        type: 'student',
-        description: '',
-        dataRange: '',
-        format: 'pdf'
+        title: "",
+        type: "student",
+        description: "",
+        dataRange: "",
+        format: "pdf",
       });
     }
   };
 
   const handleDeleteReport = (reportId: string) => {
-    setReports(reports.filter(r => r.id !== reportId));
+    setReports(reports.filter((r) => r.id !== reportId));
     setSelectedReport(null);
   };
 
   const handleDownloadReport = (report: Report) => {
     // Mock download functionality
     console.log(`Downloading report: ${report.title}`);
-    setReports(reports.map(r => 
-      r.id === report.id ? { ...r, downloadCount: r.downloadCount + 1 } : r
-    ));
+    setReports(
+      reports.map((r) =>
+        r.id === report.id ? { ...r, downloadCount: r.downloadCount + 1 } : r,
+      ),
+    );
   };
 
   return (
@@ -269,23 +304,29 @@ const AdminReportsPage = () => {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">전체 보고서</p>
-                <p className="text-2xl font-bold text-gray-900">{reportStats.total}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {reportStats.total}
+                </p>
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center">
               <div className="p-2 bg-green-100 rounded-lg">
                 <FileText className="h-6 w-6 text-green-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">발행된 보고서</p>
-                <p className="text-2xl font-bold text-green-600">{reportStats.published}</p>
+                <p className="text-sm font-medium text-gray-600">
+                  발행된 보고서
+                </p>
+                <p className="text-2xl font-bold text-green-600">
+                  {reportStats.published}
+                </p>
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center">
               <div className="p-2 bg-yellow-100 rounded-lg">
@@ -293,19 +334,25 @@ const AdminReportsPage = () => {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">초안</p>
-                <p className="text-2xl font-bold text-yellow-600">{reportStats.draft}</p>
+                <p className="text-2xl font-bold text-yellow-600">
+                  {reportStats.draft}
+                </p>
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center">
               <div className="p-2 bg-gray-100 rounded-lg">
                 <FileText className="h-6 w-6 text-gray-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">보관된 보고서</p>
-                <p className="text-2xl font-bold text-gray-600">{reportStats.archived}</p>
+                <p className="text-sm font-medium text-gray-600">
+                  보관된 보고서
+                </p>
+                <p className="text-2xl font-bold text-gray-600">
+                  {reportStats.archived}
+                </p>
               </div>
             </div>
           </div>
@@ -326,7 +373,7 @@ const AdminReportsPage = () => {
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
-                
+
                 <select
                   value={typeFilter}
                   onChange={(e) => setTypeFilter(e.target.value)}
@@ -340,7 +387,7 @@ const AdminReportsPage = () => {
                   <option value="attendance">출석</option>
                   <option value="custom">커스텀</option>
                 </select>
-                
+
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
@@ -352,7 +399,7 @@ const AdminReportsPage = () => {
                   <option value="archived">보관됨</option>
                 </select>
               </div>
-              
+
               <div className="flex gap-2">
                 <button
                   onClick={() => setShowTemplateModal(true)}
@@ -365,8 +412,7 @@ const AdminReportsPage = () => {
                   onClick={() => setShowNewReportModal(true)}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
                 >
-                  <Plus className="h-4 w-4" />
-                  새 보고서
+                  <Plus className="h-4 w-4" />새 보고서
                 </button>
               </div>
             </div>
@@ -376,36 +422,45 @@ const AdminReportsPage = () => {
         {/* Reports Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredReports.map((report) => (
-            <div key={report.id} className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow">
+            <div
+              key={report.id}
+              className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow"
+            >
               <div className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2 cursor-pointer hover:text-blue-600"
-                        onClick={() => setSelectedReport(report)}>
+                    <h3
+                      className="text-lg font-semibold text-gray-900 mb-2 cursor-pointer hover:text-blue-600"
+                      onClick={() => setSelectedReport(report)}
+                    >
                       {report.title}
                     </h3>
                     <div className="flex items-center gap-2 mb-2">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getTypeColor(report.type)}`}>
-                        {report.type === 'student' && '학생'}
-                        {report.type === 'teacher' && '선생님'}
-                        {report.type === 'financial' && '재무'}
-                        {report.type === 'course' && '코스'}
-                        {report.type === 'attendance' && '출석'}
-                        {report.type === 'custom' && '커스텀'}
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getTypeColor(report.type)}`}
+                      >
+                        {report.type === "student" && "학생"}
+                        {report.type === "teacher" && "선생님"}
+                        {report.type === "financial" && "재무"}
+                        {report.type === "course" && "코스"}
+                        {report.type === "attendance" && "출석"}
+                        {report.type === "custom" && "커스텀"}
                       </span>
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(report.status)}`}>
-                        {report.status === 'published' && '발행됨'}
-                        {report.status === 'draft' && '초안'}
-                        {report.status === 'archived' && '보관됨'}
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(report.status)}`}
+                      >
+                        {report.status === "published" && "발행됨"}
+                        {report.status === "draft" && "초안"}
+                        {report.status === "archived" && "보관됨"}
                       </span>
                     </div>
                   </div>
                 </div>
-                
+
                 <p className="text-sm text-gray-600 mb-4 line-clamp-2">
                   {report.description}
                 </p>
-                
+
                 <div className="space-y-2 mb-4">
                   <div className="flex items-center text-sm text-gray-500">
                     <User className="h-4 w-4 mr-2" />
@@ -419,12 +474,14 @@ const AdminReportsPage = () => {
                     <span>데이터 범위: {report.dataRange}</span>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                   <div className="flex items-center gap-2">
                     {getFormatIcon(report.format)}
                     <span className="text-sm text-gray-500">{report.size}</span>
-                    <span className="text-sm text-gray-500">• 다운로드 {report.downloadCount}회</span>
+                    <span className="text-sm text-gray-500">
+                      • 다운로드 {report.downloadCount}회
+                    </span>
                   </div>
                   <div className="flex gap-2">
                     <button
@@ -458,7 +515,9 @@ const AdminReportsPage = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900">새 보고서 생성</h2>
+              <h2 className="text-xl font-bold text-gray-900">
+                새 보고서 생성
+              </h2>
               <button
                 onClick={() => setShowNewReportModal(false)}
                 className="text-gray-400 hover:text-gray-600"
@@ -475,7 +534,12 @@ const AdminReportsPage = () => {
                 <input
                   type="text"
                   value={newReportData.title}
-                  onChange={(e) => setNewReportData({...newReportData, title: e.target.value})}
+                  onChange={(e) =>
+                    setNewReportData({
+                      ...newReportData,
+                      title: e.target.value,
+                    })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="보고서명을 입력하세요"
                 />
@@ -488,7 +552,12 @@ const AdminReportsPage = () => {
                   </label>
                   <select
                     value={newReportData.type}
-                    onChange={(e) => setNewReportData({...newReportData, type: e.target.value as Report['type']})}
+                    onChange={(e) =>
+                      setNewReportData({
+                        ...newReportData,
+                        type: e.target.value as Report["type"],
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="student">학생</option>
@@ -505,7 +574,12 @@ const AdminReportsPage = () => {
                   </label>
                   <select
                     value={newReportData.format}
-                    onChange={(e) => setNewReportData({...newReportData, format: e.target.value as Report['format']})}
+                    onChange={(e) =>
+                      setNewReportData({
+                        ...newReportData,
+                        format: e.target.value as Report["format"],
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="pdf">PDF</option>
@@ -521,7 +595,12 @@ const AdminReportsPage = () => {
                 </label>
                 <textarea
                   value={newReportData.description}
-                  onChange={(e) => setNewReportData({...newReportData, description: e.target.value})}
+                  onChange={(e) =>
+                    setNewReportData({
+                      ...newReportData,
+                      description: e.target.value,
+                    })
+                  }
                   rows={3}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="보고서 설명을 입력하세요"
@@ -535,7 +614,12 @@ const AdminReportsPage = () => {
                 <input
                   type="text"
                   value={newReportData.dataRange}
-                  onChange={(e) => setNewReportData({...newReportData, dataRange: e.target.value})}
+                  onChange={(e) =>
+                    setNewReportData({
+                      ...newReportData,
+                      dataRange: e.target.value,
+                    })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="예: 2024-01-01 ~ 2024-01-31"
                 />
@@ -577,26 +661,35 @@ const AdminReportsPage = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {templates.map((template) => (
-                <div key={template.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
+                <div
+                  key={template.id}
+                  className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50"
+                >
                   <div className="flex items-start justify-between mb-3">
-                    <h3 className="text-lg font-semibold text-gray-900">{template.name}</h3>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {template.name}
+                    </h3>
                     {template.isDefault && (
                       <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
                         기본
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-gray-600 mb-3">{template.description}</p>
+                  <p className="text-sm text-gray-600 mb-3">
+                    {template.description}
+                  </p>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500">{template.category}</span>
+                    <span className="text-sm text-gray-500">
+                      {template.category}
+                    </span>
                     <button
                       onClick={() => {
                         setNewReportData({
                           title: template.name,
-                          type: template.type as Report['type'],
+                          type: template.type as Report["type"],
                           description: template.description,
-                          dataRange: '',
-                          format: 'pdf'
+                          dataRange: "",
+                          format: "pdf",
                         });
                         setShowTemplateModal(false);
                         setShowNewReportModal(true);
@@ -627,7 +720,9 @@ const AdminReportsPage = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900">보고서 상세 정보</h2>
+              <h2 className="text-xl font-bold text-gray-900">
+                보고서 상세 정보
+              </h2>
               <button
                 onClick={() => setSelectedReport(null)}
                 className="text-gray-400 hover:text-gray-600"
@@ -639,55 +734,85 @@ const AdminReportsPage = () => {
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">기본 정보</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    기본 정보
+                  </h3>
                   <div className="space-y-3">
                     <div>
-                      <span className="text-sm font-medium text-gray-500">제목:</span>
-                      <span className="ml-2 text-sm text-gray-900">{selectedReport.title}</span>
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium text-gray-500">유형:</span>
-                      <span className={`ml-2 inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getTypeColor(selectedReport.type)}`}>
-                        {selectedReport.type === 'student' && '학생'}
-                        {selectedReport.type === 'teacher' && '선생님'}
-                        {selectedReport.type === 'financial' && '재무'}
-                        {selectedReport.type === 'course' && '코스'}
-                        {selectedReport.type === 'attendance' && '출석'}
-                        {selectedReport.type === 'custom' && '커스텀'}
+                      <span className="text-sm font-medium text-gray-500">
+                        제목:
+                      </span>
+                      <span className="ml-2 text-sm text-gray-900">
+                        {selectedReport.title}
                       </span>
                     </div>
                     <div>
-                      <span className="text-sm font-medium text-gray-500">상태:</span>
-                      <span className={`ml-2 inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(selectedReport.status)}`}>
-                        {selectedReport.status === 'published' && '발행됨'}
-                        {selectedReport.status === 'draft' && '초안'}
-                        {selectedReport.status === 'archived' && '보관됨'}
+                      <span className="text-sm font-medium text-gray-500">
+                        유형:
+                      </span>
+                      <span
+                        className={`ml-2 inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getTypeColor(selectedReport.type)}`}
+                      >
+                        {selectedReport.type === "student" && "학생"}
+                        {selectedReport.type === "teacher" && "선생님"}
+                        {selectedReport.type === "financial" && "재무"}
+                        {selectedReport.type === "course" && "코스"}
+                        {selectedReport.type === "attendance" && "출석"}
+                        {selectedReport.type === "custom" && "커스텀"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-gray-500">
+                        상태:
+                      </span>
+                      <span
+                        className={`ml-2 inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(selectedReport.status)}`}
+                      >
+                        {selectedReport.status === "published" && "발행됨"}
+                        {selectedReport.status === "draft" && "초안"}
+                        {selectedReport.status === "archived" && "보관됨"}
                       </span>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">파일 정보</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    파일 정보
+                  </h3>
                   <div className="space-y-3">
                     <div>
-                      <span className="text-sm font-medium text-gray-500">형식:</span>
-                      <span className="ml-2 text-sm text-gray-900">{selectedReport.format.toUpperCase()}</span>
+                      <span className="text-sm font-medium text-gray-500">
+                        형식:
+                      </span>
+                      <span className="ml-2 text-sm text-gray-900">
+                        {selectedReport.format.toUpperCase()}
+                      </span>
                     </div>
                     <div>
-                      <span className="text-sm font-medium text-gray-500">크기:</span>
-                      <span className="ml-2 text-sm text-gray-900">{selectedReport.size}</span>
+                      <span className="text-sm font-medium text-gray-500">
+                        크기:
+                      </span>
+                      <span className="ml-2 text-sm text-gray-900">
+                        {selectedReport.size}
+                      </span>
                     </div>
                     <div>
-                      <span className="text-sm font-medium text-gray-500">다운로드:</span>
-                      <span className="ml-2 text-sm text-gray-900">{selectedReport.downloadCount}회</span>
+                      <span className="text-sm font-medium text-gray-500">
+                        다운로드:
+                      </span>
+                      <span className="ml-2 text-sm text-gray-900">
+                        {selectedReport.downloadCount}회
+                      </span>
                     </div>
                   </div>
                 </div>
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">설명</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  설명
+                </h3>
                 <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg">
                   {selectedReport.description}
                 </p>
@@ -695,29 +820,49 @@ const AdminReportsPage = () => {
 
               <div className="grid grid-cols-2 gap-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">작성 정보</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    작성 정보
+                  </h3>
                   <div className="space-y-2">
                     <div>
-                      <span className="text-sm font-medium text-gray-500">작성자:</span>
-                      <span className="ml-2 text-sm text-gray-900">{selectedReport.author}</span>
+                      <span className="text-sm font-medium text-gray-500">
+                        작성자:
+                      </span>
+                      <span className="ml-2 text-sm text-gray-900">
+                        {selectedReport.author}
+                      </span>
                     </div>
                     <div>
-                      <span className="text-sm font-medium text-gray-500">생성일:</span>
-                      <span className="ml-2 text-sm text-gray-900">{selectedReport.createdAt}</span>
+                      <span className="text-sm font-medium text-gray-500">
+                        생성일:
+                      </span>
+                      <span className="ml-2 text-sm text-gray-900">
+                        {selectedReport.createdAt}
+                      </span>
                     </div>
                     <div>
-                      <span className="text-sm font-medium text-gray-500">수정일:</span>
-                      <span className="ml-2 text-sm text-gray-900">{selectedReport.updatedAt}</span>
+                      <span className="text-sm font-medium text-gray-500">
+                        수정일:
+                      </span>
+                      <span className="ml-2 text-sm text-gray-900">
+                        {selectedReport.updatedAt}
+                      </span>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">데이터 정보</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    데이터 정보
+                  </h3>
                   <div className="space-y-2">
                     <div>
-                      <span className="text-sm font-medium text-gray-500">데이터 범위:</span>
-                      <span className="ml-2 text-sm text-gray-900">{selectedReport.dataRange}</span>
+                      <span className="text-sm font-medium text-gray-500">
+                        데이터 범위:
+                      </span>
+                      <span className="ml-2 text-sm text-gray-900">
+                        {selectedReport.dataRange}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -752,4 +897,4 @@ const AdminReportsPage = () => {
   );
 };
 
-export default AdminReportsPage; 
+export default AdminReportsPage;

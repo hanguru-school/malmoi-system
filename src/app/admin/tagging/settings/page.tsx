@@ -1,14 +1,8 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { 
-  Save, 
-  Home, 
-  Clock, 
-  Repeat,
-  CheckCircle
-} from 'lucide-react';
-import Link from 'next/link';
+import { useState, useEffect } from "react";
+import { Save, Home, Clock, Repeat, CheckCircle } from "lucide-react";
+import Link from "next/link";
 
 interface TaggingSettings {
   checkoutThreshold: number;
@@ -18,22 +12,22 @@ interface TaggingSettings {
 export default function TaggingSettingsPage() {
   const [settings, setSettings] = useState<TaggingSettings>({
     checkoutThreshold: 30,
-    maxReTags: 3
+    maxReTags: 3,
   });
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
 
   // 설정 조회
   const fetchSettings = async () => {
     try {
-      const response = await fetch('/api/tagging/settings');
+      const response = await fetch("/api/tagging/settings");
       const data = await response.json();
-      
+
       if (data.success) {
         setSettings(data.settings);
       }
     } catch (error) {
-      console.error('설정 조회 실패:', error);
+      console.error("설정 조회 실패:", error);
     }
   };
 
@@ -41,26 +35,26 @@ export default function TaggingSettingsPage() {
   const saveSettings = async () => {
     try {
       setLoading(true);
-      setMessage('');
-      
-      const response = await fetch('/api/tagging/settings', {
-        method: 'PUT',
+      setMessage("");
+
+      const response = await fetch("/api/tagging/settings", {
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(settings),
       });
-      
+
       const data = await response.json();
-      
+
       if (data.success) {
-        setMessage('설정이 성공적으로 저장되었습니다');
-        setTimeout(() => setMessage(''), 3000);
+        setMessage("설정이 성공적으로 저장되었습니다");
+        setTimeout(() => setMessage(""), 3000);
       } else {
-        setMessage('설정 저장 실패');
+        setMessage("설정 저장 실패");
       }
     } catch (error) {
-      setMessage('설정 저장 중 오류 발생');
+      setMessage("설정 저장 중 오류 발생");
     } finally {
       setLoading(false);
     }
@@ -76,12 +70,8 @@ export default function TaggingSettingsPage() {
         {/* 헤더 */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">
-              태깅 설정
-            </h1>
-            <p className="text-lg text-gray-600">
-              태깅 처리 조건 및 규칙 설정
-            </p>
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">태깅 설정</h1>
+            <p className="text-lg text-gray-600">태깅 처리 조건 및 규칙 설정</p>
           </div>
           <Link
             href="/"
@@ -94,11 +84,13 @@ export default function TaggingSettingsPage() {
 
         {/* 메시지 */}
         {message && (
-          <div className={`mb-6 p-4 rounded-lg ${
-            message.includes('성공') 
-              ? 'bg-green-100 text-green-800 border border-green-200' 
-              : 'bg-red-100 text-red-800 border border-red-200'
-          }`}>
+          <div
+            className={`mb-6 p-4 rounded-lg ${
+              message.includes("성공")
+                ? "bg-green-100 text-green-800 border border-green-200"
+                : "bg-red-100 text-red-800 border border-red-200"
+            }`}
+          >
             <div className="flex items-center gap-2">
               <CheckCircle className="w-5 h-5" />
               {message}
@@ -111,7 +103,7 @@ export default function TaggingSettingsPage() {
           <h2 className="text-2xl font-semibold text-gray-900 mb-6">
             태깅 처리 설정
           </h2>
-          
+
           <div className="space-y-8">
             {/* 출퇴근 분기 기준 */}
             <div className="border-b border-gray-200 pb-6">
@@ -128,10 +120,12 @@ export default function TaggingSettingsPage() {
                 <input
                   type="number"
                   value={settings.checkoutThreshold}
-                  onChange={(e) => setSettings({
-                    ...settings,
-                    checkoutThreshold: parseInt(e.target.value) || 30
-                  })}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      checkoutThreshold: parseInt(e.target.value) || 30,
+                    })
+                  }
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   min="1"
                   max="60"
@@ -157,10 +151,12 @@ export default function TaggingSettingsPage() {
                 <input
                   type="number"
                   value={settings.maxReTags}
-                  onChange={(e) => setSettings({
-                    ...settings,
-                    maxReTags: parseInt(e.target.value) || 3
-                  })}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      maxReTags: parseInt(e.target.value) || 3,
+                    })
+                  }
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   min="1"
                   max="10"
@@ -179,7 +175,7 @@ export default function TaggingSettingsPage() {
                 className="w-full flex items-center justify-center gap-3 px-8 py-4 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 text-lg font-medium"
               >
                 <Save className="w-6 h-6" />
-                {loading ? '저장 중...' : '설정 저장'}
+                {loading ? "저장 중..." : "설정 저장"}
               </button>
             </div>
           </div>
@@ -194,15 +190,17 @@ export default function TaggingSettingsPage() {
             <div className="flex items-start gap-2">
               <Clock className="w-4 h-4 text-purple-600 mt-0.5 flex-shrink-0" />
               <div>
-                <strong>출퇴근 분기 기준:</strong> 같은 날에 출석과 퇴근을 구분하는 시간 기준입니다. 
-                예를 들어 30분으로 설정하면, 오전 9시에 태그하면 출석, 오후 6시에 태그하면 퇴근으로 기록됩니다.
+                <strong>출퇴근 분기 기준:</strong> 같은 날에 출석과 퇴근을
+                구분하는 시간 기준입니다. 예를 들어 30분으로 설정하면, 오전
+                9시에 태그하면 출석, 오후 6시에 태그하면 퇴근으로 기록됩니다.
               </div>
             </div>
             <div className="flex items-start gap-2">
               <Repeat className="w-4 h-4 text-purple-600 mt-0.5 flex-shrink-0" />
               <div>
-                <strong>최대 연속 태깅 횟수:</strong> 짧은 시간 내에 같은 사용자가 연속으로 태그할 수 있는 횟수를 제한합니다. 
-                이는 실수로 중복 태그하는 것을 방지하고 시스템 안정성을 높입니다.
+                <strong>최대 연속 태깅 횟수:</strong> 짧은 시간 내에 같은
+                사용자가 연속으로 태그할 수 있는 횟수를 제한합니다. 이는 실수로
+                중복 태그하는 것을 방지하고 시스템 안정성을 높입니다.
               </div>
             </div>
           </div>
@@ -228,4 +226,4 @@ export default function TaggingSettingsPage() {
       </div>
     </div>
   );
-} 
+}

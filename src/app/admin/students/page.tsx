@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { 
-  Plus, 
-  Search, 
+import { useState, useEffect } from "react";
+import {
+  Plus,
+  Search,
   User,
   Edit,
   Trash2,
@@ -11,8 +11,8 @@ import {
   GraduationCap,
   Clock,
   CheckCircle,
-  AlertCircle
-} from 'lucide-react';
+  AlertCircle,
+} from "lucide-react";
 
 interface Student {
   id: string;
@@ -23,7 +23,7 @@ interface Student {
   course: string;
   teacher: string;
   enrollmentDate: string;
-  status: 'active' | 'inactive' | 'graduated' | 'suspended';
+  status: "active" | "inactive" | "graduated" | "suspended";
   attendanceRate: number;
   remainingHours: number;
   lastAttendance: string;
@@ -32,9 +32,11 @@ interface Student {
 export default function AdminStudentsPage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive' | 'graduated' | 'suspended'>('all');
-  const [levelFilter, setLevelFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "active" | "inactive" | "graduated" | "suspended"
+  >("all");
+  const [levelFilter, setLevelFilter] = useState("all");
   const [showCreateModal, setShowCreateModal] = useState(false);
 
   useEffect(() => {
@@ -42,75 +44,75 @@ export default function AdminStudentsPage() {
     setTimeout(() => {
       const mockStudents: Student[] = [
         {
-          id: '1',
-          name: '김학생',
-          email: 'kim@example.com',
-          phone: '010-1234-5678',
-          level: 'A-1 (기초)',
-          course: '한국어 기초 과정',
-          teacher: '김선생님',
-          enrollmentDate: '2024-01-01',
-          status: 'active',
+          id: "1",
+          name: "김학생",
+          email: "kim@example.com",
+          phone: "010-1234-5678",
+          level: "A-1 (기초)",
+          course: "한국어 기초 과정",
+          teacher: "김선생님",
+          enrollmentDate: "2024-01-01",
+          status: "active",
           attendanceRate: 95,
           remainingHours: 20,
-          lastAttendance: '2024-01-15'
+          lastAttendance: "2024-01-15",
         },
         {
-          id: '2',
-          name: '이학생',
-          email: 'lee@example.com',
-          phone: '010-2345-6789',
-          level: 'A-2 (초급)',
-          course: '한국어 초급 과정',
-          teacher: '이선생님',
-          enrollmentDate: '2024-01-05',
-          status: 'active',
+          id: "2",
+          name: "이학생",
+          email: "lee@example.com",
+          phone: "010-2345-6789",
+          level: "A-2 (초급)",
+          course: "한국어 초급 과정",
+          teacher: "이선생님",
+          enrollmentDate: "2024-01-05",
+          status: "active",
           attendanceRate: 88,
           remainingHours: 15,
-          lastAttendance: '2024-01-14'
+          lastAttendance: "2024-01-14",
         },
         {
-          id: '3',
-          name: '박학생',
-          email: 'park@example.com',
-          phone: '010-3456-7890',
-          level: 'B-1 (중급)',
-          course: '한국어 중급 과정',
-          teacher: '박선생님',
-          enrollmentDate: '2023-12-15',
-          status: 'active',
+          id: "3",
+          name: "박학생",
+          email: "park@example.com",
+          phone: "010-3456-7890",
+          level: "B-1 (중급)",
+          course: "한국어 중급 과정",
+          teacher: "박선생님",
+          enrollmentDate: "2023-12-15",
+          status: "active",
           attendanceRate: 92,
           remainingHours: 8,
-          lastAttendance: '2024-01-13'
+          lastAttendance: "2024-01-13",
         },
         {
-          id: '4',
-          name: '최학생',
-          email: 'choi@example.com',
-          phone: '010-4567-8901',
-          level: 'B-2 (고급)',
-          course: '한국어 고급 과정',
-          teacher: '최선생님',
-          enrollmentDate: '2023-11-20',
-          status: 'graduated',
+          id: "4",
+          name: "최학생",
+          email: "choi@example.com",
+          phone: "010-4567-8901",
+          level: "B-2 (고급)",
+          course: "한국어 고급 과정",
+          teacher: "최선생님",
+          enrollmentDate: "2023-11-20",
+          status: "graduated",
           attendanceRate: 98,
           remainingHours: 0,
-          lastAttendance: '2024-01-10'
+          lastAttendance: "2024-01-10",
         },
         {
-          id: '5',
-          name: '정학생',
-          email: 'jung@example.com',
-          phone: '010-5678-9012',
-          level: 'A-1 (기초)',
-          course: '한국어 기초 과정',
-          teacher: '김선생님',
-          enrollmentDate: '2024-01-10',
-          status: 'suspended',
+          id: "5",
+          name: "정학생",
+          email: "jung@example.com",
+          phone: "010-5678-9012",
+          level: "A-1 (기초)",
+          course: "한국어 기초 과정",
+          teacher: "김선생님",
+          enrollmentDate: "2024-01-10",
+          status: "suspended",
           attendanceRate: 45,
           remainingHours: 25,
-          lastAttendance: '2024-01-08'
-        }
+          lastAttendance: "2024-01-08",
+        },
       ];
 
       setStudents(mockStudents);
@@ -118,52 +120,53 @@ export default function AdminStudentsPage() {
     }, 1000);
   }, []);
 
-  const filteredStudents = students.filter(student => {
-    const matchesSearch = 
+  const filteredStudents = students.filter((student) => {
+    const matchesSearch =
       student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.phone.includes(searchTerm);
-    
-    const matchesStatus = statusFilter === 'all' || student.status === statusFilter;
-    const matchesLevel = levelFilter === 'all' || student.level === levelFilter;
-    
+
+    const matchesStatus =
+      statusFilter === "all" || student.status === statusFilter;
+    const matchesLevel = levelFilter === "all" || student.level === levelFilter;
+
     return matchesSearch && matchesStatus && matchesLevel;
   });
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active':
-        return 'bg-green-100 text-green-800';
-      case 'inactive':
-        return 'bg-gray-100 text-gray-800';
-      case 'graduated':
-        return 'bg-blue-100 text-blue-800';
-      case 'suspended':
-        return 'bg-red-100 text-red-800';
+      case "active":
+        return "bg-green-100 text-green-800";
+      case "inactive":
+        return "bg-gray-100 text-gray-800";
+      case "graduated":
+        return "bg-blue-100 text-blue-800";
+      case "suspended":
+        return "bg-red-100 text-red-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'active':
-        return '활성';
-      case 'inactive':
-        return '비활성';
-      case 'graduated':
-        return '졸업';
-      case 'suspended':
-        return '정지';
+      case "active":
+        return "활성";
+      case "inactive":
+        return "비활성";
+      case "graduated":
+        return "졸업";
+      case "suspended":
+        return "정지";
       default:
-        return '알 수 없음';
+        return "알 수 없음";
     }
   };
 
   const getAttendanceColor = (rate: number) => {
-    if (rate >= 90) return 'text-green-600';
-    if (rate >= 80) return 'text-yellow-600';
-    return 'text-red-600';
+    if (rate >= 90) return "text-green-600";
+    if (rate >= 80) return "text-yellow-600";
+    return "text-red-600";
   };
 
   if (loading) {
@@ -186,8 +189,7 @@ export default function AdminStudentsPage() {
           onClick={() => setShowCreateModal(true)}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
         >
-          <Plus className="w-5 h-5" />
-          새 학생 등록
+          <Plus className="w-5 h-5" />새 학생 등록
         </button>
       </div>
 
@@ -197,7 +199,9 @@ export default function AdminStudentsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">총 학생 수</p>
-              <p className="text-2xl font-bold text-gray-900">{students.length}명</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {students.length}명
+              </p>
             </div>
             <div className="p-2 bg-blue-100 rounded-lg">
               <User className="w-6 h-6 text-blue-600" />
@@ -210,7 +214,7 @@ export default function AdminStudentsPage() {
             <div>
               <p className="text-sm text-gray-600">활성 학생</p>
               <p className="text-2xl font-bold text-green-600">
-                {students.filter(s => s.status === 'active').length}명
+                {students.filter((s) => s.status === "active").length}명
               </p>
             </div>
             <div className="p-2 bg-green-100 rounded-lg">
@@ -224,7 +228,7 @@ export default function AdminStudentsPage() {
             <div>
               <p className="text-sm text-gray-600">졸업생</p>
               <p className="text-2xl font-bold text-blue-600">
-                {students.filter(s => s.status === 'graduated').length}명
+                {students.filter((s) => s.status === "graduated").length}명
               </p>
             </div>
             <div className="p-2 bg-blue-100 rounded-lg">
@@ -238,7 +242,11 @@ export default function AdminStudentsPage() {
             <div>
               <p className="text-sm text-gray-600">평균 출석률</p>
               <p className="text-2xl font-bold text-purple-600">
-                {Math.round(students.reduce((sum, s) => sum + s.attendanceRate, 0) / students.length)}%
+                {Math.round(
+                  students.reduce((sum, s) => sum + s.attendanceRate, 0) /
+                    students.length,
+                )}
+                %
               </p>
             </div>
             <div className="p-2 bg-purple-100 rounded-lg">
@@ -261,10 +269,19 @@ export default function AdminStudentsPage() {
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
-          
+
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'inactive' | 'graduated' | 'suspended')}
+            onChange={(e) =>
+              setStatusFilter(
+                e.target.value as
+                  | "all"
+                  | "active"
+                  | "inactive"
+                  | "graduated"
+                  | "suspended",
+              )
+            }
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="all">전체 상태</option>
@@ -273,7 +290,7 @@ export default function AdminStudentsPage() {
             <option value="graduated">졸업</option>
             <option value="suspended">정지</option>
           </select>
-          
+
           <select
             value={levelFilter}
             onChange={(e) => setLevelFilter(e.target.value)}
@@ -285,7 +302,7 @@ export default function AdminStudentsPage() {
             <option value="B-1 (중급)">B-1 (중급)</option>
             <option value="B-2 (고급)">B-2 (고급)</option>
           </select>
-          
+
           <div className="text-sm text-gray-600">
             총 {filteredStudents.length}명의 학생
           </div>
@@ -297,7 +314,7 @@ export default function AdminStudentsPage() {
         <div className="p-6 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900">학생 목록</h2>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50">
@@ -330,15 +347,25 @@ export default function AdminStudentsPage() {
                 <tr key={student.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4">
                     <div>
-                      <div className="text-sm font-medium text-gray-900">{student.name}</div>
-                      <div className="text-sm text-gray-500">{student.email}</div>
-                      <div className="text-sm text-gray-500">{student.phone}</div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {student.name}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {student.email}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {student.phone}
+                      </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div>
-                      <div className="text-sm text-gray-900">{student.course}</div>
-                      <div className="text-sm text-gray-500">{student.teacher}</div>
+                      <div className="text-sm text-gray-900">
+                        {student.course}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {student.teacher}
+                      </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
@@ -347,21 +374,29 @@ export default function AdminStudentsPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <div className={`text-sm font-medium ${getAttendanceColor(student.attendanceRate)}`}>
+                    <div
+                      className={`text-sm font-medium ${getAttendanceColor(student.attendanceRate)}`}
+                    >
                       {student.attendanceRate}%
                     </div>
                     <div className="text-sm text-gray-500">
-                      마지막: {new Date(student.lastAttendance).toLocaleDateString()}
+                      마지막:{" "}
+                      {new Date(student.lastAttendance).toLocaleDateString()}
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="text-sm font-medium text-gray-900">{student.remainingHours}시간</div>
+                    <div className="text-sm font-medium text-gray-900">
+                      {student.remainingHours}시간
+                    </div>
                     <div className="text-sm text-gray-500">
-                      등록: {new Date(student.enrollmentDate).toLocaleDateString()}
+                      등록:{" "}
+                      {new Date(student.enrollmentDate).toLocaleDateString()}
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(student.status)}`}>
+                    <span
+                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(student.status)}`}
+                    >
                       {getStatusText(student.status)}
                     </span>
                   </td>
@@ -390,7 +425,9 @@ export default function AdminStudentsPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">새 학생 등록</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                새 학생 등록
+              </h3>
               <button
                 onClick={() => setShowCreateModal(false)}
                 className="text-gray-400 hover:text-gray-600"
@@ -398,20 +435,24 @@ export default function AdminStudentsPage() {
                 <AlertCircle className="w-5 h-5" />
               </button>
             </div>
-            
+
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">이름</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    이름
+                  </label>
                   <input
                     type="text"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     placeholder="학생 이름"
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">이메일</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    이메일
+                  </label>
                   <input
                     type="email"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -419,19 +460,23 @@ export default function AdminStudentsPage() {
                   />
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">전화번호</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    전화번호
+                  </label>
                   <input
                     type="tel"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     placeholder="전화번호"
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">레벨</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    레벨
+                  </label>
                   <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                     <option value="">레벨 선택</option>
                     <option value="A-1 (기초)">A-1 (기초)</option>
@@ -441,10 +486,12 @@ export default function AdminStudentsPage() {
                   </select>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">코스</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    코스
+                  </label>
                   <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                     <option value="">코스 선택</option>
                     <option value="한국어 기초 과정">한국어 기초 과정</option>
@@ -453,9 +500,11 @@ export default function AdminStudentsPage() {
                     <option value="한국어 고급 과정">한국어 고급 과정</option>
                   </select>
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">담당 강사</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    담당 강사
+                  </label>
                   <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                     <option value="">강사 선택</option>
                     <option value="김선생님">김선생님</option>
@@ -466,7 +515,7 @@ export default function AdminStudentsPage() {
                 </div>
               </div>
             </div>
-            
+
             <div className="flex justify-end gap-3 mt-6">
               <button
                 onClick={() => setShowCreateModal(false)}
@@ -489,4 +538,4 @@ export default function AdminStudentsPage() {
       )}
     </div>
   );
-} 
+}

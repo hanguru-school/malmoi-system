@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { ArrowLeft, Download, RefreshCw, QrCode, Shield } from 'lucide-react';
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { ArrowLeft, Download, RefreshCw, QrCode, Shield } from "lucide-react";
 
 export default function AdminQRDisplayPage() {
-  const [qrCodeData, setQrCodeData] = useState<string>('');
+  const [qrCodeData, setQrCodeData] = useState<string>("");
   const [adminInfo, setAdminInfo] = useState<{
     id: string;
     name: string;
@@ -16,10 +16,10 @@ export default function AdminQRDisplayPage() {
   useEffect(() => {
     // 실제로는 API에서 관리자 정보를 가져와야 함
     const mockAdminInfo = {
-      id: 'A-001',
-      name: '관리자',
-      role: '시스템 관리자',
-      permissions: ['전체 관리', '사용자 관리', '시스템 설정', '데이터 관리']
+      id: "A-001",
+      name: "관리자",
+      role: "시스템 관리자",
+      permissions: ["전체 관리", "사용자 관리", "시스템 설정", "데이터 관리"],
     };
     setAdminInfo(mockAdminInfo);
 
@@ -37,7 +37,7 @@ export default function AdminQRDisplayPage() {
 
   const downloadQR = () => {
     // QR코드 이미지 다운로드 로직
-    alert('QR코드가 다운로드되었습니다.');
+    alert("QR코드가 다운로드되었습니다.");
   };
 
   if (!adminInfo) {
@@ -75,21 +75,35 @@ export default function AdminQRDisplayPage() {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">관리자 ID</label>
-            <p className="text-lg font-semibold text-gray-900">{adminInfo.id}</p>
+            <label className="block text-sm font-medium text-gray-700">
+              관리자 ID
+            </label>
+            <p className="text-lg font-semibold text-gray-900">
+              {adminInfo.id}
+            </p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">이름</label>
-            <p className="text-lg font-semibold text-gray-900">{adminInfo.name}</p>
+            <label className="block text-sm font-medium text-gray-700">
+              이름
+            </label>
+            <p className="text-lg font-semibold text-gray-900">
+              {adminInfo.name}
+            </p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">역할</label>
-            <p className="text-lg font-semibold text-gray-900">{adminInfo.role}</p>
+            <label className="block text-sm font-medium text-gray-700">
+              역할
+            </label>
+            <p className="text-lg font-semibold text-gray-900">
+              {adminInfo.role}
+            </p>
           </div>
         </div>
-        
+
         <div className="mt-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">권한</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            권한
+          </label>
           <div className="flex flex-wrap gap-2">
             {adminInfo.permissions.map((permission, index) => (
               <span
@@ -137,7 +151,9 @@ export default function AdminQRDisplayPage() {
 
           <div className="text-center">
             <p className="text-sm text-gray-600">QR코드 데이터</p>
-            <p className="font-mono text-sm bg-gray-100 p-2 rounded mt-1">{qrCodeData}</p>
+            <p className="font-mono text-sm bg-gray-100 p-2 rounded mt-1">
+              {qrCodeData}
+            </p>
           </div>
         </div>
       </div>
@@ -155,4 +171,4 @@ export default function AdminQRDisplayPage() {
       </div>
     </div>
   );
-} 
+}

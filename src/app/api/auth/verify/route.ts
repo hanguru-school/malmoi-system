@@ -1,21 +1,20 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { 
-  handleApiError, 
-  validateEnvironmentVariables 
-} from '@/lib/api-utils';
+import { NextRequest, NextResponse } from "next/server";
+import { handleApiError, validateEnvironmentVariables } from "@/lib/api-utils";
 
 // Node.js 런타임 명시
-export const runtime = 'nodejs';
+export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
   try {
     // 환경변수 검증
     const envCheck = validateEnvironmentVariables();
     if (!envCheck.isValid) {
-      console.error('환경변수 누락:', envCheck.missingVars);
+      console.error("환경변수 누락:", envCheck.missingVars);
       return handleApiError(
-        new Error(`Configuration error: Missing ${envCheck.missingVars.join(', ')}`),
-        500
+        new Error(
+          `Configuration error: Missing ${envCheck.missingVars.join(", ")}`,
+        ),
+        500,
       );
     }
 
@@ -23,19 +22,22 @@ export async function POST(request: NextRequest) {
     const { token } = body;
 
     if (!token) {
-      return handleApiError(new Error('Token is required'), 400);
+      return handleApiError(new Error("Token is required"), 400);
     }
 
     // JWT 토큰 검증
-    const jwt = require('jsonwebtoken');
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret');
+    const jwt = require("jsonwebtoken");
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "fallback-secret",
+    );
 
     // 사용자 정보 가져오기
-    const { getUserById } = await import('@/lib/database');
+    const { getUserById } = await import("@/lib/database");
     const user = await getUserById(decoded.userId);
 
     if (!user) {
-      return handleApiError(new Error('User not found'), 404);
+      return handleApiError(new Error("User not found"), 404);
     }
 
     return NextResponse.json({
@@ -44,21 +46,21 @@ export async function POST(request: NextRequest) {
         id: user.id,
         email: user.email,
         name: user.name,
-        role: user.role
+        role: user.role,
       },
       token: decoded,
-      message: 'Token verification successful'
+      message: "Token verification successful",
     });
   } catch (error) {
     if (error instanceof Error) {
-      if (error.name === 'JsonWebTokenError') {
-        return handleApiError(new Error('Invalid token'), 401);
+      if (error.name === "JsonWebTokenError") {
+        return handleApiError(new Error("Invalid token"), 401);
       }
-      if (error.name === 'TokenExpiredError') {
-        return handleApiError(new Error('Token expired'), 401);
+      if (error.name === "TokenExpiredError") {
+        return handleApiError(new Error("Token expired"), 401);
       }
     }
-    
+
     return handleApiError(error, 500);
   }
 }
@@ -69,18 +71,20 @@ export async function GET(request: NextRequest) {
     const envCheck = validateEnvironmentVariables();
     if (!envCheck.isValid) {
       return handleApiError(
-        new Error(`Configuration error: Missing ${envCheck.missingVars.join(', ')}`),
-        500
+        new Error(
+          `Configuration error: Missing ${envCheck.missingVars.join(", ")}`,
+        ),
+        500,
       );
     }
 
     return NextResponse.json({
-      message: 'Token verification endpoint is available',
-      method: 'POST',
-      requiredFields: ['token'],
-      timestamp: new Date().toISOString()
+      message: "Token verification endpoint is available",
+      method: "POST",
+      requiredFields: ["token"],
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
     return handleApiError(error, 500);
   }
-} 
+}

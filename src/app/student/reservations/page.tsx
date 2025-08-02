@@ -1,22 +1,22 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { 
-  Calendar, 
-  Clock, 
-  User, 
-  MapPin, 
-  MessageSquare, 
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Calendar,
+  Clock,
+  User,
+  MapPin,
+  MessageSquare,
   Plus,
   Eye,
   Trash2,
   Filter,
   CalendarDays,
   Clock3,
-  Star
-} from 'lucide-react';
-import Link from 'next/link';
+  Star,
+} from "lucide-react";
+import Link from "next/link";
 
 interface Reservation {
   id: string;
@@ -33,14 +33,14 @@ interface Reservation {
   };
 }
 
-type FilterType = 'all' | 'last' | 'thisMonth' | 'first';
+type FilterType = "all" | "last" | "thisMonth" | "first";
 
 export default function ReservationsPage() {
   const router = useRouter();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filter, setFilter] = useState<FilterType>('all');
+  const [filter, setFilter] = useState<FilterType>("all");
   const [showCancelModal, setShowCancelModal] = useState<string | null>(null);
   const [cancelling, setCancelling] = useState<string | null>(null);
 
@@ -51,17 +51,21 @@ export default function ReservationsPage() {
   const loadReservations = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/reservations/list');
-      
+      const response = await fetch("/api/reservations/list");
+
       if (!response.ok) {
-        throw new Error('예약 목록을 불러올 수 없습니다.');
+        throw new Error("예약 목록을 불러올 수 없습니다.");
       }
 
       const data = await response.json();
       setReservations(data.reservations || []);
     } catch (error) {
-      console.error('예약 로드 오류:', error);
-      setError(error instanceof Error ? error.message : '예약 목록을 불러오는 중 오류가 발생했습니다.');
+      console.error("예약 로드 오류:", error);
+      setError(
+        error instanceof Error
+          ? error.message
+          : "예약 목록을 불러오는 중 오류가 발생했습니다.",
+      );
     } finally {
       setLoading(false);
     }
@@ -70,42 +74,49 @@ export default function ReservationsPage() {
   const handleCancelReservation = async (reservationId: string) => {
     try {
       setCancelling(reservationId);
-      const response = await fetch(`/api/reservations/${reservationId}/cancel`, {
-        method: 'PUT'
-      });
+      const response = await fetch(
+        `/api/reservations/${reservationId}/cancel`,
+        {
+          method: "PUT",
+        },
+      );
 
       if (!response.ok) {
-        throw new Error('예약 취소에 실패했습니다.');
+        throw new Error("예약 취소에 실패했습니다.");
       }
 
       // 취소 성공 후 목록 새로고침
       await loadReservations();
       setShowCancelModal(null);
     } catch (error) {
-      console.error('예약 취소 오류:', error);
-      setError(error instanceof Error ? error.message : '예약 취소 중 오류가 발생했습니다.');
+      console.error("예약 취소 오류:", error);
+      setError(
+        error instanceof Error
+          ? error.message
+          : "예약 취소 중 오류가 발생했습니다.",
+      );
     } finally {
       setCancelling(null);
     }
   };
 
   const getFilteredReservations = () => {
-    if (filter === 'all') return reservations;
-    
+    if (filter === "all") return reservations;
+
     const now = new Date();
     const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    
-    return reservations.filter(reservation => {
+
+    return reservations.filter((reservation) => {
       const reservationDate = new Date(reservation.date);
-      
+
       switch (filter) {
-        case 'last':
+        case "last":
           // 가장 최근 예약
           return reservation === reservations[0];
-        case 'thisMonth':
+        case "thisMonth":
           // 이번달 예약
           return reservationDate >= thisMonth;
-        case 'first':
+        case "first":
           // 첫 번째 예약
           return reservation === reservations[reservations.length - 1];
         default:
@@ -116,43 +127,43 @@ export default function ReservationsPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'CONFIRMED':
-        return 'bg-green-100 text-green-800';
-      case 'PENDING':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'CANCELLED':
-        return 'bg-red-100 text-red-800';
-      case 'ATTENDED':
-        return 'bg-blue-100 text-blue-800';
+      case "CONFIRMED":
+        return "bg-green-100 text-green-800";
+      case "PENDING":
+        return "bg-yellow-100 text-yellow-800";
+      case "CANCELLED":
+        return "bg-red-100 text-red-800";
+      case "ATTENDED":
+        return "bg-blue-100 text-blue-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'CONFIRMED':
-        return '확정';
-      case 'PENDING':
-        return '대기';
-      case 'CANCELLED':
-        return '취소';
-      case 'ATTENDED':
-        return '완료';
+      case "CONFIRMED":
+        return "확정";
+      case "PENDING":
+        return "대기";
+      case "CANCELLED":
+        return "취소";
+      case "ATTENDED":
+        return "완료";
       default:
         return status;
     }
   };
 
   const getDayOfWeek = (date: string) => {
-    return new Date(date).toLocaleDateString('ko-KR', { weekday: 'long' });
+    return new Date(date).toLocaleDateString("ko-KR", { weekday: "long" });
   };
 
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    return new Date(date).toLocaleDateString("ko-KR", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
@@ -188,8 +199,7 @@ export default function ReservationsPage() {
             href="/student/reservations/new"
             className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            <Plus className="w-5 h-5" />
-            새 예약하기
+            <Plus className="w-5 h-5" />새 예약하기
           </Link>
         </div>
 
@@ -213,44 +223,44 @@ export default function ReservationsPage() {
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <button
-              onClick={() => setFilter('all')}
+              onClick={() => setFilter("all")}
               className={`flex items-center gap-2 p-3 rounded-lg border-2 transition-all ${
-                filter === 'all'
-                  ? 'border-blue-500 bg-blue-50 text-blue-700'
-                  : 'border-gray-200 hover:border-gray-300'
+                filter === "all"
+                  ? "border-blue-500 bg-blue-50 text-blue-700"
+                  : "border-gray-200 hover:border-gray-300"
               }`}
             >
               <Eye className="w-4 h-4" />
               <span className="text-sm font-medium">전체</span>
             </button>
             <button
-              onClick={() => setFilter('last')}
+              onClick={() => setFilter("last")}
               className={`flex items-center gap-2 p-3 rounded-lg border-2 transition-all ${
-                filter === 'last'
-                  ? 'border-blue-500 bg-blue-50 text-blue-700'
-                  : 'border-gray-200 hover:border-gray-300'
+                filter === "last"
+                  ? "border-blue-500 bg-blue-50 text-blue-700"
+                  : "border-gray-200 hover:border-gray-300"
               }`}
             >
               <Star className="w-4 h-4" />
               <span className="text-sm font-medium">마지막 예약</span>
             </button>
             <button
-              onClick={() => setFilter('thisMonth')}
+              onClick={() => setFilter("thisMonth")}
               className={`flex items-center gap-2 p-3 rounded-lg border-2 transition-all ${
-                filter === 'thisMonth'
-                  ? 'border-blue-500 bg-blue-50 text-blue-700'
-                  : 'border-gray-200 hover:border-gray-300'
+                filter === "thisMonth"
+                  ? "border-blue-500 bg-blue-50 text-blue-700"
+                  : "border-gray-200 hover:border-gray-300"
               }`}
             >
               <CalendarDays className="w-4 h-4" />
               <span className="text-sm font-medium">이번달 예약</span>
             </button>
             <button
-              onClick={() => setFilter('first')}
+              onClick={() => setFilter("first")}
               className={`flex items-center gap-2 p-3 rounded-lg border-2 transition-all ${
-                filter === 'first'
-                  ? 'border-blue-500 bg-blue-50 text-blue-700'
-                  : 'border-gray-200 hover:border-gray-300'
+                filter === "first"
+                  ? "border-blue-500 bg-blue-50 text-blue-700"
+                  : "border-gray-200 hover:border-gray-300"
               }`}
             >
               <Clock3 className="w-4 h-4" />
@@ -270,18 +280,19 @@ export default function ReservationsPage() {
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Calendar className="w-8 h-8 text-gray-400" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">예약이 없습니다</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                예약이 없습니다
+              </h3>
               <p className="text-gray-600 mb-6">
-                {filter === 'all' 
-                  ? '아직 예약한 수업이 없습니다.' 
-                  : '해당 조건의 예약이 없습니다.'}
+                {filter === "all"
+                  ? "아직 예약한 수업이 없습니다."
+                  : "해당 조건의 예약이 없습니다."}
               </p>
               <Link
                 href="/student/reservations/new"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
-                <Plus className="w-5 h-5" />
-                첫 예약하기
+                <Plus className="w-5 h-5" />첫 예약하기
               </Link>
             </div>
           ) : (
@@ -297,16 +308,20 @@ export default function ReservationsPage() {
                         <div className="flex items-center gap-2">
                           <Calendar className="w-5 h-5 text-blue-600" />
                           <span className="font-medium text-gray-900">
-                            {formatDate(reservation.date)} ({getDayOfWeek(reservation.date)})
+                            {formatDate(reservation.date)} (
+                            {getDayOfWeek(reservation.date)})
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
                           <Clock className="w-5 h-5 text-green-600" />
                           <span className="text-gray-700">
-                            {formatTime(reservation.startTime)} ~ {formatTime(reservation.endTime)}
+                            {formatTime(reservation.startTime)} ~{" "}
+                            {formatTime(reservation.endTime)}
                           </span>
                         </div>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(reservation.status)}`}>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(reservation.status)}`}
+                        >
                           {getStatusText(reservation.status)}
                         </span>
                       </div>
@@ -316,37 +331,47 @@ export default function ReservationsPage() {
                           <User className="w-4 h-4 text-purple-600" />
                           <span className="text-sm text-gray-600">선생님:</span>
                           <span className="font-medium text-gray-900">
-                            {reservation.teacher?.name || '선생님'}
+                            {reservation.teacher?.name || "선생님"}
                             {reservation.teacher?.rating && (
-                              <span className="ml-1 text-yellow-500">★ {reservation.teacher.rating}</span>
+                              <span className="ml-1 text-yellow-500">
+                                ★ {reservation.teacher.rating}
+                              </span>
                             )}
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
                           <MapPin className="w-4 h-4 text-orange-600" />
-                          <span className="text-sm text-gray-600">수업 방식:</span>
+                          <span className="text-sm text-gray-600">
+                            수업 방식:
+                          </span>
                           <span className="font-medium text-gray-900">
-                            {reservation.location === 'ONLINE' ? '온라인' : '대면'}
+                            {reservation.location === "ONLINE"
+                              ? "온라인"
+                              : "대면"}
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
                           <MessageSquare className="w-4 h-4 text-red-600" />
                           <span className="text-sm text-gray-600">예약일:</span>
                           <span className="font-medium text-gray-900">
-                            {new Date(reservation.createdAt).toLocaleDateString('ko-KR')}
+                            {new Date(reservation.createdAt).toLocaleDateString(
+                              "ko-KR",
+                            )}
                           </span>
                         </div>
                       </div>
 
                       {reservation.notes && (
                         <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-                          <p className="text-sm text-gray-700">{reservation.notes}</p>
+                          <p className="text-sm text-gray-700">
+                            {reservation.notes}
+                          </p>
                         </div>
                       )}
                     </div>
 
                     <div className="flex items-center gap-2 ml-4">
-                      {reservation.status === 'CONFIRMED' && (
+                      {reservation.status === "CONFIRMED" && (
                         <>
                           <Link
                             href={`/student/reservations/complete/${reservation.id}`}
@@ -364,7 +389,7 @@ export default function ReservationsPage() {
                           </button>
                         </>
                       )}
-                      {reservation.status === 'PENDING' && (
+                      {reservation.status === "PENDING" && (
                         <button
                           onClick={() => setShowCancelModal(reservation.id)}
                           className="flex items-center gap-1 px-3 py-2 text-sm bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
@@ -386,7 +411,9 @@ export default function ReservationsPage() {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-xl shadow-xl p-6 max-w-md w-full mx-4">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">예약 취소 확인</h3>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  예약 취소 확인
+                </h3>
                 <button
                   onClick={() => setShowCancelModal(null)}
                   className="text-gray-400 hover:text-gray-600"
@@ -394,7 +421,7 @@ export default function ReservationsPage() {
                   <div className="w-5 h-5">×</div>
                 </button>
               </div>
-              
+
               <div className="mb-6">
                 <p className="text-gray-600 mb-4">
                   정말로 이 예약을 취소하시겠습니까?
@@ -405,7 +432,7 @@ export default function ReservationsPage() {
                   </p>
                 </div>
               </div>
-              
+
               <div className="flex justify-end gap-3">
                 <button
                   type="button"
@@ -439,4 +466,4 @@ export default function ReservationsPage() {
       </div>
     </div>
   );
-} 
+}

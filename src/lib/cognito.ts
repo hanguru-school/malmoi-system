@@ -1,5 +1,9 @@
-import { CognitoUserPool, CognitoUser, AuthenticationDetails } from 'amazon-cognito-identity-js';
-import { cognitoConfig } from './cognito-provider';
+import {
+  CognitoUserPool,
+  CognitoUser,
+  AuthenticationDetails,
+} from "amazon-cognito-identity-js";
+import { cognitoConfig } from "./cognito-provider";
 
 // Cognito User Pool 설정
 const poolData = {
@@ -35,7 +39,7 @@ export const signIn = (username: string, password: string): Promise<any> => {
       onFailure: (err) => {
         reject({
           success: false,
-          error: err.message || '로그인에 실패했습니다.',
+          error: err.message || "로그인에 실패했습니다.",
         });
       },
     });
@@ -54,7 +58,7 @@ export const getSession = (): Promise<any> => {
         if (err) {
           reject({
             success: false,
-            error: err.message || '세션을 가져오는데 실패했습니다.',
+            error: err.message || "세션을 가져오는데 실패했습니다.",
           });
         } else if (session.isValid()) {
           resolve({
@@ -66,14 +70,14 @@ export const getSession = (): Promise<any> => {
         } else {
           reject({
             success: false,
-            error: '세션이 유효하지 않습니다.',
+            error: "세션이 유효하지 않습니다.",
           });
         }
       });
     } else {
       reject({
         success: false,
-        error: '로그인된 사용자가 없습니다.',
+        error: "로그인된 사용자가 없습니다.",
       });
     }
   });
@@ -87,7 +91,7 @@ export const getUserAttributes = (): Promise<any> => {
         if (err) {
           reject({
             success: false,
-            error: err.message || '사용자 속성을 가져오는데 실패했습니다.',
+            error: err.message || "사용자 속성을 가져오는데 실패했습니다.",
           });
         } else {
           const userAttributes: any = {};
@@ -103,7 +107,7 @@ export const getUserAttributes = (): Promise<any> => {
     } else {
       reject({
         success: false,
-        error: '로그인된 사용자가 없습니다.',
+        error: "로그인된 사용자가 없습니다.",
       });
     }
   });
@@ -126,13 +130,13 @@ export const cognitoAuth = {
 };
 
 // 새로운 Cognito Provider에서 함수들을 다시 export
-export { 
-  createOAuthUrl, 
-  exchangeCodeForToken, 
-  parseIdToken, 
+export {
+  createOAuthUrl,
+  exchangeCodeForToken,
+  parseIdToken,
   getRedirectUrlByRole,
   validateCognitoConfig,
-  cognitoConfig
-} from './cognito-provider';
+  cognitoConfig,
+} from "./cognito-provider";
 
-export default cognitoAuth; 
+export default cognitoAuth;

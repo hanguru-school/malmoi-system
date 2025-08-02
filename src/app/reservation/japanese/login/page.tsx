@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
-import { useState, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { 
-  User, 
-  Lock, 
-  Eye, 
-  EyeOff, 
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import {
+  User,
+  Lock,
+  Eye,
+  EyeOff,
   AlertCircle,
   Loader2,
   Mail,
   Phone,
-  CreditCard
-} from 'lucide-react';
+  CreditCard,
+} from "lucide-react";
 
 interface LoginForm {
   email: string;
@@ -31,36 +31,36 @@ interface RegisterForm {
 function JapaneseLoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const action = searchParams.get('action') || 'new';
-  
+  const action = searchParams.get("action") || "new";
+
   const [isLogin, setIsLogin] = useState(true);
   const [form, setForm] = useState<LoginForm>({
-    email: '',
-    password: ''
+    email: "",
+    password: "",
   });
   const [registerForm, setRegisterForm] = useState<RegisterForm>({
-    name: '',
-    email: '',
-    phone: '',
-    password: '',
-    confirmPassword: '',
-    uid: ''
+    name: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
+    uid: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
+    setError("");
 
     try {
-      const response = await fetch('/api/reservation/japanese/login', {
-        method: 'POST',
+      const response = await fetch("/api/reservation/japanese/login", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(form),
       });
@@ -68,16 +68,16 @@ function JapaneseLoginPageContent() {
       const result = await response.json();
 
       if (result.success) {
-        if (action === 'new') {
-          router.push('/reservation/japanese/new');
+        if (action === "new") {
+          router.push("/reservation/japanese/new");
         } else {
-          router.push('/reservation/japanese/mypage');
+          router.push("/reservation/japanese/mypage");
         }
       } else {
-        setError(result.error || 'ログインに失敗しました');
+        setError(result.error || "ログインに失敗しました");
       }
     } catch (error) {
-      setError('サーバーエラーが発生しました');
+      setError("サーバーエラーが発生しました");
     } finally {
       setIsLoading(false);
     }
@@ -86,19 +86,19 @@ function JapaneseLoginPageContent() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
+    setError("");
 
     if (registerForm.password !== registerForm.confirmPassword) {
-      setError('パスワードが一致しません');
+      setError("パスワードが一致しません");
       setIsLoading(false);
       return;
     }
 
     try {
-      const response = await fetch('/api/reservation/japanese/register', {
-        method: 'POST',
+      const response = await fetch("/api/reservation/japanese/register", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(registerForm),
       });
@@ -107,27 +107,30 @@ function JapaneseLoginPageContent() {
 
       if (result.success) {
         setIsLogin(true);
-        setError('');
+        setError("");
         // 회원가입 성공 메시지
-        alert('アカウントが正常に作成されました。ログインしてください。');
+        alert("アカウントが正常に作成されました。ログインしてください。");
       } else {
-        setError(result.error || 'アカウント作成に失敗しました');
+        setError(result.error || "アカウント作成に失敗しました");
       }
     } catch (error) {
-      setError('サーバーエラーが発生しました');
+      setError("サーバーエラーが発生しました");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleInputChange = (field: keyof LoginForm, value: string) => {
-    setForm(prev => ({ ...prev, [field]: value }));
-    if (error) setError('');
+    setForm((prev) => ({ ...prev, [field]: value }));
+    if (error) setError("");
   };
 
-  const handleRegisterInputChange = (field: keyof RegisterForm, value: string) => {
-    setRegisterForm(prev => ({ ...prev, [field]: value }));
-    if (error) setError('');
+  const handleRegisterInputChange = (
+    field: keyof RegisterForm,
+    value: string,
+  ) => {
+    setRegisterForm((prev) => ({ ...prev, [field]: value }));
+    if (error) setError("");
   };
 
   return (
@@ -138,12 +141,12 @@ function JapaneseLoginPageContent() {
             <CreditCard className="h-6 w-6 text-blue-600" />
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            {isLogin ? 'ログイン' : 'アカウント作成'}
+            {isLogin ? "ログイン" : "アカウント作成"}
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             {isLogin ? (
               <>
-                アカウントをお持ちでない場合は{' '}
+                アカウントをお持ちでない場合は{" "}
                 <button
                   onClick={() => setIsLogin(false)}
                   className="font-medium text-blue-600 hover:text-blue-500"
@@ -153,7 +156,7 @@ function JapaneseLoginPageContent() {
               </>
             ) : (
               <>
-                既にアカウントをお持ちの場合は{' '}
+                既にアカウントをお持ちの場合は{" "}
                 <button
                   onClick={() => setIsLogin(true)}
                   className="font-medium text-blue-600 hover:text-blue-500"
@@ -169,7 +172,10 @@ function JapaneseLoginPageContent() {
           <form className="mt-8 space-y-6" onSubmit={handleLogin}>
             <div className="space-y-4">
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   メールアドレス
                 </label>
                 <div className="mt-1 relative">
@@ -182,7 +188,7 @@ function JapaneseLoginPageContent() {
                     type="email"
                     required
                     value={form.email}
-                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    onChange={(e) => handleInputChange("email", e.target.value)}
                     className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     placeholder="メールアドレスを入力してください"
                   />
@@ -190,7 +196,10 @@ function JapaneseLoginPageContent() {
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   パスワード
                 </label>
                 <div className="mt-1 relative">
@@ -200,10 +209,12 @@ function JapaneseLoginPageContent() {
                   <input
                     id="password"
                     name="password"
-                    type={showPassword ? 'text' : 'password'}
+                    type={showPassword ? "text" : "password"}
                     required
                     value={form.password}
-                    onChange={(e) => handleInputChange('password', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("password", e.target.value)
+                    }
                     className="appearance-none block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     placeholder="パスワードを入力してください"
                   />
@@ -245,7 +256,7 @@ function JapaneseLoginPageContent() {
                     ログイン中...
                   </>
                 ) : (
-                  'ログイン'
+                  "ログイン"
                 )}
               </button>
             </div>
@@ -254,7 +265,10 @@ function JapaneseLoginPageContent() {
           <form className="mt-8 space-y-6" onSubmit={handleRegister}>
             <div className="space-y-4">
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   お名前 *
                 </label>
                 <div className="mt-1 relative">
@@ -267,7 +281,9 @@ function JapaneseLoginPageContent() {
                     type="text"
                     required
                     value={registerForm.name}
-                    onChange={(e) => handleRegisterInputChange('name', e.target.value)}
+                    onChange={(e) =>
+                      handleRegisterInputChange("name", e.target.value)
+                    }
                     className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     placeholder="お名前を入力してください"
                   />
@@ -275,7 +291,10 @@ function JapaneseLoginPageContent() {
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   メールアドレス *
                 </label>
                 <div className="mt-1 relative">
@@ -288,7 +307,9 @@ function JapaneseLoginPageContent() {
                     type="email"
                     required
                     value={registerForm.email}
-                    onChange={(e) => handleRegisterInputChange('email', e.target.value)}
+                    onChange={(e) =>
+                      handleRegisterInputChange("email", e.target.value)
+                    }
                     className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     placeholder="メールアドレスを入力してください"
                   />
@@ -296,7 +317,10 @@ function JapaneseLoginPageContent() {
               </div>
 
               <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="phone"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   電話番号 *
                 </label>
                 <div className="mt-1 relative">
@@ -309,7 +333,9 @@ function JapaneseLoginPageContent() {
                     type="tel"
                     required
                     value={registerForm.phone}
-                    onChange={(e) => handleRegisterInputChange('phone', e.target.value)}
+                    onChange={(e) =>
+                      handleRegisterInputChange("phone", e.target.value)
+                    }
                     className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     placeholder="電話番号を入力してください"
                   />
@@ -317,7 +343,10 @@ function JapaneseLoginPageContent() {
               </div>
 
               <div>
-                <label htmlFor="uid" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="uid"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   教室発行コード *
                 </label>
                 <div className="mt-1 relative">
@@ -330,7 +359,9 @@ function JapaneseLoginPageContent() {
                     type="text"
                     required
                     value={registerForm.uid}
-                    onChange={(e) => handleRegisterInputChange('uid', e.target.value)}
+                    onChange={(e) =>
+                      handleRegisterInputChange("uid", e.target.value)
+                    }
                     className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     placeholder="教室発行コードを入力してください"
                   />
@@ -338,7 +369,10 @@ function JapaneseLoginPageContent() {
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   パスワード *
                 </label>
                 <div className="mt-1 relative">
@@ -348,10 +382,12 @@ function JapaneseLoginPageContent() {
                   <input
                     id="password"
                     name="password"
-                    type={showPassword ? 'text' : 'password'}
+                    type={showPassword ? "text" : "password"}
                     required
                     value={registerForm.password}
-                    onChange={(e) => handleRegisterInputChange('password', e.target.value)}
+                    onChange={(e) =>
+                      handleRegisterInputChange("password", e.target.value)
+                    }
                     className="appearance-none block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     placeholder="パスワードを入力してください"
                   />
@@ -370,7 +406,10 @@ function JapaneseLoginPageContent() {
               </div>
 
               <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   パスワード確認 *
                 </label>
                 <div className="mt-1 relative">
@@ -380,10 +419,15 @@ function JapaneseLoginPageContent() {
                   <input
                     id="confirmPassword"
                     name="confirmPassword"
-                    type={showConfirmPassword ? 'text' : 'password'}
+                    type={showConfirmPassword ? "text" : "password"}
                     required
                     value={registerForm.confirmPassword}
-                    onChange={(e) => handleRegisterInputChange('confirmPassword', e.target.value)}
+                    onChange={(e) =>
+                      handleRegisterInputChange(
+                        "confirmPassword",
+                        e.target.value,
+                      )
+                    }
                     className="appearance-none block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                     placeholder="パスワードを再入力してください"
                   />
@@ -425,7 +469,7 @@ function JapaneseLoginPageContent() {
                     作成中...
                   </>
                 ) : (
-                  'アカウント作成'
+                  "アカウント作成"
                 )}
               </button>
             </div>
@@ -442,4 +486,4 @@ export default function JapaneseLoginPage() {
       <JapaneseLoginPageContent />
     </Suspense>
   );
-} 
+}

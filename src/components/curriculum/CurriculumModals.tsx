@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { User, Clock } from 'lucide-react';
+import React, { useState } from "react";
+import { User, Clock } from "lucide-react";
 
 interface CurriculumLevel {
   id: string;
@@ -30,7 +30,7 @@ interface CurriculumItem {
   title: string;
   description: string;
   examples: string[];
-  status: 'not_taught' | 'completed' | 'continued' | 'skipped';
+  status: "not_taught" | "completed" | "continued" | "skipped";
   explanationCount: number;
   lastExplainedAt?: Date;
   notes: string;
@@ -49,24 +49,32 @@ interface Student {
   };
 }
 
-export function AddLevelModal({ onClose, onAdd }: { onClose: () => void; onAdd: (level: Omit<CurriculumLevel, 'id' | 'createdAt' | 'updatedAt'>) => void }) {
+export function AddLevelModal({
+  onClose,
+  onAdd,
+}: {
+  onClose: () => void;
+  onAdd: (
+    level: Omit<CurriculumLevel, "id" | "createdAt" | "updatedAt">,
+  ) => void;
+}) {
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    objectives: [''],
-    vocabulary: [''],
-    expressions: ['']
+    name: "",
+    description: "",
+    objectives: [""],
+    vocabulary: [""],
+    expressions: [""],
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onAdd({
       ...formData,
-      objectives: formData.objectives.filter(obj => obj.trim()),
-      vocabulary: formData.vocabulary.filter(voc => voc.trim()),
-      expressions: formData.expressions.filter(exp => exp.trim()),
+      objectives: formData.objectives.filter((obj) => obj.trim()),
+      vocabulary: formData.vocabulary.filter((voc) => voc.trim()),
+      expressions: formData.expressions.filter((exp) => exp.trim()),
       subLevels: [],
-      order: 1
+      order: 1,
     });
   };
 
@@ -76,27 +84,37 @@ export function AddLevelModal({ onClose, onAdd }: { onClose: () => void; onAdd: 
         <h2 className="text-xl font-semibold mb-4">새 레벨 추가</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">레벨 이름</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              레벨 이름
+            </label>
             <input
               type="text"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
               className="w-full p-2 border border-gray-300 rounded-lg"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">설명</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              설명
+            </label>
             <textarea
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               className="w-full p-2 border border-gray-300 rounded-lg"
               rows={3}
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">학습 목표</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              학습 목표
+            </label>
             {formData.objectives.map((objective, index) => (
               <div key={index} className="flex space-x-2 mb-2">
                 <input
@@ -113,7 +131,9 @@ export function AddLevelModal({ onClose, onAdd }: { onClose: () => void; onAdd: 
                 <button
                   type="button"
                   onClick={() => {
-                    const newObjectives = formData.objectives.filter((_, i) => i !== index);
+                    const newObjectives = formData.objectives.filter(
+                      (_, i) => i !== index,
+                    );
                     setFormData({ ...formData, objectives: newObjectives });
                   }}
                   className="px-3 py-2 bg-red-600 text-white rounded-lg"
@@ -124,14 +144,21 @@ export function AddLevelModal({ onClose, onAdd }: { onClose: () => void; onAdd: 
             ))}
             <button
               type="button"
-              onClick={() => setFormData({ ...formData, objectives: [...formData.objectives, ''] })}
+              onClick={() =>
+                setFormData({
+                  ...formData,
+                  objectives: [...formData.objectives, ""],
+                })
+              }
               className="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm"
             >
               목표 추가
             </button>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">필수 어휘</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              필수 어휘
+            </label>
             {formData.vocabulary.map((vocab, index) => (
               <div key={index} className="flex space-x-2 mb-2">
                 <input
@@ -148,7 +175,9 @@ export function AddLevelModal({ onClose, onAdd }: { onClose: () => void; onAdd: 
                 <button
                   type="button"
                   onClick={() => {
-                    const newVocabulary = formData.vocabulary.filter((_, i) => i !== index);
+                    const newVocabulary = formData.vocabulary.filter(
+                      (_, i) => i !== index,
+                    );
                     setFormData({ ...formData, vocabulary: newVocabulary });
                   }}
                   className="px-3 py-2 bg-red-600 text-white rounded-lg"
@@ -159,14 +188,21 @@ export function AddLevelModal({ onClose, onAdd }: { onClose: () => void; onAdd: 
             ))}
             <button
               type="button"
-              onClick={() => setFormData({ ...formData, vocabulary: [...formData.vocabulary, ''] })}
+              onClick={() =>
+                setFormData({
+                  ...formData,
+                  vocabulary: [...formData.vocabulary, ""],
+                })
+              }
               className="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm"
             >
               어휘 추가
             </button>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">기본 표현</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              기본 표현
+            </label>
             {formData.expressions.map((expression, index) => (
               <div key={index} className="flex space-x-2 mb-2">
                 <input
@@ -183,7 +219,9 @@ export function AddLevelModal({ onClose, onAdd }: { onClose: () => void; onAdd: 
                 <button
                   type="button"
                   onClick={() => {
-                    const newExpressions = formData.expressions.filter((_, i) => i !== index);
+                    const newExpressions = formData.expressions.filter(
+                      (_, i) => i !== index,
+                    );
                     setFormData({ ...formData, expressions: newExpressions });
                   }}
                   className="px-3 py-2 bg-red-600 text-white rounded-lg"
@@ -194,7 +232,12 @@ export function AddLevelModal({ onClose, onAdd }: { onClose: () => void; onAdd: 
             ))}
             <button
               type="button"
-              onClick={() => setFormData({ ...formData, expressions: [...formData.expressions, ''] })}
+              onClick={() =>
+                setFormData({
+                  ...formData,
+                  expressions: [...formData.expressions, ""],
+                })
+              }
               className="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm"
             >
               표현 추가
@@ -221,10 +264,16 @@ export function AddLevelModal({ onClose, onAdd }: { onClose: () => void; onAdd: 
   );
 }
 
-export function AddSubLevelModal({ onClose, onAdd }: { onClose: () => void; onAdd: (subLevel: Omit<CurriculumSubLevel, 'id' | 'parentLevelId'>) => void }) {
+export function AddSubLevelModal({
+  onClose,
+  onAdd,
+}: {
+  onClose: () => void;
+  onAdd: (subLevel: Omit<CurriculumSubLevel, "id" | "parentLevelId">) => void;
+}) {
   const [formData, setFormData] = useState({
-    name: '',
-    description: ''
+    name: "",
+    description: "",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -232,7 +281,7 @@ export function AddSubLevelModal({ onClose, onAdd }: { onClose: () => void; onAd
     onAdd({
       ...formData,
       items: [],
-      order: 1
+      order: 1,
     });
   };
 
@@ -242,20 +291,28 @@ export function AddSubLevelModal({ onClose, onAdd }: { onClose: () => void; onAd
         <h2 className="text-xl font-semibold mb-4">새 소분류 추가</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">소분류 이름</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              소분류 이름
+            </label>
             <input
               type="text"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
               className="w-full p-2 border border-gray-300 rounded-lg"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">설명</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              설명
+            </label>
             <textarea
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               className="w-full p-2 border border-gray-300 rounded-lg"
               rows={3}
               required
@@ -282,22 +339,28 @@ export function AddSubLevelModal({ onClose, onAdd }: { onClose: () => void; onAd
   );
 }
 
-export function AddItemModal({ onClose, onAdd }: { onClose: () => void; onAdd: (item: Omit<CurriculumItem, 'id' | 'parentSubLevelId'>) => void }) {
+export function AddItemModal({
+  onClose,
+  onAdd,
+}: {
+  onClose: () => void;
+  onAdd: (item: Omit<CurriculumItem, "id" | "parentSubLevelId">) => void;
+}) {
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    examples: ['']
+    title: "",
+    description: "",
+    examples: [""],
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onAdd({
       ...formData,
-      examples: formData.examples.filter(example => example.trim()),
-      status: 'not_taught',
+      examples: formData.examples.filter((example) => example.trim()),
+      status: "not_taught",
       explanationCount: 0,
-      notes: '',
-      order: 1
+      notes: "",
+      order: 1,
     });
   };
 
@@ -307,27 +370,37 @@ export function AddItemModal({ onClose, onAdd }: { onClose: () => void; onAdd: (
         <h2 className="text-xl font-semibold mb-4">새 항목 추가</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">항목 제목</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              항목 제목
+            </label>
             <input
               type="text"
               value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, title: e.target.value })
+              }
               className="w-full p-2 border border-gray-300 rounded-lg"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">상세 설명</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              상세 설명
+            </label>
             <textarea
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               className="w-full p-2 border border-gray-300 rounded-lg"
               rows={3}
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">예시</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              예시
+            </label>
             {formData.examples.map((example, index) => (
               <div key={index} className="flex space-x-2 mb-2">
                 <input
@@ -344,7 +417,9 @@ export function AddItemModal({ onClose, onAdd }: { onClose: () => void; onAdd: (
                 <button
                   type="button"
                   onClick={() => {
-                    const newExamples = formData.examples.filter((_, i) => i !== index);
+                    const newExamples = formData.examples.filter(
+                      (_, i) => i !== index,
+                    );
                     setFormData({ ...formData, examples: newExamples });
                   }}
                   className="px-3 py-2 bg-red-600 text-white rounded-lg"
@@ -355,7 +430,12 @@ export function AddItemModal({ onClose, onAdd }: { onClose: () => void; onAdd: (
             ))}
             <button
               type="button"
-              onClick={() => setFormData({ ...formData, examples: [...formData.examples, ''] })}
+              onClick={() =>
+                setFormData({
+                  ...formData,
+                  examples: [...formData.examples, ""],
+                })
+              }
               className="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm"
             >
               예시 추가
@@ -382,26 +462,27 @@ export function AddItemModal({ onClose, onAdd }: { onClose: () => void; onAdd: (
   );
 }
 
-export function StudentSelectorModal({ 
-  students, 
-  allStudents, 
-  selectedStudent, 
-  onSelect, 
-  onClose 
-}: { 
-  students: Student[]; 
-  allStudents: Student[]; 
-  selectedStudent: string; 
-  onSelect: (studentId: string) => void; 
-  onClose: () => void; 
+export function StudentSelectorModal({
+  students,
+  allStudents,
+  selectedStudent,
+  onSelect,
+  onClose,
+}: {
+  students: Student[];
+  allStudents: Student[];
+  selectedStudent: string;
+  onSelect: (studentId: string) => void;
+  onClose: () => void;
 }) {
   const [showAllStudents, setShowAllStudents] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredStudents = showAllStudents 
-    ? allStudents.filter(student => 
-        student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        student.level.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredStudents = showAllStudents
+    ? allStudents.filter(
+        (student) =>
+          student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          student.level.toLowerCase().includes(searchTerm.toLowerCase()),
       )
     : students;
 
@@ -409,7 +490,7 @@ export function StudentSelectorModal({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-md">
         <h2 className="text-xl font-semibold mb-4">학생 선택</h2>
-        
+
         <div className="mb-4">
           <input
             type="text"
@@ -425,20 +506,20 @@ export function StudentSelectorModal({
             onClick={() => setShowAllStudents(!showAllStudents)}
             className="w-full p-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
           >
-            {showAllStudents ? '현재 수업 학생만 보기' : '전체 학생 보기'}
+            {showAllStudents ? "현재 수업 학생만 보기" : "전체 학생 보기"}
           </button>
         </div>
 
         <div className="space-y-2 max-h-60 overflow-y-auto">
           <button
             onClick={() => {
-              onSelect('');
+              onSelect("");
               onClose();
             }}
             className={`w-full p-3 text-left rounded-lg border ${
-              selectedStudent === '' 
-                ? 'bg-blue-50 border-blue-200 text-blue-700' 
-                : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+              selectedStudent === ""
+                ? "bg-blue-50 border-blue-200 text-blue-700"
+                : "bg-gray-50 border-gray-200 hover:bg-gray-100"
             }`}
           >
             <div className="flex items-center space-x-2">
@@ -455,16 +536,18 @@ export function StudentSelectorModal({
                 onClose();
               }}
               className={`w-full p-3 text-left rounded-lg border ${
-                selectedStudent === student.id 
-                  ? 'bg-blue-50 border-blue-200 text-blue-700' 
-                  : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                selectedStudent === student.id
+                  ? "bg-blue-50 border-blue-200 text-blue-700"
+                  : "bg-gray-50 border-gray-200 hover:bg-gray-100"
               }`}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <User className="w-4 h-4" />
                   <span>{student.name}</span>
-                  <span className="text-sm text-gray-500">(레벨 {student.level})</span>
+                  <span className="text-sm text-gray-500">
+                    (레벨 {student.level})
+                  </span>
                 </div>
                 {student.currentLesson && (
                   <Clock className="w-4 h-4 text-green-500" />
@@ -485,4 +568,4 @@ export function StudentSelectorModal({
       </div>
     </div>
   );
-} 
+}

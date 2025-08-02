@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { 
-  BookOpen, 
-  Calendar, 
-  MessageSquare, 
+import { useState } from "react";
+import {
+  BookOpen,
+  Calendar,
+  MessageSquare,
   Clock,
   Languages,
   User,
   Settings,
   LogOut,
   Users,
-  CheckCircle
-} from 'lucide-react';
-import { useRouter } from 'next/navigation';
+  CheckCircle,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 
 // 다국어 텍스트 정의
 const translations = {
@@ -40,7 +40,7 @@ const translations = {
     totalStudents: "総生徒数",
     activeStudents: "アクティブな生徒",
     completedClasses: "完了したレッスン",
-    pendingTasks: "保留中のタスク"
+    pendingTasks: "保留中のタスク",
   },
   ko: {
     title: "한국어교실MalMoi",
@@ -65,22 +65,22 @@ const translations = {
     totalStudents: "총 학생 수",
     activeStudents: "활성 학생",
     completedClasses: "완료된 수업",
-    pendingTasks: "대기 중인 작업"
-  }
+    pendingTasks: "대기 중인 작업",
+  },
 };
 
 export default function EmployeeDashboard() {
   const router = useRouter();
-  const [language, setLanguage] = useState<'ja' | 'ko'>('ja');
-  
+  const [language, setLanguage] = useState<"ja" | "ko">("ja");
+
   const t = translations[language];
 
   const toggleLanguage = () => {
-    setLanguage(language === 'ja' ? 'ko' : 'ja');
+    setLanguage(language === "ja" ? "ko" : "ja");
   };
 
   const handleLogout = () => {
-    router.push('/auth/login');
+    router.push("/auth/login");
   };
 
   return (
@@ -101,10 +101,10 @@ export default function EmployeeDashboard() {
                 className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200"
               >
                 <Languages className="w-4 h-4" />
-                {language === 'ja' ? '한국어' : '日本語'}
+                {language === "ja" ? "한국어" : "日本語"}
               </button>
               <button
-                onClick={() => router.push('/employee/settings')}
+                onClick={() => router.push("/employee/settings")}
                 className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200"
               >
                 <Settings className="w-4 h-4" />
@@ -126,65 +126,61 @@ export default function EmployeeDashboard() {
       <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Welcome Section */}
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            {t.welcome}
-          </h2>
-          <p className="text-lg text-gray-600">
-            {t.subtitle}
-          </p>
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">{t.welcome}</h2>
+          <p className="text-lg text-gray-600">{t.subtitle}</p>
         </div>
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <button
-            onClick={() => router.push('/employee/attendance')}
+            onClick={() => router.push("/employee/attendance")}
             className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl"
           >
             <CheckCircle className="w-8 h-8 mb-3" />
-            <h3 className="text-lg font-semibold mb-2">
-              {t.attendance}
-            </h3>
+            <h3 className="text-lg font-semibold mb-2">{t.attendance}</h3>
             <p className="text-sm opacity-90">
-              {language === 'ja' ? '出勤状況を管理する' : '출근 상황을 관리하세요'}
+              {language === "ja"
+                ? "出勤状況を管理する"
+                : "출근 상황을 관리하세요"}
             </p>
           </button>
 
           <button
-            onClick={() => router.push('/employee/schedule')}
+            onClick={() => router.push("/employee/schedule")}
             className="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg hover:shadow-xl"
           >
             <Calendar className="w-8 h-8 mb-3" />
-            <h3 className="text-lg font-semibold mb-2">
-              {t.schedule}
-            </h3>
+            <h3 className="text-lg font-semibold mb-2">{t.schedule}</h3>
             <p className="text-sm opacity-90">
-              {language === 'ja' ? 'スケジュールを確認する' : '스케줄을 확인하세요'}
+              {language === "ja"
+                ? "スケジュールを確認する"
+                : "스케줄을 확인하세요"}
             </p>
           </button>
 
           <button
-            onClick={() => router.push('/employee/students')}
+            onClick={() => router.push("/employee/students")}
             className="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl"
           >
             <Users className="w-8 h-8 mb-3" />
-            <h3 className="text-lg font-semibold mb-2">
-              {t.students}
-            </h3>
+            <h3 className="text-lg font-semibold mb-2">{t.students}</h3>
             <p className="text-sm opacity-90">
-              {language === 'ja' ? '生徒情報を管理する' : '학생 정보를 관리하세요'}
+              {language === "ja"
+                ? "生徒情報を管理する"
+                : "학생 정보를 관리하세요"}
             </p>
           </button>
 
           <button
-            onClick={() => router.push('/employee/messages')}
+            onClick={() => router.push("/employee/messages")}
             className="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-6 rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all duration-200 shadow-lg hover:shadow-xl"
           >
             <MessageSquare className="w-8 h-8 mb-3" />
-            <h3 className="text-lg font-semibold mb-2">
-              {t.messages}
-            </h3>
+            <h3 className="text-lg font-semibold mb-2">{t.messages}</h3>
             <p className="text-sm opacity-90">
-              {language === 'ja' ? 'メッセージを確認する' : '메시지를 확인하세요'}
+              {language === "ja"
+                ? "メッセージを確認する"
+                : "메시지를 확인하세요"}
             </p>
           </button>
         </div>
@@ -194,7 +190,7 @@ export default function EmployeeDashboard() {
           <h3 className="text-xl font-semibold text-gray-900 mb-6">
             {t.todayAttendance}
           </h3>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="text-center">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -203,7 +199,7 @@ export default function EmployeeDashboard() {
               <div className="text-2xl font-bold text-gray-900">08:30</div>
               <div className="text-sm text-gray-600">{t.checkIn}</div>
             </div>
-            
+
             <div className="text-center">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
                 <Clock className="w-8 h-8 text-blue-600" />
@@ -211,7 +207,7 @@ export default function EmployeeDashboard() {
               <div className="text-2xl font-bold text-gray-900">8.5</div>
               <div className="text-sm text-gray-600">{t.workingHours}</div>
             </div>
-            
+
             <div className="text-center">
               <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
                 <Users className="w-8 h-8 text-purple-600" />
@@ -219,7 +215,7 @@ export default function EmployeeDashboard() {
               <div className="text-2xl font-bold text-gray-900">45</div>
               <div className="text-sm text-gray-600">{t.totalStudents}</div>
             </div>
-            
+
             <div className="text-center">
               <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
                 <Calendar className="w-8 h-8 text-orange-600" />
@@ -242,7 +238,7 @@ export default function EmployeeDashboard() {
                 {t.viewAll}
               </button>
             </div>
-            
+
             <div className="space-y-4">
               <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -250,24 +246,28 @@ export default function EmployeeDashboard() {
                 </div>
                 <div className="flex-1">
                   <h4 className="font-medium text-gray-900">
-                    {language === 'ja' ? '中級会話レッスン' : '중급 회화 수업'}
+                    {language === "ja" ? "中級会話レッスン" : "중급 회화 수업"}
                   </h4>
                   <p className="text-sm text-gray-600">
-                    {language === 'ja' ? '明日 18:00 - 19:00' : '내일 18:00 - 19:00'}
+                    {language === "ja"
+                      ? "明日 18:00 - 19:00"
+                      : "내일 18:00 - 19:00"}
                   </p>
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
                 <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                   <Calendar className="w-6 h-6 text-green-600" />
                 </div>
                 <div className="flex-1">
                   <h4 className="font-medium text-gray-900">
-                    {language === 'ja' ? '初級文法レッスン' : '초급 문법 수업'}
+                    {language === "ja" ? "初級文法レッスン" : "초급 문법 수업"}
                   </h4>
                   <p className="text-sm text-gray-600">
-                    {language === 'ja' ? '金曜日 19:00 - 20:00' : '금요일 19:00 - 20:00'}
+                    {language === "ja"
+                      ? "金曜日 19:00 - 20:00"
+                      : "금요일 19:00 - 20:00"}
                   </p>
                 </div>
               </div>
@@ -284,7 +284,7 @@ export default function EmployeeDashboard() {
                 {t.viewAll}
               </button>
             </div>
-            
+
             <div className="space-y-4">
               <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
                 <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
@@ -292,31 +292,35 @@ export default function EmployeeDashboard() {
                 </div>
                 <div className="flex-1">
                   <h4 className="font-medium text-gray-900">
-                    {language === 'ja' ? '田中先生' : '田中선생님'}
+                    {language === "ja" ? "田中先生" : "田中선생님"}
                   </h4>
                   <p className="text-sm text-gray-600">
-                    {language === 'ja' ? 'レッスン資料の準備をお願いします' : '수업 자료 준비를 부탁드립니다'}
+                    {language === "ja"
+                      ? "レッスン資料の準備をお願いします"
+                      : "수업 자료 준비를 부탁드립니다"}
                   </p>
                 </div>
                 <div className="text-xs text-gray-500">
-                  {language === 'ja' ? '1時間前' : '1시간 전'}
+                  {language === "ja" ? "1時間前" : "1시간 전"}
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
                 <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
                   <User className="w-6 h-6 text-orange-600" />
                 </div>
                 <div className="flex-1">
                   <h4 className="font-medium text-gray-900">
-                    {language === 'ja' ? 'システム' : '시스템'}
+                    {language === "ja" ? "システム" : "시스템"}
                   </h4>
                   <p className="text-sm text-gray-600">
-                    {language === 'ja' ? '新しい生徒が登録されました' : '새로운 학생이 등록되었습니다'}
+                    {language === "ja"
+                      ? "新しい生徒が登録されました"
+                      : "새로운 학생이 등록되었습니다"}
                   </p>
                 </div>
                 <div className="text-xs text-gray-500">
-                  {language === 'ja' ? '2時間前' : '2시간 전'}
+                  {language === "ja" ? "2時間前" : "2시간 전"}
                 </div>
               </div>
             </div>
@@ -325,4 +329,4 @@ export default function EmployeeDashboard() {
       </main>
     </div>
   );
-} 
+}

@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
-import React, { Suspense } from 'react';
-import { CheckCircle, Loader2 } from 'lucide-react';
+import React, { Suspense } from "react";
+import { CheckCircle, Loader2 } from "lucide-react";
 
 function AuthSuccessContent() {
-  const { useRouter, useSearchParams } = require('next/navigation');
+  const { useRouter, useSearchParams } = require("next/navigation");
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   const [countdown, setCountdown] = React.useState(3);
-  const [userEmail, setUserEmail] = React.useState<string>('');
+  const [userEmail, setUserEmail] = React.useState<string>("");
 
   React.useEffect(() => {
-    const user = searchParams.get('user');
+    const user = searchParams.get("user");
     if (user) {
       setUserEmail(user);
     }
@@ -21,7 +21,7 @@ function AuthSuccessContent() {
     const timer = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
-          router.push('/');
+          router.push("/");
           return 0;
         }
         return prev - 1;
@@ -53,14 +53,14 @@ function AuthSuccessContent() {
 
         <div className="space-y-3">
           <button
-            onClick={() => router.push('/')}
+            onClick={() => router.push("/")}
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
           >
             지금 이동하기
           </button>
-          
+
           <button
-            onClick={() => router.push('/student/dashboard')}
+            onClick={() => router.push("/student/dashboard")}
             className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors"
           >
             대시보드로 이동
@@ -81,9 +81,7 @@ function LoadingFallback() {
       <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
         <div className="mb-6">
           <Loader2 className="w-16 h-16 text-blue-500 mx-auto mb-4 animate-spin" />
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            로딩 중...
-          </h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">로딩 중...</h1>
         </div>
       </div>
     </div>
@@ -96,4 +94,4 @@ export default function AuthSuccessPage() {
       <AuthSuccessContent />
     </Suspense>
   );
-} 
+}

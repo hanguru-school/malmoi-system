@@ -1,5 +1,5 @@
-import { Construction, ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
+import { Construction, ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 interface ComingSoonPageProps {
   title: string;
@@ -8,11 +8,11 @@ interface ComingSoonPageProps {
   backText?: string;
 }
 
-export default function ComingSoonPage({ 
-  title, 
+export default function ComingSoonPage({
+  title,
   description = "이 기능은 현재 개발 중입니다. 곧 만나보실 수 있습니다!",
   backHref = "/",
-  backText = "홈으로 돌아가기"
+  backText = "홈으로 돌아가기",
 }: ComingSoonPageProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 flex items-center justify-center p-6">
@@ -28,9 +28,7 @@ export default function ComingSoonPage({
         </div>
 
         {/* 제목 */}
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">
-          {title}
-        </h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-4">{title}</h1>
 
         {/* 설명 */}
         <p className="text-lg text-gray-600 mb-8 leading-relaxed">
@@ -41,28 +39,41 @@ export default function ComingSoonPage({
         <div className="bg-white rounded-lg p-6 mb-8 shadow-lg">
           <div className="text-sm text-gray-600 mb-3">개발 진행률</div>
           <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
-            <div className="bg-gradient-to-r from-orange-400 to-red-500 h-2 rounded-full animate-pulse" style={{ width: '65%' }}></div>
+            <div
+              className="bg-gradient-to-r from-orange-400 to-red-500 h-2 rounded-full animate-pulse"
+              style={{ width: "65%" }}
+            ></div>
           </div>
           <div className="text-xs text-gray-500">65% 완료</div>
         </div>
 
         {/* 예상 출시일 */}
         <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-8">
-          <div className="text-sm font-medium text-orange-800 mb-1">예상 출시일</div>
-          <div className="text-lg font-semibold text-orange-900">2024년 2월</div>
+          <div className="text-sm font-medium text-orange-800 mb-1">
+            예상 출시일
+          </div>
+          <div className="text-lg font-semibold text-orange-900">
+            2024년 2월
+          </div>
         </div>
 
         {/* 기능 미리보기 */}
         <div className="bg-white rounded-lg p-6 mb-8 shadow-lg">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">준비 중인 기능들</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            준비 중인 기능들
+          </h3>
           <div className="space-y-3 text-left">
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-              <span className="text-sm text-gray-700">직관적인 사용자 인터페이스</span>
+              <span className="text-sm text-gray-700">
+                직관적인 사용자 인터페이스
+              </span>
             </div>
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-              <span className="text-sm text-gray-700">실시간 데이터 동기화</span>
+              <span className="text-sm text-gray-700">
+                실시간 데이터 동기화
+              </span>
             </div>
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
@@ -91,4 +102,4 @@ export default function ComingSoonPage({
       </div>
     </div>
   );
-} 
+}

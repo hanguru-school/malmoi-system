@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { 
-  CheckCircle, 
-  XCircle, 
-  AlertTriangle, 
-  Info, 
-  RefreshCw, 
-  Database, 
+import { useState, useEffect } from "react";
+import {
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  Info,
+  RefreshCw,
+  Database,
   Settings,
   Activity,
-  Copy
-} from 'lucide-react';
+  Copy,
+} from "lucide-react";
 
 interface EnvironmentStatus {
   timestamp: string;
@@ -58,14 +58,14 @@ export default function EnvironmentStatusPage() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('/api/system/env-status');
-      
+      const response = await fetch("/api/system/env-status");
+
       if (response.ok) {
         const data = await response.json();
         setEnvStatus(data);
         setLastRefresh(new Date());
       } else {
-        throw new Error('Failed to fetch environment status');
+        throw new Error("Failed to fetch environment status");
       }
     } catch (err: any) {
       setError(err.message);
@@ -80,9 +80,9 @@ export default function EnvironmentStatusPage() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'healthy':
+      case "healthy":
         return <CheckCircle className="w-5 h-5 text-green-500" />;
-      case 'unhealthy':
+      case "unhealthy":
         return <XCircle className="w-5 h-5 text-red-500" />;
       default:
         return <AlertTriangle className="w-5 h-5 text-yellow-500" />;
@@ -91,12 +91,12 @@ export default function EnvironmentStatusPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'healthy':
-        return 'text-green-600 bg-green-50 border-green-200';
-      case 'unhealthy':
-        return 'text-red-600 bg-red-50 border-red-200';
+      case "healthy":
+        return "text-green-600 bg-green-50 border-green-200";
+      case "unhealthy":
+        return "text-red-600 bg-red-50 border-red-200";
       default:
-        return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+        return "text-yellow-600 bg-yellow-50 border-yellow-200";
     }
   };
 
@@ -106,14 +106,14 @@ export default function EnvironmentStatusPage() {
       setCopied(label);
       setTimeout(() => setCopied(null), 2000);
     } catch (err) {
-      console.error('Failed to copy to clipboard:', err);
+      console.error("Failed to copy to clipboard:", err);
     }
   };
 
   const formatValue = (value: string | undefined) => {
-    if (!value) return 'undefined';
-    if (value === '***') return '*** (마스킹됨)';
-    if (value.length > 50) return value.substring(0, 50) + '...';
+    if (!value) return "undefined";
+    if (value === "***") return "*** (마스킹됨)";
+    if (value.length > 50) return value.substring(0, 50) + "...";
     return value;
   };
 
@@ -123,7 +123,9 @@ export default function EnvironmentStatusPage() {
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-center h-64">
             <RefreshCw className="w-8 h-8 animate-spin text-blue-600" />
-            <span className="ml-2 text-gray-600">환경 변수 상태를 확인하는 중...</span>
+            <span className="ml-2 text-gray-600">
+              환경 변수 상태를 확인하는 중...
+            </span>
           </div>
         </div>
       </div>
@@ -159,7 +161,9 @@ export default function EnvironmentStatusPage() {
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">환경 변수 상태</h1>
+              <h1 className="text-3xl font-bold text-gray-900">
+                환경 변수 상태
+              </h1>
               <p className="text-gray-600 mt-2">
                 시스템 환경 변수 설정 상태를 확인하고 관리합니다
               </p>
@@ -183,12 +187,16 @@ export default function EnvironmentStatusPage() {
           <>
             {/* 요약 카드 */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              <div className={`p-6 rounded-lg border ${getStatusColor(envStatus.summary.status)}`}>
+              <div
+                className={`p-6 rounded-lg border ${getStatusColor(envStatus.summary.status)}`}
+              >
                 <div className="flex items-center">
                   {getStatusIcon(envStatus.summary.status)}
                   <div className="ml-3">
                     <h3 className="text-lg font-semibold">전체 상태</h3>
-                    <p className="text-sm capitalize">{envStatus.summary.status}</p>
+                    <p className="text-sm capitalize">
+                      {envStatus.summary.status}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -227,22 +235,27 @@ export default function EnvironmentStatusPage() {
             {/* 환경 변수 그룹별 상세 */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {Object.entries(envStatus.config).map(([group, vars]) => (
-                <div key={group} className="bg-white rounded-lg border border-gray-200 p-6">
+                <div
+                  key={group}
+                  className="bg-white rounded-lg border border-gray-200 p-6"
+                >
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-xl font-semibold flex items-center">
                       <Settings className="w-5 h-5 mr-2" />
-                      {group.replace('_', ' ').toUpperCase()}
+                      {group.replace("_", " ").toUpperCase()}
                     </h2>
                     <span className="text-sm text-gray-500">
                       {Object.keys(vars).length}개 변수
                     </span>
                   </div>
-                  
+
                   <div className="space-y-3">
                     {Object.entries(vars).map(([key, value]) => (
                       <div key={key} className="p-3 bg-gray-50 rounded-lg">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-mono text-gray-700">{key}</span>
+                          <span className="text-sm font-mono text-gray-700">
+                            {key}
+                          </span>
                           <button
                             onClick={() => copyToClipboard(key, key)}
                             className="text-gray-400 hover:text-gray-600"
@@ -255,7 +268,7 @@ export default function EnvironmentStatusPage() {
                           <span className="text-sm font-mono text-gray-800 break-all">
                             {formatValue(value)}
                           </span>
-                          {value && value !== 'undefined' && (
+                          {value && value !== "undefined" && (
                             <button
                               onClick={() => copyToClipboard(value, key)}
                               className="text-gray-400 hover:text-gray-600 ml-2"
@@ -266,7 +279,9 @@ export default function EnvironmentStatusPage() {
                           )}
                         </div>
                         {copied === key && (
-                          <div className="text-xs text-green-600 mt-1">복사됨!</div>
+                          <div className="text-xs text-green-600 mt-1">
+                            복사됨!
+                          </div>
                         )}
                       </div>
                     ))}
@@ -281,36 +296,50 @@ export default function EnvironmentStatusPage() {
                 <Activity className="w-5 h-5 mr-2" />
                 검증 결과
               </h2>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* 누락된 변수 */}
                 <div>
-                  <h3 className="font-semibold text-red-600 mb-2">누락된 변수</h3>
+                  <h3 className="font-semibold text-red-600 mb-2">
+                    누락된 변수
+                  </h3>
                   <div className="space-y-1">
                     {envStatus.validation.missingVars.length > 0 ? (
                       envStatus.validation.missingVars.map((varName, index) => (
-                        <div key={index} className="text-sm font-mono text-red-600 bg-red-50 p-2 rounded">
+                        <div
+                          key={index}
+                          className="text-sm font-mono text-red-600 bg-red-50 p-2 rounded"
+                        >
                           {varName}
                         </div>
                       ))
                     ) : (
-                      <div className="text-sm text-green-600">모든 필수 변수가 설정되어 있습니다.</div>
+                      <div className="text-sm text-green-600">
+                        모든 필수 변수가 설정되어 있습니다.
+                      </div>
                     )}
                   </div>
                 </div>
 
                 {/* 잘못된 변수 */}
                 <div>
-                  <h3 className="font-semibold text-yellow-600 mb-2">잘못된 변수</h3>
+                  <h3 className="font-semibold text-yellow-600 mb-2">
+                    잘못된 변수
+                  </h3>
                   <div className="space-y-1">
                     {envStatus.validation.invalidVars.length > 0 ? (
                       envStatus.validation.invalidVars.map((varName, index) => (
-                        <div key={index} className="text-sm font-mono text-yellow-600 bg-yellow-50 p-2 rounded">
+                        <div
+                          key={index}
+                          className="text-sm font-mono text-yellow-600 bg-yellow-50 p-2 rounded"
+                        >
                           {varName}
                         </div>
                       ))
                     ) : (
-                      <div className="text-sm text-green-600">모든 변수가 올바르게 설정되어 있습니다.</div>
+                      <div className="text-sm text-green-600">
+                        모든 변수가 올바르게 설정되어 있습니다.
+                      </div>
                     )}
                   </div>
                 </div>
@@ -321,12 +350,17 @@ export default function EnvironmentStatusPage() {
                   <div className="space-y-1">
                     {envStatus.validation.warnings.length > 0 ? (
                       envStatus.validation.warnings.map((warning, index) => (
-                        <div key={index} className="text-sm text-blue-600 bg-blue-50 p-2 rounded">
+                        <div
+                          key={index}
+                          className="text-sm text-blue-600 bg-blue-50 p-2 rounded"
+                        >
                           {warning}
                         </div>
                       ))
                     ) : (
-                      <div className="text-sm text-green-600">경고가 없습니다.</div>
+                      <div className="text-sm text-green-600">
+                        경고가 없습니다.
+                      </div>
                     )}
                   </div>
                 </div>
@@ -339,40 +373,65 @@ export default function EnvironmentStatusPage() {
                 <Info className="w-5 h-5 mr-2" />
                 시스템 정보
               </h2>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h3 className="font-semibold mb-2">기본 정보</h3>
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="text-gray-600">Node.js 버전</span>
-                      <span className="font-mono">{envStatus.system_info.node_version}</span>
+                      <span className="font-mono">
+                        {envStatus.system_info.node_version}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">플랫폼</span>
-                      <span className="font-mono">{envStatus.system_info.platform}</span>
+                      <span className="font-mono">
+                        {envStatus.system_info.platform}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">가동 시간</span>
-                      <span className="font-mono">{Math.round(envStatus.system_info.uptime)}초</span>
+                      <span className="font-mono">
+                        {Math.round(envStatus.system_info.uptime)}초
+                      </span>
                     </div>
                   </div>
                 </div>
-                
+
                 <div>
                   <h3 className="font-semibold mb-2">메모리 사용량</h3>
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="text-gray-600">RSS</span>
-                      <span className="font-mono">{Math.round(envStatus.system_info.memory_usage.rss / 1024 / 1024)} MB</span>
+                      <span className="font-mono">
+                        {Math.round(
+                          envStatus.system_info.memory_usage.rss / 1024 / 1024,
+                        )}{" "}
+                        MB
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Heap Total</span>
-                      <span className="font-mono">{Math.round(envStatus.system_info.memory_usage.heapTotal / 1024 / 1024)} MB</span>
+                      <span className="font-mono">
+                        {Math.round(
+                          envStatus.system_info.memory_usage.heapTotal /
+                            1024 /
+                            1024,
+                        )}{" "}
+                        MB
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Heap Used</span>
-                      <span className="font-mono">{Math.round(envStatus.system_info.memory_usage.heapUsed / 1024 / 1024)} MB</span>
+                      <span className="font-mono">
+                        {Math.round(
+                          envStatus.system_info.memory_usage.heapUsed /
+                            1024 /
+                            1024,
+                        )}{" "}
+                        MB
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -383,4 +442,4 @@ export default function EnvironmentStatusPage() {
       </div>
     </div>
   );
-} 
+}

@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React from 'react';
-import QRCode from 'react-qr-code';
+import React from "react";
+import QRCode from "react-qr-code";
 
 interface StudentQRCodeProps {
   data: string;
@@ -9,13 +9,15 @@ interface StudentQRCodeProps {
   className?: string;
 }
 
-export default function StudentQRCode({ 
-  data, 
-  size = 200, 
-  className = '' 
+export default function StudentQRCode({
+  data,
+  size = 200,
+  className = "",
 }: StudentQRCodeProps) {
   return (
-    <div className={`flex justify-center p-4 bg-white rounded-lg shadow-md ${className}`}>
+    <div
+      className={`flex justify-center p-4 bg-white rounded-lg shadow-md ${className}`}
+    >
       <QRCode
         value={data}
         size={size}
@@ -25,4 +27,4 @@ export default function StudentQRCode({
       />
     </div>
   );
-} 
+}

@@ -1,28 +1,28 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { NextRequest, NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const search = searchParams.get('search');
-    const status = searchParams.get('status');
-    const uidStatus = searchParams.get('uidStatus');
-    const page = parseInt(searchParams.get('page') || '1');
-    const pageSize = parseInt(searchParams.get('pageSize') || '25');
+    const search = searchParams.get("search");
+    const status = searchParams.get("status");
+    const uidStatus = searchParams.get("uidStatus");
+    const page = parseInt(searchParams.get("page") || "1");
+    const pageSize = parseInt(searchParams.get("pageSize") || "25");
 
     const where: any = {};
 
     if (search) {
       where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { user: { email: { contains: search, mode: 'insensitive' } } },
+        { name: { contains: search, mode: "insensitive" } },
+        { user: { email: { contains: search, mode: "insensitive" } } },
         { phone: { contains: search } },
       ];
     }
 
-    if (status && status !== 'all') {
+    if (status && status !== "all") {
       // 상태 필터링은 User 모델의 role을 기반으로 할 수 있습니다
       where.user = { role: status.toUpperCase() };
     }
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
       skip: (page - 1) * pageSize,
       take: pageSize,
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
     });
 
@@ -51,10 +51,10 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('고객 조회 실패:', error);
+    console.error("고객 조회 실패:", error);
     return NextResponse.json(
-      { error: '고객 조회에 실패했습니다.' },
-      { status: 500 }
+      { error: "고객 조회에 실패했습니다." },
+      { status: 500 },
     );
   }
 }
@@ -69,8 +69,8 @@ export async function POST(request: NextRequest) {
       kanjiName,
       yomigana,
       koreanName,
-      level = '초급 A',
-      password = 'temp_password', // 실제로는 해시된 비밀번호를 생성해야 함
+      level = "초급 A",
+      password = "temp_password", // 실제로는 해시된 비밀번호를 생성해야 함
     } = body;
 
     // 사용자 생성
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
         email,
         name,
         phone,
-        role: 'STUDENT',
+        role: "STUDENT",
         password,
       },
     });
@@ -102,10 +102,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(student);
   } catch (error) {
-    console.error('고객 생성 실패:', error);
+    console.error("고객 생성 실패:", error);
     return NextResponse.json(
-      { error: '고객 생성에 실패했습니다.' },
-      { status: 500 }
+      { error: "고객 생성에 실패했습니다." },
+      { status: 500 },
     );
   }
-} 
+}

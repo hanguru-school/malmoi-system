@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Search, Filter } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { Plus, Edit, Trash2, Search, Filter } from "lucide-react";
 
 interface MemoType {
   id: string;
@@ -16,8 +16,10 @@ interface MemoType {
 export default function MemoTypeManagementPage() {
   const [memoTypes, setMemoTypes] = useState<MemoType[]>([]);
   const [filteredMemoTypes, setFilteredMemoTypes] = useState<MemoType[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "active" | "inactive"
+  >("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMemoType, setEditingMemoType] = useState<MemoType | null>(null);
   const [loading, setLoading] = useState(true);
@@ -27,50 +29,50 @@ export default function MemoTypeManagementPage() {
     setTimeout(() => {
       const sampleData: MemoType[] = [
         {
-          id: '1',
-          name: '학습 진도',
-          description: '학생의 학습 진도 및 이해도 관련 메모',
-          color: '#3B82F6',
+          id: "1",
+          name: "학습 진도",
+          description: "학생의 학습 진도 및 이해도 관련 메모",
+          color: "#3B82F6",
           isActive: true,
-          createdAt: '2024-01-15',
-          updatedAt: '2024-01-15'
+          createdAt: "2024-01-15",
+          updatedAt: "2024-01-15",
         },
         {
-          id: '2',
-          name: '행동 관찰',
-          description: '수업 중 학생의 행동 및 태도 관찰 메모',
-          color: '#10B981',
+          id: "2",
+          name: "행동 관찰",
+          description: "수업 중 학생의 행동 및 태도 관찰 메모",
+          color: "#10B981",
           isActive: true,
-          createdAt: '2024-01-15',
-          updatedAt: '2024-01-15'
+          createdAt: "2024-01-15",
+          updatedAt: "2024-01-15",
         },
         {
-          id: '3',
-          name: '숙제 완료도',
-          description: '숙제 완료 상황 및 품질 관련 메모',
-          color: '#F59E0B',
+          id: "3",
+          name: "숙제 완료도",
+          description: "숙제 완료 상황 및 품질 관련 메모",
+          color: "#F59E0B",
           isActive: true,
-          createdAt: '2024-01-15',
-          updatedAt: '2024-01-15'
+          createdAt: "2024-01-15",
+          updatedAt: "2024-01-15",
         },
         {
-          id: '4',
-          name: '특별 주의사항',
-          description: '학생에게 특별히 주의해야 할 사항들',
-          color: '#EF4444',
+          id: "4",
+          name: "특별 주의사항",
+          description: "학생에게 특별히 주의해야 할 사항들",
+          color: "#EF4444",
           isActive: false,
-          createdAt: '2024-01-15',
-          updatedAt: '2024-01-15'
+          createdAt: "2024-01-15",
+          updatedAt: "2024-01-15",
         },
         {
-          id: '5',
-          name: '부모님 연락',
-          description: '부모님과의 연락 내용 및 요청사항',
-          color: '#8B5CF6',
+          id: "5",
+          name: "부모님 연락",
+          description: "부모님과의 연락 내용 및 요청사항",
+          color: "#8B5CF6",
           isActive: true,
-          createdAt: '2024-01-15',
-          updatedAt: '2024-01-15'
-        }
+          createdAt: "2024-01-15",
+          updatedAt: "2024-01-15",
+        },
       ];
       setMemoTypes(sampleData);
       setFilteredMemoTypes(sampleData);
@@ -84,16 +86,17 @@ export default function MemoTypeManagementPage() {
 
     // 검색 필터
     if (searchTerm) {
-      filtered = filtered.filter(memoType =>
-        memoType.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        memoType.description.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        (memoType) =>
+          memoType.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          memoType.description.toLowerCase().includes(searchTerm.toLowerCase()),
       );
     }
 
     // 상태 필터
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(memoType =>
-        statusFilter === 'active' ? memoType.isActive : !memoType.isActive
+    if (statusFilter !== "all") {
+      filtered = filtered.filter((memoType) =>
+        statusFilter === "active" ? memoType.isActive : !memoType.isActive,
       );
     }
 
@@ -111,44 +114,46 @@ export default function MemoTypeManagementPage() {
   };
 
   const handleDeleteMemoType = (id: string) => {
-    if (confirm('정말로 이 메모 유형을 삭제하시겠습니까?')) {
-      setMemoTypes(prev => prev.filter(memoType => memoType.id !== id));
+    if (confirm("정말로 이 메모 유형을 삭제하시겠습니까?")) {
+      setMemoTypes((prev) => prev.filter((memoType) => memoType.id !== id));
     }
   };
 
   const handleToggleStatus = (id: string) => {
-    setMemoTypes(prev =>
-      prev.map(memoType =>
+    setMemoTypes((prev) =>
+      prev.map((memoType) =>
         memoType.id === id
           ? { ...memoType, isActive: !memoType.isActive }
-          : memoType
-      )
+          : memoType,
+      ),
     );
   };
 
-  const handleSaveMemoType = (memoTypeData: Omit<MemoType, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const handleSaveMemoType = (
+    memoTypeData: Omit<MemoType, "id" | "createdAt" | "updatedAt">,
+  ) => {
     if (editingMemoType) {
       // 편집
-      setMemoTypes(prev =>
-        prev.map(memoType =>
+      setMemoTypes((prev) =>
+        prev.map((memoType) =>
           memoType.id === editingMemoType.id
             ? {
                 ...memoType,
                 ...memoTypeData,
-                updatedAt: new Date().toISOString().split('T')[0]
+                updatedAt: new Date().toISOString().split("T")[0],
               }
-            : memoType
-        )
+            : memoType,
+        ),
       );
     } else {
       // 추가
       const newMemoType: MemoType = {
         id: Date.now().toString(),
         ...memoTypeData,
-        createdAt: new Date().toISOString().split('T')[0],
-        updatedAt: new Date().toISOString().split('T')[0]
+        createdAt: new Date().toISOString().split("T")[0],
+        updatedAt: new Date().toISOString().split("T")[0],
       };
-      setMemoTypes(prev => [...prev, newMemoType]);
+      setMemoTypes((prev) => [...prev, newMemoType]);
     }
     setIsModalOpen(false);
     setEditingMemoType(null);
@@ -198,7 +203,9 @@ export default function MemoTypeManagementPage() {
             <Filter className="w-4 h-4 text-gray-400" />
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'inactive')}
+              onChange={(e) =>
+                setStatusFilter(e.target.value as "all" | "active" | "inactive")
+              }
               className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">전체</option>
@@ -239,7 +246,9 @@ export default function MemoTypeManagementPage() {
               {filteredMemoTypes.map((memoType) => (
                 <tr key={memoType.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{memoType.name}</div>
+                    <div className="text-sm font-medium text-gray-900">
+                      {memoType.name}
+                    </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="text-sm text-gray-500 max-w-xs truncate">
@@ -252,18 +261,20 @@ export default function MemoTypeManagementPage() {
                         className="w-6 h-6 rounded-full border border-gray-300"
                         style={{ backgroundColor: memoType.color }}
                       ></div>
-                      <span className="ml-2 text-sm text-gray-500">{memoType.color}</span>
+                      <span className="ml-2 text-sm text-gray-500">
+                        {memoType.color}
+                      </span>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
                       className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                         memoType.isActive
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-gray-100 text-gray-800'
+                          ? "bg-green-100 text-green-800"
+                          : "bg-gray-100 text-gray-800"
                       }`}
                     >
-                      {memoType.isActive ? '활성' : '비활성'}
+                      {memoType.isActive ? "활성" : "비활성"}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -275,11 +286,11 @@ export default function MemoTypeManagementPage() {
                         onClick={() => handleToggleStatus(memoType.id)}
                         className={`px-2 py-1 text-xs rounded ${
                           memoType.isActive
-                            ? 'text-orange-600 hover:text-orange-900'
-                            : 'text-green-600 hover:text-green-900'
+                            ? "text-orange-600 hover:text-orange-900"
+                            : "text-green-600 hover:text-green-900"
                         }`}
                       >
-                        {memoType.isActive ? '비활성화' : '활성화'}
+                        {memoType.isActive ? "비활성화" : "활성화"}
                       </button>
                       <button
                         onClick={() => handleEditMemoType(memoType)}
@@ -326,16 +337,16 @@ export default function MemoTypeManagementPage() {
 // 메모 유형 모달 컴포넌트
 interface MemoTypeModalProps {
   memoType: MemoType | null;
-  onSave: (data: Omit<MemoType, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  onSave: (data: Omit<MemoType, "id" | "createdAt" | "updatedAt">) => void;
   onClose: () => void;
 }
 
 function MemoTypeModal({ memoType, onSave, onClose }: MemoTypeModalProps) {
   const [formData, setFormData] = useState({
-    name: memoType?.name || '',
-    description: memoType?.description || '',
-    color: memoType?.color || '#3B82F6',
-    isActive: memoType?.isActive ?? true
+    name: memoType?.name || "",
+    description: memoType?.description || "",
+    color: memoType?.color || "#3B82F6",
+    isActive: memoType?.isActive ?? true,
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -347,9 +358,9 @@ function MemoTypeModal({ memoType, onSave, onClose }: MemoTypeModalProps) {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
         <h2 className="text-lg font-semibold mb-4">
-          {memoType ? '메모 유형 편집' : '메모 유형 추가'}
+          {memoType ? "메모 유형 편집" : "메모 유형 추가"}
         </h2>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -359,7 +370,9 @@ function MemoTypeModal({ memoType, onSave, onClose }: MemoTypeModalProps) {
               type="text"
               required
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="예: 학습 진도"
             />
@@ -371,7 +384,9 @@ function MemoTypeModal({ memoType, onSave, onClose }: MemoTypeModalProps) {
             </label>
             <textarea
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               rows={3}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="메모 유형에 대한 설명을 입력하세요"
@@ -386,13 +401,17 @@ function MemoTypeModal({ memoType, onSave, onClose }: MemoTypeModalProps) {
               <input
                 type="color"
                 value={formData.color}
-                onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, color: e.target.value })
+                }
                 className="w-12 h-10 border border-gray-300 rounded-lg"
               />
               <input
                 type="text"
                 value={formData.color}
-                onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, color: e.target.value })
+                }
                 className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="#3B82F6"
               />
@@ -404,10 +423,15 @@ function MemoTypeModal({ memoType, onSave, onClose }: MemoTypeModalProps) {
               type="checkbox"
               id="isActive"
               checked={formData.isActive}
-              onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+              onChange={(e) =>
+                setFormData({ ...formData, isActive: e.target.checked })
+              }
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
-            <label htmlFor="isActive" className="ml-2 block text-sm text-gray-900">
+            <label
+              htmlFor="isActive"
+              className="ml-2 block text-sm text-gray-900"
+            >
               활성 상태
             </label>
           </div>
@@ -424,11 +448,11 @@ function MemoTypeModal({ memoType, onSave, onClose }: MemoTypeModalProps) {
               type="submit"
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
-              {memoType ? '수정' : '추가'}
+              {memoType ? "수정" : "추가"}
             </button>
           </div>
         </form>
       </div>
     </div>
   );
-} 
+}
