@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Bell, BookOpen, Calendar, FileText, CheckCircle, Clock } from 'lucide-react';
+import { ArrowLeft, Bell, BookOpen, Calendar, FileText, Clock } from 'lucide-react';
 
 interface Notification {
   id: number;

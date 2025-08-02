@@ -6,28 +6,17 @@ import {
   Calendar, 
   Clock,
   User,
-  FileText,
   AlertCircle,
-  ChevronRight,
   Search,
-  Filter,
   Upload,
   CheckCircle,
-  XCircle,
   Play,
-  Volume2,
   Eye,
-  CalendarDays,
   GraduationCap,
-  Globe,
-  Monitor,
   BookMarked,
-  MessageSquare,
   Target,
-  TrendingUp,
   BarChart3,
-  Award,
-  Zap
+  Award
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -525,7 +514,7 @@ export default function StudentHomeworkPage() {
             href="/student/lesson-notes"
             className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            <FileText className="w-5 h-5" />
+            {/* <FileText className="w-5 h-5" /> */}
             레슨노트
           </Link>
           <Link
