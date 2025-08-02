@@ -1,20 +1,4 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/next"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/"
-    }
-  ],
-  "env": {
-    "NODE_ENV": "production"
-  },
   "functions": {
     "api/**/*.ts": {
       "runtime": "nodejs18.x"
@@ -25,12 +9,5 @@
       "source": "/api/(.*)",
       "destination": "/api/$1"
     }
-  ],
-  "regions": ["nrt1"],
-  "git": {
-    "deploymentEnabled": {
-      "main": true,
-      "preview": false
-    }
-  }
+  ]
 } 
