@@ -10,21 +10,21 @@ export function middleware(request: NextRequest) {
     hostname === "app.hanguru.school" || hostname === "hanguru.school";
   const isDevelopment = process.env.NODE_ENV === "development";
 
-  // 개발 환경에서는 환경 경고 페이지 리다이렉트 비활성화
-  if (
-    !isProduction &&
-    !isDevelopment &&
-    !pathname.startsWith("/api/") &&
-    !pathname.startsWith("/_next/")
-  ) {
-    // 정적 파일들은 제외
-    if (pathname.includes(".") || pathname.startsWith("/_next/")) {
-      return NextResponse.next();
-    }
+  // 환경 경고 페이지 리다이렉트 비활성화 (메인 페이지 표시를 위해)
+  // if (
+  //   !isProduction &&
+  //   !isDevelopment &&
+  //   !pathname.startsWith("/api/") &&
+  //   !pathname.startsWith("/_next/")
+  // ) {
+  //   // 정적 파일들은 제외
+  //   if (pathname.includes(".") || pathname.startsWith("/_next/")) {
+  //     return NextResponse.next();
+  //   }
 
-    // 경고 페이지로 리다이렉트 (운영 환경이 아닌 경우에만)
-    return NextResponse.redirect(new URL("/environment-warning", request.url));
-  }
+  //   // 경고 페이지로 리다이렉트 (운영 환경이 아닌 경우에만)
+  //   return NextResponse.redirect(new URL("/environment-warning", request.url));
+  // }
 
   // 로그인 페이지는 제외
   if (pathname.startsWith("/auth/")) {
