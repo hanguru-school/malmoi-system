@@ -40,29 +40,12 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // 메인 페이지는 로그인 없이 접근 가능
-  if (pathname === "/") {
-    return NextResponse.next();
-  }
-
   // 쿠키에서 사용자 세션 확인
   const userSession = request.cookies.get("user-session");
 
-  // 로그인되지 않은 경우
+  // 로그인되지 않은 경우 모든 페이지를 로그인 페이지로 리다이렉트
   if (!userSession) {
-    // 보호된 페이지 접근 시 로그인 페이지로 리다이렉트
-    if (
-      pathname.startsWith("/admin/") ||
-      pathname.startsWith("/employee/") ||
-      pathname.startsWith("/teacher/") ||
-      pathname.startsWith("/staff/") ||
-      pathname.startsWith("/student/") ||
-      pathname.startsWith("/parent/")
-    ) {
-      return NextResponse.redirect(new URL("/auth/login", request.url));
-    }
-
-    return NextResponse.next();
+    return NextResponse.redirect(new URL("/auth/login", request.url));
   }
 
   // 로그인된 경우
@@ -76,11 +59,7 @@ export function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL(dashboardPath, request.url));
     }
   } catch (error) {
-    // 세션 파싱 오류 시에도 메인 페이지는 접근 가능하도록 허용
-    if (pathname === "/") {
-      return NextResponse.next();
-    }
-    // 다른 보호된 페이지는 로그인 페이지로 리다이렉트
+    // 세션 파싱 오류 시 로그인 페이지로 리다이렉트
     return NextResponse.redirect(new URL("/auth/login", request.url));
   }
 
