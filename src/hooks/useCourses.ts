@@ -1,12 +1,8 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { 
-  createCourse, 
-  getAllCourses, 
-  getActiveCourses
-} from '@/lib/firestore';
-import { Course } from '@/lib/firebase';
+import { useState, useEffect } from "react";
+import { createCourse, getAllCourses, getActiveCourses } from "@/lib/firestore";
+import { Course } from "@/lib/firebase";
 
 // 코스 관리 훅
 export function useCourses() {
@@ -18,13 +14,13 @@ export function useCourses() {
   const fetchAllCourses = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const allCourses = await getAllCourses();
       setCourses(allCourses);
     } catch (err: any) {
       setError(err.message);
-      console.error('코스 조회 실패:', err);
+      console.error("코스 조회 실패:", err);
     } finally {
       setLoading(false);
     }
@@ -34,34 +30,36 @@ export function useCourses() {
   const fetchActiveCourses = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const activeCourses = await getActiveCourses();
       setCourses(activeCourses);
     } catch (err: any) {
       setError(err.message);
-      console.error('활성 코스 조회 실패:', err);
+      console.error("활성 코스 조회 실패:", err);
     } finally {
       setLoading(false);
     }
   };
 
   // 코스 생성
-  const addCourse = async (courseData: Omit<Course, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const addCourse = async (
+    courseData: Omit<Course, "id" | "createdAt" | "updatedAt">,
+  ) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const courseId = await createCourse(courseData);
-      console.log('코스 생성 완료:', courseId);
-      
+      console.log("코스 생성 완료:", courseId);
+
       // 코스 목록 새로고침
       await fetchAllCourses();
-      
+
       return courseId;
     } catch (err: any) {
       setError(err.message);
-      console.error('코스 생성 실패:', err);
+      console.error("코스 생성 실패:", err);
       throw err;
     } finally {
       setLoading(false);
@@ -79,6 +77,6 @@ export function useCourses() {
     error,
     addCourse,
     fetchAllCourses,
-    fetchActiveCourses
+    fetchActiveCourses,
   };
-} 
+}

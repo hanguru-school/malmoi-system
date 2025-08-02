@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { User, Mail, Phone, Camera, Eye, EyeOff, Bell, Save, Upload } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { User, Camera, Eye, EyeOff, Bell, Save } from "lucide-react";
 
 interface EmployeeProfile {
   id: string;
@@ -28,48 +28,49 @@ export default function EmployeeProfilePage() {
   const [showPasswords, setShowPasswords] = useState({
     current: false,
     new: false,
-    confirm: false
+    confirm: false,
   });
 
   // 폼 상태
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    introduction: '',
+    name: "",
+    email: "",
+    phone: "",
+    introduction: "",
     pushNotifications: {
       lessonReminders: true,
       salaryNotifications: true,
       systemAnnouncements: true,
-      reviewRequests: true
-    }
+      reviewRequests: true,
+    },
   });
 
   // 비밀번호 변경 폼
   const [passwordData, setPasswordData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   });
 
   // 샘플 데이터
   useEffect(() => {
     setTimeout(() => {
       const sampleProfile: EmployeeProfile = {
-        id: '1',
-        name: '田中先生',
-        email: 'tanaka@hanguru.com',
-        phone: '010-1234-5678',
-        profileImage: '/api/placeholder/150/150',
-        introduction: '안녕하세요! 저는 영어와 수학을 가르치는 선생님입니다. 학생들이 재미있게 학습할 수 있도록 노력하고 있습니다.',
+        id: "1",
+        name: "田中先生",
+        email: "tanaka@hanguru.com",
+        phone: "010-1234-5678",
+        profileImage: "/api/placeholder/150/150",
+        introduction:
+          "안녕하세요! 저는 영어와 수학을 가르치는 선생님입니다. 학생들이 재미있게 학습할 수 있도록 노력하고 있습니다.",
         pushNotifications: {
           lessonReminders: true,
           salaryNotifications: true,
           systemAnnouncements: false,
-          reviewRequests: true
+          reviewRequests: true,
         },
-        createdAt: '2024-01-01',
-        updatedAt: '2024-01-15'
+        createdAt: "2024-01-01",
+        updatedAt: "2024-01-15",
       };
 
       setProfile(sampleProfile);
@@ -78,7 +79,7 @@ export default function EmployeeProfilePage() {
         email: sampleProfile.email,
         phone: sampleProfile.phone,
         introduction: sampleProfile.introduction,
-        pushNotifications: sampleProfile.pushNotifications
+        pushNotifications: sampleProfile.pushNotifications,
       });
       setLoading(false);
     }, 1000);
@@ -90,13 +91,17 @@ export default function EmployeeProfilePage() {
 
   const handleSave = () => {
     if (profile) {
-      setProfile(prev => prev ? {
-        ...prev,
-        ...formData,
-        updatedAt: new Date().toISOString().split('T')[0]
-      } : null);
+      setProfile((prev) =>
+        prev
+          ? {
+              ...prev,
+              ...formData,
+              updatedAt: new Date().toISOString().split("T")[0],
+            }
+          : null,
+      );
       setIsEditing(false);
-      alert('프로필이 성공적으로 업데이트되었습니다.');
+      alert("프로필이 성공적으로 업데이트되었습니다.");
     }
   };
 
@@ -107,7 +112,7 @@ export default function EmployeeProfilePage() {
         email: profile.email,
         phone: profile.phone,
         introduction: profile.introduction,
-        pushNotifications: profile.pushNotifications
+        pushNotifications: profile.pushNotifications,
       });
     }
     setIsEditing(false);
@@ -115,23 +120,23 @@ export default function EmployeeProfilePage() {
 
   const handlePasswordChange = () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert('새 비밀번호와 확인 비밀번호가 일치하지 않습니다.');
+      alert("새 비밀번호와 확인 비밀번호가 일치하지 않습니다.");
       return;
     }
 
     if (passwordData.newPassword.length < 8) {
-      alert('새 비밀번호는 8자 이상이어야 합니다.');
+      alert("새 비밀번호는 8자 이상이어야 합니다.");
       return;
     }
 
     // 비밀번호 변경 로직
     setPasswordData({
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: ''
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
     });
     setShowPasswordModal(false);
-    alert('비밀번호가 성공적으로 변경되었습니다.');
+    alert("비밀번호가 성공적으로 변경되었습니다.");
   };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -140,7 +145,9 @@ export default function EmployeeProfilePage() {
       const reader = new FileReader();
       reader.onload = (e) => {
         const imageUrl = e.target?.result as string;
-        setProfile(prev => prev ? { ...prev, profileImage: imageUrl } : null);
+        setProfile((prev) =>
+          prev ? { ...prev, profileImage: imageUrl } : null,
+        );
       };
       reader.readAsDataURL(file);
     }
@@ -202,8 +209,10 @@ export default function EmployeeProfilePage() {
         <div className="lg:col-span-2 space-y-6">
           {/* 기본 정보 */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">기본 정보</h2>
-            
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              기본 정보
+            </h2>
+
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -214,7 +223,9 @@ export default function EmployeeProfilePage() {
                     <input
                       type="text"
                       value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   ) : (
@@ -230,7 +241,9 @@ export default function EmployeeProfilePage() {
                     <input
                       type="email"
                       value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, email: e.target.value })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   ) : (
@@ -246,7 +259,9 @@ export default function EmployeeProfilePage() {
                     <input
                       type="tel"
                       value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, phone: e.target.value })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   ) : (
@@ -274,7 +289,9 @@ export default function EmployeeProfilePage() {
                 {isEditing ? (
                   <textarea
                     value={formData.introduction}
-                    onChange={(e) => setFormData({ ...formData, introduction: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, introduction: e.target.value })
+                    }
                     rows={4}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="자기소개를 입력하세요..."
@@ -292,36 +309,42 @@ export default function EmployeeProfilePage() {
               <Bell className="w-5 h-5 mr-2" />
               알림 설정
             </h2>
-            
+
             <div className="space-y-3">
               <label className="flex items-center">
                 <input
                   type="checkbox"
                   checked={formData.pushNotifications.lessonReminders}
-                  onChange={(e) => setFormData({
-                    ...formData,
-                    pushNotifications: {
-                      ...formData.pushNotifications,
-                      lessonReminders: e.target.checked
-                    }
-                  })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      pushNotifications: {
+                        ...formData.pushNotifications,
+                        lessonReminders: e.target.checked,
+                      },
+                    })
+                  }
                   disabled={!isEditing}
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
-                <span className="ml-2 text-sm text-gray-900">수업 리마인더</span>
+                <span className="ml-2 text-sm text-gray-900">
+                  수업 리마인더
+                </span>
               </label>
 
               <label className="flex items-center">
                 <input
                   type="checkbox"
                   checked={formData.pushNotifications.salaryNotifications}
-                  onChange={(e) => setFormData({
-                    ...formData,
-                    pushNotifications: {
-                      ...formData.pushNotifications,
-                      salaryNotifications: e.target.checked
-                    }
-                  })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      pushNotifications: {
+                        ...formData.pushNotifications,
+                        salaryNotifications: e.target.checked,
+                      },
+                    })
+                  }
                   disabled={!isEditing}
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
@@ -332,30 +355,36 @@ export default function EmployeeProfilePage() {
                 <input
                   type="checkbox"
                   checked={formData.pushNotifications.systemAnnouncements}
-                  onChange={(e) => setFormData({
-                    ...formData,
-                    pushNotifications: {
-                      ...formData.pushNotifications,
-                      systemAnnouncements: e.target.checked
-                    }
-                  })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      pushNotifications: {
+                        ...formData.pushNotifications,
+                        systemAnnouncements: e.target.checked,
+                      },
+                    })
+                  }
                   disabled={!isEditing}
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
-                <span className="ml-2 text-sm text-gray-900">시스템 공지사항</span>
+                <span className="ml-2 text-sm text-gray-900">
+                  시스템 공지사항
+                </span>
               </label>
 
               <label className="flex items-center">
                 <input
                   type="checkbox"
                   checked={formData.pushNotifications.reviewRequests}
-                  onChange={(e) => setFormData({
-                    ...formData,
-                    pushNotifications: {
-                      ...formData.pushNotifications,
-                      reviewRequests: e.target.checked
-                    }
-                  })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      pushNotifications: {
+                        ...formData.pushNotifications,
+                        reviewRequests: e.target.checked,
+                      },
+                    })
+                  }
                   disabled={!isEditing}
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
@@ -368,8 +397,10 @@ export default function EmployeeProfilePage() {
         {/* 프로필 사진 */}
         <div className="space-y-6">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">프로필 사진</h2>
-            
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              프로필 사진
+            </h2>
+
             <div className="text-center">
               <div className="relative inline-block">
                 <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-100 mx-auto mb-4">
@@ -385,7 +416,7 @@ export default function EmployeeProfilePage() {
                     </div>
                   )}
                 </div>
-                
+
                 {isEditing && (
                   <label className="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full cursor-pointer hover:bg-blue-700 transition-colors">
                     <Camera className="w-4 h-4" />
@@ -398,7 +429,7 @@ export default function EmployeeProfilePage() {
                   </label>
                 )}
               </div>
-              
+
               {isEditing && (
                 <p className="text-xs text-gray-500">
                   클릭하여 프로필 사진을 변경하세요
@@ -409,8 +440,10 @@ export default function EmployeeProfilePage() {
 
           {/* 계정 정보 */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">계정 정보</h2>
-            
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              계정 정보
+            </h2>
+
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
                 <span className="text-gray-600">가입일</span>
@@ -430,7 +463,7 @@ export default function EmployeeProfilePage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
             <h2 className="text-lg font-semibold mb-4">비밀번호 변경</h2>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -438,18 +471,32 @@ export default function EmployeeProfilePage() {
                 </label>
                 <div className="relative">
                   <input
-                    type={showPasswords.current ? 'text' : 'password'}
+                    type={showPasswords.current ? "text" : "password"}
                     value={passwordData.currentPassword}
-                    onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                    onChange={(e) =>
+                      setPasswordData({
+                        ...passwordData,
+                        currentPassword: e.target.value,
+                      })
+                    }
                     className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="현재 비밀번호를 입력하세요"
                   />
                   <button
                     type="button"
-                    onClick={() => setShowPasswords(prev => ({ ...prev, current: !prev.current }))}
+                    onClick={() =>
+                      setShowPasswords((prev) => ({
+                        ...prev,
+                        current: !prev.current,
+                      }))
+                    }
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
-                    {showPasswords.current ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showPasswords.current ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
                   </button>
                 </div>
               </div>
@@ -460,18 +507,29 @@ export default function EmployeeProfilePage() {
                 </label>
                 <div className="relative">
                   <input
-                    type={showPasswords.new ? 'text' : 'password'}
+                    type={showPasswords.new ? "text" : "password"}
                     value={passwordData.newPassword}
-                    onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                    onChange={(e) =>
+                      setPasswordData({
+                        ...passwordData,
+                        newPassword: e.target.value,
+                      })
+                    }
                     className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="새 비밀번호를 입력하세요"
                   />
                   <button
                     type="button"
-                    onClick={() => setShowPasswords(prev => ({ ...prev, new: !prev.new }))}
+                    onClick={() =>
+                      setShowPasswords((prev) => ({ ...prev, new: !prev.new }))
+                    }
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
-                    {showPasswords.new ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showPasswords.new ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
                   </button>
                 </div>
               </div>
@@ -482,25 +540,40 @@ export default function EmployeeProfilePage() {
                 </label>
                 <div className="relative">
                   <input
-                    type={showPasswords.confirm ? 'text' : 'password'}
+                    type={showPasswords.confirm ? "text" : "password"}
                     value={passwordData.confirmPassword}
-                    onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                    onChange={(e) =>
+                      setPasswordData({
+                        ...passwordData,
+                        confirmPassword: e.target.value,
+                      })
+                    }
                     className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="새 비밀번호를 다시 입력하세요"
                   />
                   <button
                     type="button"
-                    onClick={() => setShowPasswords(prev => ({ ...prev, confirm: !prev.confirm }))}
+                    onClick={() =>
+                      setShowPasswords((prev) => ({
+                        ...prev,
+                        confirm: !prev.confirm,
+                      }))
+                    }
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
-                    {showPasswords.confirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showPasswords.confirm ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
                   </button>
                 </div>
               </div>
 
               <div className="p-3 bg-yellow-50 rounded-lg">
                 <p className="text-sm text-yellow-800">
-                  <strong>주의:</strong> 비밀번호는 8자 이상이어야 하며, 특수문자를 포함하는 것을 권장합니다.
+                  <strong>주의:</strong> 비밀번호는 8자 이상이어야 하며,
+                  특수문자를 포함하는 것을 권장합니다.
                 </p>
               </div>
 
@@ -509,9 +582,9 @@ export default function EmployeeProfilePage() {
                   onClick={() => {
                     setShowPasswordModal(false);
                     setPasswordData({
-                      currentPassword: '',
-                      newPassword: '',
-                      confirmPassword: ''
+                      currentPassword: "",
+                      newPassword: "",
+                      confirmPassword: "",
                     });
                   }}
                   className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
@@ -531,4 +604,4 @@ export default function EmployeeProfilePage() {
       )}
     </div>
   );
-} 
+}

@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 export default function StudentClassesPage() {
   return (
@@ -22,4 +22,4 @@ export default function StudentClassesPage() {
       </div>
     </div>
   );
-} 
+}

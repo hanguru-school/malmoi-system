@@ -1,32 +1,17 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { 
-  Star, 
-  MessageSquare, 
-  Heart, 
-  ThumbsUp, 
-  Award,
-  Calendar,
-  Clock,
-  User,
-  Users,
-  BarChart3,
-  TrendingUp,
+import React, { useState, useEffect } from "react";
+import {
+  Star,
+  MessageSquare,
   CheckCircle,
-  AlertCircle,
-  Send,
-  Edit,
-  Trash2,
   Search,
-  Filter,
-  Plus,
   X,
   Smile,
   Frown,
   Meh,
-  ChevronRight
-} from 'lucide-react';
+  ChevronRight,
+} from "lucide-react";
 
 interface Review {
   id: string;
@@ -38,7 +23,7 @@ interface Review {
   checklist: string[];
   createdAt: string;
   response?: string;
-  sentiment: 'positive' | 'neutral' | 'negative';
+  sentiment: "positive" | "neutral" | "negative";
 }
 
 export default function ReviewSystemPage() {
@@ -46,40 +31,42 @@ export default function ReviewSystemPage() {
   const [selectedReview, setSelectedReview] = useState<Review | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [filterRating, setFilterRating] = useState<number | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
   const checklistOptions = [
-    '재미있었어요',
-    '이해하기 쉬웠어요',
-    '숙제가 어려웠어요',
-    '선생님이 친절해요',
-    '수업 속도가 적당해요'
+    "재미있었어요",
+    "이해하기 쉬웠어요",
+    "숙제가 어려웠어요",
+    "선생님이 친절해요",
+    "수업 속도가 적당해요",
   ];
 
   useEffect(() => {
     const mockReviews: Review[] = [
       {
-        id: 'REVIEW001',
-        lessonId: 'LESSON001',
-        studentName: '김학생',
-        teacherName: '박선생님',
+        id: "REVIEW001",
+        lessonId: "LESSON001",
+        studentName: "김학생",
+        teacherName: "박선생님",
         rating: 5,
-        comment: '정말 재미있고 유익한 수업이었습니다. 선생님이 친절하게 설명해주셔서 이해하기 쉬웠어요.',
-        checklist: ['재미있었어요', '이해하기 쉬웠어요', '선생님이 친절해요'],
-        createdAt: '2024-01-15T18:00:00Z',
-        sentiment: 'positive'
+        comment:
+          "정말 재미있고 유익한 수업이었습니다. 선생님이 친절하게 설명해주셔서 이해하기 쉬웠어요.",
+        checklist: ["재미있었어요", "이해하기 쉬웠어요", "선생님이 친절해요"],
+        createdAt: "2024-01-15T18:00:00Z",
+        sentiment: "positive",
       },
       {
-        id: 'REVIEW002',
-        lessonId: 'LESSON002',
-        studentName: '이학생',
-        teacherName: '박선생님',
+        id: "REVIEW002",
+        lessonId: "LESSON002",
+        studentName: "이학생",
+        teacherName: "박선생님",
         rating: 4,
-        comment: '수업은 좋았지만 숙제가 조금 어려웠어요. 더 많은 연습이 필요할 것 같습니다.',
-        checklist: ['수업 속도가 적당해요', '숙제가 어려웠어요'],
-        createdAt: '2024-01-14T17:30:00Z',
-        sentiment: 'neutral'
-      }
+        comment:
+          "수업은 좋았지만 숙제가 조금 어려웠어요. 더 많은 연습이 필요할 것 같습니다.",
+        checklist: ["수업 속도가 적당해요", "숙제가 어려웠어요"],
+        createdAt: "2024-01-14T17:30:00Z",
+        sentiment: "neutral",
+      },
     ];
 
     setReviews(mockReviews);
@@ -94,18 +81,22 @@ export default function ReviewSystemPage() {
     let filtered = reviews;
 
     if (filterRating !== null) {
-      filtered = filtered.filter(review => review.rating === filterRating);
+      filtered = filtered.filter((review) => review.rating === filterRating);
     }
 
     if (searchTerm) {
-      filtered = filtered.filter(review => 
-        review.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        review.teacherName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        review.comment.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        (review) =>
+          review.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          review.teacherName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          review.comment.toLowerCase().includes(searchTerm.toLowerCase()),
       );
     }
 
-    return filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return filtered.sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
   };
 
   const getAverageRating = () => {
@@ -119,7 +110,7 @@ export default function ReviewSystemPage() {
       <Star
         key={i}
         className={`w-4 h-4 ${
-          i < rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
+          i < rating ? "text-yellow-400 fill-current" : "text-gray-300"
         }`}
       />
     ));
@@ -127,9 +118,12 @@ export default function ReviewSystemPage() {
 
   const getSentimentIcon = (sentiment: string) => {
     switch (sentiment) {
-      case 'positive': return <Smile className="w-4 h-4 text-green-600" />;
-      case 'negative': return <Frown className="w-4 h-4 text-red-600" />;
-      default: return <Meh className="w-4 h-4 text-yellow-600" />;
+      case "positive":
+        return <Smile className="w-4 h-4 text-green-600" />;
+      case "negative":
+        return <Frown className="w-4 h-4 text-red-600" />;
+      default:
+        return <Meh className="w-4 h-4 text-yellow-600" />;
     }
   };
 
@@ -143,8 +137,12 @@ export default function ReviewSystemPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">리뷰 및 응원 시스템</h1>
-              <p className="mt-2 text-gray-600">학생 피드백 관리 및 학습 동기 부여</p>
+              <h1 className="text-3xl font-bold text-gray-900">
+                리뷰 및 응원 시스템
+              </h1>
+              <p className="mt-2 text-gray-600">
+                학생 피드백 관리 및 학습 동기 부여
+              </p>
             </div>
           </div>
         </div>
@@ -158,7 +156,9 @@ export default function ReviewSystemPage() {
               <Star className="w-8 h-8 text-yellow-500" />
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">평균 평점</p>
-                <p className="text-2xl font-bold text-gray-900">{averageRating}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {averageRating}
+                </p>
               </div>
             </div>
           </div>
@@ -167,7 +167,9 @@ export default function ReviewSystemPage() {
               <MessageSquare className="w-8 h-8 text-blue-500" />
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">총 리뷰</p>
-                <p className="text-2xl font-bold text-gray-900">{reviews.length}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {reviews.length}
+                </p>
               </div>
             </div>
           </div>
@@ -177,7 +179,7 @@ export default function ReviewSystemPage() {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">긍정적 리뷰</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {reviews.filter(r => r.sentiment === 'positive').length}
+                  {reviews.filter((r) => r.sentiment === "positive").length}
                 </p>
               </div>
             </div>
@@ -188,7 +190,14 @@ export default function ReviewSystemPage() {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">응답률</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {reviews.length > 0 ? Math.round((reviews.filter(r => r.response).length / reviews.length) * 100) : 0}%
+                  {reviews.length > 0
+                    ? Math.round(
+                        (reviews.filter((r) => r.response).length /
+                          reviews.length) *
+                          100,
+                      )
+                    : 0}
+                  %
                 </p>
               </div>
             </div>
@@ -210,16 +219,20 @@ export default function ReviewSystemPage() {
                 />
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-2">
               <span className="text-sm text-gray-600">평점:</span>
               <div className="flex space-x-1">
-                {[1, 2, 3, 4, 5].map(rating => (
+                {[1, 2, 3, 4, 5].map((rating) => (
                   <button
                     key={rating}
-                    onClick={() => setFilterRating(filterRating === rating ? null : rating)}
+                    onClick={() =>
+                      setFilterRating(filterRating === rating ? null : rating)
+                    }
                     className={`p-1 rounded ${
-                      filterRating === rating ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'
+                      filterRating === rating
+                        ? "bg-blue-100 text-blue-600"
+                        : "text-gray-400 hover:text-gray-600"
                     }`}
                   >
                     <Star className="w-4 h-4" />
@@ -242,7 +255,7 @@ export default function ReviewSystemPage() {
                 <p className="text-gray-500">리뷰가 없습니다.</p>
               </div>
             ) : (
-              filteredReviews.map(review => (
+              filteredReviews.map((review) => (
                 <div
                   key={review.id}
                   onClick={() => handleReviewClick(review)}
@@ -261,20 +274,25 @@ export default function ReviewSystemPage() {
                           </span>
                         )}
                       </div>
-                      
+
                       <div className="flex items-center space-x-4 text-sm text-gray-500 mb-2">
                         <span>학생: {review.studentName}</span>
                         <span>선생님: {review.teacherName}</span>
-                        <span>{new Date(review.createdAt).toLocaleDateString()}</span>
+                        <span>
+                          {new Date(review.createdAt).toLocaleDateString()}
+                        </span>
                       </div>
-                      
+
                       <p className="text-gray-700 mb-3 line-clamp-2">
                         {review.comment}
                       </p>
-                      
+
                       <div className="flex flex-wrap gap-2">
-                        {review.checklist.map(item => (
-                          <span key={item} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        {review.checklist.map((item) => (
+                          <span
+                            key={item}
+                            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                          >
                             {item}
                           </span>
                         ))}
@@ -322,26 +340,39 @@ export default function ReviewSystemPage() {
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">작성일</p>
-                  <p className="font-medium">{new Date(selectedReview.createdAt).toLocaleDateString()}</p>
+                  <p className="font-medium">
+                    {new Date(selectedReview.createdAt).toLocaleDateString()}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">상태</p>
-                  <p className="font-medium">{selectedReview.response ? '응답 완료' : '응답 대기'}</p>
+                  <p className="font-medium">
+                    {selectedReview.response ? "응답 완료" : "응답 대기"}
+                  </p>
                 </div>
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">리뷰 내용</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                  리뷰 내용
+                </h3>
                 <div className="bg-gray-50 p-4 rounded-lg">
-                  <p className="text-gray-700 whitespace-pre-wrap">{selectedReview.comment}</p>
+                  <p className="text-gray-700 whitespace-pre-wrap">
+                    {selectedReview.comment}
+                  </p>
                 </div>
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">체크리스트</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                  체크리스트
+                </h3>
                 <div className="flex flex-wrap gap-2">
-                  {selectedReview.checklist.map(item => (
-                    <span key={item} className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                  {selectedReview.checklist.map((item) => (
+                    <span
+                      key={item}
+                      className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
+                    >
                       {item}
                     </span>
                   ))}
@@ -350,7 +381,9 @@ export default function ReviewSystemPage() {
 
               {selectedReview.response && (
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">응답</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                    응답
+                  </h3>
                   <div className="bg-blue-50 p-4 rounded-lg">
                     <p className="text-gray-700">{selectedReview.response}</p>
                   </div>
@@ -376,4 +409,4 @@ export default function ReviewSystemPage() {
       )}
     </div>
   );
-} 
+}

@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Search, Filter, Play, Calendar, Clock, User, BookOpen } from 'lucide-react';
-import Link from 'next/link';
+import { useState, useEffect } from "react";
+import { Search, Play, Calendar, Clock, User, BookOpen } from "lucide-react";
+import Link from "next/link";
 
 interface LessonNote {
   id: string;
@@ -18,24 +18,24 @@ interface LessonNote {
 export default function LessonNotesPage() {
   const [notes, setNotes] = useState<LessonNote[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterType, setFilterType] = useState("all");
 
   useEffect(() => {
     // 실제 레슨 노트 데이터를 가져오는 로직
     const fetchNotes = async () => {
       try {
         setLoading(true);
-        
+
         // 실제 API 호출
-        const response = await fetch('/api/lesson-notes/student');
+        const response = await fetch("/api/lesson-notes/student");
         if (!response.ok) {
-          throw new Error('Failed to fetch lesson notes');
+          throw new Error("Failed to fetch lesson notes");
         }
         const data = await response.json();
         setNotes(data.notes || []);
       } catch (error) {
-        console.error('레슨 노트 로드 오류:', error);
+        console.error("레슨 노트 로드 오류:", error);
         setNotes([]);
       } finally {
         setLoading(false);
@@ -45,16 +45,18 @@ export default function LessonNotesPage() {
     fetchNotes();
   }, []);
 
-  const filteredNotes = notes.filter(note => {
-    const matchesSearch = 
+  const filteredNotes = notes.filter((note) => {
+    const matchesSearch =
       note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       note.teacherName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       note.description.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesFilter = filterType === 'all' || 
-      (filterType === 'recent' && new Date(note.date) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)) ||
-      (filterType === 'completed' && note.score !== undefined);
-    
+
+    const matchesFilter =
+      filterType === "all" ||
+      (filterType === "recent" &&
+        new Date(note.date) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)) ||
+      (filterType === "completed" && note.score !== undefined);
+
     return matchesSearch && matchesFilter;
   });
 
@@ -116,7 +118,7 @@ export default function LessonNotesPage() {
             <p className="text-gray-600 mb-6">
               첫 번째 수업을 예약하고 레슨 노트를 받아보세요
             </p>
-            <Link 
+            <Link
               href="/student/reservations/new"
               className="inline-flex items-center px-6 py-3 bg-orange-600 text-white font-medium rounded-lg hover:bg-orange-700 transition-colors"
             >
@@ -130,14 +132,15 @@ export default function LessonNotesPage() {
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Calendar className="w-8 h-8 text-gray-400" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">레슨 노트가 없습니다</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              레슨 노트가 없습니다
+            </h3>
             <p className="text-gray-600">
-              {searchTerm || filterType !== 'all' 
-                ? '검색 조건에 맞는 레슨 노트가 없습니다.'
-                : '아직 수업을 받지 않았습니다. 첫 번째 수업을 예약해보세요!'
-              }
+              {searchTerm || filterType !== "all"
+                ? "검색 조건에 맞는 레슨 노트가 없습니다."
+                : "아직 수업을 받지 않았습니다. 첫 번째 수업을 예약해보세요!"}
             </p>
-            {!searchTerm && filterType === 'all' && (
+            {!searchTerm && filterType === "all" && (
               <button className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                 수업 예약하기
               </button>
@@ -149,7 +152,9 @@ export default function LessonNotesPage() {
               <div key={note.id} className="bg-white rounded-xl shadow-sm p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1">{note.title}</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                      {note.title}
+                    </h3>
                     <div className="flex items-center gap-4 text-sm text-gray-600">
                       <div className="flex items-center gap-1">
                         <User className="w-4 h-4" />
@@ -171,9 +176,9 @@ export default function LessonNotesPage() {
                     </div>
                   )}
                 </div>
-                
+
                 <p className="text-gray-700 mb-4">{note.description}</p>
-                
+
                 <div className="flex items-center gap-4">
                   {note.audioUrl && (
                     <button className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors">
@@ -189,4 +194,4 @@ export default function LessonNotesPage() {
       </div>
     </div>
   );
-} 
+}

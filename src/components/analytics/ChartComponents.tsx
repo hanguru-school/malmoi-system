@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { ChartDataConverter } from '@/lib/analytics-engine';
+import React from "react";
+import { ChartDataConverter } from "@/lib/analytics-engine";
 
 interface ChartData {
   label: string;
@@ -44,9 +44,13 @@ interface StatCardProps {
 /**
  * 파이 차트 컴포넌트
  */
-export const PieChart: React.FC<PieChartProps> = ({ data, title, colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'] }) => {
+export const PieChart: React.FC<PieChartProps> = ({
+  data,
+  title,
+  colors = ["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6"],
+}) => {
   const total = data.reduce((sum, item) => sum + item.value, 0);
-  
+
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
       <h3 className="text-lg font-semibold text-gray-800 mb-4">{title}</h3>
@@ -59,14 +63,14 @@ export const PieChart: React.FC<PieChartProps> = ({ data, title, colors = ['#3B8
                 .slice(0, index)
                 .reduce((sum, d) => sum + (d.value / total) * 360, 0);
               const endAngle = startAngle + (item.value / total) * 360;
-              
+
               const x1 = 50 + 40 * Math.cos((startAngle * Math.PI) / 180);
               const y1 = 50 + 40 * Math.sin((startAngle * Math.PI) / 180);
               const x2 = 50 + 40 * Math.cos((endAngle * Math.PI) / 180);
               const y2 = 50 + 40 * Math.sin((endAngle * Math.PI) / 180);
-              
+
               const largeArcFlag = endAngle - startAngle > 180 ? 1 : 0;
-              
+
               return (
                 <path
                   key={index}
@@ -109,9 +113,13 @@ export const PieChart: React.FC<PieChartProps> = ({ data, title, colors = ['#3B8
 /**
  * 바 차트 컴포넌트
  */
-export const BarChart: React.FC<BarChartProps> = ({ data, title, color = '#3B82F6' }) => {
-  const maxValue = Math.max(...data.map(item => item.value));
-  
+export const BarChart: React.FC<BarChartProps> = ({
+  data,
+  title,
+  color = "#3B82F6",
+}) => {
+  const maxValue = Math.max(...data.map((item) => item.value));
+
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
       <h3 className="text-lg font-semibold text-gray-800 mb-4">{title}</h3>
@@ -124,7 +132,7 @@ export const BarChart: React.FC<BarChartProps> = ({ data, title, color = '#3B82F
                 className="h-6 rounded-full transition-all duration-300"
                 style={{
                   width: `${(item.value / maxValue) * 100}%`,
-                  backgroundColor: color
+                  backgroundColor: color,
                 }}
               />
             </div>
@@ -141,11 +149,15 @@ export const BarChart: React.FC<BarChartProps> = ({ data, title, color = '#3B82F
 /**
  * 선 그래프 컴포넌트
  */
-export const LineChart: React.FC<LineChartProps> = ({ data, title, color = '#3B82F6' }) => {
-  const maxValue = Math.max(...data.map(item => item.value));
-  const minValue = Math.min(...data.map(item => item.value));
+export const LineChart: React.FC<LineChartProps> = ({
+  data,
+  title,
+  color = "#3B82F6",
+}) => {
+  const maxValue = Math.max(...data.map((item) => item.value));
+  const minValue = Math.min(...data.map((item) => item.value));
   const range = maxValue - minValue;
-  
+
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
       <h3 className="text-lg font-semibold text-gray-800 mb-4">{title}</h3>
@@ -161,7 +173,7 @@ export const LineChart: React.FC<LineChartProps> = ({ data, title, color = '#3B8
                 const y = 180 - ((item.value - minValue) / range) * 160;
                 return `${x},${y}`;
               })
-              .join(' ')}
+              .join(" ")}
           />
           {data.map((item, index) => {
             const x = index * 60 + 30;
@@ -196,21 +208,32 @@ export const LineChart: React.FC<LineChartProps> = ({ data, title, color = '#3B8
  * 히트맵 컴포넌트
  */
 export const Heatmap: React.FC<HeatmapProps> = ({ data, title }) => {
-  const days = ['월', '화', '수', '목', '금', '토', '일'];
-  const hours = ['09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'];
-  
-  const maxValue = Math.max(...data.map(item => item.value));
-  
+  const days = ["월", "화", "수", "목", "금", "토", "일"];
+  const hours = [
+    "09:00",
+    "10:00",
+    "11:00",
+    "14:00",
+    "15:00",
+    "16:00",
+    "17:00",
+    "18:00",
+    "19:00",
+    "20:00",
+  ];
+
+  const maxValue = Math.max(...data.map((item) => item.value));
+
   const getCellValue = (day: string, hour: string) => {
-    const cell = data.find(item => item.day === day && item.hour === hour);
+    const cell = data.find((item) => item.day === day && item.hour === hour);
     return cell ? cell.value : 0;
   };
-  
+
   const getColor = (value: number) => {
     const intensity = value / maxValue;
     return `rgba(59, 130, 246, ${intensity})`;
   };
-  
+
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
       <h3 className="text-lg font-semibold text-gray-800 mb-4">{title}</h3>
@@ -219,7 +242,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({ data, title }) => {
           <thead>
             <tr>
               <th className="p-2 text-sm text-gray-600">요일/시간</th>
-              {hours.map(hour => (
+              {hours.map((hour) => (
                 <th key={hour} className="p-2 text-sm text-gray-600">
                   {hour}
                 </th>
@@ -227,10 +250,10 @@ export const Heatmap: React.FC<HeatmapProps> = ({ data, title }) => {
             </tr>
           </thead>
           <tbody>
-            {days.map(day => (
+            {days.map((day) => (
               <tr key={day}>
                 <td className="p-2 text-sm font-medium text-gray-700">{day}</td>
-                {hours.map(hour => {
+                {hours.map((hour) => {
                   const value = getCellValue(day, hour);
                   return (
                     <td key={hour} className="p-1">
@@ -239,7 +262,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({ data, title }) => {
                         style={{ backgroundColor: getColor(value) }}
                         title={`${day} ${hour}: ${value}명`}
                       >
-                        {value > 0 ? value : ''}
+                        {value > 0 ? value : ""}
                       </div>
                     </td>
                   );
@@ -256,7 +279,12 @@ export const Heatmap: React.FC<HeatmapProps> = ({ data, title }) => {
 /**
  * 통계 카드 컴포넌트
  */
-export const StatCard: React.FC<StatCardProps> = ({ title, value, subtitle, trend }) => {
+export const StatCard: React.FC<StatCardProps> = ({
+  title,
+  value,
+  subtitle,
+  trend,
+}) => {
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
       <div className="flex items-center justify-between">
@@ -266,16 +294,23 @@ export const StatCard: React.FC<StatCardProps> = ({ title, value, subtitle, tren
           {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
         </div>
         {trend && (
-          <div className={`flex items-center ${trend.isPositive ? 'text-green-600' : 'text-red-600'}`}>
+          <div
+            className={`flex items-center ${trend.isPositive ? "text-green-600" : "text-red-600"}`}
+          >
             <span className="text-sm font-medium">
-              {trend.isPositive ? '+' : ''}{trend.value}%
+              {trend.isPositive ? "+" : ""}
+              {trend.value}%
             </span>
             <svg
-              className={`w-4 h-4 ml-1 ${trend.isPositive ? 'rotate-0' : 'rotate-180'}`}
+              className={`w-4 h-4 ml-1 ${trend.isPositive ? "rotate-0" : "rotate-180"}`}
               fill="currentColor"
               viewBox="0 0 20 20"
             >
-              <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+              <path
+                fillRule="evenodd"
+                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                clipRule="evenodd"
+              />
             </svg>
           </div>
         )}
@@ -291,5 +326,5 @@ export const ChartHelpers = {
   toPieChartData: ChartDataConverter.toPieChartData,
   toBarChartData: ChartDataConverter.toBarChartData,
   toLineChartData: ChartDataConverter.toLineChartData,
-  toHeatmapData: ChartDataConverter.toHeatmapData
-}; 
+  toHeatmapData: ChartDataConverter.toHeatmapData,
+};

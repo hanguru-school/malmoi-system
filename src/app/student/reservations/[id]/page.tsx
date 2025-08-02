@@ -1,24 +1,24 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { 
-  Calendar, 
-  Clock, 
-  User, 
-  BookOpen, 
-  MapPin, 
-  MessageSquare, 
-  ArrowLeft, 
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import {
+  Calendar,
+  Clock,
+  User,
+  BookOpen,
+  MapPin,
+  MessageSquare,
+  ArrowLeft,
   Edit,
   Trash2,
   CheckCircle,
   XCircle,
   AlertCircle,
   Loader2,
-  Star
-} from 'lucide-react';
-import Link from 'next/link';
+  Star,
+} from "lucide-react";
+import Link from "next/link";
 
 interface Reservation {
   id: string;
@@ -27,7 +27,7 @@ interface Reservation {
   teacher: string;
   teacherAssigned: boolean; // 선생님이 지정되었는지 여부
   subject: string;
-  status: 'upcoming' | 'completed' | 'cancelled';
+  status: "upcoming" | "completed" | "cancelled";
   duration: number;
   location: string;
   notes?: string;
@@ -35,8 +35,6 @@ interface Reservation {
   totalPurchasedMinutes: number; // 총 구매한 시간 (분)
   teacherBio?: string; // 선생님 자기소개
 }
-
-
 
 export default function ReservationDetailPage() {
   const params = useParams();
@@ -56,38 +54,57 @@ export default function ReservationDetailPage() {
   const loadReservation = async () => {
     try {
       setLoading(true);
-      
+
       // 실제 API 호출로 대체
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       const mockReservation: Reservation = {
         id: reservationId,
-        date: '2024-01-15',
-        time: '14:00',
-        teacher: reservationId === '1' ? '김선생님' : 
-                reservationId === '2' ? '이선생님' : 
-                reservationId === '3' ? '박선생님' : 
-                reservationId === '5' ? '' : '정선생님',
-        teacherAssigned: reservationId === '1' ? true : 
-                        reservationId === '2' ? true : 
-                        reservationId === '3' ? true : 
-                        reservationId === '5' ? false : true,
-        subject: '한국어 회화',
-        status: reservationId === '2' || reservationId === '3' ? 'completed' : 
-                reservationId === '4' ? 'cancelled' : 'upcoming',
+        date: "2024-01-15",
+        time: "14:00",
+        teacher:
+          reservationId === "1"
+            ? "김선생님"
+            : reservationId === "2"
+              ? "이선생님"
+              : reservationId === "3"
+                ? "박선생님"
+                : reservationId === "5"
+                  ? ""
+                  : "정선생님",
+        teacherAssigned:
+          reservationId === "1"
+            ? true
+            : reservationId === "2"
+              ? true
+              : reservationId === "3"
+                ? true
+                : reservationId === "5"
+                  ? false
+                  : true,
+        subject: "한국어 회화",
+        status:
+          reservationId === "2" || reservationId === "3"
+            ? "completed"
+            : reservationId === "4"
+              ? "cancelled"
+              : "upcoming",
         duration: 60,
-        location: '온라인',
-        notes: '일상 대화 연습을 하고 싶습니다.',
-        remainingMinutes: reservationId === '5' ? 30 : reservationId === '6' ? 150 : 300,
-        totalPurchasedMinutes: reservationId === '5' ? 120 : reservationId === '6' ? 300 : 600,
-        teacherBio: '한국어 회화 강사로 10년 이상의 경력을 가지고 있습니다. 청소년 교육 경험이 풍부하며, 학생들의 목표에 맞춰 개인적인 수업을 진행합니다.'
+        location: "온라인",
+        notes: "일상 대화 연습을 하고 싶습니다.",
+        remainingMinutes:
+          reservationId === "5" ? 30 : reservationId === "6" ? 150 : 300,
+        totalPurchasedMinutes:
+          reservationId === "5" ? 120 : reservationId === "6" ? 300 : 600,
+        teacherBio:
+          "한국어 회화 강사로 10년 이상의 경력을 가지고 있습니다. 청소년 교육 경험이 풍부하며, 학생들의 목표에 맞춰 개인적인 수업을 진행합니다.",
       };
 
       setReservation(mockReservation);
       setLoading(false);
     } catch (error) {
-      console.error('예약 조회 실패:', error);
-      setError('예약 정보를 불러오는데 실패했습니다.');
+      console.error("예약 조회 실패:", error);
+      setError("예약 정보를 불러오는데 실패했습니다.");
       setLoading(false);
     }
   };
@@ -95,17 +112,17 @@ export default function ReservationDetailPage() {
   const handleCancel = async () => {
     try {
       setCancelling(true);
-      
-      // 실제 API 호출로 대체
-      await new Promise(resolve => setTimeout(resolve, 2000));
 
-      console.log('예약 취소:', reservationId);
-      
+      // 실제 API 호출로 대체
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      console.log("예약 취소:", reservationId);
+
       // 성공 시 목록으로 이동
-      router.push('/student/reservations');
+      router.push("/student/reservations");
     } catch (error) {
-      console.error('예약 취소 실패:', error);
-      setError('예약 취소 중 오류가 발생했습니다.');
+      console.error("예약 취소 실패:", error);
+      setError("예약 취소 중 오류가 발생했습니다.");
     } finally {
       setCancelling(false);
       setShowCancelModal(false);
@@ -114,24 +131,24 @@ export default function ReservationDetailPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'upcoming':
-        return 'bg-blue-100 text-blue-800';
-      case 'completed':
-        return 'bg-green-100 text-green-800';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800';
+      case "upcoming":
+        return "bg-blue-100 text-blue-800";
+      case "completed":
+        return "bg-green-100 text-green-800";
+      case "cancelled":
+        return "bg-red-100 text-red-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'upcoming':
+      case "upcoming":
         return <Clock className="w-4 h-4" />;
-      case 'completed':
+      case "completed":
         return <CheckCircle className="w-4 h-4" />;
-      case 'cancelled':
+      case "cancelled":
         return <XCircle className="w-4 h-4" />;
       default:
         return <AlertCircle className="w-4 h-4" />;
@@ -140,19 +157,19 @@ export default function ReservationDetailPage() {
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'upcoming':
-        return '예정';
-      case 'completed':
-        return '완료';
-      case 'cancelled':
-        return '취소';
+      case "upcoming":
+        return "예정";
+      case "completed":
+        return "완료";
+      case "cancelled":
+        return "취소";
       default:
-        return '알 수 없음';
+        return "알 수 없음";
     }
   };
 
   const getDayOfWeek = (date: string) => {
-    return new Date(date).toLocaleDateString('ko-KR', { weekday: 'long' });
+    return new Date(date).toLocaleDateString("ko-KR", { weekday: "long" });
   };
 
   if (loading) {
@@ -174,7 +191,7 @@ export default function ReservationDetailPage() {
             <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
             <h1 className="text-3xl font-bold text-gray-900 mb-4">오류 발생</h1>
             <p className="text-lg text-gray-600 mb-8">
-              {error || '예약을 찾을 수 없습니다.'}
+              {error || "예약을 찾을 수 없습니다."}
             </p>
             <Link
               href="/student/reservations"
@@ -215,7 +232,9 @@ export default function ReservationDetailPage() {
           <div className={`px-6 py-4 ${getStatusColor(reservation.status)}`}>
             <div className="flex items-center gap-2">
               {getStatusIcon(reservation.status)}
-              <span className="font-medium">{getStatusText(reservation.status)}</span>
+              <span className="font-medium">
+                {getStatusText(reservation.status)}
+              </span>
             </div>
           </div>
 
@@ -225,7 +244,9 @@ export default function ReservationDetailPage() {
               {/* 기본 정보 */}
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">기본 정보</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    기본 정보
+                  </h3>
                   <div className="space-y-3">
                     <div className="flex items-center gap-3">
                       <Calendar className="w-5 h-5 text-blue-600" />
@@ -249,8 +270,12 @@ export default function ReservationDetailPage() {
                       <User className="w-5 h-5 text-purple-600" />
                       <div>
                         <div className="text-sm text-gray-600">선생님</div>
-                        <div className={`font-medium ${reservation.teacherAssigned ? 'text-gray-900' : 'text-gray-500'}`}>
-                          {reservation.teacherAssigned ? reservation.teacher : '미확정'}
+                        <div
+                          className={`font-medium ${reservation.teacherAssigned ? "text-gray-900" : "text-gray-500"}`}
+                        >
+                          {reservation.teacherAssigned
+                            ? reservation.teacher
+                            : "미확정"}
                         </div>
                       </div>
                     </div>
@@ -258,14 +283,18 @@ export default function ReservationDetailPage() {
                       <BookOpen className="w-5 h-5 text-orange-600" />
                       <div>
                         <div className="text-sm text-gray-600">과목</div>
-                        <div className="font-medium text-gray-900">{reservation.subject} ({reservation.duration}분)</div>
+                        <div className="font-medium text-gray-900">
+                          {reservation.subject} ({reservation.duration}분)
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
                       <MapPin className="w-5 h-5 text-red-600" />
                       <div>
                         <div className="text-sm text-gray-600">장소</div>
-                        <div className="font-medium text-gray-900">{reservation.location}</div>
+                        <div className="font-medium text-gray-900">
+                          {reservation.location}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -274,7 +303,9 @@ export default function ReservationDetailPage() {
                 {/* 메모 */}
                 {reservation.notes && (
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">메모</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                      메모
+                    </h3>
                     <div className="flex items-start gap-3">
                       <MessageSquare className="w-5 h-5 text-gray-600 mt-0.5" />
                       <div className="text-gray-700 bg-gray-50 rounded-lg p-3 flex-1">
@@ -287,7 +318,9 @@ export default function ReservationDetailPage() {
 
               {/* 남은 시간 정보 */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">남은 시간 정보</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  남은 시간 정보
+                </h3>
                 <div className="bg-gray-50 rounded-lg p-4 space-y-3">
                   <div className="flex justify-between">
                     <span className="text-gray-600">현재 남은 시간</span>
@@ -296,9 +329,15 @@ export default function ReservationDetailPage() {
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">이번 레슨 후 남는 시간</span>
+                    <span className="text-gray-600">
+                      이번 레슨 후 남는 시간
+                    </span>
                     <span className="font-medium text-gray-900">
-                      {Math.max(0, reservation.remainingMinutes - reservation.duration)}분
+                      {Math.max(
+                        0,
+                        reservation.remainingMinutes - reservation.duration,
+                      )}
+                      분
                     </span>
                   </div>
                   <div className="flex justify-between">
@@ -315,10 +354,13 @@ export default function ReservationDetailPage() {
                     <div className="flex items-start gap-3">
                       <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
                       <div>
-                        <div className="font-medium text-yellow-800 mb-1">레슨 시간 구매 필요</div>
+                        <div className="font-medium text-yellow-800 mb-1">
+                          레슨 시간 구매 필요
+                        </div>
                         <div className="text-sm text-yellow-700">
-                          남은 시간이 {reservation.remainingMinutes}분으로 부족합니다. 
-                          원활한 수업을 위해 추가 시간을 구매해 주세요.
+                          남은 시간이 {reservation.remainingMinutes}분으로
+                          부족합니다. 원활한 수업을 위해 추가 시간을 구매해
+                          주세요.
                         </div>
                       </div>
                     </div>
@@ -327,15 +369,23 @@ export default function ReservationDetailPage() {
 
                 {/* 선생님 정보 */}
                 <div className="mt-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">선생님 정보</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    선생님 정보
+                  </h3>
                   <div className="bg-blue-50 rounded-lg p-4">
                     <div className="flex items-center gap-3 mb-3">
                       <User className="w-8 h-8 text-blue-600" />
                       <div>
-                        <div className={`font-medium ${reservation.teacherAssigned ? 'text-gray-900' : 'text-gray-500'}`}>
-                          {reservation.teacherAssigned ? reservation.teacher : '미확정'}
+                        <div
+                          className={`font-medium ${reservation.teacherAssigned ? "text-gray-900" : "text-gray-500"}`}
+                        >
+                          {reservation.teacherAssigned
+                            ? reservation.teacher
+                            : "미확정"}
                         </div>
-                        <div className="text-sm text-gray-600">한국어 전문 강사</div>
+                        <div className="text-sm text-gray-600">
+                          한국어 전문 강사
+                        </div>
                       </div>
                     </div>
                     {reservation.teacherAssigned && (
@@ -360,7 +410,7 @@ export default function ReservationDetailPage() {
 
         {/* 액션 버튼 */}
         <div className="flex justify-end gap-4">
-          {reservation.status === 'upcoming' && (
+          {reservation.status === "upcoming" && (
             <>
               <Link
                 href={`/student/reservations/${reservation.id}/edit`}
@@ -378,7 +428,7 @@ export default function ReservationDetailPage() {
               </button>
             </>
           )}
-          {reservation.status === 'completed' && (
+          {reservation.status === "completed" && (
             <Link
               href={`/student/reviews?lessonId=${reservation.id}`}
               className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
@@ -393,9 +443,12 @@ export default function ReservationDetailPage() {
         {showCancelModal && (
           <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
             <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">예약 취소</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                예약 취소
+              </h3>
               <p className="text-gray-600 mb-6">
-                정말로 이 예약을 취소하시겠습니까? 취소된 예약은 복구할 수 없습니다.
+                정말로 이 예약을 취소하시겠습니까? 취소된 예약은 복구할 수
+                없습니다.
               </p>
               <div className="flex justify-end gap-4">
                 <button
@@ -429,4 +482,4 @@ export default function ReservationDetailPage() {
       </div>
     </div>
   );
-} 
+}

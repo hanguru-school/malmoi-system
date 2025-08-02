@@ -1,418 +1,235 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { 
-  CreditCard, 
-  QrCode, 
-  CheckCircle, 
-  XCircle, 
-  Clock, 
-  User,
-  LogOut,
-  Home,
-  AlertCircle,
-  Wifi,
-  WifiOff
-} from 'lucide-react';
-import Link from 'next/link';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Tablet,
+  Smartphone,
+  Monitor,
+  QrCode,
+  ArrowRight,
+  Settings,
+  BarChart3,
+  Users,
+} from "lucide-react";
 
-interface TaggingUser {
-  id: string;
-  cardId: string;
-  uid: string;
-  name: string;
-  role: 'student' | 'teacher' | 'staff' | 'admin';
-  department: string;
-  lastTaggingTime?: Date;
-  isCurrentlyIn: boolean;
-}
+export default function TaggingMainPage() {
+  const router = useRouter();
+  const [selectedDevice, setSelectedDevice] = useState<string>("");
+  const [location, setLocation] = useState("교실 A");
 
-interface TaggingLog {
-  id: string;
-  userId: string;
-  userName: string;
-  userRole: string;
-  action: 'check_in' | 'check_out';
-  timestamp: Date;
-  deviceId: string;
-  location: string;
-}
+  const handleDeviceSelect = (device: string) => {
+    setSelectedDevice(device);
+  };
 
-export default function TaggingPage() {
-  const [isOnline, setIsOnline] = useState(true);
-  const [currentTime, setCurrentTime] = useState(new Date());
-  const [scanInput, setScanInput] = useState('');
-  const [recentTaggings, setRecentTaggings] = useState<TaggingLog[]>([]);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [lastTaggingResult, setLastTaggingResult] = useState<{
-    success: boolean;
-    message: string;
-    user?: TaggingUser;
-  } | null>(null);
+  const handleStartTagging = () => {
+    if (!selectedDevice) return;
 
-  // 현재 시간 업데이트
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
-
-  // 온라인 상태 체크
-  useEffect(() => {
-    const checkOnlineStatus = () => {
-      setIsOnline(navigator.onLine);
-    };
-
-    window.addEventListener('online', checkOnlineStatus);
-    window.addEventListener('offline', checkOnlineStatus);
-    checkOnlineStatus();
-
-    return () => {
-      window.removeEventListener('online', checkOnlineStatus);
-      window.removeEventListener('offline', checkOnlineStatus);
-    };
-  }, []);
-
-  // 최근 태깅 로그 로드
-  useEffect(() => {
-    loadRecentTaggings();
-  }, []);
-
-  const loadRecentTaggings = async () => {
-    try {
-      const response = await fetch('/api/tagging');
-      const result = await response.json();
-
-      if (result.success) {
-        const logs = result.logs.map((log: any) => ({
-          ...log,
-          timestamp: new Date(log.timestamp)
-        }));
-        setRecentTaggings(logs);
-      }
-    } catch (error) {
-      console.error('태깅 로그 로드 오류:', error);
-      // 오류 시 기본 데이터 사용
-      const mockTaggings: TaggingLog[] = [
-        {
-          id: '1',
-          userId: 'student-001',
-          userName: '김학생',
-          userRole: '학생',
-          action: 'check_in',
-          timestamp: new Date(Date.now() - 5 * 60 * 1000), // 5분 전
-          deviceId: 'DEVICE-001',
-          location: 'A동 101호'
-        },
-        {
-          id: '2',
-          userId: 'teacher-001',
-          userName: '박교수',
-          userRole: '강사',
-          action: 'check_in',
-          timestamp: new Date(Date.now() - 15 * 60 * 1000), // 15분 전
-          deviceId: 'DEVICE-001',
-          location: 'A동 101호'
-        },
-        {
-          id: '3',
-          userId: 'student-002',
-          userName: '이학생',
-          userRole: '학생',
-          action: 'check_out',
-          timestamp: new Date(Date.now() - 30 * 60 * 1000), // 30분 전
-          deviceId: 'DEVICE-001',
-          location: 'A동 101호'
-        }
-      ];
-      setRecentTaggings(mockTaggings);
+    if (selectedDevice === "tablet") {
+      router.push(`/tagging/tablet?device=ipad&location=${location}`);
+    } else if (selectedDevice === "mobile") {
+      // 모바일의 경우 UID를 시뮬레이션
+      const uid = `mobile_${Date.now()}`;
+      router.push(`/tagging/mobile?uid=${uid}&location=${location}`);
     }
   };
 
-  // 태깅 처리
-  const processTagging = async (cardId: string) => {
-    setIsProcessing(true);
-    setLastTaggingResult(null);
+  const devices = [
+    {
+      id: "tablet",
+      name: "iPad 태깅",
+      description: "iPad 또는 Mac에서 사용하는 태깅 인터페이스",
+      icon: Tablet,
+      color: "blue",
+    },
+    {
+      id: "mobile",
+      name: "스마트폰 태깅",
+      description: "iPhone 또는 Android에서 FeliCa/NFC 사용",
+      icon: Smartphone,
+      color: "green",
+    },
+    {
+      id: "desktop",
+      name: "데스크톱 태깅",
+      description: "Mac 또는 PC에서 사용하는 태깅 인터페이스",
+      icon: Monitor,
+      color: "purple",
+    },
+  ];
 
-    try {
-      // API 호출
-      const response = await fetch('/api/tagging', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          cardId,
-          deviceId: 'DEVICE-001',
-          location: 'A동 101호',
-          action: 'check_in' // 기본값은 출근, 실제로는 사용자 상태에 따라 결정
-        }),
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        // 태깅 로그 추가
-        const newTagging: TaggingLog = {
-          id: result.taggingLog.id,
-          userId: result.taggingLog.userId,
-          userName: result.taggingLog.userName,
-          userRole: result.taggingLog.userRole,
-          action: result.taggingLog.action,
-          timestamp: new Date(result.taggingLog.timestamp),
-          deviceId: result.taggingLog.deviceId,
-          location: result.taggingLog.location
-        };
-
-        setRecentTaggings(prev => [newTagging, ...prev.slice(0, 9)]); // 최근 10개만 유지
-
-        setLastTaggingResult({
-          success: true,
-          message: result.message,
-          user: result.user
-        });
-
-        // 입력 필드 초기화
-        setScanInput('');
-      } else {
-        setLastTaggingResult({
-          success: false,
-          message: result.message
-        });
-      }
-
-    } catch (error) {
-      console.error('태깅 API 호출 오류:', error);
-      setLastTaggingResult({
-        success: false,
-        message: '태깅 처리 중 오류가 발생했습니다.'
-      });
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  // 스캔 입력 처리
-  const handleScanInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setScanInput(value);
-
-    // 엔터키나 특정 길이에 도달하면 태깅 처리
-    if (value.length >= 8) {
-      processTagging(value);
-    }
-  };
-
-  // 키보드 이벤트 처리
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && scanInput.trim()) {
-      processTagging(scanInput.trim());
-    }
-  };
-
-  const getActionIcon = (action: string) => {
-    return action === 'check_in' ? 
-      <CheckCircle className="w-4 h-4 text-green-500" /> : 
-      <XCircle className="w-4 h-4 text-red-500" />;
-  };
-
-  const getActionText = (action: string) => {
-    return action === 'check_in' ? '출근' : '퇴근';
-  };
-
-  const getRoleColor = (role: string) => {
-    switch (role) {
-      case '학생': return 'bg-blue-100 text-blue-800';
-      case '강사': return 'bg-green-100 text-green-800';
-      case '직원': return 'bg-purple-100 text-purple-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
+  const getDeviceIcon = (device: any) => {
+    const IconComponent = device.icon;
+    return <IconComponent className={`w-8 h-8 text-${device.color}-600`} />;
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* 헤더 */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <h1 className="text-2xl font-bold text-gray-900">출근 태깅 시스템</h1>
-              <div className="flex items-center space-x-2">
-                {isOnline ? (
-                  <Wifi className="w-4 h-4 text-green-500" />
-                ) : (
-                  <WifiOff className="w-4 h-4 text-red-500" />
-                )}
-                <span className={`text-sm ${isOnline ? 'text-green-600' : 'text-red-600'}`}>
-                  {isOnline ? '온라인' : '오프라인'}
-                </span>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="text-right">
-                <div className="text-sm text-gray-500">현재 시간</div>
-                <div className="text-lg font-mono font-semibold text-gray-900">
-                  {currentTime.toLocaleTimeString('ko-KR')}
-                </div>
-              </div>
-              <Link
-                href="/"
-                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="max-w-4xl mx-auto p-6">
+        {/* 헤더 */}
+        <div className="text-center mb-12">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <QrCode className="w-12 h-12 text-blue-600" />
+            <h1 className="text-4xl font-bold text-gray-900">
+              UID 태깅 시스템
+            </h1>
+          </div>
+          <p className="text-xl text-gray-600">
+            IC카드 및 스마트폰을 통한 출석 체크 및 관리 시스템
+          </p>
+        </div>
+
+        {/* 디바이스 선택 */}
+        <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+            디바이스 선택
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            {devices.map((device) => (
+              <button
+                key={device.id}
+                onClick={() => handleDeviceSelect(device.id)}
+                className={`p-6 rounded-xl border-2 transition-all duration-200 ${
+                  selectedDevice === device.id
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                }`}
               >
-                <Home className="w-4 h-4" />
-                <span>홈으로</span>
-              </Link>
+                <div className="flex items-center gap-4">
+                  {getDeviceIcon(device)}
+                  <div className="text-left">
+                    <h3 className="font-semibold text-gray-900">
+                      {device.name}
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      {device.description}
+                    </p>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {/* 위치 설정 */}
+          <div className="mb-8">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              태깅 위치
+            </label>
+            <select
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="교실 A">교실 A</option>
+              <option value="교실 B">교실 B</option>
+              <option value="교실 C">교실 C</option>
+              <option value="1층 로비">1층 로비</option>
+              <option value="2층 로비">2층 로비</option>
+              <option value="사무실">사무실</option>
+            </select>
+          </div>
+
+          {/* 시작 버튼 */}
+          <button
+            onClick={handleStartTagging}
+            disabled={!selectedDevice}
+            className="w-full bg-blue-600 text-white py-4 px-6 rounded-xl font-semibold text-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+          >
+            태깅 시작하기
+            <ArrowRight className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* 기능 설명 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div className="bg-white rounded-2xl shadow-xl p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <Users className="w-8 h-8 text-green-600" />
+              <h3 className="text-xl font-semibold text-gray-900">학생 태깅</h3>
             </div>
+            <ul className="space-y-2 text-gray-600">
+              <li>• 예약 확인 및 출석 처리</li>
+              <li>• 포인트 자동 적립</li>
+              <li>• 정기권/쿠폰 사용</li>
+              <li>• 중복 태깅 방지</li>
+            </ul>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-xl p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <Settings className="w-8 h-8 text-orange-600" />
+              <h3 className="text-xl font-semibold text-gray-900">직원 태깅</h3>
+            </div>
+            <ul className="space-y-2 text-gray-600">
+              <li>• 출근/퇴근 기록</li>
+              <li>• 자동 퇴근 처리</li>
+              <li>• 교통비 계산</li>
+              <li>• 근무 시간 관리</li>
+            </ul>
           </div>
         </div>
-      </div>
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* 태깅 섹션 */}
-          <div className="space-y-6">
-            {/* 카드 스캔 */}
-            <div className="bg-white rounded-lg shadow-sm border p-6">
-              <div className="text-center mb-6">
-                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <CreditCard className="w-8 h-8 text-blue-600" />
-                </div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-2">카드 태깅</h2>
-                <p className="text-gray-600">IC 카드나 바코드를 스캔하세요</p>
+        {/* 관리 링크 */}
+        <div className="bg-white rounded-2xl shadow-xl p-6">
+          <h3 className="text-xl font-semibold text-gray-900 mb-4">
+            관리 기능
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <button
+              onClick={() => router.push("/admin/tagging-management")}
+              className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <BarChart3 className="w-6 h-6 text-blue-600" />
+              <div className="text-left">
+                <div className="font-medium text-gray-900">태깅 관리</div>
+                <div className="text-sm text-gray-600">로그 및 통계</div>
               </div>
+            </button>
 
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="scanInput" className="block text-sm font-medium text-gray-700 mb-2">
-                    카드 ID 입력
-                  </label>
-                  <input
-                    id="scanInput"
-                    type="text"
-                    value={scanInput}
-                    onChange={handleScanInput}
-                    onKeyPress={handleKeyPress}
-                    placeholder="카드를 스캔하거나 ID를 입력하세요"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center text-lg font-mono"
-                    disabled={isProcessing}
-                    autoFocus
-                  />
-                </div>
-
-                {isProcessing && (
-                  <div className="text-center py-4">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="text-sm text-gray-600 mt-2">처리 중...</p>
-                  </div>
-                )}
-
-                {lastTaggingResult && (
-                  <div className={`p-4 rounded-lg border ${
-                    lastTaggingResult.success 
-                      ? 'bg-green-50 border-green-200' 
-                      : 'bg-red-50 border-red-200'
-                  }`}>
-                    <div className="flex items-center space-x-2">
-                      {lastTaggingResult.success ? (
-                        <CheckCircle className="w-5 h-5 text-green-500" />
-                      ) : (
-                        <AlertCircle className="w-5 h-5 text-red-500" />
-                      )}
-                      <span className={`font-medium ${
-                        lastTaggingResult.success ? 'text-green-800' : 'text-red-800'
-                      }`}>
-                        {lastTaggingResult.message}
-                      </span>
-                    </div>
-                    {lastTaggingResult.user && (
-                      <div className="mt-2 text-sm text-gray-600">
-                        <div>이름: {lastTaggingResult.user.name}</div>
-                        <div>역할: {lastTaggingResult.user.role === 'student' ? '학생' : lastTaggingResult.user.role === 'teacher' ? '강사' : '직원'}</div>
-                        <div>부서: {lastTaggingResult.user.department}</div>
-                      </div>
-                    )}
-                  </div>
-                )}
+            <button
+              onClick={() => router.push("/admin/uid-management")}
+              className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <Users className="w-6 h-6 text-green-600" />
+              <div className="text-left">
+                <div className="font-medium text-gray-900">UID 관리</div>
+                <div className="text-sm text-gray-600">등록 및 연결</div>
               </div>
-            </div>
+            </button>
 
-            {/* 테스트 카드 */}
-            <div className="bg-white rounded-lg shadow-sm border p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">테스트 카드</h3>
-              <div className="grid grid-cols-1 gap-2">
-                {[
-                  { id: 'CARD-001', name: '김학생 (학생)', role: 'student' },
-                  { id: 'CARD-002', name: '박교수 (강사)', role: 'teacher' },
-                  { id: 'CARD-003', name: '이직원 (직원)', role: 'staff' }
-                ].map((card) => (
-                  <button
-                    key={card.id}
-                    onClick={() => processTagging(card.id)}
-                    disabled={isProcessing}
-                    className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <CreditCard className="w-4 h-4 text-gray-500" />
-                      <div className="text-left">
-                        <div className="font-medium text-gray-900">{card.name}</div>
-                        <div className="text-sm text-gray-500">{card.id}</div>
-                      </div>
-                    </div>
-                    <span className={`px-2 py-1 text-xs rounded-full ${
-                      card.role === 'student' ? 'bg-blue-100 text-blue-800' :
-                      card.role === 'teacher' ? 'bg-green-100 text-green-800' :
-                      'bg-purple-100 text-purple-800'
-                    }`}>
-                      {card.role === 'student' ? '학생' : card.role === 'teacher' ? '강사' : '직원'}
-                    </span>
-                  </button>
-                ))}
+            <button
+              onClick={() => router.push("/admin/passport-management")}
+              className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <QrCode className="w-6 h-6 text-purple-600" />
+              <div className="text-left">
+                <div className="font-medium text-gray-900">정기권 관리</div>
+                <div className="text-sm text-gray-600">구매 및 사용</div>
               </div>
-            </div>
+            </button>
           </div>
+        </div>
 
-          {/* 최근 태깅 로그 */}
-          <div className="bg-white rounded-lg shadow-sm border p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-gray-900">최근 태깅 로그</h2>
-              <Clock className="w-5 h-5 text-gray-400" />
-            </div>
-
-            <div className="space-y-3">
-              {recentTaggings.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  <CreditCard className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                  <p>아직 태깅 기록이 없습니다.</p>
-                </div>
-              ) : (
-                recentTaggings.map((tagging) => (
-                  <div key={tagging.id} className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg">
-                    {getActionIcon(tagging.action)}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center space-x-2">
-                        <span className="font-medium text-gray-900">{tagging.userName}</span>
-                        <span className={`px-2 py-1 text-xs rounded-full ${getRoleColor(tagging.userRole)}`}>
-                          {tagging.userRole}
-                        </span>
-                        <span className={`px-2 py-1 text-xs rounded-full ${
-                          tagging.action === 'check_in' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                        }`}>
-                          {getActionText(tagging.action)}
-                        </span>
-                      </div>
-                      <div className="text-sm text-gray-500 mt-1">
-                        {tagging.timestamp.toLocaleTimeString('ko-KR')} • {tagging.location}
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
+        {/* 사용 가이드 */}
+        <div className="bg-blue-50 rounded-2xl p-6 mt-8">
+          <h3 className="text-lg font-semibold text-blue-900 mb-4">
+            사용 가이드
+          </h3>
+          <div className="space-y-2 text-blue-800">
+            <p>• IC카드나 스마트폰을 기기에 가져다 대면 자동으로 태깅됩니다</p>
+            <p>• 신규 사용자는 UID 등록 후 사용자 정보를 입력해야 합니다</p>
+            <p>
+              • 태깅 시 예약 상태, 정기권 잔여량, 포인트 적립이 자동으로
+              처리됩니다
+            </p>
+            <p>
+              • 관리자는 태깅 관리 페이지에서 모든 로그와 통계를 확인할 수
+              있습니다
+            </p>
           </div>
         </div>
       </div>
     </div>
   );
-} 
+}

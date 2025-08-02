@@ -1,27 +1,20 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { 
-  Globe, 
-  ArrowLeft,
-  Save,
-  CheckCircle,
-  Languages,
-  Flag
-} from 'lucide-react';
-import Link from 'next/link';
+import { useState } from "react";
+import { Globe, ArrowLeft, Save, CheckCircle, Languages } from "lucide-react";
+import Link from "next/link";
 
 interface LanguageSettings {
-  currentLanguage: 'ko' | 'ja';
-  preferredLanguage: 'ko' | 'ja';
+  currentLanguage: "ko" | "ja";
+  preferredLanguage: "ko" | "ja";
   autoDetect: boolean;
 }
 
 export default function StudentLanguageSettingsPage() {
   const [settings, setSettings] = useState<LanguageSettings>({
-    currentLanguage: 'ko',
-    preferredLanguage: 'ko',
-    autoDetect: true
+    currentLanguage: "ko",
+    preferredLanguage: "ko",
+    autoDetect: true,
   });
 
   const [saving, setSaving] = useState(false);
@@ -29,39 +22,39 @@ export default function StudentLanguageSettingsPage() {
 
   const languages = [
     {
-      code: 'ko',
-      name: '한국어',
-      nativeName: '한국어',
-      flag: '🇰🇷',
-      description: '한국어로 표시됩니다'
+      code: "ko",
+      name: "한국어",
+      nativeName: "한국어",
+      flag: "🇰🇷",
+      description: "한국어로 표시됩니다",
     },
     {
-      code: 'ja',
-      name: '日本語',
-      nativeName: '日本語',
-      flag: '🇯🇵',
-      description: '日本語で表示されます'
-    }
+      code: "ja",
+      name: "日本語",
+      nativeName: "日本語",
+      flag: "🇯🇵",
+      description: "日本語で表示されます",
+    },
   ];
 
-  const handleLanguageChange = (language: 'ko' | 'ja') => {
-    setSettings(prev => ({
+  const handleLanguageChange = (language: "ko" | "ja") => {
+    setSettings((prev) => ({
       ...prev,
-      preferredLanguage: language
+      preferredLanguage: language,
     }));
   };
 
   const handleAutoDetectToggle = () => {
-    setSettings(prev => ({
+    setSettings((prev) => ({
       ...prev,
-      autoDetect: !prev.autoDetect
+      autoDetect: !prev.autoDetect,
     }));
   };
 
   const handleSave = async () => {
     setSaving(true);
     // 실제 API 호출로 대체
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
@@ -92,17 +85,29 @@ export default function StudentLanguageSettingsPage() {
               <Globe className="w-6 h-6 text-blue-600" />
               <h2 className="text-lg font-semibold text-gray-900">현재 언어</h2>
             </div>
-            
+
             <div className="flex items-center gap-4 p-4 bg-blue-50 rounded-lg">
               <div className="text-2xl">
-                {languages.find(lang => lang.code === settings.currentLanguage)?.flag}
+                {
+                  languages.find(
+                    (lang) => lang.code === settings.currentLanguage,
+                  )?.flag
+                }
               </div>
               <div>
                 <h3 className="font-medium text-gray-900">
-                  {languages.find(lang => lang.code === settings.currentLanguage)?.name}
+                  {
+                    languages.find(
+                      (lang) => lang.code === settings.currentLanguage,
+                    )?.name
+                  }
                 </h3>
                 <p className="text-sm text-gray-600">
-                  {languages.find(lang => lang.code === settings.currentLanguage)?.description}
+                  {
+                    languages.find(
+                      (lang) => lang.code === settings.currentLanguage,
+                    )?.description
+                  }
                 </p>
               </div>
             </div>
@@ -114,25 +119,33 @@ export default function StudentLanguageSettingsPage() {
               <Languages className="w-6 h-6 text-blue-600" />
               <h2 className="text-lg font-semibold text-gray-900">언어 선택</h2>
             </div>
-            
+
             <div className="space-y-4">
               {languages.map((language) => (
                 <div
                   key={language.code}
                   className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
                     settings.preferredLanguage === language.code
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-200 hover:border-gray-300"
                   }`}
-                  onClick={() => handleLanguageChange(language.code as 'ko' | 'ja')}
+                  onClick={() =>
+                    handleLanguageChange(language.code as "ko" | "ja")
+                  }
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className="text-2xl">{language.flag}</div>
                       <div>
-                        <h3 className="font-medium text-gray-900">{language.name}</h3>
-                        <p className="text-sm text-gray-600">{language.nativeName}</p>
-                        <p className="text-xs text-gray-500 mt-1">{language.description}</p>
+                        <h3 className="font-medium text-gray-900">
+                          {language.name}
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          {language.nativeName}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {language.description}
+                        </p>
                       </div>
                     </div>
                     {settings.preferredLanguage === language.code && (
@@ -148,7 +161,9 @@ export default function StudentLanguageSettingsPage() {
           <div className="bg-white rounded-xl shadow-sm p-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-semibold text-gray-900 mb-1">브라우저 언어 자동 감지</h3>
+                <h3 className="font-semibold text-gray-900 mb-1">
+                  브라우저 언어 자동 감지
+                </h3>
                 <p className="text-sm text-gray-600">
                   브라우저 설정에 따라 자동으로 언어를 감지합니다
                 </p>
@@ -177,13 +192,15 @@ export default function StudentLanguageSettingsPage() {
               ) : (
                 <Save className="w-5 h-5" />
               )}
-              <span>{saving ? '저장 중...' : '저장'}</span>
+              <span>{saving ? "저장 중..." : "저장"}</span>
             </button>
           </div>
 
           {/* 언어별 미리보기 */}
           <div className="bg-white rounded-xl shadow-sm p-6">
-            <h3 className="font-semibold text-gray-900 mb-4">언어별 미리보기</h3>
+            <h3 className="font-semibold text-gray-900 mb-4">
+              언어별 미리보기
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="p-4 border border-gray-200 rounded-lg">
                 <div className="flex items-center gap-2 mb-3">
@@ -225,4 +242,4 @@ export default function StudentLanguageSettingsPage() {
       </div>
     </div>
   );
-} 
+}

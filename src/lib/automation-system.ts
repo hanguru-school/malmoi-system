@@ -6,16 +6,16 @@
 export interface AutomationRule {
   id: string;
   name: string;
-  type: 'reminder' | 'notification' | 'report';
+  type: "reminder" | "notification" | "report";
   schedule: {
-    type: 'daily' | 'weekly' | 'monthly' | 'custom';
+    type: "daily" | "weekly" | "monthly" | "custom";
     time?: string; // HH:MM (custom 타입에서는 선택적)
     dayOfWeek?: number; // 0-6 (일요일-토요일)
     dayOfMonth?: number; // 1-31
     interval?: number; // 분 단위 (custom 타입용)
   };
   conditions: {
-    targetType: 'student' | 'teacher' | 'admin';
+    targetType: "student" | "teacher" | "admin";
     filters?: {
       levels?: string[];
       lastClassDays?: number;
@@ -28,7 +28,7 @@ export interface AutomationRule {
     content: string;
     template: string;
   };
-  channels: ('line' | 'email' | 'sms')[];
+  channels: ("line" | "email" | "sms")[];
   enabled: boolean;
   lastExecuted?: Date;
   nextExecution?: Date;
@@ -38,7 +38,7 @@ export interface AutomationLog {
   id: string;
   ruleId: string;
   timestamp: Date;
-  status: 'success' | 'failed' | 'skipped';
+  status: "success" | "failed" | "skipped";
   targetCount: number;
   sentCount: number;
   errorCount: number;
@@ -49,7 +49,7 @@ export interface AutomationLog {
 export interface MessageTemplate {
   id: string;
   name: string;
-  type: 'reminder' | 'notification' | 'report';
+  type: "reminder" | "notification" | "report";
   title: string;
   content: string;
   variables: string[];
@@ -75,191 +75,198 @@ class AutomationSystem {
     this.rules = [
       // 관리자 리마인드 규칙
       {
-        id: 'admin-monthly-5',
-        name: '매월 5일 근태 기록 확인 요청',
-        type: 'reminder',
+        id: "admin-monthly-5",
+        name: "매월 5일 근태 기록 확인 요청",
+        type: "reminder",
         schedule: {
-          type: 'monthly',
-          time: '09:00',
-          dayOfMonth: 5
+          type: "monthly",
+          time: "09:00",
+          dayOfMonth: 5,
         },
         conditions: {
-          targetType: 'admin'
+          targetType: "admin",
         },
         message: {
-          title: '근태 기록 확인 요청',
-          content: '이번 달 근태 기록을 확인해주세요. 미완료 항목이 {incompleteCount}개 있습니다.',
-          template: 'admin_attendance_reminder'
+          title: "근태 기록 확인 요청",
+          content:
+            "이번 달 근태 기록을 확인해주세요. 미완료 항목이 {incompleteCount}개 있습니다.",
+          template: "admin_attendance_reminder",
         },
-        channels: ['line', 'email'],
-        enabled: true
+        channels: ["line", "email"],
+        enabled: true,
       },
       {
-        id: 'admin-monthly-10',
-        name: '매월 10일 직원 확인 시작 알림',
-        type: 'notification',
+        id: "admin-monthly-10",
+        name: "매월 10일 직원 확인 시작 알림",
+        type: "notification",
         schedule: {
-          type: 'monthly',
-          time: '09:00',
-          dayOfMonth: 10
+          type: "monthly",
+          time: "09:00",
+          dayOfMonth: 10,
         },
         conditions: {
-          targetType: 'admin'
+          targetType: "admin",
         },
         message: {
-          title: '직원 확인 시작',
-          content: '이번 달 직원 확인이 시작되었습니다. {employeeCount}명의 직원 정보를 확인해주세요.',
-          template: 'admin_employee_check'
+          title: "직원 확인 시작",
+          content:
+            "이번 달 직원 확인이 시작되었습니다. {employeeCount}명의 직원 정보를 확인해주세요.",
+          template: "admin_employee_check",
         },
-        channels: ['line', 'email'],
-        enabled: true
+        channels: ["line", "email"],
+        enabled: true,
       },
       {
-        id: 'student-monthly-15',
-        name: '매월 15일 수업 시간 부족 학생 알림',
-        type: 'reminder',
+        id: "student-monthly-15",
+        name: "매월 15일 수업 시간 부족 학생 알림",
+        type: "reminder",
         schedule: {
-          type: 'monthly',
-          time: '10:00',
-          dayOfMonth: 15
+          type: "monthly",
+          time: "10:00",
+          dayOfMonth: 15,
         },
         conditions: {
-          targetType: 'student',
+          targetType: "student",
           filters: {
-            totalHours: 180 // 180분 미만
-          }
+            totalHours: 180, // 180분 미만
+          },
         },
         message: {
-          title: '추가 예약 안내',
-          content: '이번 달 수업 시간이 {currentHours}분으로 목표에 미달했습니다. 추가 예약을 권장합니다.',
-          template: 'student_booking_reminder'
+          title: "추가 예약 안내",
+          content:
+            "이번 달 수업 시간이 {currentHours}분으로 목표에 미달했습니다. 추가 예약을 권장합니다.",
+          template: "student_booking_reminder",
         },
-        channels: ['line', 'email'],
-        enabled: true
+        channels: ["line", "email"],
+        enabled: true,
       },
       {
-        id: 'student-monthly-25',
-        name: '매월 25일 다음 달 예약 부족 학생 알림',
-        type: 'reminder',
+        id: "student-monthly-25",
+        name: "매월 25일 다음 달 예약 부족 학생 알림",
+        type: "reminder",
         schedule: {
-          type: 'monthly',
-          time: '10:00',
-          dayOfMonth: 25
+          type: "monthly",
+          time: "10:00",
+          dayOfMonth: 25,
         },
         conditions: {
-          targetType: 'student',
+          targetType: "student",
           filters: {
-            totalHours: 180
-          }
+            totalHours: 180,
+          },
         },
         message: {
-          title: '다음 달 예약 안내',
-          content: '다음 달 예약이 {nextMonthHours}분으로 부족합니다. 미리 예약하시면 좋겠습니다.',
-          template: 'student_next_month_reminder'
+          title: "다음 달 예약 안내",
+          content:
+            "다음 달 예약이 {nextMonthHours}분으로 부족합니다. 미리 예약하시면 좋겠습니다.",
+          template: "student_next_month_reminder",
         },
-        channels: ['line', 'email'],
-        enabled: true
+        channels: ["line", "email"],
+        enabled: true,
       },
       // 학생/선생님 자동화 메시지
       {
-        id: 'class-reminder-day-before',
-        name: '수업 전날 리마인드',
-        type: 'reminder',
+        id: "class-reminder-day-before",
+        name: "수업 전날 리마인드",
+        type: "reminder",
         schedule: {
-          type: 'custom',
-          interval: 60 * 24 // 24시간마다 체크
+          type: "custom",
+          interval: 60 * 24, // 24시간마다 체크
         },
         conditions: {
-          targetType: 'student'
+          targetType: "student",
         },
         message: {
-          title: '내일 수업 안내',
-          content: '내일 {time}에 {courseName} 수업이 있습니다. Zoom 링크: {zoomLink}',
-          template: 'class_reminder'
+          title: "내일 수업 안내",
+          content:
+            "내일 {time}에 {courseName} 수업이 있습니다. Zoom 링크: {zoomLink}",
+          template: "class_reminder",
         },
-        channels: ['line', 'email'],
-        enabled: true
+        channels: ["line", "email"],
+        enabled: true,
       },
       {
-        id: 'attendance-check-10min',
-        name: '수업 10분 후 출석 체크',
-        type: 'notification',
+        id: "attendance-check-10min",
+        name: "수업 10분 후 출석 체크",
+        type: "notification",
         schedule: {
-          type: 'custom',
-          interval: 10 // 10분마다 체크
+          type: "custom",
+          interval: 10, // 10분마다 체크
         },
         conditions: {
-          targetType: 'student'
+          targetType: "student",
         },
         message: {
-          title: '출석 확인 요청',
-          content: '수업이 시작되었습니다. 출석 태깅을 해주세요.',
-          template: 'attendance_check'
+          title: "출석 확인 요청",
+          content: "수업이 시작되었습니다. 출석 태깅을 해주세요.",
+          template: "attendance_check",
         },
-        channels: ['line', 'email'],
-        enabled: true
+        channels: ["line", "email"],
+        enabled: true,
       },
       {
-        id: 'review-reminder-5hours',
-        name: '수업 5시간 후 리뷰 유도',
-        type: 'reminder',
+        id: "review-reminder-5hours",
+        name: "수업 5시간 후 리뷰 유도",
+        type: "reminder",
         schedule: {
-          type: 'custom',
-          interval: 60 * 5 // 5시간마다 체크
+          type: "custom",
+          interval: 60 * 5, // 5시간마다 체크
         },
         conditions: {
-          targetType: 'student'
+          targetType: "student",
         },
         message: {
-          title: '수업 리뷰 작성',
-          content: '오늘 수업에 대한 리뷰를 작성해주세요. 피드백이 중요합니다.',
-          template: 'review_reminder'
+          title: "수업 리뷰 작성",
+          content: "오늘 수업에 대한 리뷰를 작성해주세요. 피드백이 중요합니다.",
+          template: "review_reminder",
         },
-        channels: ['line', 'email'],
-        enabled: true
+        channels: ["line", "email"],
+        enabled: true,
       },
       {
-        id: 'dormant-student-7days',
-        name: '휴면 학생 7일 후 리마인드',
-        type: 'reminder',
+        id: "dormant-student-7days",
+        name: "휴면 학생 7일 후 리마인드",
+        type: "reminder",
         schedule: {
-          type: 'custom',
-          interval: 60 * 24 * 7 // 7일마다 체크
+          type: "custom",
+          interval: 60 * 24 * 7, // 7일마다 체크
         },
         conditions: {
-          targetType: 'student',
+          targetType: "student",
           filters: {
-            lastClassDays: 7
-          }
+            lastClassDays: 7,
+          },
         },
         message: {
-          title: '수업 예약 안내',
-          content: '마지막 수업 후 7일이 지났습니다. 새로운 수업을 예약해보세요.',
-          template: 'dormant_student_reminder'
+          title: "수업 예약 안내",
+          content:
+            "마지막 수업 후 7일이 지났습니다. 새로운 수업을 예약해보세요.",
+          template: "dormant_student_reminder",
         },
-        channels: ['line', 'email'],
-        enabled: true
+        channels: ["line", "email"],
+        enabled: true,
       },
       {
-        id: 'monthly-summary',
-        name: '매월 요약 리포트',
-        type: 'report',
+        id: "monthly-summary",
+        name: "매월 요약 리포트",
+        type: "report",
         schedule: {
-          type: 'monthly',
-          time: '09:00',
-          dayOfMonth: 1
+          type: "monthly",
+          time: "09:00",
+          dayOfMonth: 1,
         },
         conditions: {
-          targetType: 'student'
+          targetType: "student",
         },
         message: {
-          title: '이번 달 학습 요약',
-          content: '이번 달 총 {totalHours}시간 수업을 완료했습니다. 다음 달 목표: {nextMonthGoal}시간',
-          template: 'monthly_summary'
+          title: "이번 달 학습 요약",
+          content:
+            "이번 달 총 {totalHours}시간 수업을 완료했습니다. 다음 달 목표: {nextMonthGoal}시간",
+          template: "monthly_summary",
         },
-        channels: ['line', 'email'],
-        enabled: true
-      }
+        channels: ["line", "email"],
+        enabled: true,
+      },
     ];
   }
 
@@ -298,7 +305,7 @@ class AutomationSystem {
         }
       }
     } catch (error) {
-      console.error('Automation rule execution failed:', error);
+      console.error("Automation rule execution failed:", error);
     } finally {
       this.isRunning = false;
     }
@@ -311,22 +318,26 @@ class AutomationSystem {
     const { schedule } = rule;
 
     switch (schedule.type) {
-      case 'daily':
+      case "daily":
         return schedule.time ? this.isTimeMatch(now, schedule.time) : false;
-      
-      case 'weekly':
-        return schedule.time ? this.isTimeMatch(now, schedule.time) && 
-               now.getDay() === (schedule.dayOfWeek || 0) : false;
-      
-      case 'monthly':
-        return schedule.time ? this.isTimeMatch(now, schedule.time) && 
-               now.getDate() === (schedule.dayOfMonth || 1) : false;
-      
-      case 'custom':
+
+      case "weekly":
+        return schedule.time
+          ? this.isTimeMatch(now, schedule.time) &&
+              now.getDay() === (schedule.dayOfWeek || 0)
+          : false;
+
+      case "monthly":
+        return schedule.time
+          ? this.isTimeMatch(now, schedule.time) &&
+              now.getDate() === (schedule.dayOfMonth || 1)
+          : false;
+
+      case "custom":
         if (!rule.lastExecuted) return true;
         const timeDiff = now.getTime() - rule.lastExecuted.getTime();
         return timeDiff >= (schedule.interval || 0) * 60 * 1000;
-      
+
       default:
         return false;
     }
@@ -336,7 +347,7 @@ class AutomationSystem {
    * 시간 매칭 확인
    */
   private isTimeMatch(now: Date, targetTime: string): boolean {
-    const [targetHour, targetMinute] = targetTime.split(':').map(Number);
+    const [targetHour, targetMinute] = targetTime.split(":").map(Number);
     return now.getHours() === targetHour && now.getMinutes() === targetMinute;
   }
 
@@ -349,12 +360,12 @@ class AutomationSystem {
       id: `log_${Date.now()}_${rule.id}`,
       ruleId: rule.id,
       timestamp: executionTime,
-      status: 'success',
+      status: "success",
       targetCount: 0,
       sentCount: 0,
       errorCount: 0,
       errors: [],
-      executionTime: 0
+      executionTime: 0,
     };
 
     try {
@@ -363,7 +374,7 @@ class AutomationSystem {
       log.targetCount = targets.length;
 
       if (targets.length === 0) {
-        log.status = 'skipped';
+        log.status = "skipped";
         this.logs.push(log);
         return;
       }
@@ -385,11 +396,10 @@ class AutomationSystem {
       rule.nextExecution = this.calculateNextExecution(rule, executionTime);
 
       if (log.errorCount > 0) {
-        log.status = log.errorCount === log.targetCount ? 'failed' : 'success';
+        log.status = log.errorCount === log.targetCount ? "failed" : "success";
       }
-
     } catch (error) {
-      log.status = 'failed';
+      log.status = "failed";
       log.errors?.push(`Rule execution failed: ${error}`);
     } finally {
       log.executionTime = Date.now() - startTime;
@@ -403,12 +413,27 @@ class AutomationSystem {
   private async identifyTargets(rule: AutomationRule): Promise<any[]> {
     // 실제 구현에서는 DB에서 대상자 조회
     const mockTargets = [
-      { id: 'student1', name: '김학생', email: 'student1@example.com', lineId: 'line1' },
-      { id: 'student2', name: '이학생', email: 'student2@example.com', lineId: null },
-      { id: 'teacher1', name: '박선생님', email: 'teacher1@example.com', lineId: 'line2' }
+      {
+        id: "student1",
+        name: "김학생",
+        email: "student1@example.com",
+        lineId: "line1",
+      },
+      {
+        id: "student2",
+        name: "이학생",
+        email: "student2@example.com",
+        lineId: null,
+      },
+      {
+        id: "teacher1",
+        name: "박선생님",
+        email: "teacher1@example.com",
+        lineId: "line2",
+      },
     ];
 
-    return mockTargets.filter(target => {
+    return mockTargets.filter((target) => {
       // 조건에 따른 필터링 로직
       if (rule.conditions.filters) {
         // 실제 구현에서는 더 복잡한 필터링 로직
@@ -421,46 +446,60 @@ class AutomationSystem {
   /**
    * 메시지 생성
    */
-  private generateMessage(rule: AutomationRule, target: Record<string, unknown>): Record<string, unknown> {
+  private generateMessage(
+    rule: AutomationRule,
+    target: Record<string, unknown>,
+  ): Record<string, unknown> {
     const { message } = rule;
-    
+
     // 템플릿 변수 치환
     let content = message.content;
-    content = content.replace('{name}', target.name);
-    content = content.replace('{currentHours}', '120');
-    content = content.replace('{nextMonthHours}', '60');
-    content = content.replace('{incompleteCount}', '3');
-    content = content.replace('{employeeCount}', '15');
-    content = content.replace('{totalHours}', '180');
-    content = content.replace('{nextMonthGoal}', '200');
-    content = content.replace('{time}', '18:00');
-    content = content.replace('{courseName}', '중급 회화');
-    content = content.replace('{zoomLink}', 'https://zoom.us/j/123456789');
+    
+    // 타입 안전한 변수 치환
+    const targetName = typeof target.name === 'string' ? target.name : '사용자';
+    content = content.replace("{name}", targetName);
+    content = content.replace("{currentHours}", "120");
+    content = content.replace("{nextMonthHours}", "60");
+    content = content.replace("{incompleteCount}", "3");
+    content = content.replace("{employeeCount}", "15");
+    content = content.replace("{totalHours}", "180");
+    content = content.replace("{nextMonthGoal}", "200");
+    content = content.replace("{time}", "18:00");
+    content = content.replace("{courseName}", "중급 회화");
+    content = content.replace("{zoomLink}", "https://zoom.us/j/123456789");
 
     return {
       title: message.title,
       content: content,
-      target: target
+      target: target,
     };
   }
 
   /**
    * 메시지 전송
    */
-  private async sendMessage(message: Record<string, unknown>, channels: string[], target: Record<string, unknown>): Promise<void> {
+  private async sendMessage(
+    message: Record<string, unknown>,
+    channels: string[],
+    target: Record<string, unknown>,
+  ): Promise<void> {
     for (const channel of channels) {
       try {
         switch (channel) {
-          case 'line':
-            if (target.lineId) {
+          case "line":
+            if (target.lineId && typeof target.lineId === 'string') {
               await this.sendLineMessage(message, target.lineId);
             }
             break;
-          case 'email':
-            await this.sendEmailMessage(message, target.email);
+          case "email":
+            if (target.email && typeof target.email === 'string') {
+              await this.sendEmailMessage(message, target.email);
+            }
             break;
-          case 'sms':
-            await this.sendSmsMessage(message, target.phone);
+          case "sms":
+            if (target.phone && typeof target.phone === 'string') {
+              await this.sendSmsMessage(message, target.phone);
+            }
             break;
         }
       } catch (error) {
@@ -473,48 +512,60 @@ class AutomationSystem {
   /**
    * LINE 메시지 전송
    */
-  private async sendLineMessage(message: Record<string, unknown>, lineId: string): Promise<void> {
+  private async sendLineMessage(
+    message: Record<string, unknown>,
+    lineId: string,
+  ): Promise<void> {
     // 실제 LINE API 연동 로직
     console.log(`Sending LINE message to ${lineId}:`, message);
-    await new Promise(resolve => setTimeout(resolve, 100)); // 시뮬레이션
+    await new Promise((resolve) => setTimeout(resolve, 100)); // 시뮬레이션
   }
 
   /**
    * 이메일 전송
    */
-  private async sendEmailMessage(message: Record<string, unknown>, email: string): Promise<void> {
+  private async sendEmailMessage(
+    message: Record<string, unknown>,
+    email: string,
+  ): Promise<void> {
     // 실제 이메일 전송 로직
     console.log(`Sending email to ${email}:`, message);
-    await new Promise(resolve => setTimeout(resolve, 100)); // 시뮬레이션
+    await new Promise((resolve) => setTimeout(resolve, 100)); // 시뮬레이션
   }
 
   /**
    * SMS 전송
    */
-  private async sendSmsMessage(message: Record<string, unknown>, phone: string): Promise<void> {
+  private async sendSmsMessage(
+    message: Record<string, unknown>,
+    phone: string,
+  ): Promise<void> {
     // 실제 SMS 전송 로직
     console.log(`Sending SMS to ${phone}:`, message);
-    await new Promise(resolve => setTimeout(resolve, 100)); // 시뮬레이션
+    await new Promise((resolve) => setTimeout(resolve, 100)); // 시뮬레이션
   }
 
   /**
    * 다음 실행 시간 계산
    */
-  private calculateNextExecution(rule: AutomationRule, currentTime: Date): Date {
+  private calculateNextExecution(
+    rule: AutomationRule,
+    currentTime: Date,
+  ): Date {
     const { schedule } = rule;
     const next = new Date(currentTime);
 
     switch (schedule.type) {
-      case 'daily':
+      case "daily":
         next.setDate(next.getDate() + 1);
         break;
-      case 'weekly':
+      case "weekly":
         next.setDate(next.getDate() + 7);
         break;
-      case 'monthly':
+      case "monthly":
         next.setMonth(next.getMonth() + 1);
         break;
-      case 'custom':
+      case "custom":
         next.setMinutes(next.getMinutes() + (schedule.interval || 0));
         break;
     }
@@ -533,7 +584,7 @@ class AutomationSystem {
    * 규칙 수정
    */
   updateRule(ruleId: string, updates: Partial<AutomationRule>): boolean {
-    const index = this.rules.findIndex(rule => rule.id === ruleId);
+    const index = this.rules.findIndex((rule) => rule.id === ruleId);
     if (index === -1) return false;
 
     this.rules[index] = { ...this.rules[index], ...updates };
@@ -544,7 +595,7 @@ class AutomationSystem {
    * 규칙 삭제
    */
   deleteRule(ruleId: string): boolean {
-    const index = this.rules.findIndex(rule => rule.id === ruleId);
+    const index = this.rules.findIndex((rule) => rule.id === ruleId);
     if (index === -1) return false;
 
     this.rules.splice(index, 1);
@@ -596,40 +647,43 @@ export const automationSystem = new AutomationSystem();
 export class MessageTemplateManager {
   private templates: MessageTemplate[] = [
     {
-      id: 'admin_attendance_reminder',
-      name: '관리자 근태 확인 요청',
-      type: 'reminder',
-      title: '근태 기록 확인 요청',
-      content: '이번 달 근태 기록을 확인해주세요. 미완료 항목이 {incompleteCount}개 있습니다.',
-      variables: ['incompleteCount'],
+      id: "admin_attendance_reminder",
+      name: "관리자 근태 확인 요청",
+      type: "reminder",
+      title: "근태 기록 확인 요청",
+      content:
+        "이번 달 근태 기록을 확인해주세요. 미완료 항목이 {incompleteCount}개 있습니다.",
+      variables: ["incompleteCount"],
       examples: {
-        incompleteCount: '3'
-      }
+        incompleteCount: "3",
+      },
     },
     {
-      id: 'student_booking_reminder',
-      name: '학생 예약 리마인드',
-      type: 'reminder',
-      title: '추가 예약 안내',
-      content: '이번 달 수업 시간이 {currentHours}분으로 목표에 미달했습니다. 추가 예약을 권장합니다.',
-      variables: ['currentHours'],
+      id: "student_booking_reminder",
+      name: "학생 예약 리마인드",
+      type: "reminder",
+      title: "추가 예약 안내",
+      content:
+        "이번 달 수업 시간이 {currentHours}분으로 목표에 미달했습니다. 추가 예약을 권장합니다.",
+      variables: ["currentHours"],
       examples: {
-        currentHours: '120'
-      }
+        currentHours: "120",
+      },
     },
     {
-      id: 'class_reminder',
-      name: '수업 전날 리마인드',
-      type: 'reminder',
-      title: '내일 수업 안내',
-      content: '내일 {time}에 {courseName} 수업이 있습니다. Zoom 링크: {zoomLink}',
-      variables: ['time', 'courseName', 'zoomLink'],
+      id: "class_reminder",
+      name: "수업 전날 리마인드",
+      type: "reminder",
+      title: "내일 수업 안내",
+      content:
+        "내일 {time}에 {courseName} 수업이 있습니다. Zoom 링크: {zoomLink}",
+      variables: ["time", "courseName", "zoomLink"],
       examples: {
-        time: '18:00',
-        courseName: '중급 회화',
-        zoomLink: 'https://zoom.us/j/123456789'
-      }
-    }
+        time: "18:00",
+        courseName: "중급 회화",
+        zoomLink: "https://zoom.us/j/123456789",
+      },
+    },
   ];
 
   getTemplates(): MessageTemplate[] {
@@ -637,7 +691,7 @@ export class MessageTemplateManager {
   }
 
   getTemplate(id: string): MessageTemplate | undefined {
-    return this.templates.find(template => template.id === id);
+    return this.templates.find((template) => template.id === id);
   }
 
   addTemplate(template: MessageTemplate): void {
@@ -645,7 +699,7 @@ export class MessageTemplateManager {
   }
 
   updateTemplate(id: string, updates: Partial<MessageTemplate>): boolean {
-    const index = this.templates.findIndex(template => template.id === id);
+    const index = this.templates.findIndex((template) => template.id === id);
     if (index === -1) return false;
 
     this.templates[index] = { ...this.templates[index], ...updates };
@@ -653,7 +707,7 @@ export class MessageTemplateManager {
   }
 
   deleteTemplate(id: string): boolean {
-    const index = this.templates.findIndex(template => template.id === id);
+    const index = this.templates.findIndex((template) => template.id === id);
     if (index === -1) return false;
 
     this.templates.splice(index, 1);
@@ -661,4 +715,4 @@ export class MessageTemplateManager {
   }
 }
 
-export const messageTemplateManager = new MessageTemplateManager(); 
+export const messageTemplateManager = new MessageTemplateManager();

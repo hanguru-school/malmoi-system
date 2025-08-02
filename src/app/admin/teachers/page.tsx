@@ -1,31 +1,19 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { 
-  GraduationCap, 
-  Search, 
-  Plus, 
-  Edit3, 
-  Trash2, 
-  Eye, 
-  Filter,
-  SortAsc,
-  Calendar,
-  BookOpen,
+import { useState, useEffect } from "react";
+import {
+  GraduationCap,
+  Search,
+  Edit3,
+  Trash2,
+  Eye,
   Star,
-  Phone,
-  Mail,
-  MapPin,
-  MoreVertical,
   UserPlus,
-  Users,
   Clock,
   CheckCircle,
   XCircle,
-  DollarSign,
-  Award,
-  User
-} from 'lucide-react';
+  User,
+} from "lucide-react";
 
 interface Teacher {
   id: string;
@@ -39,7 +27,7 @@ interface Teacher {
   totalLessons: number;
   averageRating: number;
   salary: number;
-  status: 'active' | 'inactive' | 'suspended';
+  status: "active" | "inactive" | "suspended";
   specialization: string[];
   lastLessonDate: string;
   notes?: string;
@@ -48,10 +36,10 @@ interface Teacher {
 export default function AdminTeachers() {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [filteredTeachers, setFilteredTeachers] = useState<Teacher[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterSubject, setFilterSubject] = useState<string>('all');
-  const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [sortBy, setSortBy] = useState<string>('name');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterSubject, setFilterSubject] = useState<string>("all");
+  const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("name");
   const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
   const [showTeacherModal, setShowTeacherModal] = useState(false);
 
@@ -66,117 +54,122 @@ export default function AdminTeachers() {
   const loadTeachers = () => {
     const mockTeachers: Teacher[] = [
       {
-        id: '1',
-        name: '김선생님',
-        email: 'kim.teacher@example.com',
-        phone: '010-1234-5678',
-        subject: '한국어 문법',
+        id: "1",
+        name: "김선생님",
+        email: "kim.teacher@example.com",
+        phone: "010-1234-5678",
+        subject: "한국어 문법",
         experience: 5,
-        joinDate: '2020-03-15',
+        joinDate: "2020-03-15",
         totalStudents: 25,
         totalLessons: 320,
         averageRating: 4.8,
         salary: 3500000,
-        status: 'active',
-        specialization: ['초급 문법', '중급 회화', 'TOPIK 준비'],
-        lastLessonDate: '2024-01-15',
-        notes: '매우 성실하고 학생들의 평가가 좋은 선생님입니다.'
+        status: "active",
+        specialization: ["초급 문법", "중급 회화", "TOPIK 준비"],
+        lastLessonDate: "2024-01-15",
+        notes: "매우 성실하고 학생들의 평가가 좋은 선생님입니다.",
       },
       {
-        id: '2',
-        name: '박선생님',
-        email: 'park.teacher@example.com',
-        phone: '010-2345-6789',
-        subject: '한국어 회화',
+        id: "2",
+        name: "박선생님",
+        email: "park.teacher@example.com",
+        phone: "010-2345-6789",
+        subject: "한국어 회화",
         experience: 3,
-        joinDate: '2021-06-20',
+        joinDate: "2021-06-20",
         totalStudents: 18,
         totalLessons: 245,
         averageRating: 4.6,
         salary: 3200000,
-        status: 'active',
-        specialization: ['초급 회화', '비즈니스 한국어'],
-        lastLessonDate: '2024-01-14',
-        notes: '회화 수업에 특화되어 있고 학생들이 좋아합니다.'
+        status: "active",
+        specialization: ["초급 회화", "비즈니스 한국어"],
+        lastLessonDate: "2024-01-14",
+        notes: "회화 수업에 특화되어 있고 학생들이 좋아합니다.",
       },
       {
-        id: '3',
-        name: '이선생님',
-        email: 'lee.teacher@example.com',
-        phone: '010-3456-7890',
-        subject: '한국어 작문',
+        id: "3",
+        name: "이선생님",
+        email: "lee.teacher@example.com",
+        phone: "010-3456-7890",
+        subject: "한국어 작문",
         experience: 7,
-        joinDate: '2018-09-10',
+        joinDate: "2018-09-10",
         totalStudents: 30,
         totalLessons: 450,
         averageRating: 4.9,
         salary: 4000000,
-        status: 'active',
-        specialization: ['고급 작문', '에세이 작성', '학술 한국어'],
-        lastLessonDate: '2024-01-13',
-        notes: '고급 수준의 수업을 담당하는 베테랑 선생님입니다.'
+        status: "active",
+        specialization: ["고급 작문", "에세이 작성", "학술 한국어"],
+        lastLessonDate: "2024-01-13",
+        notes: "고급 수준의 수업을 담당하는 베테랑 선생님입니다.",
       },
       {
-        id: '4',
-        name: '최선생님',
-        email: 'choi.teacher@example.com',
-        phone: '010-4567-8901',
-        subject: '한국어 발음',
+        id: "4",
+        name: "최선생님",
+        email: "choi.teacher@example.com",
+        phone: "010-4567-8901",
+        subject: "한국어 발음",
         experience: 2,
-        joinDate: '2022-01-05',
+        joinDate: "2022-01-05",
         totalStudents: 12,
         totalLessons: 180,
         averageRating: 4.3,
         salary: 2800000,
-        status: 'inactive',
-        specialization: ['발음 교정', '초급 회화'],
-        lastLessonDate: '2023-12-20',
-        notes: '발음 교정에 특화되어 있지만 최근 수업이 줄어들고 있습니다.'
+        status: "inactive",
+        specialization: ["발음 교정", "초급 회화"],
+        lastLessonDate: "2023-12-20",
+        notes: "발음 교정에 특화되어 있지만 최근 수업이 줄어들고 있습니다.",
       },
       {
-        id: '5',
-        name: '정선생님',
-        email: 'jung.teacher@example.com',
-        phone: '010-5678-9012',
-        subject: '한국어 문화',
+        id: "5",
+        name: "정선생님",
+        email: "jung.teacher@example.com",
+        phone: "010-5678-9012",
+        subject: "한국어 문화",
         experience: 4,
-        joinDate: '2020-08-15',
+        joinDate: "2020-08-15",
         totalStudents: 20,
         totalLessons: 280,
         averageRating: 4.7,
         salary: 3300000,
-        status: 'active',
-        specialization: ['한국 문화', '중급 회화', 'K-컨텐츠'],
-        lastLessonDate: '2024-01-12',
-        notes: '한국 문화와 K-컨텐츠를 활용한 수업을 진행합니다.'
-      }
+        status: "active",
+        specialization: ["한국 문화", "중급 회화", "K-컨텐츠"],
+        lastLessonDate: "2024-01-12",
+        notes: "한국 문화와 K-컨텐츠를 활용한 수업을 진행합니다.",
+      },
     ];
 
     setTeachers(mockTeachers);
   };
 
   const filterAndSortTeachers = () => {
-    let filtered = teachers.filter(teacher => {
-      const matchesSearch = teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           teacher.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           teacher.phone.includes(searchTerm);
-      const matchesSubject = filterSubject === 'all' || teacher.subject === filterSubject;
-      const matchesStatus = filterStatus === 'all' || teacher.status === filterStatus;
+    const filtered = teachers.filter((teacher) => {
+      const matchesSearch =
+        teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        teacher.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        teacher.phone.includes(searchTerm);
+      const matchesSubject =
+        filterSubject === "all" || teacher.subject === filterSubject;
+      const matchesStatus =
+        filterStatus === "all" || teacher.status === filterStatus;
       return matchesSearch && matchesSubject && matchesStatus;
     });
 
     // 정렬
     filtered.sort((a, b) => {
       switch (sortBy) {
-        case 'name':
+        case "name":
           return a.name.localeCompare(b.name);
-        case 'joinDate':
-          return new Date(b.joinDate).getTime() - new Date(a.joinDate).getTime();
-        case 'averageRating':
+        case "joinDate":
+          return (
+            new Date(b.joinDate).getTime() - new Date(a.joinDate).getTime()
+          );
+        case "averageRating":
           return b.averageRating - a.averageRating;
-        case 'totalStudents':
+        case "totalStudents":
           return b.totalStudents - a.totalStudents;
-        case 'salary':
+        case "salary":
           return b.salary - a.salary;
         default:
           return 0;
@@ -188,37 +181,37 @@ export default function AdminTeachers() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active':
-        return 'text-green-600 bg-green-100';
-      case 'inactive':
-        return 'text-gray-600 bg-gray-100';
-      case 'suspended':
-        return 'text-red-600 bg-red-100';
+      case "active":
+        return "text-green-600 bg-green-100";
+      case "inactive":
+        return "text-gray-600 bg-gray-100";
+      case "suspended":
+        return "text-red-600 bg-red-100";
       default:
-        return 'text-gray-600 bg-gray-100';
+        return "text-gray-600 bg-gray-100";
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'active':
-        return '활성';
-      case 'inactive':
-        return '비활성';
-      case 'suspended':
-        return '정지';
+      case "active":
+        return "활성";
+      case "inactive":
+        return "비활성";
+      case "suspended":
+        return "정지";
       default:
-        return '미정';
+        return "미정";
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'active':
+      case "active":
         return <CheckCircle className="w-4 h-4" />;
-      case 'inactive':
+      case "inactive":
         return <Clock className="w-4 h-4" />;
-      case 'suspended':
+      case "suspended":
         return <XCircle className="w-4 h-4" />;
       default:
         return <Clock className="w-4 h-4" />;
@@ -226,20 +219,20 @@ export default function AdminTeachers() {
   };
 
   const formatCurrency = (amount: number) => {
-    return amount.toLocaleString('ko-KR') + '원';
+    return amount.toLocaleString("ko-KR") + "원";
   };
 
   const handleDeleteTeacher = (teacherId: string) => {
-    if (confirm('정말로 이 선생님을 삭제하시겠습니까?')) {
-      setTeachers(teachers.filter(teacher => teacher.id !== teacherId));
+    if (confirm("정말로 이 선생님을 삭제하시겠습니까?")) {
+      setTeachers(teachers.filter((teacher) => teacher.id !== teacherId));
     }
   };
 
   const stats = {
     total: teachers.length,
-    active: teachers.filter(t => t.status === 'active').length,
-    inactive: teachers.filter(t => t.status === 'inactive').length,
-    suspended: teachers.filter(t => t.status === 'suspended').length
+    active: teachers.filter((t) => t.status === "active").length,
+    inactive: teachers.filter((t) => t.status === "inactive").length,
+    suspended: teachers.filter((t) => t.status === "suspended").length,
   };
 
   return (
@@ -249,11 +242,12 @@ export default function AdminTeachers() {
         <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">선생님 관리</h1>
-            <p className="text-sm text-gray-600">전체 선생님 정보를 관리하세요</p>
+            <p className="text-sm text-gray-600">
+              전체 선생님 정보를 관리하세요
+            </p>
           </div>
           <button className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-            <UserPlus className="w-4 h-4 mr-2" />
-            새 선생님 등록
+            <UserPlus className="w-4 h-4 mr-2" />새 선생님 등록
           </button>
         </div>
       </header>
@@ -269,7 +263,9 @@ export default function AdminTeachers() {
               </div>
               <div className="ml-4">
                 <p className="text-sm text-gray-600">전체 선생님</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.total}명</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {stats.total}명
+                </p>
               </div>
             </div>
           </div>
@@ -281,7 +277,9 @@ export default function AdminTeachers() {
               </div>
               <div className="ml-4">
                 <p className="text-sm text-gray-600">활성 선생님</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.active}명</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {stats.active}명
+                </p>
               </div>
             </div>
           </div>
@@ -293,7 +291,9 @@ export default function AdminTeachers() {
               </div>
               <div className="ml-4">
                 <p className="text-sm text-gray-600">비활성 선생님</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.inactive}명</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {stats.inactive}명
+                </p>
               </div>
             </div>
           </div>
@@ -305,7 +305,9 @@ export default function AdminTeachers() {
               </div>
               <div className="ml-4">
                 <p className="text-sm text-gray-600">정지 선생님</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.suspended}명</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {stats.suspended}명
+                </p>
               </div>
             </div>
           </div>
@@ -409,9 +411,15 @@ export default function AdminTeachers() {
                           <User className="w-5 h-5 text-green-600" />
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{teacher.name}</div>
-                          <div className="text-sm text-gray-500">{teacher.email}</div>
-                          <div className="text-sm text-gray-500">{teacher.phone}</div>
+                          <div className="text-sm font-medium text-gray-900">
+                            {teacher.name}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {teacher.email}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {teacher.phone}
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -430,16 +438,22 @@ export default function AdminTeachers() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <Star className="w-4 h-4 text-yellow-400 fill-current mr-1" />
-                        <span className="text-sm text-gray-900">{teacher.averageRating}</span>
+                        <span className="text-sm text-gray-900">
+                          {teacher.averageRating}
+                        </span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {formatCurrency(teacher.salary)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(teacher.status)}`}>
+                      <span
+                        className={`inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(teacher.status)}`}
+                      >
                         {getStatusIcon(teacher.status)}
-                        <span className="ml-1">{getStatusText(teacher.status)}</span>
+                        <span className="ml-1">
+                          {getStatusText(teacher.status)}
+                        </span>
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -478,7 +492,9 @@ export default function AdminTeachers() {
           <div className="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="px-6 py-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900">선생님 상세 정보</h2>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  선생님 상세 정보
+                </h2>
                 <button
                   onClick={() => setShowTeacherModal(false)}
                   className="p-2 text-gray-400 hover:text-gray-600"
@@ -487,14 +503,16 @@ export default function AdminTeachers() {
                 </button>
               </div>
             </div>
-            
+
             <div className="p-6 space-y-6">
               <div className="flex items-center space-x-4">
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
                   <User className="w-8 h-8 text-green-600" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-900">{selectedTeacher.name}</h3>
+                  <h3 className="text-xl font-semibold text-gray-900">
+                    {selectedTeacher.name}
+                  </h3>
                   <p className="text-gray-600">{selectedTeacher.email}</p>
                   <p className="text-gray-600">{selectedTeacher.phone}</p>
                 </div>
@@ -502,7 +520,9 @@ export default function AdminTeachers() {
 
               <div className="grid grid-cols-2 gap-6">
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">기본 정보</h4>
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">
+                    기본 정보
+                  </h4>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-gray-600">과목:</span>
@@ -518,9 +538,13 @@ export default function AdminTeachers() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">상태:</span>
-                      <span className={`inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(selectedTeacher.status)}`}>
+                      <span
+                        className={`inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(selectedTeacher.status)}`}
+                      >
                         {getStatusIcon(selectedTeacher.status)}
-                        <span className="ml-1">{getStatusText(selectedTeacher.status)}</span>
+                        <span className="ml-1">
+                          {getStatusText(selectedTeacher.status)}
+                        </span>
                       </span>
                     </div>
                     <div className="flex justify-between">
@@ -531,7 +555,9 @@ export default function AdminTeachers() {
                 </div>
 
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">업무 현황</h4>
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">
+                    업무 현황
+                  </h4>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-gray-600">담당 학생:</span>
@@ -557,10 +583,15 @@ export default function AdminTeachers() {
               </div>
 
               <div>
-                <h4 className="text-sm font-medium text-gray-700 mb-2">전문 분야</h4>
+                <h4 className="text-sm font-medium text-gray-700 mb-2">
+                  전문 분야
+                </h4>
                 <div className="flex flex-wrap gap-2">
                   {selectedTeacher.specialization.map((spec, index) => (
-                    <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                    <span
+                      key={index}
+                      className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full"
+                    >
                       {spec}
                     </span>
                   ))}
@@ -569,7 +600,9 @@ export default function AdminTeachers() {
 
               {selectedTeacher.notes && (
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">메모</h4>
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">
+                    메모
+                  </h4>
                   <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
                     {selectedTeacher.notes}
                   </p>
@@ -593,4 +626,4 @@ export default function AdminTeachers() {
       )}
     </div>
   );
-} 
+}

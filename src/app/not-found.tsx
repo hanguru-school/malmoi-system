@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { Search, Home, ArrowLeft } from 'lucide-react';
+import Link from "next/link";
+import { Search, Home, ArrowLeft } from "lucide-react";
 
 export default function NotFound() {
   return (
@@ -9,7 +9,9 @@ export default function NotFound() {
       <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
         <div className="mb-6">
           <Search className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">페이지를 찾을 수 없습니다</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            페이지를 찾을 수 없습니다
+          </h1>
           <p className="text-gray-600 mb-6">
             요청하신 페이지가 존재하지 않거나 이동되었을 수 있습니다.
           </p>
@@ -71,4 +73,4 @@ export default function NotFound() {
       </div>
     </div>
   );
-} 
+}

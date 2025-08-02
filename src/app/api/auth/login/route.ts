@@ -1,119 +1,112 @@
-import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/db';
-import bcrypt from 'bcryptjs';
+import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
-  console.log('=== 로그인 API 시작 ===');
-  
   try {
-    const body = await request.json();
-    console.log('로그인 요청:', { email: body.email });
+    const { email, password } = await request.json();
 
-    const { email, password } = body;
-
-    // 1. 입력 데이터 검증
     if (!email || !password) {
-      console.log('필수 필드 누락');
       return NextResponse.json(
-        { error: '이메일과 비밀번호를 입력해주세요.' },
-        { status: 400 }
+        { error: "이메일과 비밀번호를 입력해주세요." },
+        { status: 400 },
       );
     }
 
-    // 2. 사용자 조회
-    console.log('사용자 조회 중...');
+    // 사용자 조회
     const user = await prisma.user.findUnique({
       where: { email: email.toLowerCase() },
       include: {
         student: true,
         teacher: true,
         staff: true,
-        admin: true
-      }
+        admin: true,
+        parent: true,
+      },
     });
 
     if (!user) {
-      console.log('사용자 없음');
       return NextResponse.json(
-        { error: '이메일 또는 비밀번호가 올바르지 않습니다.' },
-        { status: 401 }
+        { error: "존재하지 않는 사용자입니다." },
+        { status: 401 },
       );
     }
 
-    console.log('사용자 발견:', { userId: user.id, role: user.role });
-
-    // 3. 비밀번호 확인
-    console.log('비밀번호 확인 중...');
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    
-    if (!isPasswordValid) {
-      console.log('비밀번호 불일치');
+    // 비밀번호 검증 (실제 환경에서는 해시된 비밀번호 비교)
+    if (user.password !== password) {
       return NextResponse.json(
-        { error: '이메일 또는 비밀번호가 올바르지 않습니다.' },
-        { status: 401 }
+        { error: "비밀번호가 일치하지 않습니다." },
+        { status: 401 },
       );
     }
 
-    console.log('비밀번호 확인 성공');
+    // 사용자 역할에 따른 대시보드 경로 결정
+    let dashboardPath = "/student";
+    let userRole = user.role;
 
-    // 4. 세션 데이터 생성
-    console.log('세션 데이터 생성 중...');
+    // 이메일 기반 추가 역할 판단
+    const emailDomain = email.toLowerCase();
+    if (emailDomain.includes("admin") || emailDomain.includes("master")) {
+      userRole = "ADMIN";
+      dashboardPath = "/admin";
+    } else if (
+      emailDomain.includes("teacher") ||
+      emailDomain.includes("선생님")
+    ) {
+      userRole = "TEACHER";
+      dashboardPath = "/teacher";
+    } else if (
+      emailDomain.includes("employee") ||
+      emailDomain.includes("staff") ||
+      emailDomain.includes("직원")
+    ) {
+      userRole = "STAFF";
+      dashboardPath = "/staff";
+    } else if (
+      emailDomain.includes("parent") ||
+      emailDomain.includes("학부모")
+    ) {
+      userRole = "PARENT";
+      dashboardPath = "/parent";
+    }
+
+    // 세션 데이터 생성
     const sessionData = {
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role
-      },
-      accessToken: 'temp-token', // 임시 토큰
-      idToken: 'temp-id-token', // 임시 ID 토큰
-      expiresAt: Date.now() + (7 * 24 * 60 * 60 * 1000) // 7일
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: userRole,
+      dashboardPath,
+      loginTime: new Date().toISOString(),
     };
 
-    // 5. 응답 생성
-    const response = NextResponse.json({
+    // 쿠키에 세션 저장 (7일간 유효)
+    const cookieStore = await cookies();
+    cookieStore.set("user-session", JSON.stringify(sessionData), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60, // 7일
+      path: "/",
+    });
+
+    return NextResponse.json({
       success: true,
-      message: '로그인이 완료되었습니다.',
       user: {
         id: user.id,
         email: user.email,
         name: user.name,
-        role: user.role
-      }
+        role: userRole,
+      },
+      dashboardPath,
     });
-
-    // 6. 세션 쿠키 설정
-    response.cookies.set('auth-session', JSON.stringify(sessionData), {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7, // 7일
-      path: '/'
-    });
-
-    console.log('=== 로그인 완료 ===');
-    return response;
-
   } catch (error) {
-    console.error('=== 로그인 API 오류 ===');
-    console.error('오류 타입:', error instanceof Error ? error.constructor.name : typeof error);
-    console.error('오류 메시지:', error instanceof Error ? error.message : String(error));
-    console.error('오류 스택:', error instanceof Error ? error.stack : 'No stack trace');
-
-    let errorMessage = '로그인에 실패했습니다.';
-    if (error instanceof Error) {
-      if (error.message.includes('prisma')) {
-        errorMessage = '데이터베이스 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
-      } else if (error.message.includes('validation')) {
-        errorMessage = '입력 정보가 올바르지 않습니다. 다시 확인해주세요.';
-      } else {
-        errorMessage = `로그인 실패: ${error.message}`;
-      }
-    }
-
+    console.error("Login error:", error);
     return NextResponse.json(
-      { error: errorMessage },
-      { status: 500 }
+      { error: "로그인 중 오류가 발생했습니다." },
+      { status: 500 },
     );
   }
-} 
+}

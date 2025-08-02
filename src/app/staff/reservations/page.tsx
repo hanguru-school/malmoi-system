@@ -1,22 +1,8 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { 
-  Calendar, 
-  Search, 
-  Filter, 
-  Plus, 
-  Edit, 
-  Trash2,
-  User,
-  Clock,
-  MapPin,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  ArrowRight
-} from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import { Search, Plus, Edit, Trash2, ArrowRight } from "lucide-react";
 
 interface Reservation {
   id: string;
@@ -26,68 +12,70 @@ interface Reservation {
   date: string;
   time: string;
   duration: number;
-  status: 'confirmed' | 'pending' | 'cancelled' | 'completed';
+  status: "confirmed" | "pending" | "cancelled" | "completed";
   location: string;
   notes: string;
 }
 
 const ReservationsPage = () => {
   const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [filteredReservations, setFilteredReservations] = useState<Reservation[]>([]);
-  const [selectedDate, setSelectedDate] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('all');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredReservations, setFilteredReservations] = useState<
+    Reservation[]
+  >([]);
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [newReservation, setNewReservation] = useState({
-    studentName: '',
-    courseName: '',
-    teacherName: '',
-    date: '',
-    time: '',
+    studentName: "",
+    courseName: "",
+    teacherName: "",
+    date: "",
+    time: "",
     duration: 60,
-    location: '',
-    notes: ''
+    location: "",
+    notes: "",
   });
 
   useEffect(() => {
     // Mock data
     const mockData: Reservation[] = [
       {
-        id: '1',
-        studentName: '김학생',
-        courseName: '수학 기초',
-        teacherName: '박선생님',
-        date: '2024-01-20',
-        time: '14:00',
+        id: "1",
+        studentName: "김학생",
+        courseName: "수학 기초",
+        teacherName: "박선생님",
+        date: "2024-01-20",
+        time: "14:00",
         duration: 60,
-        status: 'confirmed',
-        location: '교실 A',
-        notes: ''
+        status: "confirmed",
+        location: "교실 A",
+        notes: "",
       },
       {
-        id: '2',
-        studentName: '이학생',
-        courseName: '영어 회화',
-        teacherName: '김선생님',
-        date: '2024-01-20',
-        time: '15:30',
+        id: "2",
+        studentName: "이학생",
+        courseName: "영어 회화",
+        teacherName: "김선생님",
+        date: "2024-01-20",
+        time: "15:30",
         duration: 90,
-        status: 'pending',
-        location: '교실 B',
-        notes: '학부모 요청'
+        status: "pending",
+        location: "교실 B",
+        notes: "학부모 요청",
       },
       {
-        id: '3',
-        studentName: '박학생',
-        courseName: '과학 실험',
-        teacherName: '이선생님',
-        date: '2024-01-21',
-        time: '16:00',
+        id: "3",
+        studentName: "박학생",
+        courseName: "과학 실험",
+        teacherName: "이선생님",
+        date: "2024-01-21",
+        time: "16:00",
         duration: 120,
-        status: 'confirmed',
-        location: '실험실',
-        notes: '준비물 필요'
-      }
+        status: "confirmed",
+        location: "실험실",
+        notes: "준비물 필요",
+      },
     ];
     setReservations(mockData);
     setFilteredReservations(mockData);
@@ -95,28 +83,43 @@ const ReservationsPage = () => {
 
   useEffect(() => {
     let filtered = reservations;
-    
+
     if (selectedDate) {
-      filtered = filtered.filter(reservation => reservation.date === selectedDate);
-    }
-    
-    if (selectedStatus !== 'all') {
-      filtered = filtered.filter(reservation => reservation.status === selectedStatus);
-    }
-    
-    if (searchTerm) {
-      filtered = filtered.filter(reservation => 
-        reservation.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        reservation.courseName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        reservation.teacherName.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        (reservation) => reservation.date === selectedDate,
       );
     }
-    
+
+    if (selectedStatus !== "all") {
+      filtered = filtered.filter(
+        (reservation) => reservation.status === selectedStatus,
+      );
+    }
+
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (reservation) =>
+          reservation.studentName
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          reservation.courseName
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          reservation.teacherName
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()),
+      );
+    }
+
     setFilteredReservations(filtered);
   }, [reservations, selectedDate, selectedStatus, searchTerm]);
 
   const handleAddReservation = () => {
-    if (newReservation.studentName && newReservation.courseName && newReservation.date) {
+    if (
+      newReservation.studentName &&
+      newReservation.courseName &&
+      newReservation.date
+    ) {
       const reservation: Reservation = {
         id: Date.now().toString(),
         studentName: newReservation.studentName,
@@ -125,21 +128,21 @@ const ReservationsPage = () => {
         date: newReservation.date,
         time: newReservation.time,
         duration: newReservation.duration,
-        status: 'pending',
+        status: "pending",
         location: newReservation.location,
-        notes: newReservation.notes
+        notes: newReservation.notes,
       };
-      
-      setReservations(prev => [reservation, ...prev]);
+
+      setReservations((prev) => [reservation, ...prev]);
       setNewReservation({
-        studentName: '',
-        courseName: '',
-        teacherName: '',
-        date: '',
-        time: '',
+        studentName: "",
+        courseName: "",
+        teacherName: "",
+        date: "",
+        time: "",
         duration: 60,
-        location: '',
-        notes: ''
+        location: "",
+        notes: "",
       });
       setShowAddModal(false);
     }
@@ -147,41 +150,41 @@ const ReservationsPage = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'confirmed':
-        return 'bg-green-100 text-green-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800';
-      case 'completed':
-        return 'bg-blue-100 text-blue-800';
+      case "confirmed":
+        return "bg-green-100 text-green-800";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "cancelled":
+        return "bg-red-100 text-red-800";
+      case "completed":
+        return "bg-blue-100 text-blue-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'confirmed':
-        return '확정';
-      case 'pending':
-        return '대기';
-      case 'cancelled':
-        return '취소';
-      case 'completed':
-        return '완료';
+      case "confirmed":
+        return "확정";
+      case "pending":
+        return "대기";
+      case "cancelled":
+        return "취소";
+      case "completed":
+        return "완료";
       default:
-        return '알 수 없음';
+        return "알 수 없음";
     }
   };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric',
-      weekday: 'long'
+    return date.toLocaleDateString("ko-KR", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      weekday: "long",
     });
   };
 
@@ -197,8 +200,7 @@ const ReservationsPage = () => {
           href="/student/reservations/new"
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
         >
-          <Plus className="w-4 h-4" />
-          새 예약
+          <Plus className="w-4 h-4" />새 예약
         </Link>
       </div>
 
@@ -206,7 +208,9 @@ const ReservationsPage = () => {
       <div className="bg-white p-6 rounded-lg shadow-sm border">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">날짜</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              날짜
+            </label>
             <input
               type="date"
               value={selectedDate}
@@ -215,7 +219,9 @@ const ReservationsPage = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">상태</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              상태
+            </label>
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
@@ -229,7 +235,9 @@ const ReservationsPage = () => {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">검색</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              검색
+            </label>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
@@ -244,9 +252,9 @@ const ReservationsPage = () => {
           <div className="flex items-end">
             <button
               onClick={() => {
-                setSelectedDate('');
-                setSelectedStatus('all');
-                setSearchTerm('');
+                setSelectedDate("");
+                setSelectedStatus("all");
+                setSearchTerm("");
               }}
               className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
             >
@@ -262,14 +270,30 @@ const ReservationsPage = () => {
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">학생</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">과목</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">강사</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">날짜</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">시간</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">장소</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">상태</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">액션</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  학생
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  과목
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  강사
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  날짜
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  시간
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  장소
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  상태
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  액션
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -294,7 +318,9 @@ const ReservationsPage = () => {
                     {reservation.location}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(reservation.status)}`}>
+                    <span
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(reservation.status)}`}
+                    >
                       {getStatusText(reservation.status)}
                     </span>
                   </td>
@@ -325,25 +351,41 @@ const ReservationsPage = () => {
       {showAddModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">예약 추가</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              예약 추가
+            </h3>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">학생 이름</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    학생 이름
+                  </label>
                   <input
                     type="text"
                     value={newReservation.studentName}
-                    onChange={(e) => setNewReservation(prev => ({ ...prev, studentName: e.target.value }))}
+                    onChange={(e) =>
+                      setNewReservation((prev) => ({
+                        ...prev,
+                        studentName: e.target.value,
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     placeholder="학생 이름"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">과목</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    과목
+                  </label>
                   <input
                     type="text"
                     value={newReservation.courseName}
-                    onChange={(e) => setNewReservation(prev => ({ ...prev, courseName: e.target.value }))}
+                    onChange={(e) =>
+                      setNewReservation((prev) => ({
+                        ...prev,
+                        courseName: e.target.value,
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     placeholder="과목명"
                   />
@@ -351,21 +393,35 @@ const ReservationsPage = () => {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">강사</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    강사
+                  </label>
                   <input
                     type="text"
                     value={newReservation.teacherName}
-                    onChange={(e) => setNewReservation(prev => ({ ...prev, teacherName: e.target.value }))}
+                    onChange={(e) =>
+                      setNewReservation((prev) => ({
+                        ...prev,
+                        teacherName: e.target.value,
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     placeholder="강사명"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">장소</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    장소
+                  </label>
                   <input
                     type="text"
                     value={newReservation.location}
-                    onChange={(e) => setNewReservation(prev => ({ ...prev, location: e.target.value }))}
+                    onChange={(e) =>
+                      setNewReservation((prev) => ({
+                        ...prev,
+                        location: e.target.value,
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     placeholder="교실 또는 장소"
                   />
@@ -373,29 +429,50 @@ const ReservationsPage = () => {
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">날짜</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    날짜
+                  </label>
                   <input
                     type="date"
                     value={newReservation.date}
-                    onChange={(e) => setNewReservation(prev => ({ ...prev, date: e.target.value }))}
+                    onChange={(e) =>
+                      setNewReservation((prev) => ({
+                        ...prev,
+                        date: e.target.value,
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">시간</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    시간
+                  </label>
                   <input
                     type="time"
                     value={newReservation.time}
-                    onChange={(e) => setNewReservation(prev => ({ ...prev, time: e.target.value }))}
+                    onChange={(e) =>
+                      setNewReservation((prev) => ({
+                        ...prev,
+                        time: e.target.value,
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">소요시간 (분)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    소요시간 (분)
+                  </label>
                   <input
                     type="number"
                     value={newReservation.duration}
-                    onChange={(e) => setNewReservation(prev => ({ ...prev, duration: parseInt(e.target.value) }))}
+                    onChange={(e) =>
+                      setNewReservation((prev) => ({
+                        ...prev,
+                        duration: parseInt(e.target.value),
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     min="30"
                     max="180"
@@ -403,10 +480,17 @@ const ReservationsPage = () => {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">비고</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  비고
+                </label>
                 <textarea
                   value={newReservation.notes}
-                  onChange={(e) => setNewReservation(prev => ({ ...prev, notes: e.target.value }))}
+                  onChange={(e) =>
+                    setNewReservation((prev) => ({
+                      ...prev,
+                      notes: e.target.value,
+                    }))
+                  }
                   rows={3}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="추가 사항이나 특이사항"
@@ -434,4 +518,4 @@ const ReservationsPage = () => {
   );
 };
 
-export default ReservationsPage; 
+export default ReservationsPage;

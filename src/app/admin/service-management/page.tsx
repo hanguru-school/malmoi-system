@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Upload, 
-  Eye, 
+import { useState, useEffect } from "react";
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Upload,
+  Eye,
   EyeOff,
   Clock,
   Calendar,
   Image as ImageIcon,
   Save,
-  X
-} from 'lucide-react';
+  X,
+} from "lucide-react";
 
 interface Service {
   id: string;
@@ -35,76 +35,76 @@ export default function ServiceManagementPage() {
 
   // 폼 상태
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
+    name: "",
+    description: "",
     imageFile: null as File | null,
     duration: 40,
     bufferTime: 10,
-    isActive: true
+    isActive: true,
   });
 
   // 샘플 데이터 로드
   useEffect(() => {
     const sampleServices: Service[] = [
       {
-        id: '1',
-        name: '대면 수업 40분',
-        description: '일대일 대면 수업으로 집중적인 학습이 가능합니다.',
-        imageUrl: '/images/face-to-face.jpg',
+        id: "1",
+        name: "대면 수업 40분",
+        description: "일대일 대면 수업으로 집중적인 학습이 가능합니다.",
+        imageUrl: "/images/face-to-face.jpg",
         duration: 40,
         bufferTime: 10,
         isActive: true,
-        createdAt: '2025-01-01',
-        updatedAt: '2025-01-01'
+        createdAt: "2025-01-01",
+        updatedAt: "2025-01-01",
       },
       {
-        id: '2',
-        name: '온라인 수업 60분',
-        description: 'Zoom을 통한 온라인 수업으로 편리하게 학습할 수 있습니다.',
-        imageUrl: '/images/online.jpg',
+        id: "2",
+        name: "온라인 수업 60분",
+        description: "Zoom을 통한 온라인 수업으로 편리하게 학습할 수 있습니다.",
+        imageUrl: "/images/online.jpg",
         duration: 60,
         bufferTime: 15,
         isActive: true,
-        createdAt: '2025-01-01',
-        updatedAt: '2025-01-01'
+        createdAt: "2025-01-01",
+        updatedAt: "2025-01-01",
       },
       {
-        id: '3',
-        name: '그룹 수업 90분',
-        description: '다른 학생들과 함께하는 그룹 수업입니다.',
-        imageUrl: '/images/group.jpg',
+        id: "3",
+        name: "그룹 수업 90분",
+        description: "다른 학생들과 함께하는 그룹 수업입니다.",
+        imageUrl: "/images/group.jpg",
         duration: 90,
         bufferTime: 20,
         isActive: false,
-        createdAt: '2025-01-01',
-        updatedAt: '2025-01-01'
-      }
+        createdAt: "2025-01-01",
+        updatedAt: "2025-01-01",
+      },
     ];
     setServices(sampleServices);
   }, []);
 
   const handleInputChange = (field: string, value: any) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      handleInputChange('imageFile', file);
+      handleInputChange("imageFile", file);
     }
   };
 
   const resetForm = () => {
     setFormData({
-      name: '',
-      description: '',
+      name: "",
+      description: "",
       imageFile: null,
       duration: 40,
       bufferTime: 10,
-      isActive: true
+      isActive: true,
     });
     setEditingService(null);
   };
@@ -115,31 +115,35 @@ export default function ServiceManagementPage() {
 
     try {
       // 실제 API 호출 대신 시뮬레이션
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       if (editingService) {
         // 수정
-        setServices(prev => prev.map(service => 
-          service.id === editingService.id 
-            ? { ...service, ...formData, updatedAt: new Date().toISOString() }
-            : service
-        ));
+        setServices((prev) =>
+          prev.map((service) =>
+            service.id === editingService.id
+              ? { ...service, ...formData, updatedAt: new Date().toISOString() }
+              : service,
+          ),
+        );
       } else {
         // 추가
         const newService: Service = {
           id: Date.now().toString(),
           ...formData,
-          imageUrl: formData.imageFile ? URL.createObjectURL(formData.imageFile) : '/images/default.jpg',
+          imageUrl: formData.imageFile
+            ? URL.createObjectURL(formData.imageFile)
+            : "/images/default.jpg",
           createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          updatedAt: new Date().toISOString(),
         };
-        setServices(prev => [...prev, newService]);
+        setServices((prev) => [...prev, newService]);
       }
 
       setShowAddModal(false);
       resetForm();
     } catch (error) {
-      console.error('서비스 저장 실패:', error);
+      console.error("서비스 저장 실패:", error);
     } finally {
       setIsLoading(false);
     }
@@ -153,32 +157,38 @@ export default function ServiceManagementPage() {
       imageFile: null,
       duration: service.duration,
       bufferTime: service.bufferTime,
-      isActive: service.isActive
+      isActive: service.isActive,
     });
     setShowAddModal(true);
   };
 
   const handleDelete = async (serviceId: string) => {
-    if (!confirm('정말로 이 서비스를 삭제하시겠습니까?')) return;
+    if (!confirm("정말로 이 서비스를 삭제하시겠습니까?")) return;
 
     try {
       // 실제 API 호출 대신 시뮬레이션
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setServices(prev => prev.filter(service => service.id !== serviceId));
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      setServices((prev) => prev.filter((service) => service.id !== serviceId));
     } catch (error) {
-      console.error('서비스 삭제 실패:', error);
+      console.error("서비스 삭제 실패:", error);
     }
   };
 
   const toggleServiceStatus = async (serviceId: string) => {
     try {
-      setServices(prev => prev.map(service => 
-        service.id === serviceId 
-          ? { ...service, isActive: !service.isActive, updatedAt: new Date().toISOString() }
-          : service
-      ));
+      setServices((prev) =>
+        prev.map((service) =>
+          service.id === serviceId
+            ? {
+                ...service,
+                isActive: !service.isActive,
+                updatedAt: new Date().toISOString(),
+              }
+            : service,
+        ),
+      );
     } catch (error) {
-      console.error('서비스 상태 변경 실패:', error);
+      console.error("서비스 상태 변경 실패:", error);
     }
   };
 
@@ -188,7 +198,9 @@ export default function ServiceManagementPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">서비스 관리</h1>
-          <p className="text-sm text-gray-600">레슨 서비스를 추가, 편집, 삭제할 수 있습니다.</p>
+          <p className="text-sm text-gray-600">
+            레슨 서비스를 추가, 편집, 삭제할 수 있습니다.
+          </p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}
@@ -229,8 +241,8 @@ export default function ServiceManagementPage() {
                     <div className="flex items-center space-x-4">
                       <div className="w-12 h-12 rounded-lg bg-gray-200 flex items-center justify-center">
                         {service.imageUrl ? (
-                          <img 
-                            src={service.imageUrl} 
+                          <img
+                            src={service.imageUrl}
                             alt={service.name}
                             className="w-12 h-12 rounded-lg object-cover"
                           />
@@ -239,8 +251,12 @@ export default function ServiceManagementPage() {
                         )}
                       </div>
                       <div>
-                        <div className="text-sm font-medium text-gray-900">{service.name}</div>
-                        <div className="text-sm text-gray-500">{service.description}</div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {service.name}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {service.description}
+                        </div>
                       </div>
                     </div>
                   </td>
@@ -248,11 +264,15 @@ export default function ServiceManagementPage() {
                     <div className="space-y-1">
                       <div className="flex items-center space-x-2">
                         <Clock className="w-4 h-4 text-gray-400" />
-                        <span className="text-sm text-gray-900">{service.duration}분</span>
+                        <span className="text-sm text-gray-900">
+                          {service.duration}분
+                        </span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Calendar className="w-4 h-4 text-gray-400" />
-                        <span className="text-sm text-gray-500">버퍼: {service.bufferTime}분</span>
+                        <span className="text-sm text-gray-500">
+                          버퍼: {service.bufferTime}분
+                        </span>
                       </div>
                     </div>
                   </td>
@@ -260,9 +280,9 @@ export default function ServiceManagementPage() {
                     <button
                       onClick={() => toggleServiceStatus(service.id)}
                       className={`flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-medium ${
-                        service.isActive 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-gray-100 text-gray-800'
+                        service.isActive
+                          ? "bg-green-100 text-green-800"
+                          : "bg-gray-100 text-gray-800"
                       }`}
                     >
                       {service.isActive ? (
@@ -279,7 +299,7 @@ export default function ServiceManagementPage() {
                     </button>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">
-                    {new Date(service.createdAt).toLocaleDateString('ja-JP')}
+                    {new Date(service.createdAt).toLocaleDateString("ja-JP")}
                   </td>
                   <td className="px-6 py-4 text-right text-sm font-medium">
                     <div className="flex items-center justify-end space-x-2">
@@ -310,7 +330,7 @@ export default function ServiceManagementPage() {
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold">
-                {editingService ? '서비스 수정' : '새 서비스 추가'}
+                {editingService ? "서비스 수정" : "새 서비스 추가"}
               </h3>
               <button
                 onClick={() => {
@@ -333,7 +353,7 @@ export default function ServiceManagementPage() {
                   type="text"
                   required
                   value={formData.name}
-                  onChange={(e) => handleInputChange('name', e.target.value)}
+                  onChange={(e) => handleInputChange("name", e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="예: 대면 수업 40분"
                 />
@@ -346,7 +366,9 @@ export default function ServiceManagementPage() {
                 </label>
                 <textarea
                   value={formData.description}
-                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("description", e.target.value)
+                  }
                   rows={3}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="서비스에 대한 간단한 설명을 입력하세요"
@@ -405,7 +427,9 @@ export default function ServiceManagementPage() {
                     min="10"
                     max="180"
                     value={formData.duration}
-                    onChange={(e) => handleInputChange('duration', parseInt(e.target.value))}
+                    onChange={(e) =>
+                      handleInputChange("duration", parseInt(e.target.value))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -418,7 +442,9 @@ export default function ServiceManagementPage() {
                     min="0"
                     max="60"
                     value={formData.bufferTime}
-                    onChange={(e) => handleInputChange('bufferTime', parseInt(e.target.value))}
+                    onChange={(e) =>
+                      handleInputChange("bufferTime", parseInt(e.target.value))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -430,10 +456,14 @@ export default function ServiceManagementPage() {
                   <input
                     type="checkbox"
                     checked={formData.isActive}
-                    onChange={(e) => handleInputChange('isActive', e.target.checked)}
+                    onChange={(e) =>
+                      handleInputChange("isActive", e.target.checked)
+                    }
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
-                  <span className="text-sm font-medium text-gray-700">활성화</span>
+                  <span className="text-sm font-medium text-gray-700">
+                    활성화
+                  </span>
                 </label>
                 <p className="text-xs text-gray-500 mt-1">
                   비활성화된 서비스는 예약 페이지에 표시되지 않습니다.
@@ -462,7 +492,7 @@ export default function ServiceManagementPage() {
                   ) : (
                     <Save className="w-4 h-4" />
                   )}
-                  <span>{editingService ? '수정' : '추가'}</span>
+                  <span>{editingService ? "수정" : "추가"}</span>
                 </button>
               </div>
             </form>
@@ -471,4 +501,4 @@ export default function ServiceManagementPage() {
       )}
     </div>
   );
-} 
+}

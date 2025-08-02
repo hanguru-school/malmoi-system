@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { 
-  CheckCircle, 
-  XCircle, 
-  AlertTriangle, 
-  Info, 
-  RefreshCw, 
-  Database, 
-  Shield, 
-  Server, 
+import { useState, useEffect } from "react";
+import {
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  Info,
+  RefreshCw,
+  Database,
+  Shield,
+  Server,
   Settings,
-  Activity
-} from 'lucide-react';
+  Activity,
+} from "lucide-react";
 
 interface SystemStatus {
   timestamp: string;
@@ -114,19 +114,19 @@ export default function SystemDashboardPage() {
       setError(null);
 
       const [systemRes, envRes] = await Promise.all([
-        fetch('/api/system/status'),
-        fetch('/api/system/env-status')
+        fetch("/api/system/status"),
+        fetch("/api/system/env-status"),
       ]);
 
       if (systemRes.ok && envRes.ok) {
         const systemData = await systemRes.json();
         const envData = await envRes.json();
-        
+
         setSystemStatus(systemData);
         setEnvStatus(envData);
         setLastRefresh(new Date());
       } else {
-        throw new Error('Failed to fetch system status');
+        throw new Error("Failed to fetch system status");
       }
     } catch (err: any) {
       setError(err.message);
@@ -141,15 +141,15 @@ export default function SystemDashboardPage() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'healthy':
-      case 'configured':
-      case 'running':
+      case "healthy":
+      case "configured":
+      case "running":
         return <CheckCircle className="w-5 h-5 text-green-500" />;
-      case 'unhealthy':
-      case 'misconfigured':
-      case 'missing':
+      case "unhealthy":
+      case "misconfigured":
+      case "missing":
         return <XCircle className="w-5 h-5 text-red-500" />;
-      case 'unknown':
+      case "unknown":
         return <AlertTriangle className="w-5 h-5 text-yellow-500" />;
       default:
         return <Info className="w-5 h-5 text-blue-500" />;
@@ -158,18 +158,18 @@ export default function SystemDashboardPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'healthy':
-      case 'configured':
-      case 'running':
-        return 'text-green-600 bg-green-50 border-green-200';
-      case 'unhealthy':
-      case 'misconfigured':
-      case 'missing':
-        return 'text-red-600 bg-red-50 border-red-200';
-      case 'unknown':
-        return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+      case "healthy":
+      case "configured":
+      case "running":
+        return "text-green-600 bg-green-50 border-green-200";
+      case "unhealthy":
+      case "misconfigured":
+      case "missing":
+        return "text-red-600 bg-red-50 border-red-200";
+      case "unknown":
+        return "text-yellow-600 bg-yellow-50 border-yellow-200";
       default:
-        return 'text-blue-600 bg-blue-50 border-blue-200';
+        return "text-blue-600 bg-blue-50 border-blue-200";
     }
   };
 
@@ -179,7 +179,9 @@ export default function SystemDashboardPage() {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-center h-64">
             <RefreshCw className="w-8 h-8 animate-spin text-blue-600" />
-            <span className="ml-2 text-gray-600">시스템 상태를 확인하는 중...</span>
+            <span className="ml-2 text-gray-600">
+              시스템 상태를 확인하는 중...
+            </span>
           </div>
         </div>
       </div>
@@ -215,7 +217,9 @@ export default function SystemDashboardPage() {
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">시스템 대시보드</h1>
+              <h1 className="text-3xl font-bold text-gray-900">
+                시스템 대시보드
+              </h1>
               <p className="text-gray-600 mt-2">
                 전체 시스템 상태를 모니터링하고 관리합니다
               </p>
@@ -238,12 +242,16 @@ export default function SystemDashboardPage() {
         {/* 전체 상태 카드 */}
         {systemStatus && (
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
-            <div className={`p-6 rounded-lg border ${getStatusColor(systemStatus.overall_status)}`}>
+            <div
+              className={`p-6 rounded-lg border ${getStatusColor(systemStatus.overall_status)}`}
+            >
               <div className="flex items-center">
                 {getStatusIcon(systemStatus.overall_status)}
                 <div className="ml-3">
                   <h3 className="text-lg font-semibold">전체 상태</h3>
-                  <p className="text-sm capitalize">{systemStatus.overall_status}</p>
+                  <p className="text-sm capitalize">
+                    {systemStatus.overall_status}
+                  </p>
                 </div>
               </div>
             </div>
@@ -254,7 +262,8 @@ export default function SystemDashboardPage() {
                 <div className="ml-3">
                   <h3 className="text-lg font-semibold">환경 변수</h3>
                   <p className="text-sm">
-                    {systemStatus.environment_variables.missing_variables}개 누락
+                    {systemStatus.environment_variables.missing_variables}개
+                    누락
                   </p>
                 </div>
               </div>
@@ -266,7 +275,12 @@ export default function SystemDashboardPage() {
                 <div className="ml-3">
                   <h3 className="text-lg font-semibold">서비스</h3>
                   <p className="text-sm">
-                    {Object.values(systemStatus.services).filter(s => s.status === 'configured').length}/3 활성
+                    {
+                      Object.values(systemStatus.services).filter(
+                        (s) => s.status === "configured",
+                      ).length
+                    }
+                    /3 활성
                   </p>
                 </div>
               </div>
@@ -278,7 +292,12 @@ export default function SystemDashboardPage() {
                 <div className="ml-3">
                   <h3 className="text-lg font-semibold">보안</h3>
                   <p className="text-sm">
-                    {Object.values(systemStatus.security).filter(s => s === 'configured').length}/4 설정됨
+                    {
+                      Object.values(systemStatus.security).filter(
+                        (s) => s === "configured",
+                      ).length
+                    }
+                    /4 설정됨
                   </p>
                 </div>
               </div>
@@ -298,27 +317,43 @@ export default function SystemDashboardPage() {
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Node.js 버전</span>
-                  <span className="font-mono">{systemStatus.system_info.node_version}</span>
+                  <span className="font-mono">
+                    {systemStatus.system_info.node_version}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">플랫폼</span>
-                  <span className="font-mono">{systemStatus.system_info.platform}</span>
+                  <span className="font-mono">
+                    {systemStatus.system_info.platform}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">아키텍처</span>
-                  <span className="font-mono">{systemStatus.system_info.architecture}</span>
+                  <span className="font-mono">
+                    {systemStatus.system_info.architecture}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">가동 시간</span>
-                  <span className="font-mono">{systemStatus.system_info.uptime}</span>
+                  <span className="font-mono">
+                    {systemStatus.system_info.uptime}
+                  </span>
                 </div>
                 <div className="border-t pt-3">
                   <h4 className="font-semibold mb-2">메모리 사용량</h4>
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div>RSS: {systemStatus.system_info.memory_usage.rss}</div>
-                    <div>Heap Total: {systemStatus.system_info.memory_usage.heapTotal}</div>
-                    <div>Heap Used: {systemStatus.system_info.memory_usage.heapUsed}</div>
-                    <div>External: {systemStatus.system_info.memory_usage.external}</div>
+                    <div>
+                      Heap Total:{" "}
+                      {systemStatus.system_info.memory_usage.heapTotal}
+                    </div>
+                    <div>
+                      Heap Used:{" "}
+                      {systemStatus.system_info.memory_usage.heapUsed}
+                    </div>
+                    <div>
+                      External: {systemStatus.system_info.memory_usage.external}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -333,24 +368,39 @@ export default function SystemDashboardPage() {
                 서비스 상태
               </h2>
               <div className="space-y-4">
-                {Object.entries(systemStatus.services).map(([service, status]) => (
-                  <div key={service} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div className="flex items-center">
-                      {getStatusIcon(status.status)}
-                      <div className="ml-3">
-                        <h4 className="font-semibold capitalize">{service}</h4>
-                        <p className="text-sm text-gray-600">
-                          {service === 'database' && 'connection_string' in status && status.connection_string}
-                          {service === 'cognito' && 'region' in status && `${status.region} / ${status.user_pool_id}`}
-                          {service === 's3' && 'bucket' in status && status.bucket}
-                        </p>
+                {Object.entries(systemStatus.services).map(
+                  ([service, status]) => (
+                    <div
+                      key={service}
+                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                    >
+                      <div className="flex items-center">
+                        {getStatusIcon(status.status)}
+                        <div className="ml-3">
+                          <h4 className="font-semibold capitalize">
+                            {service}
+                          </h4>
+                          <p className="text-sm text-gray-600">
+                            {service === "database" &&
+                              "connection_string" in status &&
+                              status.connection_string}
+                            {service === "cognito" &&
+                              "region" in status &&
+                              `${status.region} / ${status.user_pool_id}`}
+                            {service === "s3" &&
+                              "bucket" in status &&
+                              status.bucket}
+                          </p>
+                        </div>
                       </div>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(status.status)}`}
+                      >
+                        {status.status}
+                      </span>
                     </div>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(status.status)}`}>
-                      {status.status}
-                    </span>
-                  </div>
-                ))}
+                  ),
+                )}
               </div>
             </div>
           )}
@@ -365,13 +415,15 @@ export default function SystemDashboardPage() {
               <div className="space-y-4">
                 {Object.entries(envStatus.config).map(([group, vars]) => (
                   <div key={group} className="border-b pb-3 last:border-b-0">
-                    <h4 className="font-semibold capitalize mb-2">{group.replace('_', ' ')}</h4>
+                    <h4 className="font-semibold capitalize mb-2">
+                      {group.replace("_", " ")}
+                    </h4>
                     <div className="space-y-1">
                       {Object.entries(vars).map(([key, value]) => (
                         <div key={key} className="flex justify-between text-sm">
                           <span className="text-gray-600 font-mono">{key}</span>
                           <span className="font-mono text-gray-800">
-                            {value || 'undefined'}
+                            {value || "undefined"}
                           </span>
                         </div>
                       ))}
@@ -391,7 +443,10 @@ export default function SystemDashboardPage() {
               </h2>
               <div className="space-y-2">
                 {systemStatus.recommendations.map((rec, index) => (
-                  <div key={index} className="flex items-start p-3 bg-blue-50 rounded-lg">
+                  <div
+                    key={index}
+                    className="flex items-start p-3 bg-blue-50 rounded-lg"
+                  >
                     <Info className="w-4 h-4 text-blue-500 mt-0.5 mr-2 flex-shrink-0" />
                     <span className="text-sm text-blue-800">{rec}</span>
                   </div>
@@ -403,4 +458,4 @@ export default function SystemDashboardPage() {
       </div>
     </div>
   );
-} 
+}

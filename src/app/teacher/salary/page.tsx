@@ -1,497 +1,540 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { 
-  DollarSign, 
-  TrendingUp, 
-  TrendingDown, 
-  Calendar, 
+import { useState, useEffect } from "react";
+import {
+  DollarSign,
+  Calendar,
   Clock,
+  User,
+  TrendingUp,
   Download,
-  Eye,
-  Home,
-  CreditCard,
-  Banknote,
-  Receipt,
-  X,
+  Search,
+  ChevronLeft,
+  ChevronRight,
   FileText,
-  Users,
-  BookOpen
-} from 'lucide-react';
-import Link from 'next/link';
+  Car,
+  Gift,
+  Award,
+} from "lucide-react";
 
-interface SalaryData {
-  currentMonth: {
-    baseSalary: number;
-    overtimePay: number;
-    bonus: number;
-    deductions: number;
-    netSalary: number;
-    workingHours: {
-      lectureHours: number;
-      otherHours: number;
-      totalHours: number;
-    };
-    overtimeHours: number;
-  };
-  monthlyHistory: {
-    month: string;
-    netSalary: number;
-    workingHours: number;
-    status: 'paid' | 'pending' | 'processing';
-  }[];
-  paymentHistory: {
-    id: string;
-    date: string;
-    amount: number;
-    method: 'bank_transfer' | 'direct_deposit';
-    status: 'completed' | 'pending' | 'failed';
-    description: string;
-  }[];
+interface SalaryItem {
+  id: string;
+  date: string;
+  studentName: string;
+  courseName: string;
+  duration: number;
+  baseSalary: number;
+  bonus: number;
+  transportationFee: number;
+  points: number;
+  totalAmount: number;
+  status: "paid" | "pending" | "processing";
+  paymentDate?: string;
+  notes?: string;
+}
+
+interface SalarySummary {
+  totalClasses: number;
+  totalHours: number;
+  totalBaseSalary: number;
+  totalBonus: number;
+  totalTransportationFee: number;
+  totalPoints: number;
+  totalAmount: number;
+  averagePerClass: number;
+  averagePerHour: number;
 }
 
 export default function TeacherSalaryPage() {
-  const [salaryData, setSalaryData] = useState<SalaryData | null>(null);
+  const [salaryItems, setSalaryItems] = useState<SalaryItem[]>([]);
+  const [summary, setSummary] = useState<SalarySummary | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedMonth, setSelectedMonth] = useState('2024-01');
-  const [showPayslipModal, setShowPayslipModal] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState(new Date());
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "paid" | "pending" | "processing"
+  >("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
 
   useEffect(() => {
-    // 실제 API 호출로 대체
-    setTimeout(() => {
-      const mockData: SalaryData = {
-        currentMonth: {
-          baseSalary: 3000000,
-          overtimePay: 450000,
-          bonus: 200000,
-          deductions: 150000,
-          netSalary: 3500000,
-          workingHours: {
-            lectureHours: 120,
-            otherHours: 40,
-            totalHours: 160
-          },
-          overtimeHours: 20
+    loadSalaryData();
+  }, [selectedMonth]);
+
+  const loadSalaryData = async () => {
+    try {
+      setLoading(true);
+      // 실제 API 호출로 대체
+      const mockSalaryItems: SalaryItem[] = [
+        {
+          id: "1",
+          date: "2024-01-15",
+          studentName: "김학생",
+          courseName: "초급 회화",
+          duration: 40,
+          baseSalary: 30000,
+          bonus: 5000,
+          transportationFee: 2000,
+          points: 100,
+          totalAmount: 37000,
+          status: "paid",
+          paymentDate: "2024-01-20",
+          notes: "정시 수업, 학생 만족도 높음",
         },
-        monthlyHistory: [
-          { month: '2024-01', netSalary: 3500000, workingHours: 160, status: 'paid' },
-          { month: '2023-12', netSalary: 3200000, workingHours: 155, status: 'paid' },
-          { month: '2023-11', netSalary: 3300000, workingHours: 158, status: 'paid' },
-          { month: '2023-10', netSalary: 3100000, workingHours: 152, status: 'paid' },
-          { month: '2023-09', netSalary: 3250000, workingHours: 156, status: 'paid' },
-          { month: '2023-08', netSalary: 3150000, workingHours: 154, status: 'paid' }
-        ],
-        paymentHistory: [
-          {
-            id: '1',
-            date: '2024-01-15',
-            amount: 3500000,
-            method: 'bank_transfer',
-            status: 'completed',
-            description: '2024년 1월 급여'
-          },
-          {
-            id: '2',
-            date: '2023-12-15',
-            amount: 3200000,
-            method: 'bank_transfer',
-            status: 'completed',
-            description: '2023년 12월 급여'
-          },
-          {
-            id: '3',
-            date: '2023-11-15',
-            amount: 3300000,
-            method: 'bank_transfer',
-            status: 'completed',
-            description: '2023년 11월 급여'
-          }
-        ]
+        {
+          id: "2",
+          date: "2024-01-15",
+          studentName: "이학생",
+          courseName: "중급 문법",
+          duration: 40,
+          baseSalary: 35000,
+          bonus: 3000,
+          transportationFee: 0,
+          points: 80,
+          totalAmount: 38000,
+          status: "paid",
+          paymentDate: "2024-01-20",
+        },
+        {
+          id: "3",
+          date: "2024-01-16",
+          studentName: "박학생",
+          courseName: "고급 토론",
+          duration: 40,
+          baseSalary: 40000,
+          bonus: 8000,
+          transportationFee: 2000,
+          points: 150,
+          totalAmount: 50000,
+          status: "pending",
+        },
+        {
+          id: "4",
+          date: "2024-01-17",
+          studentName: "최학생",
+          courseName: "초급 회화",
+          duration: 40,
+          baseSalary: 30000,
+          bonus: 2000,
+          transportationFee: 0,
+          points: 60,
+          totalAmount: 32000,
+          status: "processing",
+        },
+      ];
+      setSalaryItems(mockSalaryItems);
+
+      // 급여 요약 계산
+      const summaryData: SalarySummary = {
+        totalClasses: mockSalaryItems.length,
+        totalHours:
+          mockSalaryItems.reduce((sum, item) => sum + item.duration, 0) / 60,
+        totalBaseSalary: mockSalaryItems.reduce(
+          (sum, item) => sum + item.baseSalary,
+          0,
+        ),
+        totalBonus: mockSalaryItems.reduce((sum, item) => sum + item.bonus, 0),
+        totalTransportationFee: mockSalaryItems.reduce(
+          (sum, item) => sum + item.transportationFee,
+          0,
+        ),
+        totalPoints: mockSalaryItems.reduce(
+          (sum, item) => sum + item.points,
+          0,
+        ),
+        totalAmount: mockSalaryItems.reduce(
+          (sum, item) => sum + item.totalAmount,
+          0,
+        ),
+        averagePerClass:
+          mockSalaryItems.reduce((sum, item) => sum + item.totalAmount, 0) /
+          mockSalaryItems.length,
+        averagePerHour:
+          mockSalaryItems.reduce((sum, item) => sum + item.totalAmount, 0) /
+          (mockSalaryItems.reduce((sum, item) => sum + item.duration, 0) / 60),
       };
-
-      setSalaryData(mockData);
+      setSummary(summaryData);
+    } catch (error) {
+      console.error("급여 데이터 로드 오류:", error);
+    } finally {
       setLoading(false);
-    }, 1000);
-  }, []);
+    }
+  };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('ko-KR').format(amount);
+  const getFilteredItems = () => {
+    let filtered = salaryItems;
+
+    // 검색 필터
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (item) =>
+          item.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          item.courseName.toLowerCase().includes(searchTerm.toLowerCase()),
+      );
+    }
+
+    // 상태 필터
+    if (statusFilter !== "all") {
+      filtered = filtered.filter((item) => item.status === statusFilter);
+    }
+
+    return filtered;
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'paid':
-      case 'completed':
-        return 'bg-green-100 text-green-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'processing':
-        return 'bg-blue-100 text-blue-800';
-      case 'failed':
-        return 'bg-red-100 text-red-800';
+      case "paid":
+        return "bg-green-100 text-green-800";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "processing":
+        return "bg-blue-100 text-blue-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'paid':
-      case 'completed':
-        return '완료';
-      case 'pending':
-        return '대기';
-      case 'processing':
-        return '처리중';
-      case 'failed':
-        return '실패';
+      case "paid":
+        return "지급완료";
+      case "pending":
+        return "지급대기";
+      case "processing":
+        return "처리중";
       default:
-        return '알 수 없음';
+        return "알 수 없음";
     }
   };
 
-  const getPaymentMethodIcon = (method: string) => {
-    switch (method) {
-      case 'bank_transfer':
-        return <CreditCard className="w-4 h-4" />;
-      case 'direct_deposit':
-        return <Banknote className="w-4 h-4" />;
-      default:
-        return <Receipt className="w-4 h-4" />;
-    }
+  const formatDate = (date: string) => {
+    return new Date(date).toLocaleDateString("ko-KR", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
   };
 
-  const getPaymentMethodText = (method: string) => {
-    switch (method) {
-      case 'bank_transfer':
-        return '계좌이체';
-      case 'direct_deposit':
-        return '직접입금';
-      default:
-        return '기타';
-    }
+  const formatCurrency = (amount: number) => {
+    return amount.toLocaleString("ko-KR");
   };
 
-  const handleDownloadPayslip = () => {
-    // 실제 다운로드 로직
-    alert('급여 명세서가 다운로드되었습니다.');
-    setShowPayslipModal(false);
+  const formatDuration = (minutes: number) => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return hours > 0 ? `${hours}시간 ${mins}분` : `${mins}분`;
   };
+
+  const filteredItems = getFilteredItems();
+  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentItems = filteredItems.slice(startIndex, endIndex);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
-  if (!salaryData) {
-    return (
-      <div className="p-6">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-6">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">급여 정보를 찾을 수 없습니다</h2>
-          <p className="text-gray-600">급여 정보를 불러올 수 없습니다.</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">급여 내역을 불러오는 중...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">급여 확인</h1>
-          <p className="text-gray-600">월별 급여 정보를 확인하세요</p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* 헤더 */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">급여 내역</h1>
+            <p className="text-lg text-gray-600">
+              수업별 급여와 보너스를 확인하세요
+            </p>
+          </div>
+          <div className="flex items-center gap-4">
+            <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+              <Download className="w-4 h-4" />
+              급여명세서 다운로드
+            </button>
+          </div>
         </div>
-        <Link
-          href="/teacher/home"
-          className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
-        >
-          <Home className="w-4 h-4" />
-          홈으로
-        </Link>
-      </div>
 
-      {/* 근무시간 정보 */}
-      <div className="bg-white rounded-lg shadow-sm border p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">근무시간</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Link
-            href="/teacher/salary/lecture-hours"
-            className="bg-blue-50 p-4 rounded-lg hover:bg-blue-100 transition-colors cursor-pointer"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">강의 시간</p>
-                <p className="text-2xl font-bold text-blue-600">{salaryData.currentMonth.workingHours.lectureHours}시간</p>
-              </div>
-              <BookOpen className="w-8 h-8 text-blue-600" />
-            </div>
-          </Link>
-          
-          <Link
-            href="/teacher/salary/other-hours"
-            className="bg-green-50 p-4 rounded-lg hover:bg-green-100 transition-colors cursor-pointer"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">그 외 근무시간</p>
-                <p className="text-2xl font-bold text-green-600">{salaryData.currentMonth.workingHours.otherHours}시간</p>
-              </div>
-              <Clock className="w-8 h-8 text-green-600" />
-            </div>
-          </Link>
-          
-          <Link
-            href="/teacher/salary/total-hours"
-            className="bg-purple-50 p-4 rounded-lg hover:bg-purple-100 transition-colors cursor-pointer"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">총 근무시간</p>
-                <p className="text-2xl font-bold text-purple-600">{salaryData.currentMonth.workingHours.totalHours}시간</p>
-              </div>
-              <TrendingUp className="w-8 h-8 text-purple-600" />
-            </div>
-          </Link>
-        </div>
-      </div>
-
-      {/* 이번 달 급여 정보 */}
-      <div className="bg-white rounded-lg shadow-sm border p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">이번 달 급여</h2>
-          <button
-            onClick={() => setShowPayslipModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            <FileText className="w-4 h-4" />
-            급여 명세서
-          </button>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <p className="text-sm text-gray-600">기본급</p>
-            <p className="text-xl font-bold text-gray-900">{formatCurrency(salaryData.currentMonth.baseSalary)}원</p>
-          </div>
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <p className="text-sm text-gray-600">초과근무수당</p>
-            <p className="text-xl font-bold text-blue-600">{formatCurrency(salaryData.currentMonth.overtimePay)}원</p>
-          </div>
-          <div className="bg-green-50 p-4 rounded-lg">
-            <p className="text-sm text-gray-600">상여금</p>
-            <p className="text-xl font-bold text-green-600">{formatCurrency(salaryData.currentMonth.bonus)}원</p>
-          </div>
-          <div className="bg-red-50 p-4 rounded-lg">
-            <p className="text-sm text-gray-600">공제액</p>
-            <p className="text-xl font-bold text-red-600">-{formatCurrency(salaryData.currentMonth.deductions)}원</p>
-          </div>
-        </div>
-        
-        <div className="mt-6 p-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg text-white">
-          <p className="text-sm opacity-90">실수령액</p>
-          <p className="text-3xl font-bold">{formatCurrency(salaryData.currentMonth.netSalary)}원</p>
-        </div>
-      </div>
-
-      {/* 급여 상세 내역 */}
-      <div className="bg-white rounded-lg shadow-sm border p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">급여 상세 내역</h2>
-        <div className="space-y-4">
-          <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-            <div>
-              <p className="font-medium text-gray-900">기본급</p>
-              <p className="text-sm text-gray-600">월 기본 급여</p>
-            </div>
-            <p className="text-lg font-semibold text-gray-900">{formatCurrency(salaryData.currentMonth.baseSalary)}원</p>
-          </div>
-          
-          <div className="flex justify-between items-center p-4 bg-blue-50 rounded-lg">
-            <div>
-              <p className="font-medium text-blue-900">초과근무수당</p>
-              <p className="text-sm text-blue-600">{salaryData.currentMonth.overtimeHours}시간 초과근무</p>
-            </div>
-            <p className="text-lg font-semibold text-blue-900">{formatCurrency(salaryData.currentMonth.overtimePay)}원</p>
-          </div>
-          
-          <div className="flex justify-between items-center p-4 bg-green-50 rounded-lg">
-            <div>
-              <p className="font-medium text-green-900">상여금</p>
-              <p className="text-sm text-green-600">성과 보너스</p>
-            </div>
-            <p className="text-lg font-semibold text-green-900">{formatCurrency(salaryData.currentMonth.bonus)}원</p>
-          </div>
-          
-          <div className="flex justify-between items-center p-4 bg-red-50 rounded-lg">
-            <div>
-              <p className="font-medium text-red-900">공제액</p>
-              <p className="text-sm text-red-600">세금 및 보험료</p>
-            </div>
-            <p className="text-lg font-semibold text-red-900">-{formatCurrency(salaryData.currentMonth.deductions)}원</p>
-          </div>
-        </div>
-      </div>
-
-      {/* 월별 급여 내역 */}
-      <div className="bg-white rounded-lg shadow-sm border p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">월별 급여 내역</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">월</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">급여</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">근무시간</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">상태</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {salaryData.monthlyHistory.map((item) => (
-                <tr key={item.month} className="hover:bg-gray-50">
-                  <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {item.month}
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {formatCurrency(item.netSalary)}원
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {item.workingHours}시간
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(item.status)}`}>
-                      {getStatusText(item.status)}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* 지급 내역 */}
-      <div className="bg-white rounded-lg shadow-sm border p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">지급 내역</h2>
-        <div className="space-y-4">
-          {salaryData.paymentHistory.map((payment) => (
-            <div key={payment.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div className="flex items-center gap-4">
-                {getPaymentMethodIcon(payment.method)}
+        {/* 급여 요약 카드 */}
+        {summary && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <div className="flex items-center gap-3">
+                <Calendar className="w-8 h-8 text-blue-600" />
                 <div>
-                  <p className="font-medium text-gray-900">{payment.description}</p>
-                  <p className="text-sm text-gray-600">{payment.date}</p>
+                  <div className="text-2xl font-bold text-gray-900">
+                    {summary.totalClasses}
+                  </div>
+                  <div className="text-sm text-gray-600">총 수업 수</div>
                 </div>
               </div>
-              <div className="text-right">
-                <p className="font-semibold text-gray-900">{formatCurrency(payment.amount)}원</p>
-                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(payment.status)}`}>
-                  {getStatusText(payment.status)}
-                </span>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <div className="flex items-center gap-3">
+                <Clock className="w-8 h-8 text-green-600" />
+                <div>
+                  <div className="text-2xl font-bold text-gray-900">
+                    {summary.totalHours.toFixed(1)}
+                  </div>
+                  <div className="text-sm text-gray-600">총 수업 시간</div>
+                </div>
               </div>
             </div>
-          ))}
-        </div>
-      </div>
 
-      {/* 급여 명세서 모달 */}
-      {showPayslipModal && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-75 flex items-center justify-center">
-          <div className="bg-white rounded-lg p-8 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">급여 명세서</h2>
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <div className="flex items-center gap-3">
+                <DollarSign className="w-8 h-8 text-purple-600" />
+                <div>
+                  <div className="text-2xl font-bold text-gray-900">
+                    {formatCurrency(summary.totalAmount)}원
+                  </div>
+                  <div className="text-sm text-gray-600">총 급여</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <div className="flex items-center gap-3">
+                <TrendingUp className="w-8 h-8 text-orange-600" />
+                <div>
+                  <div className="text-2xl font-bold text-gray-900">
+                    {formatCurrency(summary.averagePerClass)}원
+                  </div>
+                  <div className="text-sm text-gray-600">수업당 평균</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 상세 내역 카드 */}
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            상세 내역
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="bg-blue-50 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <DollarSign className="w-4 h-4 text-blue-600" />
+                <span className="text-sm text-gray-600">기본급</span>
+              </div>
+              <div className="text-lg font-bold text-blue-600">
+                {summary ? formatCurrency(summary.totalBaseSalary) : "0"}원
+              </div>
+            </div>
+
+            <div className="bg-green-50 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Award className="w-4 h-4 text-green-600" />
+                <span className="text-sm text-gray-600">보너스</span>
+              </div>
+              <div className="text-lg font-bold text-green-600">
+                {summary ? formatCurrency(summary.totalBonus) : "0"}원
+              </div>
+            </div>
+
+            <div className="bg-purple-50 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Car className="w-4 h-4 text-purple-600" />
+                <span className="text-sm text-gray-600">교통비</span>
+              </div>
+              <div className="text-lg font-bold text-purple-600">
+                {summary ? formatCurrency(summary.totalTransportationFee) : "0"}
+                원
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 필터 및 검색 */}
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+          <div className="flex flex-col md:flex-row gap-4">
+            {/* 검색 */}
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="학생 이름, 과목명으로 검색..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            {/* 상태 필터 */}
+            <select
+              value={statusFilter}
+              onChange={(e) =>
+                setStatusFilter(
+                  e.target.value as "all" | "paid" | "pending" | "processing",
+                )
+              }
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="all">전체 상태</option>
+              <option value="paid">지급완료</option>
+              <option value="pending">지급대기</option>
+              <option value="processing">처리중</option>
+            </select>
+          </div>
+        </div>
+
+        {/* 급여 내역 목록 */}
+        <div className="bg-white rounded-xl shadow-lg p-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
+            <FileText className="w-5 h-5 text-blue-600" />
+            급여 내역 ({filteredItems.length}개)
+          </h2>
+
+          {currentItems.length === 0 ? (
+            <div className="text-center py-12">
+              <DollarSign className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                급여 내역이 없습니다
+              </h3>
+              <p className="text-gray-600">
+                {searchTerm || statusFilter !== "all"
+                  ? "검색 조건에 맞는 급여 내역이 없습니다."
+                  : "이번 달 급여 내역이 없습니다."}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {currentItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-4 mb-4">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4 text-blue-600" />
+                          <span className="font-medium text-gray-900">
+                            {formatDate(item.date)}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-green-600" />
+                          <span className="text-gray-700">
+                            {formatDuration(item.duration)}
+                          </span>
+                        </div>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(item.status)}`}
+                        >
+                          {getStatusText(item.status)}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div className="flex items-center gap-2">
+                          <User className="w-4 h-4 text-purple-600" />
+                          <span className="text-sm text-gray-600">학생:</span>
+                          <span className="font-medium text-gray-900">
+                            {item.studentName}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <FileText className="w-4 h-4 text-orange-600" />
+                          <span className="text-sm text-gray-600">수업:</span>
+                          <span className="font-medium text-gray-900">
+                            {item.courseName}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Gift className="w-4 h-4 text-green-600" />
+                          <span className="text-sm text-gray-600">포인트:</span>
+                          <span className="font-medium text-gray-900">
+                            {item.points}P
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* 급여 상세 내역 */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg">
+                        <div>
+                          <div className="text-sm text-gray-600">기본급</div>
+                          <div className="font-medium text-gray-900">
+                            {formatCurrency(item.baseSalary)}원
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-sm text-gray-600">보너스</div>
+                          <div className="font-medium text-green-600">
+                            {formatCurrency(item.bonus)}원
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-sm text-gray-600">교통비</div>
+                          <div className="font-medium text-purple-600">
+                            {formatCurrency(item.transportationFee)}원
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-sm text-gray-600">총액</div>
+                          <div className="font-bold text-blue-600">
+                            {formatCurrency(item.totalAmount)}원
+                          </div>
+                        </div>
+                      </div>
+
+                      {item.notes && (
+                        <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                          <p className="text-sm text-gray-700">{item.notes}</p>
+                        </div>
+                      )}
+
+                      {item.paymentDate && (
+                        <div className="mt-3 text-sm text-gray-500">
+                          지급일: {formatDate(item.paymentDate)}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* 페이지네이션 */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-8">
               <button
-                onClick={() => setShowPayslipModal(false)}
-                className="p-2 text-gray-400 hover:text-gray-600"
+                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1}
+                className="p-2 text-gray-400 hover:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <X className="w-6 h-6" />
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+
+              <span className="text-sm text-gray-600">
+                {currentPage} / {totalPages}
+              </span>
+
+              <button
+                onClick={() =>
+                  setCurrentPage(Math.min(totalPages, currentPage + 1))
+                }
+                disabled={currentPage === totalPages}
+                className="p-2 text-gray-400 hover:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <ChevronRight className="w-5 h-5" />
               </button>
             </div>
-            
-            <div className="space-y-6">
-              {/* 명세서 내용 */}
-              <div className="bg-gray-50 p-6 rounded-lg">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">2024년 1월 급여 명세서</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-2">지급 내역</h4>
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span>기본급</span>
-                        <span>{formatCurrency(salaryData.currentMonth.baseSalary)}원</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>초과근무수당</span>
-                        <span>{formatCurrency(salaryData.currentMonth.overtimePay)}원</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>상여금</span>
-                        <span>{formatCurrency(salaryData.currentMonth.bonus)}원</span>
-                      </div>
-                      <div className="border-t pt-2 font-semibold">
-                        <div className="flex justify-between">
-                          <span>지급 총액</span>
-                          <span>{formatCurrency(salaryData.currentMonth.baseSalary + salaryData.currentMonth.overtimePay + salaryData.currentMonth.bonus)}원</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-2">공제 내역</h4>
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span>소득세</span>
-                        <span>-{formatCurrency(salaryData.currentMonth.deductions * 0.7)}원</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>국민연금</span>
-                        <span>-{formatCurrency(salaryData.currentMonth.deductions * 0.2)}원</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>건강보험</span>
-                        <span>-{formatCurrency(salaryData.currentMonth.deductions * 0.1)}원</span>
-                      </div>
-                      <div className="border-t pt-2 font-semibold">
-                        <div className="flex justify-between">
-                          <span>공제 총액</span>
-                          <span>-{formatCurrency(salaryData.currentMonth.deductions)}원</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-                  <div className="flex justify-between items-center">
-                    <span className="text-lg font-semibold text-gray-900">실수령액</span>
-                    <span className="text-2xl font-bold text-blue-600">{formatCurrency(salaryData.currentMonth.netSalary)}원</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex gap-4 justify-end">
-                <button
-                  onClick={() => setShowPayslipModal(false)}
-                  className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
-                >
-                  닫기
-                </button>
-                <button
-                  onClick={handleDownloadPayslip}
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
-                >
-                  <Download className="w-4 h-4" />
-                  다운로드
-                </button>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
-} 
+}

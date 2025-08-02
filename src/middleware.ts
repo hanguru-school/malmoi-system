@@ -1,99 +1,124 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
-
-// 역할 타입 정의
-type UserRole = 'master' | 'admin' | 'teacher' | 'staff' | 'student';
-
-// 역할별 접근 가능한 경로 정의
-const ROLE_ACCESS_PATHS: Record<UserRole, string[]> = {
-  master: ['/admin', '/teacher', '/staff', '/student'],
-  admin: ['/admin'],
-  teacher: ['/teacher'],
-  staff: ['/staff'],
-  student: ['/student']
-};
-
-// 역할별 기본 대시보드 경로
-const ROLE_DASHBOARDS: Record<UserRole, string> = {
-  master: '/admin',
-  admin: '/admin',
-  teacher: '/teacher',
-  staff: '/staff',
-  student: '/student'
-};
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  
+
+  // 운영 서버 환경 체크 (개발 환경에서는 비활성화)
+  const hostname = request.headers.get("host") || "";
+  const isProduction =
+    hostname === "app.hanguru.school" || hostname === "hanguru.school";
+  const isDevelopment = process.env.NODE_ENV === "development";
+
+  // 개발 환경에서는 환경 경고 페이지 리다이렉트 비활성화
+  if (
+    !isProduction &&
+    !isDevelopment &&
+    !pathname.startsWith("/api/") &&
+    !pathname.startsWith("/_next/")
+  ) {
+    // 정적 파일들은 제외
+    if (pathname.includes(".") || pathname.startsWith("/_next/")) {
+      return NextResponse.next();
+    }
+
+    // 경고 페이지로 리다이렉트 (운영 환경이 아닌 경우에만)
+    return NextResponse.redirect(new URL("/environment-warning", request.url));
+  }
+
   // 로그인 페이지는 제외
-  if (pathname.startsWith('/auth/')) {
+  if (pathname.startsWith("/auth/")) {
     return NextResponse.next();
   }
 
   // 정적 파일들은 제외
-  if (pathname.startsWith('/_next/') || pathname.startsWith('/api/') || pathname.includes('.')) {
+  if (
+    pathname.startsWith("/_next/") ||
+    pathname.startsWith("/api/") ||
+    pathname.includes(".")
+  ) {
     return NextResponse.next();
   }
 
   // 쿠키에서 사용자 세션 확인
-  const userSession = request.cookies.get('user-session');
-  
-  // 로그인되지 않은 경우
+  const userSession = request.cookies.get("user-session");
+
+  // 로그인되지 않은 경우 모든 페이지를 로그인 페이지로 리다이렉트
   if (!userSession) {
-    // 루트 경로로 접근하면 로그인 페이지로 리다이렉트
-    if (pathname === '/') {
-      return NextResponse.redirect(new URL('/auth/login', request.url));
-    }
-    
-    // 보호된 경로 접근 시 로그인 페이지로 리다이렉트
-    const protectedPaths = ['/admin', '/teacher', '/staff', '/student', '/employee'];
-    if (protectedPaths.some((path: string) => pathname.startsWith(path))) {
-      return NextResponse.redirect(new URL('/auth/login', request.url));
-    }
-    
-    return NextResponse.next();
+    return NextResponse.redirect(new URL("/auth/login", request.url));
   }
 
   // 로그인된 경우
   try {
     const userData = JSON.parse(userSession.value);
-    const userRole = (userData.accountType || userData.role) as UserRole;
-    
-    // 루트 경로로 접근하면 역할에 따라 적절한 대시보드로 리다이렉트
-    if (pathname === '/') {
-      const dashboardPath = ROLE_DASHBOARDS[userRole] || '/auth/login';
-      return NextResponse.redirect(new URL(dashboardPath, request.url));
-    }
-    
-    // 역할별 접근 권한 확인
-    const hasAccess = checkRoleAccess(userRole, pathname);
-    
+
+    // 권한에 따른 페이지 접근 제어
+    const hasAccess = checkAccess(userData.role, pathname);
     if (!hasAccess) {
-      // 권한이 없는 경우 해당 역할의 대시보드로 리다이렉트
-      const dashboardPath = ROLE_DASHBOARDS[userRole] || '/auth/login';
+      const dashboardPath = getDashboardPath(userData.role);
       return NextResponse.redirect(new URL(dashboardPath, request.url));
     }
-    
   } catch (error) {
     // 세션 파싱 오류 시 로그인 페이지로 리다이렉트
-    return NextResponse.redirect(new URL('/auth/login', request.url));
+    return NextResponse.redirect(new URL("/auth/login", request.url));
   }
 
   return NextResponse.next();
 }
 
-// 역할별 접근 권한 확인 함수
-function checkRoleAccess(userRole: UserRole, pathname: string): boolean {
-  // 마스터는 모든 경로에 접근 가능
-  if (userRole === 'master') {
-    return true;
+// 권한에 따른 대시보드 경로 결정
+function getDashboardPath(role: string): string {
+  switch (role) {
+    case "ADMIN":
+    case "MASTER":
+      return "/admin";
+    case "TEACHER":
+      return "/teacher";
+    case "STAFF":
+      return "/staff";
+    case "EMPLOYEE":
+      return "/employee";
+    case "PARENT":
+      return "/parent";
+    case "STUDENT":
+    default:
+      return "/student";
   }
-  
-  // 각 역할별 접근 가능한 경로 확인
-  const allowedPaths = ROLE_ACCESS_PATHS[userRole] || [];
-  
-  // 해당 역할이 접근할 수 있는 경로인지 확인
-  return allowedPaths.some((path: string) => pathname.startsWith(path));
+}
+
+// 권한에 따른 페이지 접근 확인
+function checkAccess(role: string, pathname: string): boolean {
+  // 관리자 권한
+  if (role === "ADMIN" || role === "MASTER") {
+    return pathname.startsWith("/admin/") || pathname === "/admin";
+  }
+
+  // 선생님 권한
+  if (role === "TEACHER") {
+    return pathname.startsWith("/teacher/") || pathname === "/teacher";
+  }
+
+  // 사무직원 권한
+  if (role === "STAFF") {
+    return pathname.startsWith("/staff/") || pathname === "/staff";
+  }
+
+  // 직원 권한
+  if (role === "EMPLOYEE") {
+    return pathname.startsWith("/employee/") || pathname === "/employee";
+  }
+
+  // 학부모 권한
+  if (role === "PARENT") {
+    return pathname.startsWith("/parent/") || pathname === "/parent";
+  }
+
+  // 학생 권한 (기본)
+  if (role === "STUDENT") {
+    return pathname.startsWith("/student/") || pathname === "/student";
+  }
+
+  return false;
 }
 
 export const config = {
@@ -105,6 +130,6 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    "/((?!api|_next/static|_next/image|favicon.ico).*)",
   ],
-}; 
+};

@@ -1,23 +1,16 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { 
-  Upload, 
-  Play, 
-  Pause, 
-  Volume2, 
-  Move, 
+import React, { useState, useEffect } from "react";
+import {
+  Upload,
+  Play,
+  Pause,
+  Move,
   FileAudio,
-  Calendar,
-  Clock,
   Search,
-  Filter,
-  Plus,
-  Trash2,
-  Edit,
   Eye,
-  Download
-} from 'lucide-react';
+  Download,
+} from "lucide-react";
 
 interface AudioFile {
   id: string;
@@ -45,75 +38,77 @@ export default function AdminAudioManagementPage() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showMoveModal, setShowMoveModal] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState<'all' | 'attached' | 'unattached'>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterType, setFilterType] = useState<
+    "all" | "attached" | "unattached"
+  >("all");
 
   // 더미 데이터 로드
   useEffect(() => {
     const mockAudioFiles: AudioFile[] = [
       {
-        id: '1',
-        url: '/audio/lesson1-intro.mp3',
-        title: '인사말 연습',
+        id: "1",
+        url: "/audio/lesson1-intro.mp3",
+        title: "인사말 연습",
         duration: 120,
-        uploadedBy: '관리자',
-        uploadedAt: '2024-01-15T10:00:00Z',
-        lessonNoteId: 'note1',
+        uploadedBy: "관리자",
+        uploadedAt: "2024-01-15T10:00:00Z",
+        lessonNoteId: "note1",
         position: 1,
-        fileSize: 2048576 // 2MB
+        fileSize: 2048576, // 2MB
       },
       {
-        id: '2',
-        url: '/audio/lesson1-selfintro.mp3',
-        title: '자기소개 연습',
+        id: "2",
+        url: "/audio/lesson1-selfintro.mp3",
+        title: "자기소개 연습",
         duration: 180,
-        uploadedBy: '관리자',
-        uploadedAt: '2024-01-15T10:05:00Z',
-        lessonNoteId: 'note1',
+        uploadedBy: "관리자",
+        uploadedAt: "2024-01-15T10:05:00Z",
+        lessonNoteId: "note1",
         position: 2,
-        fileSize: 3072000 // 3MB
+        fileSize: 3072000, // 3MB
       },
       {
-        id: '3',
-        url: '/audio/lesson2-numbers.mp3',
-        title: '숫자 발음 연습',
+        id: "3",
+        url: "/audio/lesson2-numbers.mp3",
+        title: "숫자 발음 연습",
         duration: 90,
-        uploadedBy: '관리자',
-        uploadedAt: '2024-01-14T14:30:00Z',
-        lessonNoteId: 'note2',
+        uploadedBy: "관리자",
+        uploadedAt: "2024-01-14T14:30:00Z",
+        lessonNoteId: "note2",
         position: 1,
-        fileSize: 1536000 // 1.5MB
+        fileSize: 1536000, // 1.5MB
       },
       {
-        id: '4',
-        url: '/audio/unattached-audio.mp3',
-        title: '미첨부 음성 파일',
+        id: "4",
+        url: "/audio/unattached-audio.mp3",
+        title: "미첨부 음성 파일",
         duration: 150,
-        uploadedBy: '관리자',
-        uploadedAt: '2024-01-13T09:00:00Z',
-        fileSize: 2560000 // 2.5MB
-      }
+        uploadedBy: "관리자",
+        uploadedAt: "2024-01-13T09:00:00Z",
+        fileSize: 2560000, // 2.5MB
+      },
     ];
 
     const mockLessonNotes: LessonNote[] = [
       {
-        id: 'note1',
-        title: '기본 인사말과 자기소개',
-        studentName: '김학생',
-        date: '2024-01-15'
+        id: "note1",
+        title: "기본 인사말과 자기소개",
+        studentName: "김학생",
+        date: "2024-01-15",
       },
       {
-        id: 'note2',
-        title: '숫자와 시간 표현',
-        studentName: '이학생',
-        date: '2024-01-14'
+        id: "note2",
+        title: "숫자와 시간 표현",
+        studentName: "이학생",
+        date: "2024-01-14",
       },
       {
-        id: 'note3',
-        title: '음식 주문하기',
-        studentName: '박학생',
-        date: '2024-01-13'
-      }
+        id: "note3",
+        title: "음식 주문하기",
+        studentName: "박학생",
+        date: "2024-01-13",
+      },
     ];
 
     setAudioFiles(mockAudioFiles);
@@ -123,7 +118,7 @@ export default function AdminAudioManagementPage() {
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   const formatFileSize = (bytes: number) => {
@@ -141,39 +136,48 @@ export default function AdminAudioManagementPage() {
     const newAudio: AudioFile = {
       id: Date.now().toString(),
       url: URL.createObjectURL(file),
-      title: file.name.replace('.mp3', ''),
+      title: file.name.replace(".mp3", ""),
       duration: 0, // 실제로는 파일에서 추출
-      uploadedBy: '관리자',
+      uploadedBy: "관리자",
       uploadedAt: new Date().toISOString(),
-      fileSize: file.size
+      fileSize: file.size,
     };
 
     setAudioFiles([newAudio, ...audioFiles]);
     setShowUploadModal(false);
   };
 
-  const handleMoveAudio = (audioId: string, targetNoteId: string, position: number) => {
-    setAudioFiles(audioFiles.map(audio => 
-      audio.id === audioId 
-        ? { ...audio, lessonNoteId: targetNoteId, position }
-        : audio
-    ));
+  const handleMoveAudio = (
+    audioId: string,
+    targetNoteId: string,
+    position: number,
+  ) => {
+    setAudioFiles(
+      audioFiles.map((audio) =>
+        audio.id === audioId
+          ? { ...audio, lessonNoteId: targetNoteId, position }
+          : audio,
+      ),
+    );
     setShowMoveModal(false);
   };
 
-  const filteredAudioFiles = audioFiles.filter(audio => {
-    const matchesSearch = audio.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterType === 'all' || 
-      (filterType === 'attached' && audio.lessonNoteId) ||
-      (filterType === 'unattached' && !audio.lessonNoteId);
-    
+  const filteredAudioFiles = audioFiles.filter((audio) => {
+    const matchesSearch = audio.title
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesFilter =
+      filterType === "all" ||
+      (filterType === "attached" && audio.lessonNoteId) ||
+      (filterType === "unattached" && !audio.lessonNoteId);
+
     return matchesSearch && matchesFilter;
   });
 
   const getLessonNoteTitle = (noteId?: string) => {
-    if (!noteId) return '미첨부';
-    const note = lessonNotes.find(n => n.id === noteId);
-    return note ? `${note.title} (${note.studentName})` : '알 수 없음';
+    if (!noteId) return "미첨부";
+    const note = lessonNotes.find((n) => n.id === noteId);
+    return note ? `${note.title} (${note.studentName})` : "알 수 없음";
   };
 
   return (
@@ -187,7 +191,7 @@ export default function AdminAudioManagementPage() {
               레슨 노트에 첨부된 음성 파일을 관리하세요
             </p>
           </div>
-          
+
           <button
             onClick={() => setShowUploadModal(true)}
             className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -210,10 +214,14 @@ export default function AdminAudioManagementPage() {
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            
+
             <select
               value={filterType}
-              onChange={(e) => setFilterType(e.target.value as 'all' | 'attached' | 'unattached')}
+              onChange={(e) =>
+                setFilterType(
+                  e.target.value as "all" | "attached" | "unattached",
+                )
+              }
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">전체</option>
@@ -229,23 +237,42 @@ export default function AdminAudioManagementPage() {
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="text-left py-4 px-6 font-medium text-gray-900">파일명</th>
-                  <th className="text-left py-4 px-6 font-medium text-gray-900">길이</th>
-                  <th className="text-left py-4 px-6 font-medium text-gray-900">크기</th>
-                  <th className="text-left py-4 px-6 font-medium text-gray-900">첨부된 노트</th>
-                  <th className="text-left py-4 px-6 font-medium text-gray-900">업로드일</th>
-                  <th className="text-center py-4 px-6 font-medium text-gray-900">액션</th>
+                  <th className="text-left py-4 px-6 font-medium text-gray-900">
+                    파일명
+                  </th>
+                  <th className="text-left py-4 px-6 font-medium text-gray-900">
+                    길이
+                  </th>
+                  <th className="text-left py-4 px-6 font-medium text-gray-900">
+                    크기
+                  </th>
+                  <th className="text-left py-4 px-6 font-medium text-gray-900">
+                    첨부된 노트
+                  </th>
+                  <th className="text-left py-4 px-6 font-medium text-gray-900">
+                    업로드일
+                  </th>
+                  <th className="text-center py-4 px-6 font-medium text-gray-900">
+                    액션
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {filteredAudioFiles.map((audio) => (
-                  <tr key={audio.id} className="border-b border-gray-100 hover:bg-gray-50">
+                  <tr
+                    key={audio.id}
+                    className="border-b border-gray-100 hover:bg-gray-50"
+                  >
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-3">
                         <FileAudio className="w-5 h-5 text-blue-600" />
                         <div>
-                          <div className="font-medium text-gray-900">{audio.title}</div>
-                          <div className="text-sm text-gray-500">업로드: {audio.uploadedBy}</div>
+                          <div className="font-medium text-gray-900">
+                            {audio.title}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            업로드: {audio.uploadedBy}
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -256,11 +283,13 @@ export default function AdminAudioManagementPage() {
                       {formatFileSize(audio.fileSize)}
                     </td>
                     <td className="py-4 px-6">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        audio.lessonNoteId 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          audio.lessonNoteId
+                            ? "bg-green-100 text-green-800"
+                            : "bg-gray-100 text-gray-800"
+                        }`}
+                      >
                         {getLessonNoteTitle(audio.lessonNoteId)}
                       </span>
                     </td>
@@ -276,7 +305,7 @@ export default function AdminAudioManagementPage() {
                         >
                           <Play className="w-4 h-4" />
                         </button>
-                        
+
                         <button
                           onClick={() => {
                             setSelectedAudio(audio);
@@ -287,14 +316,14 @@ export default function AdminAudioManagementPage() {
                         >
                           <Move className="w-4 h-4" />
                         </button>
-                        
+
                         <button
                           className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
                           title="다운로드"
                         >
                           <Download className="w-4 h-4" />
                         </button>
-                        
+
                         <button
                           className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
                           title="상세보기"
@@ -319,16 +348,21 @@ export default function AdminAudioManagementPage() {
                   onClick={() => setIsPlaying(!isPlaying)}
                   className="p-3 bg-blue-600 text-white rounded-full hover:bg-blue-700"
                 >
-                  {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+                  {isPlaying ? (
+                    <Pause className="w-5 h-5" />
+                  ) : (
+                    <Play className="w-5 h-5" />
+                  )}
                 </button>
                 <div>
                   <p className="font-medium">{selectedAudio.title}</p>
                   <p className="text-sm text-gray-500">
-                    {formatDuration(selectedAudio.duration)} • {formatFileSize(selectedAudio.fileSize)}
+                    {formatDuration(selectedAudio.duration)} •{" "}
+                    {formatFileSize(selectedAudio.fileSize)}
                   </p>
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-4">
                 <span className="text-sm text-gray-500">
                   {getLessonNoteTitle(selectedAudio.lessonNoteId)}
@@ -348,16 +382,23 @@ export default function AdminAudioManagementPage() {
         {showUploadModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">음성 파일 업로드</h3>
-              
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                음성 파일 업로드
+              </h3>
+
               <div className="space-y-4">
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                   <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-600 mb-2">MP3 파일을 드래그하거나 클릭하여 업로드</p>
+                  <p className="text-gray-600 mb-2">
+                    MP3 파일을 드래그하거나 클릭하여 업로드
+                  </p>
                   <input
                     type="file"
                     accept=".mp3"
-                    onChange={(e) => e.target.files?.[0] && handleUploadAudio(e.target.files[0])}
+                    onChange={(e) =>
+                      e.target.files?.[0] &&
+                      handleUploadAudio(e.target.files[0])
+                    }
                     className="hidden"
                     id="audio-upload"
                   />
@@ -369,7 +410,7 @@ export default function AdminAudioManagementPage() {
                   </label>
                 </div>
               </div>
-              
+
               <div className="flex justify-end gap-3 mt-6">
                 <button
                   onClick={() => setShowUploadModal(false)}
@@ -386,8 +427,10 @@ export default function AdminAudioManagementPage() {
         {showMoveModal && selectedAudio && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">음성 파일 위치 변경</h3>
-              
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                음성 파일 위치 변경
+              </h3>
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -402,7 +445,7 @@ export default function AdminAudioManagementPage() {
                     ))}
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     위치 (순서)
@@ -415,7 +458,7 @@ export default function AdminAudioManagementPage() {
                   />
                 </div>
               </div>
-              
+
               <div className="flex justify-end gap-3 mt-6">
                 <button
                   onClick={() => setShowMoveModal(false)}
@@ -424,7 +467,7 @@ export default function AdminAudioManagementPage() {
                   취소
                 </button>
                 <button
-                  onClick={() => handleMoveAudio(selectedAudio.id, 'note1', 1)}
+                  onClick={() => handleMoveAudio(selectedAudio.id, "note1", 1)}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 >
                   변경
@@ -436,4 +479,4 @@ export default function AdminAudioManagementPage() {
       </div>
     </div>
   );
-} 
+}

@@ -1,15 +1,22 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { ArrowLeft, Bell, BookOpen, Calendar, FileText, CheckCircle, Clock } from 'lucide-react';
+import React, { useState } from "react";
+import Link from "next/link";
+import {
+  ArrowLeft,
+  Bell,
+  BookOpen,
+  Calendar,
+  FileText,
+  Clock,
+} from "lucide-react";
 
 interface Notification {
   id: number;
   title: string;
   message: string;
   time: string;
-  type: 'note' | 'reservation' | 'homework';
+  type: "note" | "reservation" | "homework";
   isRead: boolean;
 }
 
@@ -17,69 +24,69 @@ export default function StudentNotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([
     {
       id: 1,
-      title: '새로운 레슨노트가 업로드되었습니다',
-      message: '김선생님의 수업 노트를 확인해보세요',
-      time: '5분 전',
-      type: 'note',
-      isRead: false
+      title: "새로운 레슨노트가 업로드되었습니다",
+      message: "김선생님의 수업 노트를 확인해보세요",
+      time: "5분 전",
+      type: "note",
+      isRead: false,
     },
     {
       id: 2,
-      title: '내일 수업이 있습니다',
-      message: '오후 2시 김선생님과의 수업을 잊지 마세요',
-      time: '1시간 전',
-      type: 'reservation',
-      isRead: false
+      title: "내일 수업이 있습니다",
+      message: "오후 2시 김선생님과의 수업을 잊지 마세요",
+      time: "1시간 전",
+      type: "reservation",
+      isRead: false,
     },
     {
       id: 3,
-      title: '새로운 숙제가 등록되었습니다',
-      message: '문법 연습 문제를 풀어보세요',
-      time: '2시간 전',
-      type: 'homework',
-      isRead: true
+      title: "새로운 숙제가 등록되었습니다",
+      message: "문법 연습 문제를 풀어보세요",
+      time: "2시간 전",
+      type: "homework",
+      isRead: true,
     },
     {
       id: 4,
-      title: '수업 일정이 변경되었습니다',
-      message: '다음 주 수요일 수업이 목요일로 변경되었습니다',
-      time: '3시간 전',
-      type: 'reservation',
-      isRead: true
+      title: "수업 일정이 변경되었습니다",
+      message: "다음 주 수요일 수업이 목요일로 변경되었습니다",
+      time: "3시간 전",
+      type: "reservation",
+      isRead: true,
     },
     {
       id: 5,
-      title: '레슨노트 피드백이 있습니다',
-      message: '지난 주 작문 숙제에 대한 피드백을 확인해보세요',
-      time: '1일 전',
-      type: 'note',
-      isRead: true
-    }
+      title: "레슨노트 피드백이 있습니다",
+      message: "지난 주 작문 숙제에 대한 피드백을 확인해보세요",
+      time: "1일 전",
+      type: "note",
+      isRead: true,
+    },
   ]);
 
   const markAsRead = (id: number) => {
-    setNotifications(prev => 
-      prev.map(notification => 
-        notification.id === id 
+    setNotifications((prev) =>
+      prev.map((notification) =>
+        notification.id === id
           ? { ...notification, isRead: true }
-          : notification
-      )
+          : notification,
+      ),
     );
   };
 
   const markAllAsRead = () => {
-    setNotifications(prev => 
-      prev.map(notification => ({ ...notification, isRead: true }))
+    setNotifications((prev) =>
+      prev.map((notification) => ({ ...notification, isRead: true })),
     );
   };
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case 'note':
+      case "note":
         return <BookOpen className="w-5 h-5 text-blue-600" />;
-      case 'reservation':
+      case "reservation":
         return <Calendar className="w-5 h-5 text-green-600" />;
-      case 'homework':
+      case "homework":
         return <FileText className="w-5 h-5 text-purple-600" />;
       default:
         return <Bell className="w-5 h-5 text-gray-600" />;
@@ -88,18 +95,18 @@ export default function StudentNotificationsPage() {
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'note':
-        return 'bg-blue-100 text-blue-800';
-      case 'reservation':
-        return 'bg-green-100 text-green-800';
-      case 'homework':
-        return 'bg-purple-100 text-purple-800';
+      case "note":
+        return "bg-blue-100 text-blue-800";
+      case "reservation":
+        return "bg-green-100 text-green-800";
+      case "homework":
+        return "bg-purple-100 text-purple-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -140,8 +147,12 @@ export default function StudentNotificationsPage() {
         {notifications.length === 0 ? (
           <div className="p-8 text-center">
             <Bell className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">알림이 없습니다</h3>
-            <p className="text-gray-600">새로운 알림이 오면 여기에 표시됩니다</p>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              알림이 없습니다
+            </h3>
+            <p className="text-gray-600">
+              새로운 알림이 오면 여기에 표시됩니다
+            </p>
           </div>
         ) : (
           <div className="divide-y divide-gray-200">
@@ -149,7 +160,7 @@ export default function StudentNotificationsPage() {
               <div
                 key={notification.id}
                 className={`p-6 hover:bg-gray-50 transition-colors cursor-pointer ${
-                  !notification.isRead ? 'bg-blue-50' : ''
+                  !notification.isRead ? "bg-blue-50" : ""
                 }`}
                 onClick={() => markAsRead(notification.id)}
               >
@@ -159,16 +170,26 @@ export default function StudentNotificationsPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-2">
-                      <h3 className={`text-sm font-medium ${
-                        !notification.isRead ? 'text-gray-900' : 'text-gray-700'
-                      }`}>
+                      <h3
+                        className={`text-sm font-medium ${
+                          !notification.isRead
+                            ? "text-gray-900"
+                            : "text-gray-700"
+                        }`}
+                      >
                         {notification.title}
                       </h3>
                       <div className="flex items-center gap-2">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeColor(notification.type)}`}>
-                          {notification.type === 'note' ? '레슨노트' :
-                           notification.type === 'reservation' ? '예약' :
-                           notification.type === 'homework' ? '숙제' : '기타'}
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeColor(notification.type)}`}
+                        >
+                          {notification.type === "note"
+                            ? "레슨노트"
+                            : notification.type === "reservation"
+                              ? "예약"
+                              : notification.type === "homework"
+                                ? "숙제"
+                                : "기타"}
                         </span>
                         {!notification.isRead && (
                           <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
@@ -218,4 +239,4 @@ export default function StudentNotificationsPage() {
       </div>
     </div>
   );
-} 
+}

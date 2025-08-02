@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { 
-  Plus, 
-  Edit, 
-  Trash2, 
+import { useState, useEffect } from "react";
+import {
+  Plus,
+  Edit,
+  Trash2,
   Palette,
   Save,
   X,
   AlertCircle,
   Eye,
-  EyeOff
-} from 'lucide-react';
+  EyeOff,
+} from "lucide-react";
 
 interface MemoType {
   id: string;
@@ -27,14 +27,16 @@ export default function MemoTypeManagementPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [selectedMemoType, setSelectedMemoType] = useState<MemoType | null>(null);
+  const [selectedMemoType, setSelectedMemoType] = useState<MemoType | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // 폼 상태
   const [formData, setFormData] = useState({
-    name: '',
-    color: '#3B82F6',
-    isActive: true
+    name: "",
+    color: "#3B82F6",
+    isActive: true,
   });
 
   useEffect(() => {
@@ -44,16 +46,16 @@ export default function MemoTypeManagementPage() {
   const fetchMemoTypes = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/admin/memo-types');
-      
+      const response = await fetch("/api/admin/memo-types");
+
       if (response.ok) {
         const data = await response.json();
         setMemoTypes(data);
       } else {
-        console.error('메모 유형 데이터 로딩 실패');
+        console.error("메모 유형 데이터 로딩 실패");
       }
     } catch (error) {
-      console.error('메모 유형 데이터 로딩 실패:', error);
+      console.error("메모 유형 데이터 로딩 실패:", error);
     } finally {
       setIsLoading(false);
     }
@@ -61,15 +63,15 @@ export default function MemoTypeManagementPage() {
 
   const handleAddMemoType = async () => {
     if (!formData.name.trim()) {
-      alert('메모 유형 이름을 입력해주세요.');
+      alert("메모 유형 이름을 입력해주세요.");
       return;
     }
 
     try {
-      const response = await fetch('/api/admin/memo-types', {
-        method: 'POST',
+      const response = await fetch("/api/admin/memo-types", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
       });
@@ -78,12 +80,12 @@ export default function MemoTypeManagementPage() {
         await fetchMemoTypes();
         setShowAddModal(false);
         resetForm();
-        alert('메모 유형이 성공적으로 추가되었습니다.');
+        alert("메모 유형이 성공적으로 추가되었습니다.");
       } else {
-        alert('메모 유형 추가에 실패했습니다.');
+        alert("메모 유형 추가에 실패했습니다.");
       }
     } catch (error) {
-      alert('메모 유형 추가 중 오류가 발생했습니다.');
+      alert("메모 유형 추가 중 오류가 발생했습니다.");
     }
   };
 
@@ -91,30 +93,33 @@ export default function MemoTypeManagementPage() {
     if (!selectedMemoType) return;
 
     if (!formData.name.trim()) {
-      alert('메모 유형 이름을 입력해주세요.');
+      alert("메모 유형 이름을 입력해주세요.");
       return;
     }
 
     try {
-      const response = await fetch(`/api/admin/memo-types/${selectedMemoType.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `/api/admin/memo-types/${selectedMemoType.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
         },
-        body: JSON.stringify(formData),
-      });
+      );
 
       if (response.ok) {
         await fetchMemoTypes();
         setShowEditModal(false);
         setSelectedMemoType(null);
         resetForm();
-        alert('메모 유형이 성공적으로 수정되었습니다.');
+        alert("메모 유형이 성공적으로 수정되었습니다.");
       } else {
-        alert('메모 유형 수정에 실패했습니다.');
+        alert("메모 유형 수정에 실패했습니다.");
       }
     } catch (error) {
-      alert('메모 유형 수정 중 오류가 발생했습니다.');
+      alert("메모 유형 수정 중 오류가 발생했습니다.");
     }
   };
 
@@ -122,51 +127,59 @@ export default function MemoTypeManagementPage() {
     if (!selectedMemoType) return;
 
     try {
-      const response = await fetch(`/api/admin/memo-types/${selectedMemoType.id}`, {
-        method: 'DELETE',
-      });
+      const response = await fetch(
+        `/api/admin/memo-types/${selectedMemoType.id}`,
+        {
+          method: "DELETE",
+        },
+      );
 
       if (response.ok) {
         await fetchMemoTypes();
         setShowDeleteModal(false);
         setSelectedMemoType(null);
-        alert('메모 유형이 성공적으로 삭제되었습니다.');
+        alert("메모 유형이 성공적으로 삭제되었습니다.");
       } else {
-        alert('메모 유형 삭제에 실패했습니다.');
+        alert("메모 유형 삭제에 실패했습니다.");
       }
     } catch (error) {
-      alert('메모 유형 삭제 중 오류가 발생했습니다.');
+      alert("메모 유형 삭제 중 오류가 발생했습니다.");
     }
   };
 
   const handleToggleActive = async (memoType: MemoType) => {
     try {
-      const response = await fetch(`/api/admin/memo-types/${memoType.id}/toggle`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `/api/admin/memo-types/${memoType.id}/toggle`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            isActive: !memoType.isActive,
+          }),
         },
-        body: JSON.stringify({
-          isActive: !memoType.isActive
-        }),
-      });
+      );
 
       if (response.ok) {
         await fetchMemoTypes();
-        alert(`메모 유형이 ${!memoType.isActive ? '활성화' : '비활성화'}되었습니다.`);
+        alert(
+          `메모 유형이 ${!memoType.isActive ? "활성화" : "비활성화"}되었습니다.`,
+        );
       } else {
-        alert('메모 유형 상태 변경에 실패했습니다.');
+        alert("메모 유형 상태 변경에 실패했습니다.");
       }
     } catch (error) {
-      alert('메모 유형 상태 변경 중 오류가 발생했습니다.');
+      alert("메모 유형 상태 변경 중 오류가 발생했습니다.");
     }
   };
 
   const resetForm = () => {
     setFormData({
-      name: '',
-      color: '#3B82F6',
-      isActive: true
+      name: "",
+      color: "#3B82F6",
+      isActive: true,
     });
   };
 
@@ -175,7 +188,7 @@ export default function MemoTypeManagementPage() {
     setFormData({
       name: memoType.name,
       color: memoType.color,
-      isActive: memoType.isActive
+      isActive: memoType.isActive,
     });
     setShowEditModal(true);
   };
@@ -187,7 +200,7 @@ export default function MemoTypeManagementPage() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR');
+    return date.toLocaleDateString("ko-KR");
   };
 
   if (isLoading) {
@@ -228,25 +241,25 @@ export default function MemoTypeManagementPage() {
               <Palette className="w-8 h-8 text-blue-600" />
             </div>
           </div>
-          
+
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">활성 유형</p>
                 <p className="text-2xl font-bold">
-                  {memoTypes.filter(m => m.isActive).length}개
+                  {memoTypes.filter((m) => m.isActive).length}개
                 </p>
               </div>
               <Eye className="w-8 h-8 text-green-600" />
             </div>
           </div>
-          
+
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">비활성 유형</p>
                 <p className="text-2xl font-bold">
-                  {memoTypes.filter(m => !m.isActive).length}개
+                  {memoTypes.filter((m) => !m.isActive).length}개
                 </p>
               </div>
               <EyeOff className="w-8 h-8 text-gray-600" />
@@ -283,24 +296,30 @@ export default function MemoTypeManagementPage() {
                   {memoTypes.map((memoType) => (
                     <tr key={memoType.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4">
-                        <div className="font-medium text-gray-900">{memoType.name}</div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center space-x-2">
-                          <div 
-                            className="w-6 h-6 rounded border border-gray-300"
-                            style={{ backgroundColor: memoType.color }}
-                          />
-                          <span className="text-sm text-gray-500">{memoType.color}</span>
+                        <div className="font-medium text-gray-900">
+                          {memoType.name}
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          memoType.isActive 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-gray-100 text-gray-800'
-                        }`}>
-                          {memoType.isActive ? '활성' : '비활성'}
+                        <div className="flex items-center space-x-2">
+                          <div
+                            className="w-6 h-6 rounded border border-gray-300"
+                            style={{ backgroundColor: memoType.color }}
+                          />
+                          <span className="text-sm text-gray-500">
+                            {memoType.color}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            memoType.isActive
+                              ? "bg-green-100 text-green-800"
+                              : "bg-gray-100 text-gray-800"
+                          }`}
+                        >
+                          {memoType.isActive ? "활성" : "비활성"}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-500">
@@ -317,12 +336,16 @@ export default function MemoTypeManagementPage() {
                           <button
                             onClick={() => handleToggleActive(memoType)}
                             className={`p-2 rounded ${
-                              memoType.isActive 
-                                ? 'text-yellow-600 hover:bg-yellow-100' 
-                                : 'text-green-600 hover:bg-green-100'
+                              memoType.isActive
+                                ? "text-yellow-600 hover:bg-yellow-100"
+                                : "text-green-600 hover:bg-green-100"
                             }`}
                           >
-                            {memoType.isActive ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            {memoType.isActive ? (
+                              <EyeOff className="w-4 h-4" />
+                            ) : (
+                              <Eye className="w-4 h-4" />
+                            )}
                           </button>
                           <button
                             onClick={() => openDeleteModal(memoType)}
@@ -357,31 +380,47 @@ export default function MemoTypeManagementPage() {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            
+
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">유형 이름 *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  유형 이름 *
+                </label>
                 <input
                   type="text"
                   value={formData.name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, name: e.target.value }))
+                  }
                   className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="예: 문법 설명, 발음 교정"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">색상</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  색상
+                </label>
                 <div className="flex items-center space-x-2">
                   <input
                     type="color"
                     value={formData.color}
-                    onChange={(e) => setFormData(prev => ({ ...prev, color: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        color: e.target.value,
+                      }))
+                    }
                     className="w-12 h-10 border border-gray-300 rounded"
                   />
                   <input
                     type="text"
                     value={formData.color}
-                    onChange={(e) => setFormData(prev => ({ ...prev, color: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        color: e.target.value,
+                      }))
+                    }
                     className="flex-1 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -391,10 +430,18 @@ export default function MemoTypeManagementPage() {
                   type="checkbox"
                   id="isActive"
                   checked={formData.isActive}
-                  onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      isActive: e.target.checked,
+                    }))
+                  }
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
-                <label htmlFor="isActive" className="ml-2 block text-sm text-gray-900">
+                <label
+                  htmlFor="isActive"
+                  className="ml-2 block text-sm text-gray-900"
+                >
                   활성화
                 </label>
               </div>
@@ -439,30 +486,46 @@ export default function MemoTypeManagementPage() {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            
+
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">유형 이름 *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  유형 이름 *
+                </label>
                 <input
                   type="text"
                   value={formData.name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, name: e.target.value }))
+                  }
                   className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">색상</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  색상
+                </label>
                 <div className="flex items-center space-x-2">
                   <input
                     type="color"
                     value={formData.color}
-                    onChange={(e) => setFormData(prev => ({ ...prev, color: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        color: e.target.value,
+                      }))
+                    }
                     className="w-12 h-10 border border-gray-300 rounded"
                   />
                   <input
                     type="text"
                     value={formData.color}
-                    onChange={(e) => setFormData(prev => ({ ...prev, color: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        color: e.target.value,
+                      }))
+                    }
                     className="flex-1 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -472,10 +535,18 @@ export default function MemoTypeManagementPage() {
                   type="checkbox"
                   id="editIsActive"
                   checked={formData.isActive}
-                  onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      isActive: e.target.checked,
+                    }))
+                  }
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
-                <label htmlFor="editIsActive" className="ml-2 block text-sm text-gray-900">
+                <label
+                  htmlFor="editIsActive"
+                  className="ml-2 block text-sm text-gray-900"
+                >
                   활성화
                 </label>
               </div>
@@ -512,12 +583,14 @@ export default function MemoTypeManagementPage() {
               <AlertCircle className="w-6 h-6 text-red-600" />
               <h3 className="text-lg font-semibold">메모 유형 삭제</h3>
             </div>
-            
+
             <p className="text-gray-600 mb-4">
-              <strong>{selectedMemoType.name}</strong> 메모 유형을 삭제하시겠습니까?
+              <strong>{selectedMemoType.name}</strong> 메모 유형을
+              삭제하시겠습니까?
             </p>
             <p className="text-sm text-gray-500 mb-4">
-              이 작업은 되돌릴 수 없습니다. 해당 유형으로 등록된 메모가 있다면 삭제할 수 없거나 비활성화로 전환됩니다.
+              이 작업은 되돌릴 수 없습니다. 해당 유형으로 등록된 메모가 있다면
+              삭제할 수 없거나 비활성화로 전환됩니다.
             </p>
 
             <div className="flex justify-end space-x-3">
@@ -543,4 +616,4 @@ export default function MemoTypeManagementPage() {
       )}
     </div>
   );
-} 
+}

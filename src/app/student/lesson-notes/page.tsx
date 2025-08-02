@@ -1,28 +1,21 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { 
-  BookOpen, 
-  Calendar, 
+import React, { useState, useEffect } from "react";
+import {
+  BookOpen,
+  Calendar,
   Clock,
   User,
   FileText,
-  AlertCircle,
-  ChevronRight,
   Search,
-  Filter,
   Play,
   Volume2,
-  Download,
   Eye,
-  CalendarDays,
   GraduationCap,
-  Globe,
-  Monitor,
   BookMarked,
-  MessageSquare
-} from 'lucide-react';
-import Link from 'next/link';
+  MessageSquare,
+} from "lucide-react";
+import Link from "next/link";
 
 interface LessonNote {
   id: string;
@@ -31,10 +24,10 @@ interface LessonNote {
   date: string;
   teacherName: string;
   duration: number;
-  status: 'completed' | 'scheduled' | 'cancelled';
+  status: "completed" | "scheduled" | "cancelled";
   courseName: string;
-  level: 'beginner' | 'intermediate' | 'advanced';
-  type: 'online' | 'offline';
+  level: "beginner" | "intermediate" | "advanced";
+  type: "online" | "offline";
   words: string[];
   hasAudio: boolean;
   hasMaterials: boolean;
@@ -45,61 +38,65 @@ export default function StudentLessonNotesPage() {
   const [notes, setNotes] = useState<LessonNote[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasCompletedClasses, setHasCompletedClasses] = useState(false);
-  
+
   // 필터 상태
-  const [periodFilter, setPeriodFilter] = useState('all');
-  const [levelFilter, setLevelFilter] = useState('all');
-  const [typeFilter, setTypeFilter] = useState('all');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [periodFilter, setPeriodFilter] = useState("all");
+  const [levelFilter, setLevelFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const fetchLessonNotes = async () => {
       try {
         setLoading(true);
-        
+
         // 실제 API 호출로 대체
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
         // 모의 데이터
         const mockNotes: LessonNote[] = [
           {
-            id: '1',
-            title: '기초 문법 - 조사 학습',
-            content: '오늘은 한국어 조사에 대해 배웠습니다. 주격 조사 "이/가", 목적격 조사 "을/를"을 중심으로 학습했습니다.',
-            date: '2024-01-15',
-            teacherName: '김선생님',
+            id: "1",
+            title: "기초 문법 - 조사 학습",
+            content:
+              '오늘은 한국어 조사에 대해 배웠습니다. 주격 조사 "이/가", 목적격 조사 "을/를"을 중심으로 학습했습니다.',
+            date: "2024-01-15",
+            teacherName: "김선생님",
             duration: 60,
-            status: 'completed',
-            courseName: '기초 한국어',
-            level: 'beginner',
-            type: 'online',
-            words: ['이/가', '을/를', '조사', '주격', '목적격'],
+            status: "completed",
+            courseName: "기초 한국어",
+            level: "beginner",
+            type: "online",
+            words: ["이/가", "을/를", "조사", "주격", "목적격"],
             hasAudio: true,
             hasMaterials: true,
-            summary: '조사 사용법을 잘 이해하고 있으며, 실습에서도 적극적으로 참여했습니다.'
+            summary:
+              "조사 사용법을 잘 이해하고 있으며, 실습에서도 적극적으로 참여했습니다.",
           },
           {
-            id: '2',
-            title: '일상 회화 - 자기소개',
-            content: '자기소개 표현을 배우고 실제로 연습해보았습니다. "안녕하세요, 저는 ~입니다" 패턴을 익혔습니다.',
-            date: '2024-01-10',
-            teacherName: '박선생님',
+            id: "2",
+            title: "일상 회화 - 자기소개",
+            content:
+              '자기소개 표현을 배우고 실제로 연습해보았습니다. "안녕하세요, 저는 ~입니다" 패턴을 익혔습니다.',
+            date: "2024-01-10",
+            teacherName: "박선생님",
             duration: 60,
-            status: 'completed',
-            courseName: '실용 한국어',
-            level: 'beginner',
-            type: 'offline',
-            words: ['안녕하세요', '저는', '입니다', '만나서', '반갑습니다'],
+            status: "completed",
+            courseName: "실용 한국어",
+            level: "beginner",
+            type: "offline",
+            words: ["안녕하세요", "저는", "입니다", "만나서", "반갑습니다"],
             hasAudio: false,
             hasMaterials: true,
-            summary: '자기소개 표현을 자연스럽게 구사하고 있으며, 발음도 정확합니다.'
-          }
+            summary:
+              "자기소개 표현을 자연스럽게 구사하고 있으며, 발음도 정확합니다.",
+          },
         ];
-        
+
         setNotes(mockNotes);
         setHasCompletedClasses(mockNotes.length > 0);
       } catch (error) {
-        console.error('레슨 노트 로드 오류:', error);
+        console.error("레슨 노트 로드 오류:", error);
         setNotes([]);
         setHasCompletedClasses(false);
       } finally {
@@ -113,47 +110,52 @@ export default function StudentLessonNotesPage() {
   // 필터링된 노트 목록
   const getFilteredNotes = () => {
     let filtered = notes;
-    
+
     // 기간 필터
-    if (periodFilter !== 'all') {
+    if (periodFilter !== "all") {
       const now = new Date();
-      let cutoffDate = new Date();
-      
+      const cutoffDate = new Date();
+
       switch (periodFilter) {
-        case '7days':
+        case "7days":
           cutoffDate.setDate(now.getDate() - 7);
           break;
-        case '30days':
+        case "30days":
           cutoffDate.setDate(now.getDate() - 30);
           break;
-        case '3months':
+        case "3months":
           cutoffDate.setMonth(now.getMonth() - 3);
           break;
       }
-      
-      filtered = filtered.filter(note => new Date(note.date) >= cutoffDate);
+
+      filtered = filtered.filter((note) => new Date(note.date) >= cutoffDate);
     }
-    
+
     // 레벨 필터
-    if (levelFilter !== 'all') {
-      filtered = filtered.filter(note => note.level === levelFilter);
+    if (levelFilter !== "all") {
+      filtered = filtered.filter((note) => note.level === levelFilter);
     }
-    
+
     // 수업 유형 필터
-    if (typeFilter !== 'all') {
-      filtered = filtered.filter(note => note.type === typeFilter);
+    if (typeFilter !== "all") {
+      filtered = filtered.filter((note) => note.type === typeFilter);
     }
-    
+
     // 검색어 필터
     if (searchTerm) {
-      filtered = filtered.filter(note => 
-        note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        note.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        note.words.some(word => word.toLowerCase().includes(searchTerm.toLowerCase()))
+      filtered = filtered.filter(
+        (note) =>
+          note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          note.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          note.words.some((word) =>
+            word.toLowerCase().includes(searchTerm.toLowerCase()),
+          ),
       );
     }
-    
-    return filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    return filtered.sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+    );
   };
 
   if (loading) {
@@ -187,22 +189,27 @@ export default function StudentLessonNotesPage() {
               아직 수업을 하지 않았습니다
             </h2>
             <p className="text-gray-600 mb-8 max-w-md mx-auto">
-              첫 번째 수업을 완료하면 여기에 레슨 노트가 표시됩니다. 
-              수업 내용과 학습 포인트를 다시 확인할 수 있어요.
+              첫 번째 수업을 완료하면 여기에 레슨 노트가 표시됩니다. 수업 내용과
+              학습 포인트를 다시 확인할 수 있어요.
             </p>
-            
+
             <div className="space-y-4">
               <Link
                 href="/student/reservations/new"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
-                <Calendar className="w-5 h-5" />
-                첫 수업 예약하기
+                <Calendar className="w-5 h-5" />첫 수업 예약하기
               </Link>
-              
+
               <div className="text-sm text-gray-500">
-                또는 <Link href="/student/reservations" className="text-blue-600 hover:underline">예약 관리</Link>에서 
-                기존 예약을 확인하세요
+                또는{" "}
+                <Link
+                  href="/student/reservations"
+                  className="text-blue-600 hover:underline"
+                >
+                  예약 관리
+                </Link>
+                에서 기존 예약을 확인하세요
               </div>
             </div>
           </div>
@@ -213,27 +220,33 @@ export default function StudentLessonNotesPage() {
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
                 <FileText className="w-6 h-6 text-blue-600" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">수업 내용</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                수업 내용
+              </h3>
               <p className="text-gray-600 text-sm">
                 선생님이 작성한 수업 내용과 학습 포인트를 확인할 수 있습니다.
               </p>
             </div>
-            
+
             <div className="bg-white rounded-lg shadow p-6">
               <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
                 <User className="w-6 h-6 text-green-600" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">개인 피드백</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                개인 피드백
+              </h3>
               <p className="text-gray-600 text-sm">
                 선생님이 개인적으로 작성한 피드백과 개선점을 확인하세요.
               </p>
             </div>
-            
+
             <div className="bg-white rounded-lg shadow p-6">
               <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
                 <Clock className="w-6 h-6 text-purple-600" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">학습 기록</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                학습 기록
+              </h3>
               <p className="text-gray-600 text-sm">
                 언제든지 과거 수업 내용을 다시 확인하여 복습할 수 있습니다.
               </p>
@@ -328,7 +341,9 @@ export default function StudentLessonNotesPage() {
               <div key={note.id} className="bg-white rounded-xl shadow-lg p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">{note.title}</h3>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      {note.title}
+                    </h3>
                     <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
                       <span className="flex items-center gap-1">
                         <User className="w-4 h-4" />
@@ -336,7 +351,7 @@ export default function StudentLessonNotesPage() {
                       </span>
                       <span className="flex items-center gap-1">
                         <Calendar className="w-4 h-4" />
-                        {new Date(note.date).toLocaleDateString('ko-KR')}
+                        {new Date(note.date).toLocaleDateString("ko-KR")}
                       </span>
                       <span className="flex items-center gap-1">
                         <Clock className="w-4 h-4" />
@@ -348,18 +363,29 @@ export default function StudentLessonNotesPage() {
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        note.level === 'beginner' ? 'bg-blue-100 text-blue-800' :
-                        note.level === 'intermediate' ? 'bg-green-100 text-green-800' :
-                        'bg-purple-100 text-purple-800'
-                      }`}>
-                        {note.level === 'beginner' ? '초급' : 
-                         note.level === 'intermediate' ? '중급' : '고급'}
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          note.level === "beginner"
+                            ? "bg-blue-100 text-blue-800"
+                            : note.level === "intermediate"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-purple-100 text-purple-800"
+                        }`}
+                      >
+                        {note.level === "beginner"
+                          ? "초급"
+                          : note.level === "intermediate"
+                            ? "중급"
+                            : "고급"}
                       </span>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        note.type === 'online' ? 'bg-orange-100 text-orange-800' : 'bg-indigo-100 text-indigo-800'
-                      }`}>
-                        {note.type === 'online' ? '온라인' : '대면'}
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          note.type === "online"
+                            ? "bg-orange-100 text-orange-800"
+                            : "bg-indigo-100 text-indigo-800"
+                        }`}
+                      >
+                        {note.type === "online" ? "온라인" : "대면"}
                       </span>
                     </div>
                   </div>
@@ -378,36 +404,45 @@ export default function StudentLessonNotesPage() {
                     )}
                   </div>
                 </div>
-                
+
                 {/* 학습 경향 분석 메모 */}
                 {note.summary && (
                   <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4">
                     <div className="flex items-center gap-2 mb-2">
                       <MessageSquare className="w-4 h-4 text-blue-600" />
-                      <span className="text-sm font-medium text-blue-800">학습 경향 분석</span>
+                      <span className="text-sm font-medium text-blue-800">
+                        학습 경향 분석
+                      </span>
                     </div>
                     <p className="text-sm text-blue-700">{note.summary}</p>
                   </div>
                 )}
-                
+
                 <div className="prose max-w-none mb-4">
-                  <p className="text-gray-700 leading-relaxed line-clamp-3">{note.content}</p>
+                  <p className="text-gray-700 leading-relaxed line-clamp-3">
+                    {note.content}
+                  </p>
                 </div>
-                
+
                 {/* 학습한 단어들 */}
                 {note.words.length > 0 && (
                   <div className="mb-4">
-                    <h4 className="text-sm font-medium text-gray-900 mb-2">학습한 단어</h4>
+                    <h4 className="text-sm font-medium text-gray-900 mb-2">
+                      학습한 단어
+                    </h4>
                     <div className="flex flex-wrap gap-2">
                       {note.words.map((word, index) => (
-                        <span key={index} className="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full">
+                        <span
+                          key={index}
+                          className="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full"
+                        >
                           {word}
                         </span>
                       ))}
                     </div>
                   </div>
                 )}
-                
+
                 <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                   <div className="flex items-center gap-4">
                     <Link
@@ -425,10 +460,10 @@ export default function StudentLessonNotesPage() {
                     )}
                   </div>
                   <div className="text-sm text-gray-500">
-                    {new Date(note.date).toLocaleDateString('ko-KR', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
+                    {new Date(note.date).toLocaleDateString("ko-KR", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
                     })}
                   </div>
                 </div>
@@ -464,4 +499,4 @@ export default function StudentLessonNotesPage() {
       </div>
     </div>
   );
-} 
+}

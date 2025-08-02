@@ -1,59 +1,54 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { 
-  Settings, 
-  Monitor, 
-  Globe, 
-  Clock, 
-  Bell, 
-  Zap, 
+import { useState, useEffect } from "react";
+import {
+  Settings,
+  Clock,
+  Bell,
+  Zap,
   Palette,
   Smartphone,
-  Tablet,
-  Monitor as Desktop,
   Languages,
   Download,
   Upload,
   RotateCcw,
-  Save,
-  Home
-} from 'lucide-react';
-import Link from 'next/link';
+  Home,
+} from "lucide-react";
+import Link from "next/link";
 
 interface SystemSettings {
   device: {
-    type: 'mobile' | 'tablet' | 'desktop';
+    type: "mobile" | "tablet" | "desktop";
     uiScale: number;
-    layout: 'compact' | 'normal' | 'spacious';
+    layout: "compact" | "normal" | "spacious";
     showAdvancedFeatures: boolean;
     priorityFeatures: string[];
   };
   language: {
     autoDetect: boolean;
-    preferredLanguage: 'ko' | 'ja' | 'en' | 'zh';
-    fallbackLanguage: 'ko' | 'ja' | 'en' | 'zh';
+    preferredLanguage: "ko" | "ja" | "en" | "zh";
+    fallbackLanguage: "ko" | "ja" | "en" | "zh";
   };
   time: {
     timezone: string;
-    dateFormat: 'YYYY-MM-DD' | 'MM/DD/YYYY' | 'DD/MM/YYYY';
-    timeFormat: '12h' | '24h';
+    dateFormat: "YYYY-MM-DD" | "MM/DD/YYYY" | "DD/MM/YYYY";
+    timeFormat: "12h" | "24h";
     autoSync: boolean;
   };
   notifications: {
     email: {
       enabled: boolean;
-      frequency: 'immediate' | 'daily' | 'weekly';
+      frequency: "immediate" | "daily" | "weekly";
       types: string[];
     };
     line: {
       enabled: boolean;
-      frequency: 'immediate' | 'daily' | 'weekly';
+      frequency: "immediate" | "daily" | "weekly";
       types: string[];
     };
     push: {
       enabled: boolean;
-      frequency: 'immediate' | 'daily' | 'weekly';
+      frequency: "immediate" | "daily" | "weekly";
       types: string[];
     };
     reminders: {
@@ -72,8 +67,8 @@ interface SystemSettings {
     prefetchEnabled: boolean;
   };
   userPreferences: {
-    theme: 'light' | 'dark' | 'auto';
-    fontSize: 'small' | 'medium' | 'large';
+    theme: "light" | "dark" | "auto";
+    fontSize: "small" | "medium" | "large";
     colorBlindMode: boolean;
     reducedMotion: boolean;
     quickAccess: string[];
@@ -89,23 +84,23 @@ interface SystemSettings {
 export default function SystemSettingsPage() {
   const [settings, setSettings] = useState<SystemSettings | null>(null);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('device');
+  const [activeTab, setActiveTab] = useState("device");
   const [showExportModal, setShowExportModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
-  const [importData, setImportData] = useState('');
+  const [importData, setImportData] = useState("");
 
   // 설정 조회
   const fetchSettings = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/settings');
+      const response = await fetch("/api/settings");
       const data = await response.json();
-      
+
       if (data.success) {
         setSettings(data.data);
       }
     } catch (error) {
-      console.error('설정 조회 실패:', error);
+      console.error("설정 조회 실패:", error);
     } finally {
       setLoading(false);
     }
@@ -117,24 +112,24 @@ export default function SystemSettingsPage() {
 
     try {
       setLoading(true);
-      const response = await fetch('/api/settings', {
-        method: 'PUT',
+      const response = await fetch("/api/settings", {
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ ...settings, ...updates }),
       });
-      
+
       const data = await response.json();
-      
+
       if (data.success) {
         setSettings({ ...settings, ...updates });
-        alert('설정이 저장되었습니다');
+        alert("설정이 저장되었습니다");
       } else {
-        alert(data.error || '설정 저장 실패');
+        alert(data.error || "설정 저장 실패");
       }
     } catch (error) {
-      alert('설정 저장 중 오류 발생');
+      alert("설정 저장 중 오류 발생");
     } finally {
       setLoading(false);
     }
@@ -144,24 +139,24 @@ export default function SystemSettingsPage() {
   const runAutoOptimize = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/settings', {
-        method: 'POST',
+      const response = await fetch("/api/settings", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ action: 'auto_optimize' }),
+        body: JSON.stringify({ action: "auto_optimize" }),
       });
-      
+
       const data = await response.json();
-      
+
       if (data.success) {
-        alert('자동 최적화가 완료되었습니다');
+        alert("자동 최적화가 완료되었습니다");
         fetchSettings();
       } else {
-        alert(data.error || '자동 최적화 실패');
+        alert(data.error || "자동 최적화 실패");
       }
     } catch (error) {
-      alert('자동 최적화 중 오류 발생');
+      alert("자동 최적화 중 오류 발생");
     } finally {
       setLoading(false);
     }
@@ -169,30 +164,30 @@ export default function SystemSettingsPage() {
 
   // 설정 초기화
   const resetSettings = async () => {
-    if (!confirm('정말로 모든 설정을 초기화하시겠습니까?')) {
+    if (!confirm("정말로 모든 설정을 초기화하시겠습니까?")) {
       return;
     }
 
     try {
       setLoading(true);
-      const response = await fetch('/api/settings', {
-        method: 'POST',
+      const response = await fetch("/api/settings", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ action: 'reset_settings' }),
+        body: JSON.stringify({ action: "reset_settings" }),
       });
-      
+
       const data = await response.json();
-      
+
       if (data.success) {
-        alert('설정이 초기화되었습니다');
+        alert("설정이 초기화되었습니다");
         fetchSettings();
       } else {
-        alert(data.error || '설정 초기화 실패');
+        alert(data.error || "설정 초기화 실패");
       }
     } catch (error) {
-      alert('설정 초기화 중 오류 발생');
+      alert("설정 초기화 중 오류 발생");
     } finally {
       setLoading(false);
     }
@@ -201,18 +196,18 @@ export default function SystemSettingsPage() {
   // 설정 내보내기
   const exportSettings = () => {
     if (!settings) return;
-    
+
     const dataStr = JSON.stringify(settings, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const dataBlob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
-    link.download = 'system-settings.json';
+    link.download = "system-settings.json";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-    
+
     setShowExportModal(false);
   };
 
@@ -222,9 +217,9 @@ export default function SystemSettingsPage() {
       const parsedSettings = JSON.parse(importData);
       await updateSettings(parsedSettings);
       setShowImportModal(false);
-      setImportData('');
+      setImportData("");
     } catch (error) {
-      alert('잘못된 설정 파일입니다');
+      alert("잘못된 설정 파일입니다");
     }
   };
 
@@ -289,7 +284,7 @@ export default function SystemSettingsPage() {
               <Zap className="w-5 h-5" />
               자동 최적화
             </button>
-            
+
             <button
               onClick={() => setShowExportModal(true)}
               className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
@@ -297,7 +292,7 @@ export default function SystemSettingsPage() {
               <Download className="w-5 h-5" />
               설정 내보내기
             </button>
-            
+
             <button
               onClick={() => setShowImportModal(true)}
               className="flex items-center gap-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
@@ -305,7 +300,7 @@ export default function SystemSettingsPage() {
               <Upload className="w-5 h-5" />
               설정 가져오기
             </button>
-            
+
             <button
               onClick={resetSettings}
               disabled={loading}
@@ -321,15 +316,17 @@ export default function SystemSettingsPage() {
           {/* 탭 네비게이션 */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">설정 카테고리</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                설정 카테고리
+              </h2>
               <div className="space-y-2">
                 {[
-                  { id: 'device', name: '기기 최적화', icon: Smartphone },
-                  { id: 'language', name: '언어 설정', icon: Languages },
-                  { id: 'time', name: '시간/날짜', icon: Clock },
-                  { id: 'notifications', name: '알림 설정', icon: Bell },
-                  { id: 'performance', name: '성능 최적화', icon: Zap },
-                  { id: 'preferences', name: '사용자 환경', icon: Palette },
+                  { id: "device", name: "기기 최적화", icon: Smartphone },
+                  { id: "language", name: "언어 설정", icon: Languages },
+                  { id: "time", name: "시간/날짜", icon: Clock },
+                  { id: "notifications", name: "알림 설정", icon: Bell },
+                  { id: "performance", name: "성능 최적화", icon: Zap },
+                  { id: "preferences", name: "사용자 환경", icon: Palette },
                 ].map((tab) => {
                   const Icon = tab.icon;
                   return (
@@ -338,8 +335,8 @@ export default function SystemSettingsPage() {
                       onClick={() => setActiveTab(tab.id)}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                         activeTab === tab.id
-                          ? 'bg-blue-100 text-blue-700'
-                          : 'text-gray-600 hover:bg-gray-100'
+                          ? "bg-blue-100 text-blue-700"
+                          : "text-gray-600 hover:bg-gray-100"
                       }`}
                     >
                       <Icon className="w-5 h-5" />
@@ -366,7 +363,9 @@ export default function SystemSettingsPage() {
         {showExportModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-xl p-6 max-w-md mx-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">설정 내보내기</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                설정 내보내기
+              </h3>
               <p className="text-gray-600 mb-4">
                 현재 시스템 설정을 JSON 파일로 다운로드합니다.
               </p>
@@ -391,7 +390,9 @@ export default function SystemSettingsPage() {
         {showImportModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-xl p-6 max-w-md mx-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">설정 가져오기</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                설정 가져오기
+              </h3>
               <p className="text-gray-600 mb-4">
                 JSON 파일의 설정을 시스템에 적용합니다.
               </p>
@@ -405,7 +406,7 @@ export default function SystemSettingsPage() {
                 <button
                   onClick={() => {
                     setShowImportModal(false);
-                    setImportData('');
+                    setImportData("");
                   }}
                   className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
                 >
@@ -424,4 +425,4 @@ export default function SystemSettingsPage() {
       </div>
     </div>
   );
-} 
+}

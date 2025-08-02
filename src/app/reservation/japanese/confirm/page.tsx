@@ -1,20 +1,20 @@
-'use client';
+"use client";
 
-import { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { 
-  CheckCircle, 
-  Calendar, 
-  Clock, 
-  User, 
-  Video, 
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import {
+  CheckCircle,
+  Calendar,
+  Clock,
+  User,
+  Video,
   MapPin,
   Download,
   Share2,
   ArrowRight,
   Copy,
-  Loader2
-} from 'lucide-react';
+  Loader2,
+} from "lucide-react";
 
 interface Reservation {
   id: string;
@@ -22,7 +22,7 @@ interface Reservation {
   duration: number;
   date: string;
   time: string;
-  type: 'online' | 'offline';
+  type: "online" | "offline";
   price: number;
   reservationCode: string;
   studentName: string;
@@ -32,11 +32,11 @@ interface Reservation {
 function ReservationConfirmPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const reservationId = searchParams.get('reservationId');
-  
+  const reservationId = searchParams.get("reservationId");
+
   const [reservation, setReservation] = useState<Reservation | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -47,16 +47,18 @@ function ReservationConfirmPageContent() {
 
   const fetchReservationDetails = async () => {
     try {
-      const response = await fetch(`/api/reservation/japanese/details?reservationId=${reservationId}`);
+      const response = await fetch(
+        `/api/reservation/japanese/details?reservationId=${reservationId}`,
+      );
       const result = await response.json();
 
       if (result.success) {
         setReservation(result.reservation);
       } else {
-        setError(result.error || '予約詳細の取得に失敗しました');
+        setError(result.error || "予約詳細の取得に失敗しました");
       }
     } catch (error) {
-      setError('サーバーエラーが発生しました');
+      setError("サーバーエラーが発生しました");
     } finally {
       setIsLoading(false);
     }
@@ -70,16 +72,16 @@ function ReservationConfirmPageContent() {
       description: `予約コード: ${reservation.reservationCode}\n学生: ${reservation.studentName}`,
       start: {
         dateTime: `${reservation.date}T${reservation.time}:00`,
-        timeZone: 'Asia/Tokyo'
+        timeZone: "Asia/Tokyo",
       },
       end: {
         dateTime: `${reservation.date}T${reservation.time}:00`,
-        timeZone: 'Asia/Tokyo'
-      }
+        timeZone: "Asia/Tokyo",
+      },
     };
 
     const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.summary)}&dates=${event.start.dateTime}/${event.end.dateTime}&details=${encodeURIComponent(event.description)}`;
-    window.open(calendarUrl, '_blank');
+    window.open(calendarUrl, "_blank");
   };
 
   const handleCopyReservationCode = async () => {
@@ -90,7 +92,7 @@ function ReservationConfirmPageContent() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
-      console.error('Failed to copy:', error);
+      console.error("Failed to copy:", error);
     }
   };
 
@@ -100,12 +102,12 @@ function ReservationConfirmPageContent() {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: '韓国語レッスン予約',
+          title: "韓国語レッスン予約",
           text: `韓国語レッスンの予約が完了しました。予約コード: ${reservation.reservationCode}`,
-          url: window.location.href
+          url: window.location.href,
         });
       } catch (error) {
-        console.error('Share failed:', error);
+        console.error("Share failed:", error);
       }
     } else {
       // 폴백: 클립보드에 복사
@@ -115,11 +117,11 @@ function ReservationConfirmPageContent() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('ja-JP', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      weekday: 'long'
+    return date.toLocaleDateString("ja-JP", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      weekday: "long",
     });
   };
 
@@ -141,10 +143,14 @@ function ReservationConfirmPageContent() {
           <div className="bg-red-100 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
             <CheckCircle className="w-8 h-8 text-red-600" />
           </div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">エラーが発生しました</h2>
-          <p className="text-gray-600 mb-6">{error || '予約が見つかりません'}</p>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            エラーが発生しました
+          </h2>
+          <p className="text-gray-600 mb-6">
+            {error || "予約が見つかりません"}
+          </p>
           <button
-            onClick={() => router.push('/reservation/japanese')}
+            onClick={() => router.push("/reservation/japanese")}
             className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
           >
             ホームに戻る
@@ -173,13 +179,15 @@ function ReservationConfirmPageContent() {
         {/* 예약 상세 정보 */}
         <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">予約詳細</h2>
-          
+
           <div className="space-y-6">
             {/* 예약 코드 */}
             <div className="bg-blue-50 rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-blue-600 font-medium">予約コード</p>
+                  <p className="text-sm text-blue-600 font-medium">
+                    予約コード
+                  </p>
                   <p className="text-2xl font-bold text-blue-900 font-mono">
                     {reservation.reservationCode}
                   </p>
@@ -189,7 +197,7 @@ function ReservationConfirmPageContent() {
                   className="flex items-center space-x-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   <Copy className="w-4 h-4" />
-                  <span>{copied ? 'コピー済み' : 'コピー'}</span>
+                  <span>{copied ? "コピー済み" : "コピー"}</span>
                 </button>
               </div>
             </div>
@@ -236,7 +244,7 @@ function ReservationConfirmPageContent() {
             {/* 수업 타입 */}
             <div className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg">
               <div className="bg-orange-100 rounded-full p-3">
-                {reservation.type === 'online' ? (
+                {reservation.type === "online" ? (
                   <Video className="w-6 h-6 text-orange-600" />
                 ) : (
                   <MapPin className="w-6 h-6 text-orange-600" />
@@ -245,7 +253,7 @@ function ReservationConfirmPageContent() {
               <div>
                 <p className="text-sm text-gray-600">レッスン形式</p>
                 <p className="text-lg font-semibold text-gray-900">
-                  {reservation.type === 'online' ? 'オンライン' : '対面'}
+                  {reservation.type === "online" ? "オンライン" : "対面"}
                 </p>
               </div>
             </div>
@@ -269,7 +277,7 @@ function ReservationConfirmPageContent() {
             <Download className="w-5 h-5" />
             <span>カレンダーに追加</span>
           </button>
-          
+
           <button
             onClick={handleShare}
             className="flex items-center justify-center space-x-2 bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors"
@@ -277,9 +285,9 @@ function ReservationConfirmPageContent() {
             <Share2 className="w-5 h-5" />
             <span>共有</span>
           </button>
-          
+
           <button
-            onClick={() => router.push('/reservation/japanese/mypage')}
+            onClick={() => router.push("/reservation/japanese/mypage")}
             className="flex items-center justify-center space-x-2 bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 transition-colors"
           >
             <span>すべての予約を確認</span>
@@ -293,7 +301,9 @@ function ReservationConfirmPageContent() {
             重要なお知らせ
           </h3>
           <ul className="space-y-2 text-sm text-yellow-700">
-            <li>• レッスン開始10分前にZoomリンクが送信されます（オンラインの場合）</li>
+            <li>
+              • レッスン開始10分前にZoomリンクが送信されます（オンラインの場合）
+            </li>
             <li>• 対面レッスンの場合は、教室の場所を事前にご確認ください</li>
             <li>• キャンセルはレッスン開始24時間前まで可能です</li>
             <li>• ご質問がございましたら、お気軽にお問い合わせください</li>
@@ -303,7 +313,7 @@ function ReservationConfirmPageContent() {
         {/* 하단 버튼 */}
         <div className="text-center mt-8">
           <button
-            onClick={() => router.push('/reservation/japanese')}
+            onClick={() => router.push("/reservation/japanese")}
             className="bg-gray-600 text-white px-8 py-3 rounded-lg hover:bg-gray-700 transition-colors"
           >
             ホームに戻る
@@ -316,15 +326,17 @@ function ReservationConfirmPageContent() {
 
 export default function ReservationConfirmPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600" />
-          <p className="text-gray-600">読み込み中...</p>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600" />
+            <p className="text-gray-600">読み込み中...</p>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <ReservationConfirmPageContent />
     </Suspense>
   );
-} 
+}

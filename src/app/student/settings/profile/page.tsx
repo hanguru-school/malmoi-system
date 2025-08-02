@@ -1,23 +1,17 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  Calendar, 
-  MapPin, 
-  Camera, 
+import { useState, useEffect } from "react";
+import {
+  User,
+  Camera,
   ArrowLeft,
   Save,
   CheckCircle,
   Eye,
   EyeOff,
   AlertTriangle,
-  Building,
-  MapPinIcon
-} from 'lucide-react';
-import Link from 'next/link';
+} from "lucide-react";
+import Link from "next/link";
 
 interface ProfileData {
   // 기본 정보
@@ -31,7 +25,7 @@ interface ProfileData {
   emergencyPhone: string;
   birthDate: string;
   isMinor: boolean;
-  
+
   // 주소 정보
   address: {
     postalCode: string;
@@ -41,7 +35,7 @@ interface ProfileData {
     building: string;
     country: string;
   };
-  
+
   // 부모님 정보 (미성년자인 경우)
   parentInfo?: {
     name: string;
@@ -49,96 +43,98 @@ interface ProfileData {
     phone: string;
     email: string;
   };
-  
+
   avatar?: string;
 }
 
 export default function StudentProfileSettingsPage() {
   const [profile, setProfile] = useState<ProfileData>({
     name: {
-      kanji: '',
-      yomigana: '',
-      korean: ''
+      kanji: "",
+      yomigana: "",
+      korean: "",
     },
-    email: '',
-    phone: '',
-    emergencyPhone: '',
-    birthDate: '',
+    email: "",
+    phone: "",
+    emergencyPhone: "",
+    birthDate: "",
     isMinor: false,
     address: {
-      postalCode: '',
-      prefecture: '',
-      city: '',
-      street: '',
-      building: '',
-      country: 'JP'
+      postalCode: "",
+      prefecture: "",
+      city: "",
+      street: "",
+      building: "",
+      country: "JP",
     },
-    avatar: ''
+    avatar: "",
   });
 
-  const [originalProfile, setOriginalProfile] = useState<ProfileData | null>(null);
+  const [originalProfile, setOriginalProfile] = useState<ProfileData | null>(
+    null,
+  );
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
-  
+
   // 비밀번호 변경 관련
   const [showPassword, setShowPassword] = useState({
     current: false,
     new: false,
-    confirm: false
+    confirm: false,
   });
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [passwordError, setPasswordError] = useState('');
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
   // 실제 사용자 데이터 로드
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         setLoading(true);
-        
+
         // 세션에서 사용자 정보 가져오기
-        const sessionResponse = await fetch('/api/auth/session');
+        const sessionResponse = await fetch("/api/auth/session");
         if (sessionResponse.ok) {
           const sessionData = await sessionResponse.json();
-          
+
           if (sessionData.user) {
             // 학생 상세 정보 가져오기
-            const studentResponse = await fetch('/api/student/profile');
+            const studentResponse = await fetch("/api/student/profile");
             if (studentResponse.ok) {
               const studentData = await studentResponse.json();
-              
+
               const userProfile: ProfileData = {
                 name: {
-                  kanji: studentData.kanjiName || '',
-                  yomigana: studentData.yomigana || '',
-                  korean: studentData.koreanName || ''
+                  kanji: studentData.kanjiName || "",
+                  yomigana: studentData.yomigana || "",
+                  korean: studentData.koreanName || "",
                 },
-                email: sessionData.user.email || '',
-                phone: sessionData.user.phone || '',
-                emergencyPhone: '',
-                birthDate: '',
+                email: sessionData.user.email || "",
+                phone: sessionData.user.phone || "",
+                emergencyPhone: "",
+                birthDate: "",
                 isMinor: false,
                 address: {
-                  postalCode: '',
-                  prefecture: '',
-                  city: '',
-                  street: '',
-                  building: '',
-                  country: 'JP'
+                  postalCode: "",
+                  prefecture: "",
+                  city: "",
+                  street: "",
+                  building: "",
+                  country: "JP",
                 },
-                avatar: ''
+                avatar: "",
               };
-              
+
               setProfile(userProfile);
               setOriginalProfile(userProfile);
             }
           }
         }
       } catch (error) {
-        console.error('사용자 데이터 가져오기 오류:', error);
+        console.error("사용자 데이터 가져오기 오류:", error);
       } finally {
         setLoading(false);
       }
@@ -147,34 +143,40 @@ export default function StudentProfileSettingsPage() {
     fetchUserData();
   }, []);
 
-  const handleInputChange = (field: keyof ProfileData, value: string | boolean) => {
-    setProfile(prev => ({
+  const handleInputChange = (
+    field: keyof ProfileData,
+    value: string | boolean,
+  ) => {
+    setProfile((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
-  const handleNameChange = (type: keyof ProfileData['name'], value: string) => {
-    setProfile(prev => ({
+  const handleNameChange = (type: keyof ProfileData["name"], value: string) => {
+    setProfile((prev) => ({
       ...prev,
       name: {
         ...prev.name,
-        [type]: value
-      }
+        [type]: value,
+      },
     }));
   };
 
-  const handleAddressChange = (field: keyof ProfileData['address'], value: string) => {
-    setProfile(prev => ({
+  const handleAddressChange = (
+    field: keyof ProfileData["address"],
+    value: string,
+  ) => {
+    setProfile((prev) => ({
       ...prev,
       address: {
         ...prev.address,
-        [field]: value
-      }
+        [field]: value,
+      },
     }));
 
     // 우편번호가 입력되면 자동으로 주소 정보를 가져오기
-    if (field === 'postalCode' && value.length === 7) {
+    if (field === "postalCode" && value.length === 7) {
       fetchAddressFromPostalCode(value);
     }
   };
@@ -182,91 +184,100 @@ export default function StudentProfileSettingsPage() {
   // 우편번호로 주소 정보 가져오기
   const fetchAddressFromPostalCode = async (postalCode: string) => {
     try {
-      console.log('우편번호로 주소 조회:', postalCode);
-      
+      console.log("우편번호로 주소 조회:", postalCode);
+
       // 일본 우편번호 API 호출
-      const response = await fetch(`https://zipcloud.ibsnet.co.jp/api/search?zipcode=${postalCode}`);
+      const response = await fetch(
+        `https://zipcloud.ibsnet.co.jp/api/search?zipcode=${postalCode}`,
+      );
       const data = await response.json();
-      
-      console.log('주소 API 응답:', data);
-      
+
+      console.log("주소 API 응답:", data);
+
       if (data.results && data.results.length > 0) {
         const addressData = data.results[0];
-        console.log('주소 데이터:', addressData);
-        
-        setProfile(prev => ({
+        console.log("주소 데이터:", addressData);
+
+        setProfile((prev) => ({
           ...prev,
           address: {
             ...prev.address,
-            prefecture: addressData.address1 || '',
-            city: addressData.address2 || '',
-            street: addressData.address3 || ''
-          }
+            prefecture: addressData.address1 || "",
+            city: addressData.address2 || "",
+            street: addressData.address3 || "",
+          },
         }));
-        
-        console.log('주소 정보 업데이트 완료');
+
+        console.log("주소 정보 업데이트 완료");
       } else {
-        console.log('주소 정보를 찾을 수 없음');
-        alert('해당 우편번호의 주소를 찾을 수 없습니다.');
+        console.log("주소 정보를 찾을 수 없음");
+        alert("해당 우편번호의 주소를 찾을 수 없습니다.");
       }
     } catch (error) {
-      console.error('주소 정보 가져오기 오류:', error);
-      alert('주소 정보를 가져오는 중 오류가 발생했습니다.');
+      console.error("주소 정보 가져오기 오류:", error);
+      alert("주소 정보를 가져오는 중 오류가 발생했습니다.");
     }
   };
 
-  const handleParentInfoChange = (field: keyof NonNullable<ProfileData['parentInfo']>, value: string) => {
-    setProfile(prev => ({
+  const handleParentInfoChange = (
+    field: keyof NonNullable<ProfileData["parentInfo"]>,
+    value: string,
+  ) => {
+    setProfile((prev) => ({
       ...prev,
-      parentInfo: prev.parentInfo ? {
-        ...prev.parentInfo,
-        [field]: value
-      } : {
-        name: '',
-        relationship: '',
-        phone: '',
-        email: ''
-      }
+      parentInfo: prev.parentInfo
+        ? {
+            ...prev.parentInfo,
+            [field]: value,
+          }
+        : {
+            name: "",
+            relationship: "",
+            phone: "",
+            email: "",
+          },
     }));
   };
 
-  const handleAvatarChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0];
     if (file) {
       try {
         // 파일 크기 확인 (5MB 제한)
         if (file.size > 5 * 1024 * 1024) {
-          alert('파일 크기는 5MB 이하여야 합니다.');
+          alert("파일 크기는 5MB 이하여야 합니다.");
           return;
         }
 
         // 파일 타입 확인
-        if (!file.type.startsWith('image/')) {
-          alert('이미지 파일만 업로드 가능합니다.');
+        if (!file.type.startsWith("image/")) {
+          alert("이미지 파일만 업로드 가능합니다.");
           return;
         }
 
         const formData = new FormData();
-        formData.append('file', file);
-        formData.append('folder', 'avatars');
+        formData.append("file", file);
+        formData.append("folder", "avatars");
 
-        const response = await fetch('/api/upload', {
-          method: 'POST',
+        const response = await fetch("/api/upload", {
+          method: "POST",
           body: formData,
         });
 
         if (response.ok) {
           const data = await response.json();
-          setProfile(prev => ({
+          setProfile((prev) => ({
             ...prev,
-            avatar: data.fileUrl
+            avatar: data.fileUrl,
           }));
         } else {
-          throw new Error('업로드 실패');
+          throw new Error("업로드 실패");
         }
       } catch (error) {
-        console.error('아바타 업로드 오류:', error);
-        alert('프로필 사진 업로드에 실패했습니다.');
+        console.error("아바타 업로드 오류:", error);
+        alert("프로필 사진 업로드에 실패했습니다.");
       }
     }
   };
@@ -274,12 +285,12 @@ export default function StudentProfileSettingsPage() {
   const handleSave = async () => {
     try {
       setSaving(true);
-      
+
       // 실제 API 호출
-      const response = await fetch('/api/student/profile', {
-        method: 'PUT',
+      const response = await fetch("/api/student/profile", {
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           kanjiName: profile.name.kanji,
@@ -295,34 +306,33 @@ export default function StudentProfileSettingsPage() {
             city: profile.address.city,
             street: profile.address.street,
             building: profile.address.building,
-            country: profile.address.country
-          }
-        })
+            country: profile.address.country,
+          },
+        }),
       });
 
       if (!response.ok) {
-        throw new Error('프로필 저장에 실패했습니다.');
+        throw new Error("프로필 저장에 실패했습니다.");
       }
 
       const data = await response.json();
-      console.log('프로필 저장 성공:', data);
-      
+      console.log("프로필 저장 성공:", data);
+
       setSaving(false);
       setSaved(true);
       setIsEditing(false);
-      
+
       // 원본 데이터 업데이트
       setOriginalProfile(profile);
-      
+
       // 성공 메시지 표시
       setTimeout(() => {
         setSaved(false);
       }, 3000);
-
     } catch (error) {
-      console.error('프로필 저장 오류:', error);
+      console.error("프로필 저장 오류:", error);
       setSaving(false);
-      alert('프로필 저장에 실패했습니다.');
+      alert("프로필 저장에 실패했습니다.");
     }
   };
 
@@ -336,50 +346,91 @@ export default function StudentProfileSettingsPage() {
 
   const handlePasswordChange = async () => {
     if (!currentPassword) {
-      setPasswordError('현재 비밀번호를 입력해주세요.');
+      setPasswordError("현재 비밀번호를 입력해주세요.");
       return;
     }
     if (newPassword !== confirmPassword) {
-      setPasswordError('새 비밀번호가 일치하지 않습니다.');
+      setPasswordError("새 비밀번호가 일치하지 않습니다.");
       return;
     }
     if (newPassword.length < 8) {
-      setPasswordError('비밀번호는 8자 이상이어야 합니다.');
+      setPasswordError("비밀번호는 8자 이상이어야 합니다.");
       return;
     }
 
-    setPasswordError('');
+    setPasswordError("");
     setSaving(true);
     // 실제 API 호출로 대체
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     setSaving(false);
     setSaved(true);
-    
+
     // 폼 초기화
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
-    
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+
     setTimeout(() => setSaved(false), 3000);
   };
 
-  const togglePasswordVisibility = (field: 'current' | 'new' | 'confirm') => {
-    setShowPassword(prev => ({
+  const togglePasswordVisibility = (field: "current" | "new" | "confirm") => {
+    setShowPassword((prev) => ({
       ...prev,
-      [field]: !prev[field]
+      [field]: !prev[field],
     }));
   };
 
-  const isMinor = new Date().getFullYear() - new Date(profile.birthDate).getFullYear() < 20;
+  const isMinor =
+    new Date().getFullYear() - new Date(profile.birthDate).getFullYear() < 20;
 
   const prefectures = [
-    '北海道', '青森県', '岩手県', '宮城県', '秋田県', '山形県', '福島県',
-    '茨城県', '栃木県', '群馬県', '埼玉県', '千葉県', '東京都', '神奈川県',
-    '新潟県', '富山県', '石川県', '福井県', '山梨県', '長野県', '岐阜県',
-    '静岡県', '愛知県', '三重県', '滋賀県', '京都府', '大阪府', '兵庫県',
-    '奈良県', '和歌山県', '鳥取県', '島根県', '岡山県', '広島県', '山口県',
-    '徳島県', '香川県', '愛媛県', '高知県', '福岡県', '佐賀県', '長崎県',
-    '熊本県', '大分県', '宮崎県', '鹿児島県', '沖縄県'
+    "北海道",
+    "青森県",
+    "岩手県",
+    "宮城県",
+    "秋田県",
+    "山形県",
+    "福島県",
+    "茨城県",
+    "栃木県",
+    "群馬県",
+    "埼玉県",
+    "千葉県",
+    "東京都",
+    "神奈川県",
+    "新潟県",
+    "富山県",
+    "石川県",
+    "福井県",
+    "山梨県",
+    "長野県",
+    "岐阜県",
+    "静岡県",
+    "愛知県",
+    "三重県",
+    "滋賀県",
+    "京都府",
+    "大阪府",
+    "兵庫県",
+    "奈良県",
+    "和歌山県",
+    "鳥取県",
+    "島根県",
+    "岡山県",
+    "広島県",
+    "山口県",
+    "徳島県",
+    "香川県",
+    "愛媛県",
+    "高知県",
+    "福岡県",
+    "佐賀県",
+    "長崎県",
+    "熊本県",
+    "大分県",
+    "宮崎県",
+    "鹿児島県",
+    "沖縄県",
   ];
 
   return (
@@ -411,23 +462,27 @@ export default function StudentProfileSettingsPage() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <Camera className="w-6 h-6 text-blue-600" />
-                  <h2 className="text-lg font-semibold text-gray-900">프로필 사진</h2>
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    프로필 사진
+                  </h2>
                 </div>
                 <button
-                  onClick={() => document.getElementById('avatar-input')?.click()}
+                  onClick={() =>
+                    document.getElementById("avatar-input")?.click()
+                  }
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   사진 변경
                 </button>
               </div>
-              
+
               <div className="flex items-center gap-6">
                 <div className="relative">
                   <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
                     {profile.avatar ? (
-                      <img 
-                        src={profile.avatar} 
-                        alt="프로필 사진" 
+                      <img
+                        src={profile.avatar}
+                        alt="프로필 사진"
                         className="w-full h-full object-cover"
                       />
                     ) : (
@@ -443,7 +498,9 @@ export default function StudentProfileSettingsPage() {
                   />
                 </div>
                 <div>
-                  <h3 className="font-medium text-gray-900 mb-1">프로필 사진</h3>
+                  <h3 className="font-medium text-gray-900 mb-1">
+                    프로필 사진
+                  </h3>
                   <p className="text-sm text-gray-600">
                     프로필 사진을 변경하려면 "사진 변경" 버튼을 클릭하세요.
                     <br />
@@ -458,7 +515,9 @@ export default function StudentProfileSettingsPage() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <User className="w-6 h-6 text-blue-600" />
-                  <h2 className="text-lg font-semibold text-gray-900">기본 정보</h2>
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    기본 정보
+                  </h2>
                 </div>
                 {!isEditing ? (
                   <button
@@ -485,12 +544,12 @@ export default function StudentProfileSettingsPage() {
                       ) : (
                         <Save className="w-4 h-4" />
                       )}
-                      <span>{saving ? '저장 중...' : '저장'}</span>
+                      <span>{saving ? "저장 중..." : "저장"}</span>
                     </button>
                   </div>
                 )}
               </div>
-            
+
               <div className="space-y-6">
                 {/* 이름 정보 */}
                 <div>
@@ -503,7 +562,9 @@ export default function StudentProfileSettingsPage() {
                       <input
                         type="text"
                         value={profile.name.kanji}
-                        onChange={(e) => handleNameChange('kanji', e.target.value)}
+                        onChange={(e) =>
+                          handleNameChange("kanji", e.target.value)
+                        }
                         disabled={!isEditing}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
                         placeholder="田中太郎"
@@ -516,7 +577,9 @@ export default function StudentProfileSettingsPage() {
                       <input
                         type="text"
                         value={profile.name.yomigana}
-                        onChange={(e) => handleNameChange('yomigana', e.target.value)}
+                        onChange={(e) =>
+                          handleNameChange("yomigana", e.target.value)
+                        }
                         disabled={!isEditing}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
                         placeholder="たなかたろう"
@@ -529,7 +592,9 @@ export default function StudentProfileSettingsPage() {
                       <input
                         type="text"
                         value={profile.name.korean}
-                        onChange={(e) => handleNameChange('korean', e.target.value)}
+                        onChange={(e) =>
+                          handleNameChange("korean", e.target.value)
+                        }
                         disabled={!isEditing}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
                         placeholder="김학생"
@@ -549,7 +614,9 @@ export default function StudentProfileSettingsPage() {
                       <input
                         type="email"
                         value={profile.email}
-                        onChange={(e) => handleInputChange('email', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("email", e.target.value)
+                        }
                         disabled={!isEditing}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
                       />
@@ -561,7 +628,9 @@ export default function StudentProfileSettingsPage() {
                       <input
                         type="tel"
                         value={profile.phone}
-                        onChange={(e) => handleInputChange('phone', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("phone", e.target.value)
+                        }
                         disabled={!isEditing}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
                         placeholder="090-1234-5678"
@@ -574,7 +643,9 @@ export default function StudentProfileSettingsPage() {
                       <input
                         type="tel"
                         value={profile.emergencyPhone}
-                        onChange={(e) => handleInputChange('emergencyPhone', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("emergencyPhone", e.target.value)
+                        }
                         disabled={!isEditing}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
                         placeholder="080-9876-5432"
@@ -587,7 +658,9 @@ export default function StudentProfileSettingsPage() {
                       <input
                         type="date"
                         value={profile.birthDate}
-                        onChange={(e) => handleInputChange('birthDate', e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("birthDate", e.target.value)
+                        }
                         disabled={!isEditing}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 text-gray-900 font-medium"
                       />
@@ -596,7 +669,9 @@ export default function StudentProfileSettingsPage() {
                   {isMinor && (
                     <div className="mt-2 flex items-center gap-2 text-orange-600">
                       <AlertTriangle className="w-4 h-4" />
-                      <span className="text-sm">미성년자입니다. 부모님 정보를 입력해주세요.</span>
+                      <span className="text-sm">
+                        미성년자입니다. 부모님 정보를 입력해주세요.
+                      </span>
                     </div>
                   )}
                 </div>
@@ -604,7 +679,9 @@ export default function StudentProfileSettingsPage() {
                 {/* 부모님 정보 (미성년자인 경우) */}
                 {isMinor && (
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-3">부모님 정보</h3>
+                    <h3 className="font-semibold text-gray-900 mb-3">
+                      부모님 정보
+                    </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -612,8 +689,10 @@ export default function StudentProfileSettingsPage() {
                         </label>
                         <input
                           type="text"
-                          value={profile.parentInfo?.name || ''}
-                          onChange={(e) => handleParentInfoChange('name', e.target.value)}
+                          value={profile.parentInfo?.name || ""}
+                          onChange={(e) =>
+                            handleParentInfoChange("name", e.target.value)
+                          }
                           disabled={!isEditing}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
                           placeholder="田中花子"
@@ -624,8 +703,13 @@ export default function StudentProfileSettingsPage() {
                           관계
                         </label>
                         <select
-                          value={profile.parentInfo?.relationship || ''}
-                          onChange={(e) => handleParentInfoChange('relationship', e.target.value)}
+                          value={profile.parentInfo?.relationship || ""}
+                          onChange={(e) =>
+                            handleParentInfoChange(
+                              "relationship",
+                              e.target.value,
+                            )
+                          }
                           disabled={!isEditing}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
                         >
@@ -643,8 +727,10 @@ export default function StudentProfileSettingsPage() {
                         </label>
                         <input
                           type="tel"
-                          value={profile.parentInfo?.phone || ''}
-                          onChange={(e) => handleParentInfoChange('phone', e.target.value)}
+                          value={profile.parentInfo?.phone || ""}
+                          onChange={(e) =>
+                            handleParentInfoChange("phone", e.target.value)
+                          }
                           disabled={!isEditing}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
                           placeholder="090-1111-2222"
@@ -656,8 +742,10 @@ export default function StudentProfileSettingsPage() {
                         </label>
                         <input
                           type="email"
-                          value={profile.parentInfo?.email || ''}
-                          onChange={(e) => handleParentInfoChange('email', e.target.value)}
+                          value={profile.parentInfo?.email || ""}
+                          onChange={(e) =>
+                            handleParentInfoChange("email", e.target.value)
+                          }
                           disabled={!isEditing}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
                           placeholder="parent@example.com"
@@ -678,7 +766,9 @@ export default function StudentProfileSettingsPage() {
                       <input
                         type="text"
                         value={profile.address.postalCode}
-                        onChange={(e) => handleAddressChange('postalCode', e.target.value)}
+                        onChange={(e) =>
+                          handleAddressChange("postalCode", e.target.value)
+                        }
                         disabled={!isEditing}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
                         placeholder="100-0001"
@@ -690,12 +780,16 @@ export default function StudentProfileSettingsPage() {
                       </label>
                       <select
                         value={profile.address.prefecture}
-                        onChange={(e) => handleAddressChange('prefecture', e.target.value)}
+                        onChange={(e) =>
+                          handleAddressChange("prefecture", e.target.value)
+                        }
                         disabled={!isEditing}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 text-gray-900 font-medium"
                       >
-                        {prefectures.map(prefecture => (
-                          <option key={prefecture} value={prefecture}>{prefecture}</option>
+                        {prefectures.map((prefecture) => (
+                          <option key={prefecture} value={prefecture}>
+                            {prefecture}
+                          </option>
                         ))}
                       </select>
                     </div>
@@ -706,7 +800,9 @@ export default function StudentProfileSettingsPage() {
                       <input
                         type="text"
                         value={profile.address.city}
-                        onChange={(e) => handleAddressChange('city', e.target.value)}
+                        onChange={(e) =>
+                          handleAddressChange("city", e.target.value)
+                        }
                         disabled={!isEditing}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
                         placeholder="千代田区"
@@ -719,7 +815,9 @@ export default function StudentProfileSettingsPage() {
                       <input
                         type="text"
                         value={profile.address.street}
-                        onChange={(e) => handleAddressChange('street', e.target.value)}
+                        onChange={(e) =>
+                          handleAddressChange("street", e.target.value)
+                        }
                         disabled={!isEditing}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
                         placeholder="千代田1-1-1"
@@ -732,7 +830,9 @@ export default function StudentProfileSettingsPage() {
                       <input
                         type="text"
                         value={profile.address.building}
-                        onChange={(e) => handleAddressChange('building', e.target.value)}
+                        onChange={(e) =>
+                          handleAddressChange("building", e.target.value)
+                        }
                         disabled={!isEditing}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
                         placeholder="○○マンション101号室"
@@ -747,9 +847,11 @@ export default function StudentProfileSettingsPage() {
             <div className="bg-white rounded-xl shadow-sm p-6">
               <div className="flex items-center gap-3 mb-4">
                 <Eye className="w-6 h-6 text-blue-600" />
-                <h2 className="text-lg font-semibold text-gray-900">비밀번호 변경</h2>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  비밀번호 변경
+                </h2>
               </div>
-              
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -757,7 +859,7 @@ export default function StudentProfileSettingsPage() {
                   </label>
                   <div className="relative">
                     <input
-                      type={showPassword.current ? 'text' : 'password'}
+                      type={showPassword.current ? "text" : "password"}
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
                       className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -765,10 +867,14 @@ export default function StudentProfileSettingsPage() {
                     />
                     <button
                       type="button"
-                      onClick={() => togglePasswordVisibility('current')}
+                      onClick={() => togglePasswordVisibility("current")}
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                     >
-                      {showPassword.current ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      {showPassword.current ? (
+                        <EyeOff className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -779,7 +885,7 @@ export default function StudentProfileSettingsPage() {
                   </label>
                   <div className="relative">
                     <input
-                      type={showPassword.new ? 'text' : 'password'}
+                      type={showPassword.new ? "text" : "password"}
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -787,13 +893,19 @@ export default function StudentProfileSettingsPage() {
                     />
                     <button
                       type="button"
-                      onClick={() => togglePasswordVisibility('new')}
+                      onClick={() => togglePasswordVisibility("new")}
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                     >
-                      {showPassword.new ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      {showPassword.new ? (
+                        <EyeOff className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
                     </button>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">비밀번호는 8자 이상이어야 합니다</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    비밀번호는 8자 이상이어야 합니다
+                  </p>
                 </div>
 
                 <div>
@@ -802,7 +914,7 @@ export default function StudentProfileSettingsPage() {
                   </label>
                   <div className="relative">
                     <input
-                      type={showPassword.confirm ? 'text' : 'password'}
+                      type={showPassword.confirm ? "text" : "password"}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -810,10 +922,14 @@ export default function StudentProfileSettingsPage() {
                     />
                     <button
                       type="button"
-                      onClick={() => togglePasswordVisibility('confirm')}
+                      onClick={() => togglePasswordVisibility("confirm")}
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                     >
-                      {showPassword.confirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      {showPassword.confirm ? (
+                        <EyeOff className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -824,7 +940,12 @@ export default function StudentProfileSettingsPage() {
 
                 <button
                   onClick={handlePasswordChange}
-                  disabled={saving || !currentPassword || !newPassword || !confirmPassword}
+                  disabled={
+                    saving ||
+                    !currentPassword ||
+                    !newPassword ||
+                    !confirmPassword
+                  }
                   className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
                 >
                   비밀번호 변경
@@ -844,4 +965,4 @@ export default function StudentProfileSettingsPage() {
       </div>
     </div>
   );
-} 
+}

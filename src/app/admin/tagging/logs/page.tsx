@@ -5,8 +5,6 @@ import {
   Search, 
   Filter, 
   RefreshCw, 
-  Calendar, 
-  User, 
   Tag,
   Home,
   ChevronLeft,

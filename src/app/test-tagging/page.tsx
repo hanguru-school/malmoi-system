@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { User, Clock, CheckCircle, XCircle, RefreshCw } from 'lucide-react';
+import { useState } from "react";
+import { User, Clock, CheckCircle, XCircle, RefreshCw } from "lucide-react";
 
 interface TestResult {
   success: boolean;
@@ -16,34 +16,41 @@ export default function TestTaggingPage() {
   const testEmployeeTagging = async () => {
     setIsLoading(true);
     try {
-      const mockUid = 'EMP' + Math.random().toString(36).substr(2, 4).toUpperCase();
+      const mockUid =
+        "EMP" + Math.random().toString(36).substr(2, 4).toUpperCase();
       const timestamp = new Date().toISOString();
-      
-      const response = await fetch('/api/tagging/employee', {
-        method: 'POST',
+
+      const response = await fetch("/api/tagging/employee", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           uid: mockUid,
           timestamp: timestamp,
-          type: 'teacher'
+          type: "teacher",
         }),
       });
-      
+
       const result = await response.json();
-      
-      setTestResults(prev => [...prev, {
-        success: result.success,
-        message: result.message || '테스트 완료',
-        data: result
-      }]);
+
+      setTestResults((prev) => [
+        ...prev,
+        {
+          success: result.success,
+          message: result.message || "테스트 완료",
+          data: result,
+        },
+      ]);
     } catch (error) {
-      setTestResults(prev => [...prev, {
-        success: false,
-        message: 'API 호출 중 오류 발생',
-        data: error
-      }]);
+      setTestResults((prev) => [
+        ...prev,
+        {
+          success: false,
+          message: "API 호출 중 오류 발생",
+          data: error,
+        },
+      ]);
     } finally {
       setIsLoading(false);
     }
@@ -52,33 +59,40 @@ export default function TestTaggingPage() {
   const testStudentTagging = async () => {
     setIsLoading(true);
     try {
-      const mockUid = 'STU' + Math.random().toString(36).substr(2, 4).toUpperCase();
+      const mockUid =
+        "STU" + Math.random().toString(36).substr(2, 4).toUpperCase();
       const timestamp = new Date().toISOString();
-      
-      const response = await fetch('/api/tagging/student', {
-        method: 'POST',
+
+      const response = await fetch("/api/tagging/student", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           uid: mockUid,
-          timestamp: timestamp
+          timestamp: timestamp,
         }),
       });
-      
+
       const result = await response.json();
-      
-      setTestResults(prev => [...prev, {
-        success: result.success,
-        message: result.message || '테스트 완료',
-        data: result
-      }]);
+
+      setTestResults((prev) => [
+        ...prev,
+        {
+          success: result.success,
+          message: result.message || "테스트 완료",
+          data: result,
+        },
+      ]);
     } catch (error) {
-      setTestResults(prev => [...prev, {
-        success: false,
-        message: 'API 호출 중 오류 발생',
-        data: error
-      }]);
+      setTestResults((prev) => [
+        ...prev,
+        {
+          success: false,
+          message: "API 호출 중 오류 발생",
+          data: error,
+        },
+      ]);
     } finally {
       setIsLoading(false);
     }
@@ -87,20 +101,26 @@ export default function TestTaggingPage() {
   const testLogsAPI = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/tagging/logs');
+      const response = await fetch("/api/tagging/logs");
       const result = await response.json();
-      
-      setTestResults(prev => [...prev, {
-        success: result.success,
-        message: `로그 조회 완료 (${result.logs?.length || 0}개)`,
-        data: result
-      }]);
+
+      setTestResults((prev) => [
+        ...prev,
+        {
+          success: result.success,
+          message: `로그 조회 완료 (${result.logs?.length || 0}개)`,
+          data: result,
+        },
+      ]);
     } catch (error) {
-      setTestResults(prev => [...prev, {
-        success: false,
-        message: '로그 API 호출 중 오류 발생',
-        data: error
-      }]);
+      setTestResults((prev) => [
+        ...prev,
+        {
+          success: false,
+          message: "로그 API 호출 중 오류 발생",
+          data: error,
+        },
+      ]);
     } finally {
       setIsLoading(false);
     }
@@ -163,7 +183,9 @@ export default function TestTaggingPage() {
         {/* 결과 표시 */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-semibold text-gray-900">테스트 결과</h2>
+            <h2 className="text-2xl font-semibold text-gray-900">
+              테스트 결과
+            </h2>
             <button
               onClick={clearResults}
               className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
@@ -183,8 +205,8 @@ export default function TestTaggingPage() {
                   key={index}
                   className={`p-4 rounded-lg border ${
                     result.success
-                      ? 'bg-green-50 border-green-200'
-                      : 'bg-red-50 border-red-200'
+                      ? "bg-green-50 border-green-200"
+                      : "bg-red-50 border-red-200"
                   }`}
                 >
                   <div className="flex items-center gap-3 mb-2">
@@ -193,13 +215,15 @@ export default function TestTaggingPage() {
                     ) : (
                       <XCircle className="w-5 h-5 text-red-600" />
                     )}
-                    <span className={`font-medium ${
-                      result.success ? 'text-green-800' : 'text-red-800'
-                    }`}>
+                    <span
+                      className={`font-medium ${
+                        result.success ? "text-green-800" : "text-red-800"
+                      }`}
+                    >
                       {result.message}
                     </span>
                   </div>
-                  
+
                   {result.data && (
                     <details className="mt-3">
                       <summary className="cursor-pointer text-sm text-gray-600 hover:text-gray-800">
@@ -218,4 +242,4 @@ export default function TestTaggingPage() {
       </div>
     </div>
   );
-} 
+}

@@ -1,46 +1,46 @@
-'use client';
+"use client";
 
-import { useState, Suspense, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { Loader2, AlertCircle, CheckCircle, Info } from 'lucide-react';
-import { createOAuthUrl, validateCognitoConfig } from '@/lib/cognito-provider';
+import { useState, Suspense, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Loader2, AlertCircle, CheckCircle, Info } from "lucide-react";
+import { createOAuthUrl, validateCognitoConfig } from "@/lib/cognito-provider";
 
 function CognitoLoginContent() {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [errorDescription, setErrorDescription] = useState('');
+  const [error, setError] = useState("");
+  const [errorDescription, setErrorDescription] = useState("");
   const [configValid, setConfigValid] = useState(true);
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const getErrorMessage = (errorCode: string) => {
     switch (errorCode) {
-      case 'config_error':
-        return 'Cognito 설정이 유효하지 않습니다.';
-      case 'oauth_error':
-        return 'OAuth 인증 중 오류가 발생했습니다.';
-      case 'no_code':
-        return '인증 코드를 받지 못했습니다.';
-      case 'token_error':
-        return '토큰 교환 중 오류가 발생했습니다.';
-      case 'no_id_token':
-        return 'ID 토큰을 받지 못했습니다.';
-      case 'email_not_verified':
-        return '이메일이 인증되지 않았습니다. 이메일을 확인하여 계정을 활성화해주세요.';
-      case 'callback_error':
-        return '콜백 처리 중 오류가 발생했습니다.';
-      case 'processing':
-        return '처리 중입니다. 잠시만 기다려주세요.';
+      case "config_error":
+        return "Cognito 설정이 유효하지 않습니다.";
+      case "oauth_error":
+        return "OAuth 인증 중 오류가 발생했습니다.";
+      case "no_code":
+        return "인증 코드를 받지 못했습니다.";
+      case "token_error":
+        return "토큰 교환 중 오류가 발생했습니다.";
+      case "no_id_token":
+        return "ID 토큰을 받지 못했습니다.";
+      case "email_not_verified":
+        return "이메일이 인증되지 않았습니다. 이메일을 확인하여 계정을 활성화해주세요.";
+      case "callback_error":
+        return "콜백 처리 중 오류가 발생했습니다.";
+      case "processing":
+        return "처리 중입니다. 잠시만 기다려주세요.";
       default:
-        return '알 수 없는 오류가 발생했습니다.';
+        return "알 수 없는 오류가 발생했습니다.";
     }
   };
 
   // URL 파라미터에서 오류 메시지 확인
   useEffect(() => {
-    const errorParam = searchParams.get('error');
-    const descriptionParam = searchParams.get('description');
-    
+    const errorParam = searchParams.get("error");
+    const descriptionParam = searchParams.get("description");
+
     if (errorParam) {
       setError(getErrorMessage(errorParam));
       if (descriptionParam) {
@@ -56,44 +56,43 @@ function CognitoLoginContent() {
 
   const handleCognitoLogin = async () => {
     setIsLoading(true);
-    setError('');
-    setErrorDescription('');
+    setError("");
+    setErrorDescription("");
 
     try {
-      console.log('Cognito 로그인 시작...');
-      
+      console.log("Cognito 로그인 시작...");
+
       // 설정 검증
       if (!configValid) {
-        setError('Cognito 설정이 유효하지 않습니다.');
+        setError("Cognito 설정이 유효하지 않습니다.");
         setIsLoading(false);
         return;
       }
 
       // OAuth URL 생성
       const cognitoUrl = createOAuthUrl();
-      console.log('Cognito OAuth URL:', cognitoUrl);
+      console.log("Cognito OAuth URL:", cognitoUrl);
 
       // Cognito 로그인 페이지로 리다이렉트
       window.location.href = cognitoUrl;
-
     } catch (error: any) {
-      console.error('Cognito 로그인 오류:', error);
-      setError(error.message || 'Cognito 로그인 중 오류가 발생했습니다.');
+      console.error("Cognito 로그인 오류:", error);
+      setError(error.message || "Cognito 로그인 중 오류가 발생했습니다.");
       setIsLoading(false);
     }
   };
 
   const handleDatabaseLogin = () => {
-    router.push('/auth/login');
+    router.push("/auth/login");
   };
 
   const handleBackToHome = () => {
-    router.push('/');
+    router.push("/");
   };
 
   const handleRetry = () => {
-    setError('');
-    setErrorDescription('');
+    setError("");
+    setErrorDescription("");
     handleCognitoLogin();
   };
 
@@ -111,11 +110,13 @@ function CognitoLoginContent() {
 
         <div className="mt-8 space-y-6">
           {/* 설정 상태 표시 */}
-          <div className={`p-4 rounded-lg border ${
-            configValid 
-              ? 'bg-green-50 border-green-200 text-green-800' 
-              : 'bg-red-50 border-red-200 text-red-800'
-          }`}>
+          <div
+            className={`p-4 rounded-lg border ${
+              configValid
+                ? "bg-green-50 border-green-200 text-green-800"
+                : "bg-red-50 border-red-200 text-red-800"
+            }`}
+          >
             <div className="flex items-center">
               {configValid ? (
                 <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
@@ -123,7 +124,7 @@ function CognitoLoginContent() {
                 <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
               )}
               <span className="text-sm font-medium">
-                {configValid ? 'Cognito 설정 정상' : 'Cognito 설정 오류'}
+                {configValid ? "Cognito 설정 정상" : "Cognito 설정 오류"}
               </span>
             </div>
           </div>
@@ -136,7 +137,9 @@ function CognitoLoginContent() {
                 <div>
                   <p className="text-sm font-medium">{error}</p>
                   {errorDescription && (
-                    <p className="mt-1 text-xs text-red-600">{errorDescription}</p>
+                    <p className="mt-1 text-xs text-red-600">
+                      {errorDescription}
+                    </p>
                   )}
                   <button
                     onClick={handleRetry}
@@ -162,7 +165,7 @@ function CognitoLoginContent() {
                   AWS Cognito로 로그인 중...
                 </>
               ) : (
-                'AWS Cognito로 로그인'
+                "AWS Cognito로 로그인"
               )}
             </button>
 
@@ -171,7 +174,9 @@ function CognitoLoginContent() {
                 <div className="w-full border-t border-gray-300" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-gradient-to-br from-blue-50 to-indigo-100 text-gray-500">또는</span>
+                <span className="px-2 bg-gradient-to-br from-blue-50 to-indigo-100 text-gray-500">
+                  또는
+                </span>
               </div>
             </div>
 
@@ -195,16 +200,33 @@ function CognitoLoginContent() {
         <div className="mt-8 bg-white p-4 rounded-lg border border-gray-200">
           <div className="flex items-center mb-3">
             <Info className="h-4 w-4 text-blue-500 mr-2" />
-            <h3 className="text-sm font-medium text-gray-900">Cognito 설정 정보</h3>
+            <h3 className="text-sm font-medium text-gray-900">
+              Cognito 설정 정보
+            </h3>
           </div>
           <div className="text-xs text-gray-600 space-y-1">
-            <div><strong>User Pool:</strong> malmoi-system-pool</div>
-            <div><strong>User Pool ID:</strong> ap-northeast-1_5R7g8tN40</div>
-            <div><strong>App Client:</strong> malmoi-system</div>
-            <div><strong>Client ID:</strong> 4bdn0n9r92huqpcs21e0th1nve</div>
-            <div><strong>Region:</strong> ap-northeast-1 (Tokyo)</div>
-            <div><strong>Callback URL:</strong> https://app.hanguru.school/api/auth/callback/cognito</div>
-            <div><strong>OAuth Scopes:</strong> openid email profile phone</div>
+            <div>
+              <strong>User Pool:</strong> malmoi-system-pool
+            </div>
+            <div>
+              <strong>User Pool ID:</strong> ap-northeast-1_5R7g8tN40
+            </div>
+            <div>
+              <strong>App Client:</strong> malmoi-system
+            </div>
+            <div>
+              <strong>Client ID:</strong> 4bdn0n9r92huqpcs21e0th1nve
+            </div>
+            <div>
+              <strong>Region:</strong> ap-northeast-1 (Tokyo)
+            </div>
+            <div>
+              <strong>Callback URL:</strong>{" "}
+              https://app.hanguru.school/api/auth/callback/cognito
+            </div>
+            <div>
+              <strong>OAuth Scopes:</strong> openid email profile phone
+            </div>
           </div>
         </div>
 
@@ -228,15 +250,17 @@ function CognitoLoginContent() {
 
 export default function CognitoLoginPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="text-center">
-          <Loader2 className="animate-spin h-8 w-8 mx-auto text-blue-600" />
-          <p className="mt-2 text-gray-600">로딩 중...</p>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+          <div className="text-center">
+            <Loader2 className="animate-spin h-8 w-8 mx-auto text-blue-600" />
+            <p className="mt-2 text-gray-600">로딩 중...</p>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <CognitoLoginContent />
     </Suspense>
   );
-} 
+}

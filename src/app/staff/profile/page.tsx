@@ -1,18 +1,16 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Calendar, 
+import React, { useState, useEffect } from "react";
+import {
+  User,
+  Mail,
+  Calendar,
   Shield,
   Edit,
   Save,
   X,
-  Camera
-} from 'lucide-react';
+  Camera,
+} from "lucide-react";
 
 interface StaffProfile {
   id: string;
@@ -26,25 +24,25 @@ interface StaffProfile {
   emergencyContact: string;
   emergencyContactName: string;
   emergencyContactRelation: string;
-  
+
   // 주소 정보
   address: string;
   postalCode: string;
-  
+
   // 출근 정보
   commuteMethod: string;
   nearestStation: string;
   oneWayCost: number;
-  
+
   // 계좌 정보
   bankAccount: string;
-  
+
   // 직장 정보
   department: string;
   position: string;
   hireDate: string;
   avatar: string;
-  
+
   permissions: {
     canViewReservations: boolean;
     canEditReservations: boolean;
@@ -64,44 +62,44 @@ const ProfilePage = () => {
   useEffect(() => {
     // Mock data
     const mockProfile: StaffProfile = {
-      id: '1',
+      id: "1",
       // 기본 정보
-      name: '김사무직원',
-      nameKanji: '金事務職員',
-      nameYomi: 'キムジムショクイン',
-      nameKorean: '김사무직원',
-      email: 'staff@edubook.com',
-      phone: '010-1234-5678',
-      emergencyContact: '010-9876-5432',
-      emergencyContactName: '김부모님',
-      emergencyContactRelation: '부모',
-      
+      name: "김사무직원",
+      nameKanji: "金事務職員",
+      nameYomi: "キムジムショクイン",
+      nameKorean: "김사무직원",
+      email: "staff@edubook.com",
+      phone: "010-1234-5678",
+      emergencyContact: "010-9876-5432",
+      emergencyContactName: "김부모님",
+      emergencyContactRelation: "부모",
+
       // 주소 정보
-      address: '東京都渋谷区渋谷1-1-1',
-      postalCode: '150-0002',
-      
+      address: "東京都渋谷区渋谷1-1-1",
+      postalCode: "150-0002",
+
       // 출근 정보
-      commuteMethod: '전철',
-      nearestStation: '渋谷駅',
+      commuteMethod: "전철",
+      nearestStation: "渋谷駅",
       oneWayCost: 280,
-      
+
       // 계좌 정보
-      bankAccount: '1234-5678-9012-3456',
-      
+      bankAccount: "1234-5678-9012-3456",
+
       // 직장 정보
-      department: '사무팀',
-      position: '사무직원',
-      hireDate: '2023-01-15',
-      avatar: '/avatars/staff.jpg',
-      
+      department: "사무팀",
+      position: "사무직원",
+      hireDate: "2023-01-15",
+      avatar: "/avatars/staff.jpg",
+
       permissions: {
         canViewReservations: true,
         canEditReservations: false,
         canViewMessages: true,
         canSendMessages: true,
         canViewReports: false,
-        canManageStudents: false
-      }
+        canManageStudents: false,
+      },
     };
     setProfile(mockProfile);
     setEditedProfile(mockProfile);
@@ -133,7 +131,9 @@ const ProfilePage = () => {
     return (
       <div className="p-6">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">프로필을 찾을 수 없습니다</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            프로필을 찾을 수 없습니다
+          </h2>
           <p className="text-gray-600">프로필 정보를 불러올 수 없습니다.</p>
         </div>
       </div>
@@ -146,7 +146,9 @@ const ProfilePage = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">내 정보</h1>
-          <p className="text-gray-600">개인 정보와 권한을 확인하고 관리하세요</p>
+          <p className="text-gray-600">
+            개인 정보와 권한을 확인하고 관리하세요
+          </p>
         </div>
         {!isEditing ? (
           <button
@@ -207,15 +209,23 @@ const ProfilePage = () => {
         <div className="lg:col-span-2 space-y-6">
           {/* Personal Information */}
           <div className="bg-white rounded-lg shadow-sm border p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">개인 정보</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              개인 정보
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">이름</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  이름
+                </label>
                 {isEditing ? (
                   <input
                     type="text"
-                    value={editedProfile?.name || ''}
-                    onChange={(e) => setEditedProfile(prev => prev ? { ...prev, name: e.target.value } : null)}
+                    value={editedProfile?.name || ""}
+                    onChange={(e) =>
+                      setEditedProfile((prev) =>
+                        prev ? { ...prev, name: e.target.value } : null,
+                      )
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 ) : (
@@ -223,12 +233,18 @@ const ProfilePage = () => {
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">이메일</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  이메일
+                </label>
                 {isEditing ? (
                   <input
                     type="email"
-                    value={editedProfile?.email || ''}
-                    onChange={(e) => setEditedProfile(prev => prev ? { ...prev, email: e.target.value } : null)}
+                    value={editedProfile?.email || ""}
+                    onChange={(e) =>
+                      setEditedProfile((prev) =>
+                        prev ? { ...prev, email: e.target.value } : null,
+                      )
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 ) : (
@@ -236,12 +252,18 @@ const ProfilePage = () => {
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">전화번호</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  전화번호
+                </label>
                 {isEditing ? (
                   <input
                     type="tel"
-                    value={editedProfile?.phone || ''}
-                    onChange={(e) => setEditedProfile(prev => prev ? { ...prev, phone: e.target.value } : null)}
+                    value={editedProfile?.phone || ""}
+                    onChange={(e) =>
+                      setEditedProfile((prev) =>
+                        prev ? { ...prev, phone: e.target.value } : null,
+                      )
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 ) : (
@@ -249,16 +271,24 @@ const ProfilePage = () => {
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">입사일</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  입사일
+                </label>
                 <p className="text-gray-900">{profile.hireDate}</p>
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">주소</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  주소
+                </label>
                 {isEditing ? (
                   <input
                     type="text"
-                    value={editedProfile?.address || ''}
-                    onChange={(e) => setEditedProfile(prev => prev ? { ...prev, address: e.target.value } : null)}
+                    value={editedProfile?.address || ""}
+                    onChange={(e) =>
+                      setEditedProfile((prev) =>
+                        prev ? { ...prev, address: e.target.value } : null,
+                      )
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 ) : (
@@ -270,55 +300,67 @@ const ProfilePage = () => {
 
           {/* Permissions */}
           <div className="bg-white rounded-lg shadow-sm border p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">권한 정보</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              권한 정보
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-blue-600" />
-                  <span className="text-sm font-medium text-gray-900">예약 관리</span>
+                  <span className="text-sm font-medium text-gray-900">
+                    예약 관리
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-600">
-                    {profile.permissions.canEditReservations ? '편집 가능' : '열람만'}
+                    {profile.permissions.canEditReservations
+                      ? "편집 가능"
+                      : "열람만"}
                   </span>
                   <Shield className="w-4 h-4 text-gray-400" />
                 </div>
               </div>
-              
+
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <div className="flex items-center gap-2">
                   <Mail className="w-4 h-4 text-green-600" />
-                  <span className="text-sm font-medium text-gray-900">메시지 발송</span>
+                  <span className="text-sm font-medium text-gray-900">
+                    메시지 발송
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-600">
-                    {profile.permissions.canSendMessages ? '가능' : '불가'}
+                    {profile.permissions.canSendMessages ? "가능" : "불가"}
                   </span>
                   <Shield className="w-4 h-4 text-gray-400" />
                 </div>
               </div>
-              
+
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <div className="flex items-center gap-2">
                   <User className="w-4 h-4 text-purple-600" />
-                  <span className="text-sm font-medium text-gray-900">학생 관리</span>
+                  <span className="text-sm font-medium text-gray-900">
+                    학생 관리
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-600">
-                    {profile.permissions.canManageStudents ? '가능' : '불가'}
+                    {profile.permissions.canManageStudents ? "가능" : "불가"}
                   </span>
                   <Shield className="w-4 h-4 text-gray-400" />
                 </div>
               </div>
-              
+
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <div className="flex items-center gap-2">
                   <Shield className="w-4 h-4 text-orange-600" />
-                  <span className="text-sm font-medium text-gray-900">리포트 조회</span>
+                  <span className="text-sm font-medium text-gray-900">
+                    리포트 조회
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-600">
-                    {profile.permissions.canViewReports ? '가능' : '불가'}
+                    {profile.permissions.canViewReports ? "가능" : "불가"}
                   </span>
                   <Shield className="w-4 h-4 text-gray-400" />
                 </div>
@@ -328,22 +370,32 @@ const ProfilePage = () => {
 
           {/* Work Information */}
           <div className="bg-white rounded-lg shadow-sm border p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">근무 정보</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              근무 정보
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">부서</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  부서
+                </label>
                 <p className="text-gray-900">{profile.department}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">직책</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  직책
+                </label>
                 <p className="text-gray-900">{profile.position}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">입사일</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  입사일
+                </label>
                 <p className="text-gray-900">{profile.hireDate}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">근무일수</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  근무일수
+                </label>
                 <p className="text-gray-900">365일</p>
               </div>
             </div>
@@ -354,4 +406,4 @@ const ProfilePage = () => {
   );
 };
 
-export default ProfilePage; 
+export default ProfilePage;

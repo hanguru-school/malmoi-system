@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Camera, X, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect, useRef } from "react";
+import { Camera, X, AlertCircle } from "lucide-react";
 
 interface QRCodeScannerProps {
   onScan: (data: string) => void;
@@ -9,7 +9,11 @@ interface QRCodeScannerProps {
   onClose: () => void;
 }
 
-export default function QRCodeScanner({ onScan, onError, onClose }: QRCodeScannerProps) {
+export default function QRCodeScanner({
+  onScan,
+  onError,
+  onClose,
+}: QRCodeScannerProps) {
   const [isScanning, setIsScanning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -28,7 +32,7 @@ export default function QRCodeScanner({ onScan, onError, onClose }: QRCodeScanne
       setError(null);
 
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' }
+        video: { facingMode: "environment" },
       });
 
       if (videoRef.current) {
@@ -36,7 +40,8 @@ export default function QRCodeScanner({ onScan, onError, onClose }: QRCodeScanne
         streamRef.current = stream;
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '카메라 접근에 실패했습니다.';
+      const errorMessage =
+        err instanceof Error ? err.message : "카메라 접근에 실패했습니다.";
       setError(errorMessage);
       onError(errorMessage);
     }
@@ -44,7 +49,7 @@ export default function QRCodeScanner({ onScan, onError, onClose }: QRCodeScanne
 
   const stopScanning = () => {
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
     setIsScanning(false);
@@ -109,4 +114,4 @@ export default function QRCodeScanner({ onScan, onError, onClose }: QRCodeScanne
       </div>
     </div>
   );
-} 
+}

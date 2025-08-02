@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useRouter } from 'next/navigation';
-import { AlertTriangle, ArrowLeft, Home } from 'lucide-react';
+import { useRouter } from "next/navigation";
+import { AlertTriangle, ArrowLeft, Home } from "lucide-react";
 
 export default function UnauthorizedPage() {
   const router = useRouter();
@@ -27,9 +27,9 @@ export default function UnauthorizedPage() {
             <ArrowLeft className="w-4 h-4" />
             <span>이전 페이지로</span>
           </button>
-          
+
           <button
-            onClick={() => router.push('/')}
+            onClick={() => router.push("/")}
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"
           >
             <Home className="w-4 h-4" />
@@ -43,4 +43,4 @@ export default function UnauthorizedPage() {
       </div>
     </div>
   );
-} 
+}

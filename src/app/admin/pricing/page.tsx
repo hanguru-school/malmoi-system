@@ -1,14 +1,7 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { 
-  Save, 
-  DollarSign, 
-  Star, 
-  Clock, 
-  TrendingUp,
-  Settings
-} from 'lucide-react';
+import { useState, useEffect } from "react";
+import { Save, Star, Clock } from "lucide-react";
 
 interface PricingSettings {
   pointsRate: number; // 1엔 = ?포인트
@@ -48,64 +41,64 @@ export default function AdminPricingPage() {
         timeRate: 21600, // 360불 = 21,600원
         pointPackages: [
           {
-            id: 'points-100',
-            name: '100 포인트',
+            id: "points-100",
+            name: "100 포인트",
             amount: 100,
             price: 100,
             popular: false,
-            active: true
+            active: true,
           },
           {
-            id: 'points-500',
-            name: '500 포인트',
+            id: "points-500",
+            name: "500 포인트",
             amount: 500,
             price: 500,
             originalPrice: 550,
             discount: 10,
             popular: true,
-            active: true
+            active: true,
           },
           {
-            id: 'points-1000',
-            name: '1000 포인트',
+            id: "points-1000",
+            name: "1000 포인트",
             amount: 1000,
             price: 1000,
             originalPrice: 1200,
             discount: 17,
             popular: false,
-            active: true
-          }
+            active: true,
+          },
         ],
         timePackages: [
           {
-            id: 'time-10',
-            name: '10시간',
+            id: "time-10",
+            name: "10시간",
             amount: 10,
             price: 21600,
             popular: false,
-            active: true
+            active: true,
           },
           {
-            id: 'time-20',
-            name: '20시간',
+            id: "time-20",
+            name: "20시간",
             amount: 20,
             price: 43200,
             originalPrice: 48000,
             discount: 10,
             popular: true,
-            active: true
+            active: true,
           },
           {
-            id: 'time-40',
-            name: '40시간',
+            id: "time-40",
+            name: "40시간",
             amount: 40,
             price: 86400,
             originalPrice: 96000,
             discount: 10,
             popular: false,
-            active: true
-          }
-        ]
+            active: true,
+          },
+        ],
       });
       setLoading(false);
     }, 1000);
@@ -115,10 +108,10 @@ export default function AdminPricingPage() {
     setSaving(true);
     try {
       // 실제 API 호출로 대체
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      alert('가격 설정이 저장되었습니다.');
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      alert("가격 설정이 저장되었습니다.");
     } catch (error) {
-      alert('저장에 실패했습니다.');
+      alert("저장에 실패했습니다.");
     } finally {
       setSaving(false);
     }
@@ -128,7 +121,7 @@ export default function AdminPricingPage() {
     if (!settings) return;
     setSettings({
       ...settings,
-      pointsRate: rate
+      pointsRate: rate,
     });
   };
 
@@ -136,27 +129,35 @@ export default function AdminPricingPage() {
     if (!settings) return;
     setSettings({
       ...settings,
-      timeRate: rate
+      timeRate: rate,
     });
   };
 
-  const updatePointPackage = (id: string, field: string, value: string | number | boolean | undefined) => {
+  const updatePointPackage = (
+    id: string,
+    field: string,
+    value: string | number | boolean | undefined,
+  ) => {
     if (!settings) return;
     setSettings({
       ...settings,
-      pointPackages: settings.pointPackages.map(pkg => 
-        pkg.id === id ? { ...pkg, [field]: value } : pkg
-      )
+      pointPackages: settings.pointPackages.map((pkg) =>
+        pkg.id === id ? { ...pkg, [field]: value } : pkg,
+      ),
     });
   };
 
-  const updateTimePackage = (id: string, field: string, value: string | number | boolean | undefined) => {
+  const updateTimePackage = (
+    id: string,
+    field: string,
+    value: string | number | boolean | undefined,
+  ) => {
     if (!settings) return;
     setSettings({
       ...settings,
-      timePackages: settings.timePackages.map(pkg => 
-        pkg.id === id ? { ...pkg, [field]: value } : pkg
-      )
+      timePackages: settings.timePackages.map((pkg) =>
+        pkg.id === id ? { ...pkg, [field]: value } : pkg,
+      ),
     });
   };
 
@@ -182,7 +183,9 @@ export default function AdminPricingPage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">가격 설정</h1>
-          <p className="text-gray-600 mt-2">포인트 및 수업 시간 가격을 관리합니다</p>
+          <p className="text-gray-600 mt-2">
+            포인트 및 수업 시간 가격을 관리합니다
+          </p>
         </div>
         <button
           onClick={handleSave}
@@ -190,7 +193,7 @@ export default function AdminPricingPage() {
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
         >
           <Save className="w-4 h-4" />
-          {saving ? '저장 중...' : '저장'}
+          {saving ? "저장 중..." : "저장"}
         </button>
       </div>
 
@@ -209,7 +212,9 @@ export default function AdminPricingPage() {
               <input
                 type="number"
                 value={settings.pointsRate}
-                onChange={(e) => updatePointsRate(parseInt(e.target.value) || 1)}
+                onChange={(e) =>
+                  updatePointsRate(parseInt(e.target.value) || 1)
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 min="1"
               />
@@ -233,7 +238,9 @@ export default function AdminPricingPage() {
               <input
                 type="number"
                 value={settings.timeRate}
-                onChange={(e) => updateTimeRate(parseInt(e.target.value) || 21600)}
+                onChange={(e) =>
+                  updateTimeRate(parseInt(e.target.value) || 21600)
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 min="1"
               />
@@ -249,20 +256,36 @@ export default function AdminPricingPage() {
       <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
         <div className="flex items-center gap-3 mb-6">
           <Star className="w-6 h-6 text-yellow-600" />
-          <h2 className="text-xl font-semibold text-gray-900">포인트 패키지 관리</h2>
+          <h2 className="text-xl font-semibold text-gray-900">
+            포인트 패키지 관리
+          </h2>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 font-medium text-gray-900">패키지명</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-900">포인트</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-900">가격 (엔)</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-900">할인가</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-900">할인율</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-900">인기</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-900">활성</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-900">
+                  패키지명
+                </th>
+                <th className="text-left py-3 px-4 font-medium text-gray-900">
+                  포인트
+                </th>
+                <th className="text-left py-3 px-4 font-medium text-gray-900">
+                  가격 (엔)
+                </th>
+                <th className="text-left py-3 px-4 font-medium text-gray-900">
+                  할인가
+                </th>
+                <th className="text-left py-3 px-4 font-medium text-gray-900">
+                  할인율
+                </th>
+                <th className="text-left py-3 px-4 font-medium text-gray-900">
+                  인기
+                </th>
+                <th className="text-left py-3 px-4 font-medium text-gray-900">
+                  활성
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -272,7 +295,9 @@ export default function AdminPricingPage() {
                     <input
                       type="text"
                       value={pkg.name}
-                      onChange={(e) => updatePointPackage(pkg.id, 'name', e.target.value)}
+                      onChange={(e) =>
+                        updatePointPackage(pkg.id, "name", e.target.value)
+                      }
                       className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </td>
@@ -280,7 +305,13 @@ export default function AdminPricingPage() {
                     <input
                       type="number"
                       value={pkg.amount}
-                      onChange={(e) => updatePointPackage(pkg.id, 'amount', parseInt(e.target.value) || 0)}
+                      onChange={(e) =>
+                        updatePointPackage(
+                          pkg.id,
+                          "amount",
+                          parseInt(e.target.value) || 0,
+                        )
+                      }
                       className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </td>
@@ -288,15 +319,27 @@ export default function AdminPricingPage() {
                     <input
                       type="number"
                       value={pkg.price}
-                      onChange={(e) => updatePointPackage(pkg.id, 'price', parseInt(e.target.value) || 0)}
+                      onChange={(e) =>
+                        updatePointPackage(
+                          pkg.id,
+                          "price",
+                          parseInt(e.target.value) || 0,
+                        )
+                      }
                       className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </td>
                   <td className="py-3 px-4">
                     <input
                       type="number"
-                      value={pkg.originalPrice || ''}
-                      onChange={(e) => updatePointPackage(pkg.id, 'originalPrice', e.target.value ? parseInt(e.target.value) : undefined)}
+                      value={pkg.originalPrice || ""}
+                      onChange={(e) =>
+                        updatePointPackage(
+                          pkg.id,
+                          "originalPrice",
+                          e.target.value ? parseInt(e.target.value) : undefined,
+                        )
+                      }
                       className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="할인가 없음"
                     />
@@ -304,8 +347,14 @@ export default function AdminPricingPage() {
                   <td className="py-3 px-4">
                     <input
                       type="number"
-                      value={pkg.discount || ''}
-                      onChange={(e) => updatePointPackage(pkg.id, 'discount', e.target.value ? parseInt(e.target.value) : undefined)}
+                      value={pkg.discount || ""}
+                      onChange={(e) =>
+                        updatePointPackage(
+                          pkg.id,
+                          "discount",
+                          e.target.value ? parseInt(e.target.value) : undefined,
+                        )
+                      }
                       className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="0"
                     />
@@ -315,7 +364,13 @@ export default function AdminPricingPage() {
                       <input
                         type="checkbox"
                         checked={pkg.popular}
-                        onChange={(e) => updatePointPackage(pkg.id, 'popular', e.target.checked)}
+                        onChange={(e) =>
+                          updatePointPackage(
+                            pkg.id,
+                            "popular",
+                            e.target.checked,
+                          )
+                        }
                         className="sr-only peer"
                       />
                       <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
@@ -326,7 +381,9 @@ export default function AdminPricingPage() {
                       <input
                         type="checkbox"
                         checked={pkg.active}
-                        onChange={(e) => updatePointPackage(pkg.id, 'active', e.target.checked)}
+                        onChange={(e) =>
+                          updatePointPackage(pkg.id, "active", e.target.checked)
+                        }
                         className="sr-only peer"
                       />
                       <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
@@ -343,20 +400,36 @@ export default function AdminPricingPage() {
       <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
         <div className="flex items-center gap-3 mb-6">
           <Clock className="w-6 h-6 text-blue-600" />
-          <h2 className="text-xl font-semibold text-gray-900">시간 패키지 관리</h2>
+          <h2 className="text-xl font-semibold text-gray-900">
+            시간 패키지 관리
+          </h2>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 font-medium text-gray-900">패키지명</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-900">시간</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-900">가격 (원)</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-900">할인가</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-900">할인율</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-900">인기</th>
-                <th className="text-left py-3 px-4 font-medium text-gray-900">활성</th>
+                <th className="text-left py-3 px-4 font-medium text-gray-900">
+                  패키지명
+                </th>
+                <th className="text-left py-3 px-4 font-medium text-gray-900">
+                  시간
+                </th>
+                <th className="text-left py-3 px-4 font-medium text-gray-900">
+                  가격 (원)
+                </th>
+                <th className="text-left py-3 px-4 font-medium text-gray-900">
+                  할인가
+                </th>
+                <th className="text-left py-3 px-4 font-medium text-gray-900">
+                  할인율
+                </th>
+                <th className="text-left py-3 px-4 font-medium text-gray-900">
+                  인기
+                </th>
+                <th className="text-left py-3 px-4 font-medium text-gray-900">
+                  활성
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -366,7 +439,9 @@ export default function AdminPricingPage() {
                     <input
                       type="text"
                       value={pkg.name}
-                      onChange={(e) => updateTimePackage(pkg.id, 'name', e.target.value)}
+                      onChange={(e) =>
+                        updateTimePackage(pkg.id, "name", e.target.value)
+                      }
                       className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </td>
@@ -374,7 +449,13 @@ export default function AdminPricingPage() {
                     <input
                       type="number"
                       value={pkg.amount}
-                      onChange={(e) => updateTimePackage(pkg.id, 'amount', parseInt(e.target.value) || 0)}
+                      onChange={(e) =>
+                        updateTimePackage(
+                          pkg.id,
+                          "amount",
+                          parseInt(e.target.value) || 0,
+                        )
+                      }
                       className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </td>
@@ -382,15 +463,27 @@ export default function AdminPricingPage() {
                     <input
                       type="number"
                       value={pkg.price}
-                      onChange={(e) => updateTimePackage(pkg.id, 'price', parseInt(e.target.value) || 0)}
+                      onChange={(e) =>
+                        updateTimePackage(
+                          pkg.id,
+                          "price",
+                          parseInt(e.target.value) || 0,
+                        )
+                      }
                       className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </td>
                   <td className="py-3 px-4">
                     <input
                       type="number"
-                      value={pkg.originalPrice || ''}
-                      onChange={(e) => updateTimePackage(pkg.id, 'originalPrice', e.target.value ? parseInt(e.target.value) : undefined)}
+                      value={pkg.originalPrice || ""}
+                      onChange={(e) =>
+                        updateTimePackage(
+                          pkg.id,
+                          "originalPrice",
+                          e.target.value ? parseInt(e.target.value) : undefined,
+                        )
+                      }
                       className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="할인가 없음"
                     />
@@ -398,8 +491,14 @@ export default function AdminPricingPage() {
                   <td className="py-3 px-4">
                     <input
                       type="number"
-                      value={pkg.discount || ''}
-                      onChange={(e) => updateTimePackage(pkg.id, 'discount', e.target.value ? parseInt(e.target.value) : undefined)}
+                      value={pkg.discount || ""}
+                      onChange={(e) =>
+                        updateTimePackage(
+                          pkg.id,
+                          "discount",
+                          e.target.value ? parseInt(e.target.value) : undefined,
+                        )
+                      }
                       className="w-full px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="0"
                     />
@@ -409,7 +508,9 @@ export default function AdminPricingPage() {
                       <input
                         type="checkbox"
                         checked={pkg.popular}
-                        onChange={(e) => updateTimePackage(pkg.id, 'popular', e.target.checked)}
+                        onChange={(e) =>
+                          updateTimePackage(pkg.id, "popular", e.target.checked)
+                        }
                         className="sr-only peer"
                       />
                       <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
@@ -420,7 +521,9 @@ export default function AdminPricingPage() {
                       <input
                         type="checkbox"
                         checked={pkg.active}
-                        onChange={(e) => updateTimePackage(pkg.id, 'active', e.target.checked)}
+                        onChange={(e) =>
+                          updateTimePackage(pkg.id, "active", e.target.checked)
+                        }
                         className="sr-only peer"
                       />
                       <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
@@ -436,22 +539,30 @@ export default function AdminPricingPage() {
       {/* 통계 */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white rounded-xl shadow-lg p-4 text-center">
-          <div className="text-2xl font-bold text-yellow-600">{settings.pointPackages.length}개</div>
+          <div className="text-2xl font-bold text-yellow-600">
+            {settings.pointPackages.length}개
+          </div>
           <div className="text-sm text-gray-600">포인트 패키지</div>
         </div>
         <div className="bg-white rounded-xl shadow-lg p-4 text-center">
-          <div className="text-2xl font-bold text-blue-600">{settings.timePackages.length}개</div>
+          <div className="text-2xl font-bold text-blue-600">
+            {settings.timePackages.length}개
+          </div>
           <div className="text-sm text-gray-600">시간 패키지</div>
         </div>
         <div className="bg-white rounded-xl shadow-lg p-4 text-center">
-          <div className="text-2xl font-bold text-green-600">{settings.pointPackages.filter(p => p.active).length}개</div>
+          <div className="text-2xl font-bold text-green-600">
+            {settings.pointPackages.filter((p) => p.active).length}개
+          </div>
           <div className="text-sm text-gray-600">활성 포인트</div>
         </div>
         <div className="bg-white rounded-xl shadow-lg p-4 text-center">
-          <div className="text-2xl font-bold text-purple-600">{settings.timePackages.filter(p => p.active).length}개</div>
+          <div className="text-2xl font-bold text-purple-600">
+            {settings.timePackages.filter((p) => p.active).length}개
+          </div>
           <div className="text-sm text-gray-600">활성 시간</div>
         </div>
       </div>
     </div>
   );
-} 
+}

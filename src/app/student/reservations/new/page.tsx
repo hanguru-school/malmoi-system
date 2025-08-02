@@ -1,424 +1,261 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { 
-  Calendar, 
-  Clock, 
-  MapPin, 
-  MessageSquare, 
-  ArrowLeft, 
-  CheckCircle,
-  AlertCircle,
-  Loader2,
-  X,
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Calendar,
+  Clock,
   User,
+  MapPin,
+  CheckCircle,
+  ChevronLeft,
+  ChevronRight,
+  Star,
   BookOpen,
-  FileText
-} from 'lucide-react';
-import Link from 'next/link';
-
-interface TimeSlot {
-  time: string;
-  available: boolean;
-}
-
-interface ExistingReservation {
-  date: string;
-  time: string;
-  duration: number;
-  status: string;
-}
+  Video,
+  AlertCircle,
+  CalendarPlus,
+  ArrowRight,
+  Download,
+  ExternalLink,
+  Shield,
+} from "lucide-react";
 
 interface Course {
   id: string;
   name: string;
   description: string;
-  duration: number;
+  duration: number; // 분 단위
   price: number;
   level: string;
+  type: "online" | "offline" | "both";
+  teacher?: {
+    name: string;
+    rating: number;
+    specialties: string[];
+  };
 }
 
-interface Teacher {
+interface TimeSlot {
   id: string;
-  name: string;
-  subjects: string[];
-  rating: number;
-  totalStudents: number;
+  startTime: string;
+  endTime: string;
+  available: boolean;
+  teacherName: string;
+  location: string;
+}
+
+interface ReservationData {
+  courseId: string;
+  date: string;
+  timeSlotId: string;
+  notes?: string;
+  agreedToTerms: boolean;
 }
 
 export default function NewReservationPage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-
-  // 폼 데이터
-  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
-  const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
-  const [selectedLocation, setSelectedLocation] = useState<string>('');
-  const [selectedDuration, setSelectedDuration] = useState<number>(0);
-  const [selectedDate, setSelectedDate] = useState<string>('');
-  const [selectedTime, setSelectedTime] = useState<string>('');
-  const [notes, setNotes] = useState<string>('');
-  const [classroom, setClassroom] = useState<string>('');
-  const [agreedToTerms, setAgreedToTerms] = useState(false);
-
-  // 모달 상태
-  const [showTimeConfirmModal, setShowTimeConfirmModal] = useState(false);
-  const [showFinalConfirmModal, setShowFinalConfirmModal] = useState(false);
-  const [tempSelectedTime, setTempSelectedTime] = useState<string>('');
-
-  // 데이터
-  const [availableTimeSlots, setAvailableTimeSlots] = useState<TimeSlot[]>([]);
-  const [existingReservations, setExistingReservations] = useState<ExistingReservation[]>([]);
+  const [step, setStep] = useState<
+    "course" | "datetime" | "confirm" | "complete"
+  >("course");
   const [courses, setCourses] = useState<Course[]>([]);
-  const [teachers, setTeachers] = useState<Teacher[]>([]);
-
-  // 코스 데이터
-  const courseOptions: Course[] = [
-    {
-      id: 'basic-japanese',
-      name: '기초 일본어',
-      description: '일본어 기초 문법과 회화',
-      duration: 60,
-      price: 30000,
-      level: '초급'
-    },
-    {
-      id: 'conversation-japanese',
-      name: '일본어 회화',
-      description: '실전 일본어 회화 연습',
-      duration: 90,
-      price: 45000,
-      level: '중급'
-    },
-    {
-      id: 'advanced-japanese',
-      name: '고급 일본어',
-      description: '고급 문법과 비즈니스 일본어',
-      duration: 120,
-      price: 60000,
-      level: '고급'
-    }
-  ];
-
-  // 선생님 데이터
-  const teacherOptions: Teacher[] = [
-    {
-      id: 'teacher-1',
-      name: '김선생님',
-      subjects: ['일본어'],
-      rating: 4.8,
-      totalStudents: 45
-    },
-    {
-      id: 'teacher-2',
-      name: '이선생님',
-      subjects: ['일본어'],
-      rating: 4.9,
-      totalStudents: 38
-    },
-    {
-      id: 'teacher-3',
-      name: '박선생님',
-      subjects: ['일본어'],
-      rating: 4.7,
-      totalStudents: 52
-    }
-  ];
-
-  // 수업 시간 옵션 (간소화)
-  const durationOptions = [
-    { duration: 60, description: '기본 수업 (60분)' },
-    { duration: 90, description: '표준 수업 (90분)' },
-    { duration: 120, description: '심화 수업 (120분)' }
-  ];
-
-  // 날짜 관련
-  const [minDate, setMinDate] = useState<string>('');
-  const [maxDate, setMaxDate] = useState<string>('');
+  const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string>("");
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | null>(
+    null,
+  );
+  const [reservationData, setReservationData] = useState<ReservationData>({
+    courseId: "",
+    date: "",
+    timeSlotId: "",
+    notes: "",
+    agreedToTerms: false,
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
 
   useEffect(() => {
-    // 최소 날짜 (오늘), 최대 날짜 (3개월 후)
-    const today = new Date();
-    const threeMonthsLater = new Date();
-    threeMonthsLater.setMonth(today.getMonth() + 3);
-
-    const todayString = today.toISOString().split('T')[0];
-    setMinDate(todayString);
-    setMaxDate(threeMonthsLater.toISOString().split('T')[0]);
-    
-    // 기본값을 오늘 날짜로 설정
-    setSelectedDate(todayString);
-
-    // 데이터 로드
-    loadInitialData();
+    loadCourses();
   }, []);
 
-  const loadInitialData = async () => {
+  useEffect(() => {
+    if (selectedCourse && selectedDate) {
+      loadTimeSlots();
+    }
+  }, [selectedCourse, selectedDate]);
+
+  const loadCourses = async () => {
     try {
       setLoading(true);
-      
-      // 실제 예약 데이터 가져오기
-      const reservationsResponse = await fetch('/api/reservations/list');
-      if (reservationsResponse.ok) {
-        const reservationsData = await reservationsResponse.json();
-        const formattedReservations = reservationsData.reservations.map((reservation: any) => ({
-          date: reservation.date,
-          time: reservation.startTime,
-          duration: 60, // 기본값
-          status: reservation.status
-        }));
-        setExistingReservations(formattedReservations);
-      }
-
-      // 코스와 선생님 데이터 설정
-      setCourses(courseOptions);
-      setTeachers(teacherOptions);
-
-      await loadAvailableTimeSlots();
-      
+      // 실제 API 호출로 대체
+      const mockCourses: Course[] = [
+        {
+          id: "1",
+          name: "초급 회화",
+          description: "기본적인 일상 회화를 배우는 코스입니다.",
+          duration: 40,
+          price: 30000,
+          level: "초급",
+          type: "both",
+          teacher: {
+            name: "김선생님",
+            rating: 4.8,
+            specialties: ["초급 회화", "발음 교정"],
+          },
+        },
+        {
+          id: "2",
+          name: "중급 문법",
+          description: "중급 문법과 실용적인 표현을 학습합니다.",
+          duration: 60,
+          price: 40000,
+          level: "중급",
+          type: "online",
+          teacher: {
+            name: "이선생님",
+            rating: 4.9,
+            specialties: ["문법", "작문"],
+          },
+        },
+        {
+          id: "3",
+          name: "고급 토론",
+          description: "고급 수준의 토론과 발표 능력을 기릅니다.",
+          duration: 90,
+          price: 50000,
+          level: "고급",
+          type: "offline",
+          teacher: {
+            name: "박선생님",
+            rating: 4.7,
+            specialties: ["토론", "발표"],
+          },
+        },
+      ];
+      setCourses(mockCourses);
     } catch (error) {
-      console.error('초기 데이터 로드 오류:', error);
+      setError("코스 정보를 불러올 수 없습니다.");
     } finally {
       setLoading(false);
     }
   };
 
-  // 날짜 선택 시 가능한 시간대 로드
-  useEffect(() => {
-    if (selectedDate && selectedDuration > 0) {
-      loadAvailableTimeSlots();
-    }
-  }, [selectedDate, selectedDuration]);
-
-  const loadAvailableTimeSlots = async () => {
+  const loadTimeSlots = async () => {
     try {
-      if (!selectedDuration) return;
-      
-      // 현재 시간 확인
-      const now = new Date();
-      const selectedDateObj = new Date(selectedDate);
-      const isToday = selectedDateObj.toDateString() === now.toDateString();
-      const currentHour = now.getHours();
-      const currentMinute = now.getMinutes();
-
-      // 30분 단위로 시간대 생성 (09:00 ~ 21:00)
-      const slots: TimeSlot[] = [];
-      for (let hour = 9; hour <= 21; hour++) {
-        for (let minute = 0; minute < 60; minute += 30) {
-          const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-          
-          // 오늘 날짜인 경우 현재 시간 이전은 예약 불가
-          let isPastTime = false;
-          if (isToday) {
-            const timeHour = parseInt(time.split(':')[0]);
-            const timeMinute = parseInt(time.split(':')[1]);
-            
-            if (timeHour < currentHour || (timeHour === currentHour && timeMinute <= currentMinute)) {
-              isPastTime = true;
-            }
-          }
-          
-          // 해당 날짜의 기존 예약 확인
-          const dayReservations = existingReservations.filter(r => r.date === selectedDate);
-          
-          // 현재 시간대와 겹치는 예약이 있는지 확인
-          const isConflicting = dayReservations.some(reservation => {
-            const reservationStart = new Date(`2024-01-15 ${reservation.time}`);
-            const reservationEnd = new Date(reservationStart.getTime() + (reservation.duration + 10) * 60000);
-            const currentStart = new Date(`2024-01-15 ${time}`);
-            const currentEnd = new Date(currentStart.getTime() + (selectedDuration + 10) * 60000);
-            
-            return currentStart < reservationEnd && currentEnd > reservationStart;
-          });
-          
-          slots.push({
-            time,
-            available: !isConflicting && !isPastTime
-          });
-        }
-      }
-
-      setAvailableTimeSlots(slots);
-    } catch (error) {
-      console.error('가능한 시간대 로드 오류:', error);
-      setAvailableTimeSlots([]);
-    }
-  };
-
-  // 시간 선택 처리
-  const handleTimeSelect = (time: string) => {
-    setTempSelectedTime(time);
-    setShowTimeConfirmModal(true);
-  };
-
-  // 시간 확인 모달에서 확인
-  const handleTimeConfirm = () => {
-    setSelectedTime(tempSelectedTime);
-    setShowTimeConfirmModal(false);
-    setTempSelectedTime('');
-  };
-
-  // 시간 확인 모달에서 취소
-  const handleTimeCancel = () => {
-    setShowTimeConfirmModal(false);
-    setTempSelectedTime('');
-  };
-
-  // 최종 확인 모달 표시
-  const handleFinalConfirm = () => {
-    if (!agreedToTerms) {
-      setError('예약 규정에 동의해주세요.');
-      return;
-    }
-    setShowFinalConfirmModal(true);
-  };
-
-  // 최종 예약 확정
-  const handleFinalSubmit = async () => {
-    try {
-      setSubmitting(true);
-      setError(null);
-
-      const response = await fetch('/api/reservations/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      setLoading(true);
+      // 실제 API 호출로 대체
+      const mockTimeSlots: TimeSlot[] = [
+        {
+          id: "1",
+          startTime: "09:00",
+          endTime: "09:40",
+          available: true,
+          teacherName: "김선생님",
+          location: "온라인",
         },
-        body: JSON.stringify({
-          date: selectedDate,
-          time: selectedTime,
-          duration: selectedDuration,
-          location: selectedLocation,
-          notes: notes.trim() || undefined,
-          classroom: classroom.trim() || undefined,
-          courseId: selectedCourse?.id,
-          teacherId: selectedTeacher?.id
-        })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || '예약 생성에 실패했습니다.');
-      }
-
-      console.log('예약 성공:', data);
-
-      // 성공 처리
-      setSuccess(true);
-      setShowFinalConfirmModal(false);
-      
-      // 예약 완료 페이지로 이동
-      setTimeout(() => {
-        router.push(`/student/reservations/complete/${data.reservation.id}`);
-      }, 2000);
-
+        {
+          id: "2",
+          startTime: "10:00",
+          endTime: "10:40",
+          available: true,
+          teacherName: "이선생님",
+          location: "온라인",
+        },
+        {
+          id: "3",
+          startTime: "14:00",
+          endTime: "14:40",
+          available: false,
+          teacherName: "박선생님",
+          location: "대면",
+        },
+        {
+          id: "4",
+          startTime: "15:00",
+          endTime: "15:40",
+          available: true,
+          teacherName: "김선생님",
+          location: "온라인",
+        },
+      ];
+      setTimeSlots(mockTimeSlots);
     } catch (error) {
-      console.error('예약 실패:', error);
-      setError(error instanceof Error ? error.message : '예약 중 오류가 발생했습니다. 다시 시도해주세요.');
+      setError("시간대 정보를 불러올 수 없습니다.");
     } finally {
-      setSubmitting(false);
+      setLoading(false);
     }
   };
 
-  const getDayOfWeek = (date: string) => {
-    return new Date(date).toLocaleDateString('ko-KR', { weekday: 'long' });
+  const handleCourseSelect = (course: Course) => {
+    setSelectedCourse(course);
+    setReservationData((prev) => ({ ...prev, courseId: course.id }));
+    setStep("datetime");
   };
 
-  // 선택된 시간의 종료 시간 계산
-  const getEndTime = (startTime: string, duration: number) => {
-    const start = new Date(`2024-01-15 ${startTime}`);
-    const end = new Date(start.getTime() + duration * 60000);
-    return end.toTimeString().slice(0, 5);
+  const handleDateSelect = (date: string) => {
+    setSelectedDate(date);
+    setReservationData((prev) => ({ ...prev, date }));
   };
 
-  // 시간대 렌더링
-  const renderTimeSlots = () => {
-    if (!selectedDate) return null;
+  const handleTimeSlotSelect = (timeSlot: TimeSlot) => {
+    setSelectedTimeSlot(timeSlot);
+    setReservationData((prev) => ({ ...prev, timeSlotId: timeSlot.id }));
+    setStep("confirm");
+  };
 
-    const timeSlots = [];
-    const startHour = 9; // 오전 9시부터
-    const endHour = 21; // 오후 9시까지
-    const currentTime = new Date();
-    const selectedDateObj = new Date(selectedDate);
-
-    for (let hour = startHour; hour < endHour; hour++) {
-      for (let minute = 0; minute < 60; minute += 30) { // 30분 단위로 변경
-        const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-        const slotTime = new Date(selectedDateObj);
-        slotTime.setHours(hour, minute, 0, 0);
-
-        // 과거 시간이거나 현재 시간 이전인지 확인
-        const isPast = selectedDateObj.toDateString() === currentTime.toDateString() && 
-                      slotTime <= currentTime;
-        
-        // 실제 예약된 시간인지 확인
-        const isBooked = existingReservations.some(reservation => 
-          reservation.date === selectedDate && 
-          reservation.time === timeString &&
-          ['CONFIRMED', 'PENDING'].includes(reservation.status)
-        );
-
-        const isAvailable = !isPast && !isBooked;
-
-        timeSlots.push(
-          <button
-            key={timeString}
-            onClick={() => isAvailable && handleTimeSelect(timeString)}
-            disabled={!isAvailable}
-            className={`
-              p-3 rounded-lg text-sm font-medium transition-all duration-200
-              ${isAvailable 
-                ? 'bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200' 
-                : 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed'
-              }
-              ${selectedTime === timeString ? 'bg-blue-600 text-white border-blue-600' : ''}
-              hover:${isAvailable ? 'bg-orange-100 border-orange-300' : ''}
-              w-full sm:w-auto min-w-[80px]
-            `}
-          >
-            {timeString}
-          </button>
-        );
-      }
+  const handleConfirmReservation = async () => {
+    try {
+      setLoading(true);
+      // 실제 API 호출로 대체
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      setStep("complete");
+    } catch (error) {
+      setError("예약에 실패했습니다.");
+    } finally {
+      setLoading(false);
     }
-
-    return (
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-        {timeSlots}
-      </div>
-    );
   };
 
-  if (loading) {
+  const getDaysInMonth = (date: Date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const startDate = new Date(firstDay);
+    startDate.setDate(startDate.getDate() - firstDay.getDay());
+    const endDate = new Date(lastDay);
+    endDate.setDate(endDate.getDate() + (6 - lastDay.getDay()));
+
+    const days = [];
+    const current = new Date(startDate);
+    while (current <= endDate) {
+      days.push(new Date(current));
+      current.setDate(current.getDate() + 1);
+    }
+    return days;
+  };
+
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString("ko-KR", {
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  const formatPrice = (price: number) => {
+    return price.toLocaleString("ko-KR");
+  };
+
+  const days = getDaysInMonth(currentMonth);
+
+  if (loading && step === "course") {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-6">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">데이터를 불러오는 중...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (success) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center py-12">
-            <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">예약이 완료되었습니다!</h1>
-            <p className="text-lg text-gray-600 mb-8">
-              예약이 성공적으로 등록되었습니다. 예약 완료 페이지로 이동합니다.
-            </p>
-            <div className="animate-pulse">
-              <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto" />
-            </div>
-          </div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">코스 정보를 불러오는 중...</p>
         </div>
       </div>
     );
@@ -430,19 +267,58 @@ export default function NewReservationPage() {
         {/* 헤더 */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">새 예약하기</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">새 예약</h1>
             <p className="text-lg text-gray-600">
-              코스, 선생님, 수업 방식, 시간을 선택하여 수업을 예약하세요
+              {step === "course" && "수업 코스를 선택하세요"}
+              {step === "datetime" && "날짜와 시간을 선택하세요"}
+              {step === "confirm" && "예약 정보를 확인하세요"}
+              {step === "complete" && "예약이 완료되었습니다"}
             </p>
           </div>
-          <Link
-            href="/student/reservations"
-            className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            예약 목록으로
-          </Link>
+          {step !== "complete" && (
+            <button
+              onClick={() => router.back()}
+              className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+            >
+              <ChevronLeft className="w-5 h-5" />
+              돌아가기
+            </button>
+          )}
         </div>
+
+        {/* 진행 단계 표시 */}
+        {step !== "complete" && (
+          <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <div className="flex items-center justify-center">
+              {[
+                { id: "course", label: "코스 선택", icon: BookOpen },
+                { id: "datetime", label: "날짜/시간", icon: Calendar },
+                { id: "confirm", label: "확인", icon: CheckCircle },
+              ].map((stepItem, index) => (
+                <div key={stepItem.id} className="flex items-center">
+                  <div
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
+                      step === stepItem.id
+                        ? "bg-blue-100 text-blue-700"
+                        : index <
+                            ["course", "datetime", "confirm"].indexOf(step)
+                          ? "bg-green-100 text-green-700"
+                          : "bg-gray-100 text-gray-500"
+                    }`}
+                  >
+                    <stepItem.icon className="w-5 h-5" />
+                    <span className="text-sm font-medium">
+                      {stepItem.label}
+                    </span>
+                  </div>
+                  {index < 2 && (
+                    <ChevronRight className="w-5 h-5 text-gray-400 mx-2" />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* 에러 메시지 */}
         {error && (
@@ -454,413 +330,441 @@ export default function NewReservationPage() {
           </div>
         )}
 
-        {/* 예약 폼 */}
-        <form onSubmit={(e) => { e.preventDefault(); handleFinalConfirm(); }} className="space-y-8">
-          {/* 코스 선택 */}
-          {!selectedTime && (
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-blue-600" />
-                코스 선택
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {courses.map((course) => (
-                  <button
-                    key={course.id}
-                    type="button"
-                    onClick={() => {
-                      setSelectedCourse(course);
-                      setSelectedDuration(course.duration);
-                    }}
-                    className={`p-6 border-2 rounded-lg text-left transition-all ${
-                      selectedCourse?.id === course.id
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <div className="text-lg font-semibold text-gray-900 mb-2">{course.name}</div>
-                    <div className="text-sm text-gray-600 mb-2">{course.description}</div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-500">{course.level}</span>
-                      <span className="text-lg font-semibold text-blue-600">{course.price.toLocaleString()}원</span>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* 선생님 선택 */}
-          {selectedCourse && !selectedTime && (
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <User className="w-5 h-5 text-green-600" />
-                선생님 선택
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {teachers.map((teacher) => (
-                  <button
-                    key={teacher.id}
-                    type="button"
-                    onClick={() => setSelectedTeacher(teacher)}
-                    className={`p-6 border-2 rounded-lg text-left transition-all ${
-                      selectedTeacher?.id === teacher.id
-                        ? 'border-green-500 bg-green-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <div className="text-lg font-semibold text-gray-900 mb-2">{teacher.name}</div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-yellow-500">★</span>
-                      <span className="text-sm text-gray-600">{teacher.rating}</span>
-                      <span className="text-sm text-gray-500">({teacher.totalStudents}명)</span>
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      {teacher.subjects.join(', ')}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* 온라인/대면 선택 */}
-          {selectedTeacher && !selectedTime && (
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-blue-600" />
-                수업 방식 선택
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {['온라인', '대면'].map((location) => (
-                  <button
-                    key={location}
-                    type="button"
-                    onClick={() => setSelectedLocation(location)}
-                    className={`p-6 border-2 rounded-lg text-center transition-all ${
-                      selectedLocation === location
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <div className="text-lg font-semibold text-gray-900 mb-2">{location}</div>
-                    <div className="text-sm text-gray-600">
-                      {location === '온라인' ? '화상 수업으로 진행' : '직접 만나서 수업'}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* 날짜 선택 */}
-          {selectedLocation && !selectedTime && (
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-purple-600" />
-                날짜 선택
-              </h2>
-              <div className="max-w-md">
-                <input
-                  type="date"
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  min={minDate}
-                  max={maxDate}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                />
-                {selectedDate && (
-                  <p className="text-sm text-gray-600 mt-2">
-                    선택된 날짜: {selectedDate} ({getDayOfWeek(selectedDate)})
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* 시간 선택 */}
-          {selectedDate && availableTimeSlots.length > 0 && !selectedTime && (
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <Clock className="w-5 h-5 text-orange-600" />
-                시간 선택
-              </h2>
-              {renderTimeSlots()}
-              {availableTimeSlots.every(slot => !slot.available) && (
-                <p className="text-sm text-gray-500 mt-4">
-                  선택하신 날짜에는 가능한 시간이 없습니다. 다른 날짜를 선택해주세요.
-                </p>
-              )}
-            </div>
-          )}
-
-          {/* 추가 정보 */}
-          {selectedTime && (
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <MessageSquare className="w-5 h-5 text-red-600" />
-                추가 정보
-              </h2>
-              
-              {/* 수업 장소 */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  수업 장소 (선택사항)
-                </label>
-                <input
-                  type="text"
-                  value={classroom}
-                  onChange={(e) => setClassroom(e.target.value)}
-                  placeholder="예: 1층 교실, 온라인 회의실 등"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                />
-              </div>
-
-              {/* 메모 */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  추가 메모 (선택사항)
-                </label>
-                <textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="선생님에게 전달할 요청사항이나 질문이 있으시면 입력해주세요."
-                  rows={3}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                />
-              </div>
-
-              {/* 규정 동의 */}
-              <div className="mb-4">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={agreedToTerms}
-                    onChange={(e) => setAgreedToTerms(e.target.checked)}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="text-sm text-gray-700">
-                    예약 규정 및 취소 정책에 동의합니다.
-                  </span>
-                </label>
-              </div>
-            </div>
-          )}
-
-          {/* 예약 요약 */}
-          <div className="bg-gray-50 rounded-lg p-4 mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">예약 요약</h3>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-600">코스:</span>
-                <span className="font-medium text-gray-900">{selectedCourse?.name || '선택되지 않음'}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">선생님:</span>
-                <span className="font-medium text-gray-900">{selectedTeacher?.name || '선택되지 않음'}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">날짜:</span>
-                <span className="font-medium text-gray-900">{selectedDate || '선택되지 않음'}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">시간:</span>
-                <span className="font-medium text-gray-900">{selectedTime || '선택되지 않음'}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">수업 시간:</span>
-                <span className="font-medium text-gray-900">{selectedDuration}분</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">수업 방식:</span>
-                <span className="font-medium text-gray-900">{selectedLocation || '선택되지 않음'}</span>
-              </div>
-              {classroom && (
-                <div className="flex justify-between">
-                  <span className="text-gray-600">수업 장소:</span>
-                  <span className="font-medium text-gray-900">{classroom}</span>
-                </div>
-              )}
-              {notes && (
-                <div className="flex justify-between">
-                  <span className="text-gray-600">메모:</span>
-                  <span className="font-medium text-gray-900">{notes}</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* 제출 버튼 */}
-          {selectedCourse && selectedTeacher && selectedLocation && selectedDate && selectedTime && (
-            <div className="flex justify-end gap-4">
-              <Link
-                href="/student/reservations"
-                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                취소
-              </Link>
-              <button
-                type="submit"
-                disabled={submitting || !agreedToTerms}
-                className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
-              >
-                {submitting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    예약 중...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle className="w-4 h-4" />
-                    예약하기
-                  </>
-                )}
-              </button>
-            </div>
-          )}
-        </form>
-
-        {/* 시간 확인 모달 */}
-        {showTimeConfirmModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl shadow-xl p-6 max-w-md w-full mx-4">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">시간 확인</h3>
-                <button
-                  onClick={handleTimeCancel}
-                  className="text-gray-400 hover:text-gray-600"
+        {/* 코스 선택 단계 */}
+        {step === "course" && (
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">
+              수업 코스 선택
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {courses.map((course) => (
+                <div
+                  key={course.id}
+                  onClick={() => handleCourseSelect(course)}
+                  className="border border-gray-200 rounded-lg p-6 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer"
                 >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-              
-              <div className="mb-6">
-                <p className="text-gray-600 mb-4">
-                  선택하신 시간으로 예약을 진행하시겠습니까?
-                </p>
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">날짜:</span>
-                      <span className="font-medium">{selectedDate} ({getDayOfWeek(selectedDate)})</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">시간:</span>
-                      <span className="font-medium">
-                        {tempSelectedTime} ~ {getEndTime(tempSelectedTime, selectedDuration)}
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {course.name}
+                    </h3>
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        course.level === "초급"
+                          ? "bg-green-100 text-green-700"
+                          : course.level === "중급"
+                            ? "bg-yellow-100 text-yellow-700"
+                            : "bg-red-100 text-red-700"
+                      }`}
+                    >
+                      {course.level}
+                    </span>
+                  </div>
+
+                  <p className="text-gray-600 mb-4">{course.description}</p>
+
+                  <div className="space-y-2 mb-4">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-gray-500" />
+                      <span className="text-sm text-gray-600">
+                        {course.duration}분
                       </span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">수업 시간:</span>
-                      <span className="font-medium">{selectedDuration}분</span>
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-gray-500" />
+                      <span className="text-sm text-gray-600">
+                        {course.type === "online"
+                          ? "온라인"
+                          : course.type === "offline"
+                            ? "대면"
+                            : "온라인/대면"}
+                      </span>
                     </div>
+                    {course.teacher && (
+                      <div className="flex items-center gap-2">
+                        <User className="w-4 h-4 text-gray-500" />
+                        <span className="text-sm text-gray-600">
+                          {course.teacher.name}
+                        </span>
+                        <div className="flex items-center gap-1">
+                          <Star className="w-3 h-3 text-yellow-500 fill-current" />
+                          <span className="text-xs text-gray-600">
+                            {course.teacher.rating}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="text-right">
+                    <span className="text-lg font-bold text-blue-600">
+                      {formatPrice(course.price)}원
+                    </span>
                   </div>
                 </div>
-              </div>
-              
-              <div className="flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={handleTimeCancel}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  돌아가기
-                </button>
-                <button
-                  type="button"
-                  onClick={handleTimeConfirm}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  확인
-                </button>
-              </div>
+              ))}
             </div>
           </div>
         )}
 
-        {/* 최종 확인 모달 */}
-        {showFinalConfirmModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl shadow-xl p-6 max-w-lg w-full mx-4">
+        {/* 날짜/시간 선택 단계 */}
+        {step === "datetime" && selectedCourse && (
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">
+              {selectedCourse.name} - 날짜 및 시간 선택
+            </h2>
+
+            {/* 달력 */}
+            <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">예약 최종 확인</h3>
-                <button
-                  onClick={() => setShowFinalConfirmModal(false)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+                <h3 className="text-lg font-medium text-gray-900">날짜 선택</h3>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() =>
+                      setCurrentMonth(
+                        new Date(
+                          currentMonth.getFullYear(),
+                          currentMonth.getMonth() - 1,
+                          1,
+                        ),
+                      )
+                    }
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                  <span className="text-lg font-medium text-gray-900">
+                    {currentMonth.toLocaleDateString("ko-KR", {
+                      year: "numeric",
+                      month: "long",
+                    })}
+                  </span>
+                  <button
+                    onClick={() =>
+                      setCurrentMonth(
+                        new Date(
+                          currentMonth.getFullYear(),
+                          currentMonth.getMonth() + 1,
+                          1,
+                        ),
+                      )
+                    }
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
-              
-              <div className="mb-6">
-                <p className="text-gray-600 mb-4">
-                  아래 정보로 예약을 확정하시겠습니까?
-                </p>
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">코스:</span>
-                      <span className="font-medium">{selectedCourse?.name}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">선생님:</span>
-                      <span className="font-medium">{selectedTeacher?.name}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">날짜:</span>
-                      <span className="font-medium">{selectedDate} ({getDayOfWeek(selectedDate)})</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">시간:</span>
-                      <span className="font-medium">
-                        {selectedTime} ~ {getEndTime(selectedTime, selectedDuration)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">수업 방식:</span>
-                      <span className="font-medium">{selectedLocation}</span>
-                    </div>
-                    {classroom && (
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">수업 장소:</span>
-                        <span className="font-medium">{classroom}</span>
+
+              <div className="grid grid-cols-7 gap-1">
+                {["일", "월", "화", "수", "목", "금", "토"].map((day) => (
+                  <div
+                    key={day}
+                    className="p-2 text-center text-sm font-medium text-gray-500"
+                  >
+                    {day}
+                  </div>
+                ))}
+                {days.map((day, index) => {
+                  const isCurrentMonth =
+                    day.getMonth() === currentMonth.getMonth();
+                  const isToday =
+                    day.toDateString() === new Date().toDateString();
+                  const isSelected =
+                    selectedDate === day.toISOString().split("T")[0];
+                  const isPast = day < new Date();
+
+                  return (
+                    <button
+                      key={index}
+                      onClick={() =>
+                        !isPast &&
+                        handleDateSelect(day.toISOString().split("T")[0])
+                      }
+                      disabled={isPast}
+                      className={`p-2 text-center text-sm rounded-lg transition-colors ${
+                        !isCurrentMonth
+                          ? "text-gray-300"
+                          : isPast
+                            ? "text-gray-400 cursor-not-allowed"
+                            : isSelected
+                              ? "bg-blue-600 text-white"
+                              : isToday
+                                ? "bg-blue-100 text-blue-700"
+                                : "hover:bg-gray-100"
+                      }`}
+                    >
+                      {day.getDate()}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 시간대 선택 */}
+            {selectedDate && (
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                  시간대 선택
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {timeSlots.map((timeSlot) => (
+                    <button
+                      key={timeSlot.id}
+                      onClick={() =>
+                        timeSlot.available && handleTimeSlotSelect(timeSlot)
+                      }
+                      disabled={!timeSlot.available}
+                      className={`p-4 rounded-lg border-2 transition-all ${
+                        timeSlot.available
+                          ? "border-gray-200 hover:border-blue-300 hover:shadow-md"
+                          : "border-gray-100 bg-gray-50 cursor-not-allowed"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="text-left">
+                          <div className="font-medium text-gray-900">
+                            {timeSlot.startTime} - {timeSlot.endTime}
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            {timeSlot.teacherName} • {timeSlot.location}
+                          </div>
+                        </div>
+                        <div
+                          className={`w-4 h-4 rounded-full border-2 ${
+                            timeSlot.available
+                              ? "border-blue-500"
+                              : "border-gray-300"
+                          }`}
+                        >
+                          {timeSlot.available && (
+                            <div className="w-2 h-2 bg-blue-500 rounded-full m-0.5"></div>
+                          )}
+                        </div>
                       </div>
-                    )}
-                    {notes && (
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">메모:</span>
-                        <span className="font-medium">{notes}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* 예약 확인 단계 */}
+        {step === "confirm" && selectedCourse && selectedTimeSlot && (
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">
+              예약 정보 확인
+            </h2>
+
+            <div className="space-y-6">
+              {/* 예약 정보 */}
+              <div className="bg-blue-50 rounded-lg p-6">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                  예약 정보
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-center gap-3">
+                    <BookOpen className="w-5 h-5 text-blue-600" />
+                    <div>
+                      <div className="text-sm text-gray-600">수업 코스</div>
+                      <div className="font-medium text-gray-900">
+                        {selectedCourse.name}
                       </div>
-                    )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Calendar className="w-5 h-5 text-green-600" />
+                    <div>
+                      <div className="text-sm text-gray-600">수업 날짜</div>
+                      <div className="font-medium text-gray-900">
+                        {new Date(selectedDate).toLocaleDateString("ko-KR", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                          weekday: "long",
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Clock className="w-5 h-5 text-purple-600" />
+                    <div>
+                      <div className="text-sm text-gray-600">수업 시간</div>
+                      <div className="font-medium text-gray-900">
+                        {selectedTimeSlot.startTime} -{" "}
+                        {selectedTimeSlot.endTime}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <User className="w-5 h-5 text-orange-600" />
+                    <div>
+                      <div className="text-sm text-gray-600">담당 선생님</div>
+                      <div className="font-medium text-gray-900">
+                        {selectedTimeSlot.teacherName}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-              
-              <div className="flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowFinalConfirmModal(false)}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  돌아가기
+
+              {/* Zoom 링크 (온라인 수업인 경우) */}
+              {selectedTimeSlot.location === "온라인" && (
+                <div className="bg-green-50 rounded-lg p-6">
+                  <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
+                    <Video className="w-5 h-5 text-green-600" />
+                    Zoom 링크
+                  </h3>
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1">
+                      <div className="text-sm text-gray-600 mb-1">
+                        수업 링크
+                      </div>
+                      <div className="font-medium text-gray-900">
+                        https://zoom.us/j/123456789
+                      </div>
+                    </div>
+                    <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                      <ExternalLink className="w-4 h-4" />
+                      링크 열기
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* 예약 규정 동의 */}
+              <div className="bg-yellow-50 rounded-lg p-6">
+                <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center gap-2">
+                  <Shield className="w-5 h-5 text-yellow-600" />
+                  예약 규정 동의
+                </h3>
+                <div className="space-y-3">
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={reservationData.agreedToTerms}
+                      onChange={(e) =>
+                        setReservationData((prev) => ({
+                          ...prev,
+                          agreedToTerms: e.target.checked,
+                        }))
+                      }
+                      className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <div className="text-sm text-gray-700">
+                      <div className="font-medium mb-1">
+                        예약 규정에 동의합니다
+                      </div>
+                      <div className="text-gray-600">
+                        • 수업 24시간 전까지 취소 가능
+                        <br />
+                        • 수업 시작 10분 전까지 입장
+                        <br />• 개인정보 수집 및 이용에 동의
+                      </div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              {/* 메모 입력 */}
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                  메모 (선택사항)
+                </h3>
+                <textarea
+                  value={reservationData.notes}
+                  onChange={(e) =>
+                    setReservationData((prev) => ({
+                      ...prev,
+                      notes: e.target.value,
+                    }))
+                  }
+                  placeholder="선생님께 전달할 메모를 입력하세요..."
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  rows={3}
+                />
+              </div>
+            </div>
+
+            {/* 예약 버튼 */}
+            <div className="mt-8 flex justify-end">
+              <button
+                onClick={handleConfirmReservation}
+                disabled={!reservationData.agreedToTerms || loading}
+                className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {loading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    예약 중...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-5 h-5" />
+                    예약 확인
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* 예약 완료 단계 */}
+        {step === "complete" && (
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <CheckCircle className="w-8 h-8 text-green-600" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                예약이 완료되었습니다!
+              </h2>
+              <p className="text-gray-600 mb-8">
+                수업 전에 알림을 받으실 수 있습니다.
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <button className="flex items-center justify-center gap-2 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                  <CalendarPlus className="w-5 h-5 text-blue-600" />
+                  <span className="font-medium">캘린더에 추가</span>
+                </button>
+                <button className="flex items-center justify-center gap-2 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                  <Download className="w-5 h-5 text-green-600" />
+                  <span className="font-medium">확인서 다운로드</span>
                 </button>
                 <button
-                  type="button"
-                  onClick={handleFinalSubmit}
-                  disabled={submitting}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center gap-2"
+                  onClick={() => {
+                    setStep("course");
+                    setSelectedCourse(null);
+                    setSelectedDate("");
+                    setSelectedTimeSlot(null);
+                    setReservationData({
+                      courseId: "",
+                      date: "",
+                      timeSlotId: "",
+                      notes: "",
+                      agreedToTerms: false,
+                    });
+                  }}
+                  className="flex items-center justify-center gap-2 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                 >
-                  {submitting ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      예약 중...
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle className="w-4 h-4" />
-                      예약 확정
-                    </>
-                  )}
+                  <ArrowRight className="w-5 h-5 text-purple-600" />
+                  <span className="font-medium">계속 예약하기</span>
+                </button>
+              </div>
+
+              <div className="flex justify-center gap-4">
+                <button
+                  onClick={() => router.push("/student/reservations")}
+                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  예약 목록 보기
+                </button>
+                <button
+                  onClick={() => router.push("/student/dashboard")}
+                  className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  대시보드로 이동
                 </button>
               </div>
             </div>
@@ -869,4 +773,4 @@ export default function NewReservationPage() {
       </div>
     </div>
   );
-} 
+}

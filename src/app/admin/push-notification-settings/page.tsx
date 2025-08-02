@@ -1,13 +1,22 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Bell, Plus, Edit, Trash2, Send, Eye, EyeOff, Search, Filter, Clock, Users, MessageSquare } from 'lucide-react';
+import { useState, useEffect } from "react";
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Send,
+  Search,
+  Filter,
+  Clock,
+  Users,
+} from "lucide-react";
 
 interface NotificationType {
   id: string;
   name: string;
   description: string;
-  category: 'reservation' | 'payment' | 'reminder' | 'announcement' | 'custom';
+  category: "reservation" | "payment" | "reminder" | "announcement" | "custom";
   isActive: boolean;
   template: string;
   variables: string[];
@@ -18,7 +27,7 @@ interface NotificationType {
 
 interface NotificationCondition {
   field: string;
-  operator: 'equals' | 'contains' | 'greater_than' | 'less_than';
+  operator: "equals" | "contains" | "greater_than" | "less_than";
   value: string;
 }
 
@@ -29,22 +38,32 @@ interface NotificationHistory {
   message: string;
   recipients: number;
   sentAt: string;
-  status: 'sent' | 'failed' | 'pending';
+  status: "sent" | "failed" | "pending";
   successCount: number;
   failureCount: number;
 }
 
 export default function PushNotificationSettingsPage() {
-  const [notificationTypes, setNotificationTypes] = useState<NotificationType[]>([]);
-  const [notificationHistory, setNotificationHistory] = useState<NotificationHistory[]>([]);
+  const [notificationTypes, setNotificationTypes] = useState<
+    NotificationType[]
+  >([]);
+  const [notificationHistory, setNotificationHistory] = useState<
+    NotificationHistory[]
+  >([]);
   const [filteredTypes, setFilteredTypes] = useState<NotificationType[]>([]);
-  const [filteredHistory, setFilteredHistory] = useState<NotificationHistory[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<'all' | 'reservation' | 'payment' | 'reminder' | 'announcement' | 'custom'>('all');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
+  const [filteredHistory, setFilteredHistory] = useState<NotificationHistory[]>(
+    [],
+  );
+  const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<
+    "all" | "reservation" | "payment" | "reminder" | "announcement" | "custom"
+  >("all");
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "active" | "inactive"
+  >("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingType, setEditingType] = useState<NotificationType | null>(null);
-  const [activeTab, setActiveTab] = useState<'types' | 'history'>('types');
+  const [activeTab, setActiveTab] = useState<"types" | "history">("types");
   const [loading, setLoading] = useState(true);
 
   // 샘플 데이터
@@ -52,95 +71,105 @@ export default function PushNotificationSettingsPage() {
     setTimeout(() => {
       const sampleTypes: NotificationType[] = [
         {
-          id: '1',
-          name: '예약 확인 알림',
-          description: '학생이 예약을 완료했을 때 발송되는 알림',
-          category: 'reservation',
+          id: "1",
+          name: "예약 확인 알림",
+          description: "학생이 예약을 완료했을 때 발송되는 알림",
+          category: "reservation",
           isActive: true,
-          template: '안녕하세요, {student_name}님! {date} {time}에 {service_name} 수업이 예약되었습니다.',
-          variables: ['student_name', 'date', 'time', 'service_name'],
+          template:
+            "안녕하세요, {student_name}님! {date} {time}에 {service_name} 수업이 예약되었습니다.",
+          variables: ["student_name", "date", "time", "service_name"],
           conditions: [
-            { field: 'reservation_status', operator: 'equals', value: 'confirmed' }
+            {
+              field: "reservation_status",
+              operator: "equals",
+              value: "confirmed",
+            },
           ],
-          createdAt: '2024-01-15',
-          updatedAt: '2024-01-15'
+          createdAt: "2024-01-15",
+          updatedAt: "2024-01-15",
         },
         {
-          id: '2',
-          name: '수업 전날 리마인더',
-          description: '수업 전날 학생에게 발송되는 리마인더',
-          category: 'reminder',
+          id: "2",
+          name: "수업 전날 리마인더",
+          description: "수업 전날 학생에게 발송되는 리마인더",
+          category: "reminder",
           isActive: true,
-          template: '내일 {date} {time}에 {service_name} 수업이 있습니다. 준비물을 확인해주세요!',
-          variables: ['date', 'time', 'service_name'],
+          template:
+            "내일 {date} {time}에 {service_name} 수업이 있습니다. 준비물을 확인해주세요!",
+          variables: ["date", "time", "service_name"],
           conditions: [
-            { field: 'days_before', operator: 'equals', value: '1' }
+            { field: "days_before", operator: "equals", value: "1" },
           ],
-          createdAt: '2024-01-15',
-          updatedAt: '2024-01-15'
+          createdAt: "2024-01-15",
+          updatedAt: "2024-01-15",
         },
         {
-          id: '3',
-          name: '결제 완료 알림',
-          description: '결제가 완료되었을 때 발송되는 알림',
-          category: 'payment',
+          id: "3",
+          name: "결제 완료 알림",
+          description: "결제가 완료되었을 때 발송되는 알림",
+          category: "payment",
           isActive: true,
-          template: '결제가 완료되었습니다. 결제 금액: {amount}원, 남은 수업: {remaining_lessons}회',
-          variables: ['amount', 'remaining_lessons'],
+          template:
+            "결제가 완료되었습니다. 결제 금액: {amount}원, 남은 수업: {remaining_lessons}회",
+          variables: ["amount", "remaining_lessons"],
           conditions: [
-            { field: 'payment_status', operator: 'equals', value: 'completed' }
+            { field: "payment_status", operator: "equals", value: "completed" },
           ],
-          createdAt: '2024-01-15',
-          updatedAt: '2024-01-15'
+          createdAt: "2024-01-15",
+          updatedAt: "2024-01-15",
         },
         {
-          id: '4',
-          name: '공지사항',
-          description: '중요한 공지사항을 모든 학생에게 발송',
-          category: 'announcement',
+          id: "4",
+          name: "공지사항",
+          description: "중요한 공지사항을 모든 학생에게 발송",
+          category: "announcement",
           isActive: false,
-          template: '[공지] {title}\n\n{content}',
-          variables: ['title', 'content'],
+          template: "[공지] {title}\n\n{content}",
+          variables: ["title", "content"],
           conditions: [],
-          createdAt: '2024-01-15',
-          updatedAt: '2024-01-15'
-        }
+          createdAt: "2024-01-15",
+          updatedAt: "2024-01-15",
+        },
       ];
 
       const sampleHistory: NotificationHistory[] = [
         {
-          id: '1',
-          typeId: '1',
-          typeName: '예약 확인 알림',
-          message: '안녕하세요, 김학생님! 2024-01-20 14:00에 영어회화 수업이 예약되었습니다.',
+          id: "1",
+          typeId: "1",
+          typeName: "예약 확인 알림",
+          message:
+            "안녕하세요, 김학생님! 2024-01-20 14:00에 영어회화 수업이 예약되었습니다.",
           recipients: 25,
-          sentAt: '2024-01-15 14:30',
-          status: 'sent',
+          sentAt: "2024-01-15 14:30",
+          status: "sent",
           successCount: 24,
-          failureCount: 1
+          failureCount: 1,
         },
         {
-          id: '2',
-          typeId: '2',
-          typeName: '수업 전날 리마인더',
-          message: '내일 2024-01-16 15:00에 수학 수업이 있습니다. 준비물을 확인해주세요!',
+          id: "2",
+          typeId: "2",
+          typeName: "수업 전날 리마인더",
+          message:
+            "내일 2024-01-16 15:00에 수학 수업이 있습니다. 준비물을 확인해주세요!",
           recipients: 18,
-          sentAt: '2024-01-15 09:00',
-          status: 'sent',
+          sentAt: "2024-01-15 09:00",
+          status: "sent",
           successCount: 17,
-          failureCount: 1
+          failureCount: 1,
         },
         {
-          id: '3',
-          typeId: '3',
-          typeName: '결제 완료 알림',
-          message: '결제가 완료되었습니다. 결제 금액: 100,000원, 남은 수업: 10회',
+          id: "3",
+          typeId: "3",
+          typeName: "결제 완료 알림",
+          message:
+            "결제가 완료되었습니다. 결제 금액: 100,000원, 남은 수업: 10회",
           recipients: 5,
-          sentAt: '2024-01-14 16:45',
-          status: 'sent',
+          sentAt: "2024-01-14 16:45",
+          status: "sent",
           successCount: 5,
-          failureCount: 0
-        }
+          failureCount: 0,
+        },
       ];
 
       setNotificationTypes(sampleTypes);
@@ -153,46 +182,56 @@ export default function PushNotificationSettingsPage() {
 
   // 검색 및 필터링
   useEffect(() => {
-    let filtered = activeTab === 'types' ? notificationTypes : notificationHistory;
+    let filtered =
+      activeTab === "types" ? notificationTypes : notificationHistory;
 
-    if (activeTab === 'types') {
+    if (activeTab === "types") {
       const types = notificationTypes as NotificationType[];
-      
+
       // 검색 필터
       if (searchTerm) {
-        filtered = types.filter(type =>
-          type.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          type.description.toLowerCase().includes(searchTerm.toLowerCase())
+        filtered = types.filter(
+          (type) =>
+            type.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            type.description.toLowerCase().includes(searchTerm.toLowerCase()),
         );
       }
 
       // 카테고리 필터
-      if (categoryFilter !== 'all') {
-        filtered = filtered.filter(type => type.category === categoryFilter);
+      if (categoryFilter !== "all") {
+        filtered = filtered.filter((type) => type.category === categoryFilter);
       }
 
       // 상태 필터
-      if (statusFilter !== 'all') {
-        filtered = filtered.filter(type =>
-          statusFilter === 'active' ? type.isActive : !type.isActive
+      if (statusFilter !== "all") {
+        filtered = filtered.filter((type) =>
+          statusFilter === "active" ? type.isActive : !type.isActive,
         );
       }
 
       setFilteredTypes(filtered as NotificationType[]);
     } else {
       const history = notificationHistory as NotificationHistory[];
-      
+
       // 검색 필터
       if (searchTerm) {
-        filtered = history.filter(item =>
-          item.typeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.message.toLowerCase().includes(searchTerm.toLowerCase())
+        filtered = history.filter(
+          (item) =>
+            item.typeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            item.message.toLowerCase().includes(searchTerm.toLowerCase()),
         );
       }
 
       setFilteredHistory(filtered as NotificationHistory[]);
     }
-  }, [notificationTypes, notificationHistory, searchTerm, categoryFilter, statusFilter, activeTab]);
+  }, [
+    notificationTypes,
+    notificationHistory,
+    searchTerm,
+    categoryFilter,
+    statusFilter,
+    activeTab,
+  ]);
 
   const handleAddNotificationType = () => {
     setEditingType(null);
@@ -205,44 +244,44 @@ export default function PushNotificationSettingsPage() {
   };
 
   const handleDeleteNotificationType = (id: string) => {
-    if (confirm('정말로 이 알림 유형을 삭제하시겠습니까?')) {
-      setNotificationTypes(prev => prev.filter(type => type.id !== id));
+    if (confirm("정말로 이 알림 유형을 삭제하시겠습니까?")) {
+      setNotificationTypes((prev) => prev.filter((type) => type.id !== id));
     }
   };
 
   const handleToggleStatus = (id: string) => {
-    setNotificationTypes(prev =>
-      prev.map(type =>
-        type.id === id
-          ? { ...type, isActive: !type.isActive }
-          : type
-      )
+    setNotificationTypes((prev) =>
+      prev.map((type) =>
+        type.id === id ? { ...type, isActive: !type.isActive } : type,
+      ),
     );
   };
 
-  const handleSaveNotificationType = (typeData: Omit<NotificationType, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const handleSaveNotificationType = (
+    typeData: Omit<NotificationType, "id" | "createdAt" | "updatedAt">,
+  ) => {
     if (editingType) {
       // 편집
-      setNotificationTypes(prev =>
-        prev.map(type =>
+      setNotificationTypes((prev) =>
+        prev.map((type) =>
           type.id === editingType.id
             ? {
                 ...type,
                 ...typeData,
-                updatedAt: new Date().toISOString().split('T')[0]
+                updatedAt: new Date().toISOString().split("T")[0],
               }
-            : type
-        )
+            : type,
+        ),
       );
     } else {
       // 추가
       const newType: NotificationType = {
         id: Date.now().toString(),
         ...typeData,
-        createdAt: new Date().toISOString().split('T')[0],
-        updatedAt: new Date().toISOString().split('T')[0]
+        createdAt: new Date().toISOString().split("T")[0],
+        updatedAt: new Date().toISOString().split("T")[0],
       };
-      setNotificationTypes(prev => [...prev, newType]);
+      setNotificationTypes((prev) => [...prev, newType]);
     }
     setIsModalOpen(false);
     setEditingType(null);
@@ -266,7 +305,9 @@ export default function PushNotificationSettingsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">푸시 알림 관리</h1>
-          <p className="text-gray-600">알림 유형을 정의하고 발송 이력을 관리합니다.</p>
+          <p className="text-gray-600">
+            알림 유형을 정의하고 발송 이력을 관리합니다.
+          </p>
         </div>
         <button
           onClick={handleAddNotificationType}
@@ -281,21 +322,21 @@ export default function PushNotificationSettingsPage() {
       <div className="border-b border-gray-200">
         <nav className="-mb-px flex space-x-8">
           <button
-            onClick={() => setActiveTab('types')}
+            onClick={() => setActiveTab("types")}
             className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'types'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              activeTab === "types"
+                ? "border-blue-500 text-blue-600"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
             }`}
           >
             알림 유형
           </button>
           <button
-            onClick={() => setActiveTab('history')}
+            onClick={() => setActiveTab("history")}
             className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'history'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              activeTab === "history"
+                ? "border-blue-500 text-blue-600"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
             }`}
           >
             발송 이력
@@ -311,14 +352,18 @@ export default function PushNotificationSettingsPage() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
-                placeholder={activeTab === 'types' ? '알림 유형명 또는 설명으로 검색...' : '알림 유형명 또는 메시지로 검색...'}
+                placeholder={
+                  activeTab === "types"
+                    ? "알림 유형명 또는 설명으로 검색..."
+                    : "알림 유형명 또는 메시지로 검색..."
+                }
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
           </div>
-          {activeTab === 'types' && (
+          {activeTab === "types" && (
             <div className="flex items-center space-x-2">
               <Filter className="w-4 h-4 text-gray-400" />
               <select
@@ -335,7 +380,11 @@ export default function PushNotificationSettingsPage() {
               </select>
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'inactive')}
+                onChange={(e) =>
+                  setStatusFilter(
+                    e.target.value as "all" | "active" | "inactive",
+                  )
+                }
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="all">전체 상태</option>
@@ -348,7 +397,7 @@ export default function PushNotificationSettingsPage() {
       </div>
 
       {/* 알림 유형 목록 */}
-      {activeTab === 'types' && (
+      {activeTab === "types" && (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -379,35 +428,48 @@ export default function PushNotificationSettingsPage() {
                   <tr key={type.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
-                        <div className="text-sm font-medium text-gray-900">{type.name}</div>
-                        <div className="text-sm text-gray-500">{type.description}</div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {type.name}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {type.description}
+                        </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
                         className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          type.category === 'reservation' ? 'bg-blue-100 text-blue-800' :
-                          type.category === 'payment' ? 'bg-green-100 text-green-800' :
-                          type.category === 'reminder' ? 'bg-yellow-100 text-yellow-800' :
-                          type.category === 'announcement' ? 'bg-purple-100 text-purple-800' :
-                          'bg-gray-100 text-gray-800'
+                          type.category === "reservation"
+                            ? "bg-blue-100 text-blue-800"
+                            : type.category === "payment"
+                              ? "bg-green-100 text-green-800"
+                              : type.category === "reminder"
+                                ? "bg-yellow-100 text-yellow-800"
+                                : type.category === "announcement"
+                                  ? "bg-purple-100 text-purple-800"
+                                  : "bg-gray-100 text-gray-800"
                         }`}
                       >
-                        {type.category === 'reservation' ? '예약' :
-                         type.category === 'payment' ? '결제' :
-                         type.category === 'reminder' ? '리마인더' :
-                         type.category === 'announcement' ? '공지사항' : '커스텀'}
+                        {type.category === "reservation"
+                          ? "예약"
+                          : type.category === "payment"
+                            ? "결제"
+                            : type.category === "reminder"
+                              ? "리마인더"
+                              : type.category === "announcement"
+                                ? "공지사항"
+                                : "커스텀"}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
                         className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                           type.isActive
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-gray-100 text-gray-800'
+                            ? "bg-green-100 text-green-800"
+                            : "bg-gray-100 text-gray-800"
                         }`}
                       >
-                        {type.isActive ? '활성' : '비활성'}
+                        {type.isActive ? "활성" : "비활성"}
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -440,11 +502,11 @@ export default function PushNotificationSettingsPage() {
                           onClick={() => handleToggleStatus(type.id)}
                           className={`px-2 py-1 text-xs rounded ${
                             type.isActive
-                              ? 'text-orange-600 hover:text-orange-900'
-                              : 'text-green-600 hover:text-green-900'
+                              ? "text-orange-600 hover:text-orange-900"
+                              : "text-green-600 hover:text-green-900"
                           }`}
                         >
-                          {type.isActive ? '비활성화' : '활성화'}
+                          {type.isActive ? "비활성화" : "활성화"}
                         </button>
                         <button
                           onClick={() => handleEditNotificationType(type)}
@@ -475,7 +537,7 @@ export default function PushNotificationSettingsPage() {
       )}
 
       {/* 발송 이력 */}
-      {activeTab === 'history' && (
+      {activeTab === "history" && (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -505,7 +567,9 @@ export default function PushNotificationSettingsPage() {
                 {filteredHistory.map((item) => (
                   <tr key={item.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{item.typeName}</div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {item.typeName}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-900 max-w-xs truncate">
@@ -515,7 +579,9 @@ export default function PushNotificationSettingsPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <Users className="w-4 h-4 text-gray-400 mr-1" />
-                        <span className="text-sm text-gray-900">{item.recipients}명</span>
+                        <span className="text-sm text-gray-900">
+                          {item.recipients}명
+                        </span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -527,15 +593,18 @@ export default function PushNotificationSettingsPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
                         className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          item.status === 'sent'
-                            ? 'bg-green-100 text-green-800'
-                            : item.status === 'failed'
-                            ? 'bg-red-100 text-red-800'
-                            : 'bg-yellow-100 text-yellow-800'
+                          item.status === "sent"
+                            ? "bg-green-100 text-green-800"
+                            : item.status === "failed"
+                              ? "bg-red-100 text-red-800"
+                              : "bg-yellow-100 text-yellow-800"
                         }`}
                       >
-                        {item.status === 'sent' ? '발송 완료' :
-                         item.status === 'failed' ? '발송 실패' : '발송 중'}
+                        {item.status === "sent"
+                          ? "발송 완료"
+                          : item.status === "failed"
+                            ? "발송 실패"
+                            : "발송 중"}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -575,26 +644,32 @@ export default function PushNotificationSettingsPage() {
 // 알림 유형 모달 컴포넌트
 interface NotificationTypeModalProps {
   type: NotificationType | null;
-  onSave: (data: Omit<NotificationType, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  onSave: (
+    data: Omit<NotificationType, "id" | "createdAt" | "updatedAt">,
+  ) => void;
   onClose: () => void;
 }
 
-function NotificationTypeModal({ type, onSave, onClose }: NotificationTypeModalProps) {
+function NotificationTypeModal({
+  type,
+  onSave,
+  onClose,
+}: NotificationTypeModalProps) {
   const [formData, setFormData] = useState({
-    name: type?.name || '',
-    description: type?.description || '',
-    category: type?.category || 'custom' as any,
+    name: type?.name || "",
+    description: type?.description || "",
+    category: type?.category || ("custom" as any),
     isActive: type?.isActive ?? true,
-    template: type?.template || '',
+    template: type?.template || "",
     variables: type?.variables || [],
-    conditions: type?.conditions || []
+    conditions: type?.conditions || [],
   });
 
-  const [newVariable, setNewVariable] = useState('');
+  const [newVariable, setNewVariable] = useState("");
   const [newCondition, setNewCondition] = useState({
-    field: '',
-    operator: 'equals' as 'equals' | 'contains' | 'greater_than' | 'less_than',
-    value: ''
+    field: "",
+    operator: "equals" as "equals" | "contains" | "greater_than" | "less_than",
+    value: "",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -604,39 +679,39 @@ function NotificationTypeModal({ type, onSave, onClose }: NotificationTypeModalP
 
   const handleAddVariable = () => {
     if (newVariable && !formData.variables.includes(newVariable)) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        variables: [...prev.variables, newVariable]
+        variables: [...prev.variables, newVariable],
       }));
-      setNewVariable('');
+      setNewVariable("");
     }
   };
 
   const handleRemoveVariable = (variable: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      variables: prev.variables.filter(v => v !== variable)
+      variables: prev.variables.filter((v) => v !== variable),
     }));
   };
 
   const handleAddCondition = () => {
     if (newCondition.field && newCondition.value) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        conditions: [...prev.conditions, { ...newCondition }]
+        conditions: [...prev.conditions, { ...newCondition }],
       }));
       setNewCondition({
-        field: '',
-        operator: 'equals',
-        value: ''
+        field: "",
+        operator: "equals",
+        value: "",
       });
     }
   };
 
   const handleRemoveCondition = (index: number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      conditions: prev.conditions.filter((_, i) => i !== index)
+      conditions: prev.conditions.filter((_, i) => i !== index),
     }));
   };
 
@@ -644,9 +719,9 @@ function NotificationTypeModal({ type, onSave, onClose }: NotificationTypeModalP
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
         <h2 className="text-lg font-semibold mb-4">
-          {type ? '알림 유형 편집' : '알림 유형 추가'}
+          {type ? "알림 유형 편집" : "알림 유형 추가"}
         </h2>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -657,7 +732,9 @@ function NotificationTypeModal({ type, onSave, onClose }: NotificationTypeModalP
                 type="text"
                 required
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="예: 예약 확인 알림"
               />
@@ -669,7 +746,9 @@ function NotificationTypeModal({ type, onSave, onClose }: NotificationTypeModalP
               </label>
               <select
                 value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
+                onChange={(e) =>
+                  setFormData({ ...formData, category: e.target.value as any })
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="reservation">예약</option>
@@ -687,7 +766,9 @@ function NotificationTypeModal({ type, onSave, onClose }: NotificationTypeModalP
             </label>
             <textarea
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               rows={2}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="알림 유형에 대한 설명을 입력하세요"
@@ -701,13 +782,16 @@ function NotificationTypeModal({ type, onSave, onClose }: NotificationTypeModalP
             <textarea
               required
               value={formData.template}
-              onChange={(e) => setFormData({ ...formData, template: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, template: e.target.value })
+              }
               rows={3}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="예: 안녕하세요, {student_name}님! {date} {time}에 {service_name} 수업이 예약되었습니다."
             />
             <p className="text-xs text-gray-500 mt-1">
-              중괄호 {} 안에 변수를 사용할 수 있습니다. 예: {student_name}, {date}, {time}
+              중괄호 {} 안에 변수를 사용할 수 있습니다. 예: {student_name},{" "}
+              {date}, {time}
             </p>
           </div>
 
@@ -761,13 +845,20 @@ function NotificationTypeModal({ type, onSave, onClose }: NotificationTypeModalP
                 <input
                   type="text"
                   value={newCondition.field}
-                  onChange={(e) => setNewCondition({ ...newCondition, field: e.target.value })}
+                  onChange={(e) =>
+                    setNewCondition({ ...newCondition, field: e.target.value })
+                  }
                   placeholder="필드명"
                   className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
                 <select
                   value={newCondition.operator}
-                  onChange={(e) => setNewCondition({ ...newCondition, operator: e.target.value as any })}
+                  onChange={(e) =>
+                    setNewCondition({
+                      ...newCondition,
+                      operator: e.target.value as any,
+                    })
+                  }
                   className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="equals">같음</option>
@@ -778,7 +869,9 @@ function NotificationTypeModal({ type, onSave, onClose }: NotificationTypeModalP
                 <input
                   type="text"
                   value={newCondition.value}
-                  onChange={(e) => setNewCondition({ ...newCondition, value: e.target.value })}
+                  onChange={(e) =>
+                    setNewCondition({ ...newCondition, value: e.target.value })
+                  }
                   placeholder="값"
                   className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
@@ -792,7 +885,10 @@ function NotificationTypeModal({ type, onSave, onClose }: NotificationTypeModalP
               </button>
               <div className="space-y-1">
                 {formData.conditions.map((condition, index) => (
-                  <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-2 bg-gray-50 rounded"
+                  >
                     <span className="text-sm">
                       {condition.field} {condition.operator} {condition.value}
                     </span>
@@ -814,10 +910,15 @@ function NotificationTypeModal({ type, onSave, onClose }: NotificationTypeModalP
               type="checkbox"
               id="isActive"
               checked={formData.isActive}
-              onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+              onChange={(e) =>
+                setFormData({ ...formData, isActive: e.target.checked })
+              }
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
-            <label htmlFor="isActive" className="ml-2 block text-sm text-gray-900">
+            <label
+              htmlFor="isActive"
+              className="ml-2 block text-sm text-gray-900"
+            >
               활성 상태
             </label>
           </div>
@@ -834,11 +935,11 @@ function NotificationTypeModal({ type, onSave, onClose }: NotificationTypeModalP
               type="submit"
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
-              {type ? '수정' : '추가'}
+              {type ? "수정" : "추가"}
             </button>
           </div>
         </form>
       </div>
     </div>
   );
-} 
+}

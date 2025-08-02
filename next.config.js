@@ -3,7 +3,7 @@ const nextConfig = {
   // output: 'export', // 정적 사이트 생성 비활성화
   trailingSlash: true,
   images: {
-    unoptimized: true
+    unoptimized: true,
   },
   // ESLint 오류 무시
   eslint: {
@@ -23,4 +23,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig; 
+module.exports = nextConfig;

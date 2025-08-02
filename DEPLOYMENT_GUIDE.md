@@ -1,217 +1,140 @@
-# Production Deployment Guide
+# 🚀 운영 환경 전용 배포 가이드
 
-This guide explains how to deploy the booking system directly to production using Vercel with automatic deployments from GitHub.
+## 📋 개요
 
-## 🚀 Production Setup
+이 프로젝트는 **운영 환경 전용** 시스템으로 구성되어 있습니다.
 
-### 1. Vercel Configuration
+- **운영 서버**: `https://app.hanguru.school`
+- **테스트/개발 환경**: 접근 금지 및 자동 리다이렉트
 
-The project is configured for automatic deployment to `https://app.hanguru.school` via Vercel.
+## 🔒 보안 설정
 
-#### Key Configuration Files:
-- `vercel.json` - Vercel deployment configuration
-- `next.config.ts` - Next.js production optimizations
-- `package.json` - Build scripts optimized for production
+### 1. Vercel 설정
 
-### 2. Environment Variables
-
-All production environment variables are configured in `vercel.json`:
-
-#### Database Configuration:
 ```json
-"DATABASE_URL": "postgresql://malmoi_admin:malmoi_admin_password_2024@malmoi-system-db-tokyo.crooggsemeim.ap-northeast-1.rds.amazonaws.com:5432/malmoi_system?sslmode=require"
+{
+  "git": {
+    "deploymentEnabled": {
+      "main": true,
+      "preview": false,
+      "dev": false
+    }
+  }
+}
 ```
 
-#### AWS Configuration:
-```json
-"AWS_REGION": "ap-northeast-1",
-"AWS_ACCESS_KEY_ID": "your-access-key",
-"AWS_SECRET_ACCESS_KEY": "your-secret-key",
-"S3_BUCKET_NAME": "malmoi-system-files"
-```
+### 2. GitHub 브랜치 보호
 
-#### Cognito Configuration:
-```json
-"COGNITO_USER_POOL_ID": "ap-northeast-1_ojlXfDMDm",
-"COGNITO_CLIENT_ID": "4bdn0n9r92huqpcs21e0th1nve"
-```
+- `main` 브랜치 Force push 금지
+- 병합 전 PR 리뷰 필수
+- CI/CD 체크 통과 후에만 병합 허용
+- 특정 관리자 계정 외 push 금지
 
-### 3. Automatic Deployment Workflow
+### 3. 팀 권한 설정
 
-#### GitHub Actions (`/.github/workflows/deploy.yml`):
-- Triggers on push to `main` branch
-- Runs type checking and linting
-- Builds the application
-- Deploys to Vercel production environment
+- **Developer**: 배포 불가, 코드 읽기만 가능
+- **Owner/Admin**: 실제 배포 가능
 
-#### Deployment Process:
-1. **Code Push**: Push changes to `main` branch
-2. **GitHub Actions**: Automatically runs tests and builds
-3. **Vercel Deployment**: Deploys to production domain
-4. **Live Update**: Site is immediately available at `https://app.hanguru.school`
+## 🛠️ 개발 및 배포 흐름
 
-### 4. Production Optimizations
+### 로컬 개발
 
-#### Build Optimizations:
-- Prisma client generation during build
-- SWC minification enabled
-- Bundle splitting for vendor code
-- Image optimization with WebP/AVIF support
-
-#### Security Headers:
-- X-Frame-Options: SAMEORIGIN
-- X-Content-Type-Options: nosniff
-- Referrer-Policy: strict-origin-when-cross-origin
-
-#### Performance Optimizations:
-- Automatic code splitting
-- Static asset optimization
-- CDN distribution via Vercel
-
-### 5. Development Workflow
-
-#### Local Development:
 ```bash
-npm run dev          # Start development server
-npm run build        # Build for production
-npm run lint         # Run linting
-npm run type-check   # Run TypeScript checks
+# 로컬에서 개발 (테스트용)
+npm run dev
+
+# 빌드 테스트
+npm run build
+npm run type-check
+npm run lint
 ```
 
-#### Production Deployment:
+### 운영 배포
+
 ```bash
+# main 브랜치에 푸시 시 자동 배포
 git add .
-git commit -m "Your commit message"
+git commit -m "기능 추가"
 git push origin main
-# Automatic deployment to production
 ```
 
-### 6. Monitoring and Maintenance
+## ⚠️ 환경 경고 시스템
 
-#### Health Checks:
-- Production health endpoint: `https://app.hanguru.school/api/health`
-- Database connectivity monitoring
-- AWS service status monitoring
+### 비운영 환경 접속 시
 
-#### Error Monitoring:
-- Vercel function logs
-- Database connection monitoring
-- API error tracking
+- **경고 메시지**: "現在の環境はテスト用のため、正式な動作を保証していません。必ず https://app.hanguru.school を使用してください。"
+- **자동 리다이렉트**: 5초 후 운영 서버로 이동
+- **수동 이동**: 버튼 클릭으로 즉시 이동
 
-### 7. Rollback Strategy
+### 지원 환경
 
-If issues occur in production:
+- ✅ `https://app.hanguru.school` - 정상 작동
+- ❌ `localhost:3000` - 경고 후 리다이렉트
+- ❌ `localhost:3006` - 경고 후 리다이렉트
+- ❌ `*.vercel.app` - 경고 후 리다이렉트
+- ❌ `*.netlify.app` - 경고 후 리다이렉트
 
-1. **Immediate Rollback**: Use Vercel dashboard to rollback to previous deployment
-2. **Hot Fix**: Push emergency fixes to `main` branch
-3. **Database Rollback**: Use Prisma migrations if needed
+## 🔧 환경 변수 설정
 
-### 8. Security Considerations
+### 필수 환경 변수
 
-#### Environment Variables:
-- All sensitive data stored in Vercel environment variables
-- No secrets in code repository
-- AWS credentials properly configured
+```bash
+# 운영 환경
+NODE_ENV=production
+NEXT_PUBLIC_APP_URL=https://app.hanguru.school
+DATABASE_URL=your-production-database-url
+NEXTAUTH_SECRET=your-production-secret
+```
 
-#### Authentication:
-- AWS Cognito for user authentication
-- JWT tokens for session management
-- Role-based access control implemented
+### Vercel Secrets 설정
 
-### 9. Performance Monitoring
+1. Vercel 대시보드 → Project Settings → Environment Variables
+2. 다음 변수들을 Production 환경에만 설정:
+   - `DATABASE_URL`
+   - `NEXTAUTH_SECRET`
+   - `AWS_ACCESS_KEY_ID` (필요시)
+   - `AWS_SECRET_ACCESS_KEY` (필요시)
 
-#### Key Metrics:
-- Page load times
-- API response times
-- Database query performance
-- Error rates
+## 📊 모니터링
 
-#### Tools:
-- Vercel Analytics
-- Database performance monitoring
-- AWS CloudWatch metrics
+### 배포 상태 확인
 
-### 10. Backup Strategy
+- Vercel 대시보드에서 배포 상태 모니터링
+- GitHub Actions에서 CI/CD 상태 확인
+- 운영 서버 접속 테스트
 
-#### Database Backups:
-- Automated daily backups via AWS RDS
-- Point-in-time recovery available
-- Backup retention: 30 days
+### 로그 확인
 
-#### Code Backups:
-- GitHub repository as primary backup
-- Vercel deployment history
-- Local development copies
+```bash
+# Vercel 로그 확인
+vercel logs --prod
 
-## 🎯 Quick Start
+# 실시간 로그 모니터링
+vercel logs --follow --prod
+```
 
-1. **Clone Repository**:
-   ```bash
-   git clone https://github.com/hanguru-school/malmoi-system.git
-   cd malmoi-system
-   ```
+## 🚨 긴급 상황 대응
 
-2. **Install Dependencies**:
-   ```bash
-   npm install
-   ```
+### 롤백 방법
 
-3. **Local Development**:
-   ```bash
-   npm run dev
-   ```
+1. Vercel 대시보드 → Deployments
+2. 이전 배포 버전 선택
+3. "Redeploy" 클릭
 
-4. **Deploy to Production**:
-   ```bash
-   git push origin main
-   ```
+### 문제 해결
 
-## 📋 Production Checklist
+1. 로그 확인: `vercel logs --prod`
+2. 환경 변수 확인: Vercel 대시보드
+3. 데이터베이스 연결 확인
+4. 운영 서버 접속 테스트
 
-- [ ] All environment variables configured in Vercel
-- [ ] Database migrations applied
-- [ ] AWS services properly configured
-- [ ] Cognito user pool set up
-- [ ] S3 bucket permissions configured
-- [ ] Health checks passing
-- [ ] SSL certificate valid
-- [ ] Domain properly configured
-- [ ] Monitoring alerts set up
-- [ ] Backup strategy implemented
+## 📞 연락처
 
-## 🔧 Troubleshooting
+운영 환경 관련 문의:
 
-### Common Issues:
-
-1. **Build Failures**:
-   - Check TypeScript errors
-   - Verify all dependencies installed
-   - Review Vercel build logs
-
-2. **Database Connection Issues**:
-   - Verify DATABASE_URL in Vercel
-   - Check AWS RDS security groups
-   - Confirm database is running
-
-3. **Authentication Issues**:
-   - Verify Cognito configuration
-   - Check callback URLs
-   - Review JWT secret configuration
-
-4. **File Upload Issues**:
-   - Check S3 bucket permissions
-   - Verify AWS credentials
-   - Review CORS configuration
-
-## 📞 Support
-
-For production issues:
-1. Check Vercel deployment logs
-2. Review GitHub Actions workflow
-3. Monitor AWS CloudWatch metrics
-4. Contact development team
+- **기술 지원**: 개발팀
+- **긴급 상황**: 관리자 계정으로 직접 접근
 
 ---
 
-**Last Updated**: July 31, 2025
-**Version**: 1.0.0 
+**⚠️ 주의사항**: 이 시스템은 운영 환경에서만 사용되어야 하며, 테스트 환경에서의 사용은 금지됩니다.

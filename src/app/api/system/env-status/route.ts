@@ -1,23 +1,23 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { validateEnvironment, getEnvironmentConfig } from '@/lib/env-validator';
+import { NextRequest, NextResponse } from "next/server";
+import { validateEnvironment, getEnvironmentConfig } from "@/lib/env-validator";
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('=== Environment Status API 호출됨 ===');
-    
+    console.log("=== Environment Status API 호출됨 ===");
+
     const validation = validateEnvironment();
     const config = getEnvironmentConfig();
-    
+
     // 민감한 정보는 마스킹
     const maskedConfig = {
       ...config,
-      COGNITO_CLIENT_SECRET: config.COGNITO_CLIENT_SECRET ? '***' : undefined,
-      AWS_RDS_PASSWORD: config.AWS_RDS_PASSWORD ? '***' : undefined,
-      JWT_SECRET: config.JWT_SECRET ? '***' : undefined,
-      SESSION_SECRET: config.SESSION_SECRET ? '***' : undefined,
-      CSRF_SECRET: config.CSRF_SECRET ? '***' : undefined
+      COGNITO_CLIENT_SECRET: config.COGNITO_CLIENT_SECRET ? "***" : undefined,
+      AWS_RDS_PASSWORD: config.AWS_RDS_PASSWORD ? "***" : undefined,
+      JWT_SECRET: config.JWT_SECRET ? "***" : undefined,
+      SESSION_SECRET: config.SESSION_SECRET ? "***" : undefined,
+      CSRF_SECRET: config.CSRF_SECRET ? "***" : undefined,
     };
-    
+
     // 환경 변수 그룹별로 분류
     const groupedConfig = {
       database: {
@@ -26,11 +26,11 @@ export async function GET(request: NextRequest) {
         AWS_RDS_PORT: maskedConfig.AWS_RDS_PORT,
         AWS_RDS_DATABASE: maskedConfig.AWS_RDS_DATABASE,
         AWS_RDS_USERNAME: maskedConfig.AWS_RDS_USERNAME,
-        AWS_RDS_PASSWORD: maskedConfig.AWS_RDS_PASSWORD
+        AWS_RDS_PASSWORD: maskedConfig.AWS_RDS_PASSWORD,
       },
       aws: {
         AWS_REGION: maskedConfig.AWS_REGION,
-        AWS_S3_BUCKET: maskedConfig.AWS_S3_BUCKET
+        AWS_S3_BUCKET: maskedConfig.AWS_S3_BUCKET,
       },
       cognito_server: {
         COGNITO_REGION: maskedConfig.COGNITO_REGION,
@@ -38,33 +38,39 @@ export async function GET(request: NextRequest) {
         COGNITO_CLIENT_ID: maskedConfig.COGNITO_CLIENT_ID,
         COGNITO_CLIENT_SECRET: maskedConfig.COGNITO_CLIENT_SECRET,
         COGNITO_DOMAIN: maskedConfig.COGNITO_DOMAIN,
-        COGNITO_RESPONSE_TYPE: maskedConfig.COGNITO_RESPONSE_TYPE
+        COGNITO_RESPONSE_TYPE: maskedConfig.COGNITO_RESPONSE_TYPE,
       },
       cognito_client: {
         NEXT_PUBLIC_COGNITO_REGION: maskedConfig.NEXT_PUBLIC_COGNITO_REGION,
-        NEXT_PUBLIC_COGNITO_USER_POOL_ID: maskedConfig.NEXT_PUBLIC_COGNITO_USER_POOL_ID,
-        NEXT_PUBLIC_COGNITO_CLIENT_ID: maskedConfig.NEXT_PUBLIC_COGNITO_CLIENT_ID,
+        NEXT_PUBLIC_COGNITO_USER_POOL_ID:
+          maskedConfig.NEXT_PUBLIC_COGNITO_USER_POOL_ID,
+        NEXT_PUBLIC_COGNITO_CLIENT_ID:
+          maskedConfig.NEXT_PUBLIC_COGNITO_CLIENT_ID,
         NEXT_PUBLIC_COGNITO_DOMAIN: maskedConfig.NEXT_PUBLIC_COGNITO_DOMAIN,
-        NEXT_PUBLIC_COGNITO_CALLBACK_URL: maskedConfig.NEXT_PUBLIC_COGNITO_CALLBACK_URL,
-        NEXT_PUBLIC_COGNITO_SIGNOUT_URL: maskedConfig.NEXT_PUBLIC_COGNITO_SIGNOUT_URL,
-        NEXT_PUBLIC_COGNITO_OAUTH_SCOPES: maskedConfig.NEXT_PUBLIC_COGNITO_OAUTH_SCOPES,
-        NEXT_PUBLIC_COGNITO_RESPONSE_TYPE: maskedConfig.NEXT_PUBLIC_COGNITO_RESPONSE_TYPE
+        NEXT_PUBLIC_COGNITO_CALLBACK_URL:
+          maskedConfig.NEXT_PUBLIC_COGNITO_CALLBACK_URL,
+        NEXT_PUBLIC_COGNITO_SIGNOUT_URL:
+          maskedConfig.NEXT_PUBLIC_COGNITO_SIGNOUT_URL,
+        NEXT_PUBLIC_COGNITO_OAUTH_SCOPES:
+          maskedConfig.NEXT_PUBLIC_COGNITO_OAUTH_SCOPES,
+        NEXT_PUBLIC_COGNITO_RESPONSE_TYPE:
+          maskedConfig.NEXT_PUBLIC_COGNITO_RESPONSE_TYPE,
       },
       authentication: {
         JWT_SECRET: maskedConfig.JWT_SECRET,
         SESSION_SECRET: maskedConfig.SESSION_SECRET,
-        AUTH_BASE_URL: maskedConfig.AUTH_BASE_URL
+        AUTH_BASE_URL: maskedConfig.AUTH_BASE_URL,
       },
       security: {
         CORS_ORIGIN: maskedConfig.CORS_ORIGIN,
-        CSRF_SECRET: maskedConfig.CSRF_SECRET
+        CSRF_SECRET: maskedConfig.CSRF_SECRET,
       },
       environment: {
         NODE_ENV: maskedConfig.NODE_ENV,
-        NEXT_PUBLIC_NODE_ENV: maskedConfig.NEXT_PUBLIC_NODE_ENV
-      }
+        NEXT_PUBLIC_NODE_ENV: maskedConfig.NEXT_PUBLIC_NODE_ENV,
+      },
     };
-    
+
     const response = {
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV,
@@ -72,7 +78,7 @@ export async function GET(request: NextRequest) {
         isValid: validation.isValid,
         missingVars: validation.missingVars,
         invalidVars: validation.invalidVars,
-        warnings: validation.warnings
+        warnings: validation.warnings,
       },
       config: groupedConfig,
       summary: {
@@ -80,32 +86,34 @@ export async function GET(request: NextRequest) {
         missingVars: validation.missingVars.length,
         invalidVars: validation.invalidVars.length,
         warnings: validation.warnings.length,
-        status: validation.isValid ? 'healthy' : 'unhealthy'
+        status: validation.isValid ? "healthy" : "unhealthy",
       },
       system_info: {
         node_version: process.version,
         platform: process.platform,
         memory_usage: process.memoryUsage(),
-        uptime: process.uptime()
-      }
+        uptime: process.uptime(),
+      },
     };
-    
-    console.log('Environment Status:', {
+
+    console.log("Environment Status:", {
       isValid: validation.isValid,
       missingCount: validation.missingVars.length,
       invalidCount: validation.invalidVars.length,
-      warningCount: validation.warnings.length
+      warningCount: validation.warnings.length,
     });
-    
-    return NextResponse.json(response, { 
-      status: validation.isValid ? 200 : 500 
+
+    return NextResponse.json(response, {
+      status: validation.isValid ? 200 : 500,
     });
-    
   } catch (error: any) {
-    console.error('Environment Status API 오류:', error);
-    return NextResponse.json({ 
-      error: '환경 변수 상태 확인 중 오류가 발생했습니다.',
-      details: error.message 
-    }, { status: 500 });
+    console.error("Environment Status API 오류:", error);
+    return NextResponse.json(
+      {
+        error: "환경 변수 상태 확인 중 오류가 발생했습니다.",
+        details: error.message,
+      },
+      { status: 500 },
+    );
   }
-} 
+}

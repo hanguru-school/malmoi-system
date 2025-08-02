@@ -1,25 +1,24 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { 
-  CreditCard, 
-  Smartphone, 
-  Wifi, 
-  WifiOff, 
-  CheckCircle, 
-  XCircle, 
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import {
+  CreditCard,
+  Wifi,
+  WifiOff,
+  CheckCircle,
+  XCircle,
   AlertCircle,
   Loader2,
   RefreshCw,
   Settings,
-  BarChart3
-} from 'lucide-react';
-import { taggingSystem, TaggingFlow } from '@/lib/tagging-system';
-import { hardwareReaderManager } from '@/lib/hardware-reader';
+  BarChart3,
+} from "lucide-react";
+import { taggingSystem, TaggingFlow } from "@/lib/tagging-system";
+import { hardwareReaderManager } from "@/lib/hardware-reader";
 
 interface TaggingInterfaceProps {
   deviceId: string;
-  deviceType: 'desktop' | 'tablet' | 'mobile';
+  deviceType: "desktop" | "tablet" | "mobile";
   onTaggingComplete?: (result: Record<string, unknown>) => void;
 }
 
@@ -52,21 +51,21 @@ function useDebounce<T>(value: T, delay: number): T {
 
 // 애니메이션 최적화를 위한 CSS 클래스
 const ANIMATION_CLASSES = {
-  scanning: 'animate-pulse bg-blue-500',
-  processing: 'animate-spin bg-yellow-500',
-  success: 'animate-bounce bg-green-500',
-  error: 'animate-pulse bg-red-500',
-  idle: 'bg-gray-300'
+  scanning: "animate-pulse bg-blue-500",
+  processing: "animate-spin bg-yellow-500",
+  success: "animate-bounce bg-green-500",
+  error: "animate-pulse bg-red-500",
+  idle: "bg-gray-300",
 };
 
-export default function TaggingInterface({ 
-  deviceId, 
-  deviceType, 
-  onTaggingComplete 
+export default function TaggingInterface({
+  deviceId,
+  deviceType,
+  onTaggingComplete,
 }: TaggingInterfaceProps) {
   const [state, setState] = useState<TaggingState>({
     isScanning: false,
-    isProcessing: false
+    isProcessing: false,
   });
   const [showPopup, setShowPopup] = useState(false);
   const [popupConfig, setPopupConfig] = useState<{
@@ -75,11 +74,13 @@ export default function TaggingInterface({
     showOptions?: boolean;
     duration?: number;
   } | null>(null);
-  const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'error'>('connected');
+  const [connectionStatus, setConnectionStatus] = useState<
+    "connected" | "disconnected" | "error"
+  >("connected");
   const [performanceMetrics, setPerformanceMetrics] = useState({
     averageProcessingTime: 0,
     successRate: 100,
-    totalTags: 0
+    totalTags: 0,
   });
 
   // 디바운스된 상태 업데이트
@@ -88,14 +89,14 @@ export default function TaggingInterface({
   // 디바이스 정보 메모이제이션
   const deviceInfo = useMemo(() => {
     const devices = taggingSystem.getDevices();
-    return devices.find(d => d.id === deviceId);
+    return devices.find((d) => d.id === deviceId);
   }, [deviceId]);
 
   // 연결 상태 모니터링
   useEffect(() => {
     const checkConnection = () => {
       const isConnected = hardwareReaderManager.isConnected();
-      setConnectionStatus(isConnected ? 'connected' : 'disconnected');
+      setConnectionStatus(isConnected ? "connected" : "disconnected");
     };
 
     checkConnection();
@@ -110,7 +111,7 @@ export default function TaggingInterface({
       setPerformanceMetrics({
         averageProcessingTime: stats.totalTagging > 0 ? 1500 : 0, // 임시 값
         successRate: stats.successRate,
-        totalTags: stats.totalTagging
+        totalTags: stats.totalTagging,
       });
     };
 
@@ -125,66 +126,69 @@ export default function TaggingInterface({
       return;
     }
 
-    setState(prev => ({ ...prev, isScanning: true, error: undefined }));
+    setState((prev) => ({ ...prev, isScanning: true, error: undefined }));
 
     try {
       // 하드웨어 리더에서 UID 읽기 (타임아웃 설정)
       const uidPromise = hardwareReaderManager.readUID();
-      const timeoutPromise = new Promise<string>((_, reject) => 
-        setTimeout(() => reject(new Error('카드 읽기 시간 초과')), 5000)
+      const timeoutPromise = new Promise<string>((_, reject) =>
+        setTimeout(() => reject(new Error("카드 읽기 시간 초과")), 5000),
       );
-      
-      const uid = await Promise.race([uidPromise, timeoutPromise]);
-      console.log('읽은 UID:', uid);
 
-      setState(prev => ({ 
-        ...prev, 
-        isScanning: false, 
-        isProcessing: true 
+      const uid = await Promise.race([uidPromise, timeoutPromise]);
+      console.log("읽은 UID:", uid);
+
+      setState((prev) => ({
+        ...prev,
+        isScanning: false,
+        isProcessing: true,
       }));
 
       // 태깅 시스템에 전송 (타임아웃 설정)
-      const responsePromise = fetch('/api/tagging', {
-        method: 'POST',
+      const responsePromise = fetch("/api/tagging", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           uid,
           deviceId,
-          taggingMethod: 'nfc', // 기본값
+          taggingMethod: "nfc", // 기본값
           metadata: {
-            ipAddress: '127.0.0.1',
+            ipAddress: "127.0.0.1",
             userAgent: navigator.userAgent,
-            timestamp: new Date().toISOString()
-          }
+            timestamp: new Date().toISOString(),
+          },
         }),
       });
 
       const timeoutResponsePromise = new Promise<Response>((_, reject) =>
-        setTimeout(() => reject(new Error('서버 응답 시간 초과')), 3000)
+        setTimeout(() => reject(new Error("서버 응답 시간 초과")), 3000),
       );
 
-      const response = await Promise.race([responsePromise, timeoutResponsePromise]);
+      const response = await Promise.race([
+        responsePromise,
+        timeoutResponsePromise,
+      ]);
       const result = await response.json();
 
       if (result.success) {
-        setState(prev => ({
+        setState((prev) => ({
           ...prev,
           isProcessing: false,
           success: true,
           flow: result.flow,
           processingTime: result.processingTime,
-          lastTagTime: Date.now()
+          lastTagTime: Date.now(),
         }));
 
         // 성공 팝업 표시 (빠른 표시)
         setPopupConfig({
-          message: result.flow?.uiConfig?.showSuccessMessage ? 
-            '태깅이 성공적으로 처리되었습니다!' : 
-            '처리 완료',
-          color: 'green',
-          duration: Math.min(result.flow?.uiConfig?.autoClose || 2000, 2000) // 최대 2초
+          message: result.flow?.uiConfig?.showSuccessMessage
+            ? "태깅이 성공적으로 처리되었습니다!"
+            : "처리 완료",
+          color: "green",
+          duration: Math.min(result.flow?.uiConfig?.autoClose || 2000, 2000), // 최대 2초
         });
         setShowPopup(true);
 
@@ -192,40 +196,44 @@ export default function TaggingInterface({
         if (onTaggingComplete) {
           onTaggingComplete(result);
         }
-
       } else {
-        setState(prev => ({
+        setState((prev) => ({
           ...prev,
           isProcessing: false,
           success: false,
           error: result.error,
-          processingTime: result.processingTime
+          processingTime: result.processingTime,
         }));
 
         // 오류 팝업 표시 (빠른 표시)
         setPopupConfig({
-          message: result.error || '태깅 처리 중 오류가 발생했습니다.',
-          color: 'red',
-          duration: 3000 // 3초로 단축
+          message: result.error || "태깅 처리 중 오류가 발생했습니다.",
+          color: "red",
+          duration: 3000, // 3초로 단축
         });
         setShowPopup(true);
       }
-
     } catch (error) {
-      console.error('태깅 처리 오류:', error);
-      setState(prev => ({
+      console.error("태깅 처리 오류:", error);
+      setState((prev) => ({
         ...prev,
         isScanning: false,
         isProcessing: false,
         success: false,
-        error: error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.'
+        error:
+          error instanceof Error
+            ? error.message
+            : "알 수 없는 오류가 발생했습니다.",
       }));
 
       // 오류 팝업 표시
       setPopupConfig({
-        message: error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.',
-        color: 'red',
-        duration: 3000
+        message:
+          error instanceof Error
+            ? error.message
+            : "알 수 없는 오류가 발생했습니다.",
+        color: "red",
+        duration: 3000,
       });
       setShowPopup(true);
     }
@@ -257,30 +265,33 @@ export default function TaggingInterface({
       {/* 헤더 */}
       <div className="text-center mb-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">태깅 시스템</h2>
-        <p className="text-gray-600">
-          {deviceInfo?.name || '태깅 디바이스'}
-        </p>
+        <p className="text-gray-600">{deviceInfo?.name || "태깅 디바이스"}</p>
       </div>
 
       {/* 연결 상태 */}
       <div className="flex items-center justify-center mb-6">
-        <div className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
-          connectionStatus === 'connected' 
-            ? 'bg-green-100 text-green-800' 
-            : connectionStatus === 'error'
-            ? 'bg-red-100 text-red-800'
-            : 'bg-yellow-100 text-yellow-800'
-        }`}>
-          {connectionStatus === 'connected' ? (
+        <div
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
+            connectionStatus === "connected"
+              ? "bg-green-100 text-green-800"
+              : connectionStatus === "error"
+                ? "bg-red-100 text-red-800"
+                : "bg-yellow-100 text-yellow-800"
+          }`}
+        >
+          {connectionStatus === "connected" ? (
             <Wifi className="w-4 h-4" />
-          ) : connectionStatus === 'error' ? (
+          ) : connectionStatus === "error" ? (
             <XCircle className="w-4 h-4" />
           ) : (
             <WifiOff className="w-4 h-4" />
           )}
           <span className="text-sm font-medium">
-            {connectionStatus === 'connected' ? '연결됨' : 
-             connectionStatus === 'error' ? '연결 오류' : '연결 중...'}
+            {connectionStatus === "connected"
+              ? "연결됨"
+              : connectionStatus === "error"
+                ? "연결 오류"
+                : "연결 중..."}
           </span>
         </div>
       </div>
@@ -289,11 +300,15 @@ export default function TaggingInterface({
       <div className="text-center mb-6">
         <button
           onClick={handleTagging}
-          disabled={state.isScanning || state.isProcessing || connectionStatus !== 'connected'}
+          disabled={
+            state.isScanning ||
+            state.isProcessing ||
+            connectionStatus !== "connected"
+          }
           className={`w-32 h-32 rounded-full flex items-center justify-center transition-all ${
             state.isScanning || state.isProcessing
-              ? 'cursor-not-allowed opacity-75'
-              : 'hover:scale-105 active:scale-95 cursor-pointer'
+              ? "cursor-not-allowed opacity-75"
+              : "hover:scale-105 active:scale-95 cursor-pointer"
           } ${getAnimationClass()}`}
         >
           {state.isScanning ? (
@@ -308,13 +323,17 @@ export default function TaggingInterface({
             <CreditCard className="w-12 h-12 text-white" />
           )}
         </button>
-        
+
         <p className="text-sm text-gray-600 mt-4">
-          {state.isScanning ? '카드를 읽는 중...' :
-           state.isProcessing ? '처리 중...' :
-           state.success ? '완료!' :
-           state.error ? '오류 발생' :
-           '카드를 태그하세요'}
+          {state.isScanning
+            ? "카드를 읽는 중..."
+            : state.isProcessing
+              ? "처리 중..."
+              : state.success
+                ? "완료!"
+                : state.error
+                  ? "오류 발생"
+                  : "카드를 태그하세요"}
         </p>
       </div>
 
@@ -368,7 +387,7 @@ export default function TaggingInterface({
         <button
           onClick={() => {
             const status = taggingSystem.getSystemStatus();
-            console.log('시스템 상태:', status);
+            console.log("시스템 상태:", status);
           }}
           className="flex items-center gap-1 px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
         >
@@ -380,19 +399,27 @@ export default function TaggingInterface({
       {/* 팝업 */}
       {showPopup && popupConfig && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className={`bg-white rounded-lg p-6 max-w-sm mx-4 text-center ${
-            popupConfig.color === 'green' ? 'border-l-4 border-green-500' :
-            popupConfig.color === 'red' ? 'border-l-4 border-red-500' :
-            'border-l-4 border-blue-500'
-          }`}>
-            <div className={`w-12 h-12 mx-auto mb-4 rounded-full flex items-center justify-center ${
-              popupConfig.color === 'green' ? 'bg-green-100' :
-              popupConfig.color === 'red' ? 'bg-red-100' :
-              'bg-blue-100'
-            }`}>
-              {popupConfig.color === 'green' ? (
+          <div
+            className={`bg-white rounded-lg p-6 max-w-sm mx-4 text-center ${
+              popupConfig.color === "green"
+                ? "border-l-4 border-green-500"
+                : popupConfig.color === "red"
+                  ? "border-l-4 border-red-500"
+                  : "border-l-4 border-blue-500"
+            }`}
+          >
+            <div
+              className={`w-12 h-12 mx-auto mb-4 rounded-full flex items-center justify-center ${
+                popupConfig.color === "green"
+                  ? "bg-green-100"
+                  : popupConfig.color === "red"
+                    ? "bg-red-100"
+                    : "bg-blue-100"
+              }`}
+            >
+              {popupConfig.color === "green" ? (
                 <CheckCircle className="w-6 h-6 text-green-600" />
-              ) : popupConfig.color === 'red' ? (
+              ) : popupConfig.color === "red" ? (
                 <XCircle className="w-6 h-6 text-red-600" />
               ) : (
                 <AlertCircle className="w-6 h-6 text-blue-600" />
@@ -413,4 +440,4 @@ export default function TaggingInterface({
       )}
     </div>
   );
-} 
+}
