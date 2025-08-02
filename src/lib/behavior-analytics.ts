@@ -132,10 +132,22 @@ export class BehaviorAnalyticsManager {
   private loadData(): void {
     try {
       const cached = cache.get(this.CACHE_KEY);
-      if (cached) {
-        this.behaviors = new Map(cached.behaviors);
-        this.reminderRules = cached.reminderRules || this.reminderRules;
-        this.reminderQueue = cached.reminderQueue || [];
+      if (cached && typeof cached === 'object' && cached !== null) {
+        const typedCache = cached as {
+          behaviors: [string, UserBehavior][];
+          reminderRules: ReminderRule[];
+          reminderQueue: ReminderMessage[];
+        };
+        
+        if (Array.isArray(typedCache.behaviors)) {
+          this.behaviors = new Map(typedCache.behaviors);
+        }
+        if (Array.isArray(typedCache.reminderRules)) {
+          this.reminderRules = typedCache.reminderRules;
+        }
+        if (Array.isArray(typedCache.reminderQueue)) {
+          this.reminderQueue = typedCache.reminderQueue;
+        }
       }
     } catch (error) {
       console.error("행동 분석 데이터 로드 실패:", error);

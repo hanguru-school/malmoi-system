@@ -154,9 +154,9 @@ export const storage = {
   get: (key: string): Record<string, unknown> => {
     try {
       const item = localStorage.getItem(key);
-      return item ? JSON.parse(item) : null;
+      return item ? JSON.parse(item) : {};
     } catch {
-      return null;
+      return {};
     }
   },
 
@@ -190,9 +190,9 @@ export const sessionStorageUtil = {
   get: (key: string): Record<string, unknown> => {
     try {
       const item = window.sessionStorage.getItem(key);
-      return item ? JSON.parse(item) : null;
+      return item ? JSON.parse(item) : {};
     } catch {
-      return null;
+      return {};
     }
   },
 

@@ -13,17 +13,18 @@ export interface ApiResponse<T = any> {
 // 간단한 에러 핸들러 (User provided, adapted to ApiResponse interface)
 export function handleApiError(
   error: unknown,
-  message = "서버 오류가 발생했습니다.",
+  statusCode: string | number = "500",
 ) {
   console.error("[API ERROR]", error);
+  const status = typeof statusCode === 'string' ? parseInt(statusCode, 10) : statusCode;
   return NextResponse.json(
     {
       success: false,
-      message,
+      message: error instanceof Error ? error.message : "서버 오류가 발생했습니다.",
       error: error instanceof Error ? error.message : "UNKNOWN_ERROR",
       timestamp: new Date().toISOString(),
     },
-    { status: 500 },
+    { status },
   );
 }
 
