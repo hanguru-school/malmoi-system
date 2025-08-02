@@ -16,10 +16,16 @@
     "NODE_ENV": "production"
   },
   "functions": {
-    "src/app/api/**/*.ts": {
-      "maxDuration": 30
+    "api/**/*.ts": {
+      "runtime": "nodejs18.x"
     }
   },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    }
+  ],
   "regions": ["nrt1"],
   "git": {
     "deploymentEnabled": {
