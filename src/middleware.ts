@@ -4,74 +4,7 @@ import type { NextRequest } from "next/server";
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // 운영 서버 환경 체크 (개발 환경에서는 비활성화)
-  const hostname = request.headers.get("host") || "";
-  const isProduction =
-    hostname === "app.hanguru.school" || hostname === "hanguru.school";
-  const isDevelopment = process.env.NODE_ENV === "development";
-
-  // 환경 경고 페이지 리다이렉트 비활성화 (메인 페이지 표시를 위해)
-  // if (
-  //   !isProduction &&
-  //   !isDevelopment &&
-  //   !pathname.startsWith("/api/") &&
-  //   !pathname.startsWith("/_next/")
-  // ) {
-  //   // 정적 파일들은 제외
-  //   if (pathname.includes(".") || pathname.startsWith("/_next/")) {
-  //     return NextResponse.next();
-  //   }
-
-  //   // 경고 페이지로 리다이렉트 (운영 환경이 아닌 경우에만)
-  //   return NextResponse.redirect(new URL("/environment-warning", request.url));
-  // }
-
-  // 로그인 페이지는 제외
-  if (pathname.startsWith("/auth/")) {
-    return NextResponse.next();
-  }
-
-  // 정적 파일들은 제외
-  if (
-    pathname.startsWith("/_next/") ||
-    pathname.startsWith("/api/") ||
-    pathname.includes(".")
-  ) {
-    return NextResponse.next();
-  }
-
-  // 쿠키에서 사용자 세션 확인
-  const userSession = request.cookies.get("user-session");
-
-  // 메인 페이지는 로그인 없이 접근 가능
-  if (pathname === "/") {
-    return NextResponse.next();
-  }
-
-  // 로그인되지 않은 경우 보호된 페이지를 로그인 페이지로 리다이렉트
-  if (!userSession) {
-    return NextResponse.redirect(new URL("/auth/login", request.url));
-  }
-
-  // 로그인된 경우
-  try {
-    const userData = JSON.parse(userSession.value);
-
-    // 권한에 따른 페이지 접근 제어
-    const hasAccess = checkAccess(userData.role, pathname);
-    if (!hasAccess) {
-      const dashboardPath = getDashboardPath(userData.role);
-      return NextResponse.redirect(new URL(dashboardPath, request.url));
-    }
-  } catch (error) {
-    // 세션 파싱 오류 시에도 메인 페이지는 접근 가능하도록 허용
-    if (pathname === "/") {
-      return NextResponse.next();
-    }
-    // 다른 보호된 페이지는 로그인 페이지로 리다이렉트
-    return NextResponse.redirect(new URL("/auth/login", request.url));
-  }
-
+  // 미들웨어 완전 비활성화 (메인 페이지 표시를 위해)
   return NextResponse.next();
 }
 
