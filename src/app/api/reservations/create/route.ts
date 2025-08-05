@@ -1,307 +1,214 @@
 import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import prisma from "@/lib/prisma";
-import { getSessionFromCookies } from "@/lib/auth-utils";
-import { ReservationStatus, Location } from "@prisma/client";
-
-// 이메일 알림 함수 (실제 구현에서는 이메일 서비스 사용)
-const sendReservationNotification = async (reservationData: any) => {
-  try {
-    console.log("📧 예약 알림 전송:", {
-      to: reservationData.student.email,
-      subject: "예약이 완료되었습니다",
-      reservationId: reservationData.id,
-      date: reservationData.date,
-      time: reservationData.startTime,
-    });
-
-    // 실제 구현에서는 이메일 서비스 (SendGrid, AWS SES 등) 사용
-    // await emailService.send({
-    //   to: reservationData.student.email,
-    //   subject: '예약이 완료되었습니다',
-    //   template: 'reservation-confirmation',
-    //   data: reservationData
-    // });
-
-    return true;
-  } catch (error) {
-    console.error("이메일 알림 전송 실패:", error);
-    return false;
-  }
-};
-
-// LINE 알림 함수 (실제 구현에서는 LINE Notify API 사용)
-const sendLineNotification = async (reservationData: any) => {
-  try {
-    console.log("📱 LINE 알림 전송:", {
-      reservationId: reservationData.id,
-      date: reservationData.date,
-      time: reservationData.startTime,
-    });
-
-    // 실제 구현에서는 LINE Notify API 사용
-    // await lineNotify.send({
-    //   message: `예약이 완료되었습니다!\n날짜: ${reservationData.date}\n시간: ${reservationData.startTime}`
-    // });
-
-    return true;
-  } catch (error) {
-    console.error("LINE 알림 전송 실패:", error);
-    return false;
-  }
-};
 
 export async function POST(request: NextRequest) {
   try {
-    console.log("=== 예약 생성 API 시작 ===");
+    console.log("수업 예약 API 시작");
+    
+    const cookieStore = await cookies();
+    const userCookie = cookieStore.get("user");
+    
+    if (!userCookie) {
+      return NextResponse.json(
+        { 
+          success: false,
+          message: "로그인이 필요합니다.",
+          error: "UNAUTHORIZED"
+        },
+        { status: 401 }
+      );
+    }
 
-    // 1. 요청 파싱
-    const body = await request.json();
-    console.log("요청 데이터:", body);
-
-    const {
-      date,
-      time,
-      duration,
-      location,
+    const userData = JSON.parse(userCookie.value);
+    const { 
+      lessonType,
+      preferredDate,
+      preferredTime,
+      duration = 60,
       notes,
-      classroom,
-      courseId,
-      teacherId,
-    } = body;
+      studentId 
+    } = await request.json();
 
-    // 2. 세션 확인
-    const session = await getSessionFromCookies(request);
-    if (!session?.user?.id) {
-      console.log("세션 없음 - 401 반환");
+    // 필수 필드 검증
+    if (!lessonType || !preferredDate || !preferredTime) {
       return NextResponse.json(
-        { error: "로그인이 필요합니다." },
-        { status: 401 },
+        { 
+          success: false,
+          message: "수업 유형, 희망 날짜, 희망 시간을 모두 입력해주세요.",
+          error: "MISSING_REQUIRED_FIELDS"
+        },
+        { status: 400 }
       );
     }
 
-    // 3. 입력 검증
-    if (!date || !time || !duration || !location) {
-      console.log("필수 필드 누락:", { date, time, duration, location });
-      return NextResponse.json(
-        { error: "날짜, 시간, 수업시간, 수업방식은 필수입니다." },
-        { status: 400 },
-      );
-    }
-
-    // 4. 날짜/시간 검증
-    const reservationDateTime = new Date(`${date}T${time}`);
-    const now = new Date();
-
-    if (reservationDateTime <= now) {
-      console.log("과거 시간 예약 시도 - 400 반환");
-      return NextResponse.json(
-        { error: "과거 시간에는 예약할 수 없습니다." },
-        { status: 400 },
-      );
-    }
-
-    // 5. 데이터베이스 연결 확인
-    try {
-      await prisma.$connect();
-      console.log("데이터베이스 연결 성공");
-    } catch (dbError) {
-      console.error("데이터베이스 연결 실패:", dbError);
-      return NextResponse.json(
-        { error: "데이터베이스 연결에 실패했습니다." },
-        { status: 500 },
-      );
-    }
-
-    // 6. 사용자 정보 조회
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      include: {
-        student: true,
-      },
-    });
-
-    if (!user) {
-      console.log("사용자 정보 없음 - 404 반환");
-      return NextResponse.json(
-        { error: "사용자 정보를 찾을 수 없습니다." },
-        { status: 404 },
-      );
-    }
-
-    if (!user.student) {
-      console.log("학생 프로필 없음 - 404 반환");
-      return NextResponse.json(
-        { error: "학생 프로필이 없습니다. 회원가입을 완료해주세요." },
-        { status: 404 },
-      );
-    }
-
-    // 7. 선생님 정보 조회/생성
-    let teacher = null;
-    if (teacherId) {
-      teacher = await prisma.teacher.findUnique({
-        where: { id: teacherId },
+    // 학생 정보 확인
+    let student;
+    if (userData.role === "STUDENT") {
+      student = await prisma.student.findUnique({
+        where: { userId: userData.id },
+        include: { user: true }
       });
-    }
-
-    if (!teacher) {
-      // 기본 선생님 생성 또는 조회
-      teacher = await prisma.teacher.findFirst({
-        where: { name: "김선생님" },
+    } else if (userData.role === "PARENT" && studentId) {
+      student = await prisma.student.findUnique({
+        where: { id: studentId },
+        include: { user: true }
       });
-
-      if (!teacher) {
-        try {
-          // 먼저 User 생성
-          const teacherUser = await prisma.user.create({
-            data: {
-              name: "김선생님",
-              email: "teacher@hanguru.school",
-              password: "hashed_password_placeholder",
-              role: "TEACHER",
-              phone: "010-1234-5678",
-            },
-          });
-
-          // Teacher 생성
-          teacher = await prisma.teacher.create({
-            data: {
-              userId: teacherUser.id,
-              name: "김선생님",
-              kanjiName: "金先生",
-              yomigana: "きむせんせい",
-              koreanName: "김선생님",
-              phone: "010-1234-5678",
-              subjects: ["일본어"],
-              hourlyRate: 30000,
-            },
-          });
-          console.log("기본 선생님 생성 완료:", teacher.id);
-        } catch (teacherError) {
-          console.error("선생님 생성 실패:", teacherError);
-          return NextResponse.json(
-            { error: "선생님 정보를 생성할 수 없습니다." },
-            { status: 500 },
-          );
-        }
-      }
+    } else {
+      return NextResponse.json(
+        { 
+          success: false,
+          message: "학생 정보를 찾을 수 없습니다.",
+          error: "STUDENT_NOT_FOUND"
+        },
+        { status: 404 }
+      );
     }
 
-    // 8. 중복 예약 확인
+    if (!student) {
+      return NextResponse.json(
+        { 
+          success: false,
+          message: "학생 정보를 찾을 수 없습니다.",
+          error: "STUDENT_NOT_FOUND"
+        },
+        { status: 404 }
+      );
+    }
+
+    // 예약 시간 파싱
+    const [hours, minutes] = preferredTime.split(':').map(Number);
+    const reservationDateTime = new Date(preferredDate);
+    reservationDateTime.setHours(hours, minutes, 0, 0);
+
+    // 현재 시간과 비교
+    if (reservationDateTime <= new Date()) {
+      return NextResponse.json(
+        { 
+          success: false,
+          message: "과거 시간으로는 예약할 수 없습니다.",
+          error: "INVALID_DATETIME"
+        },
+        { status: 400 }
+      );
+    }
+
+    // 중복 예약 확인
     const existingReservation = await prisma.reservation.findFirst({
       where: {
-        date: new Date(date),
-        startTime: time,
-        studentId: user.student.id,
-        status: {
-          in: ["CONFIRMED", "PENDING"],
+        studentId: student.id,
+        startTime: {
+          gte: new Date(reservationDateTime.getTime() - 24 * 60 * 60 * 1000), // 24시간 전
+          lte: new Date(reservationDateTime.getTime() + 24 * 60 * 60 * 1000), // 24시간 후
         },
-      },
+        status: {
+          in: ["PENDING", "CONFIRMED"]
+        }
+      }
     });
 
     if (existingReservation) {
-      console.log("중복 예약 발견:", existingReservation.id);
       return NextResponse.json(
-        { error: "해당 시간에 이미 예약이 있습니다." },
-        { status: 409 },
+        { 
+          success: false,
+          message: "해당 시간대에 이미 예약이 있습니다.",
+          error: "DUPLICATE_RESERVATION"
+        },
+        { status: 409 }
       );
     }
 
-    // 9. 종료 시간 계산
-    const getEndTime = (startTime: string, durationMinutes: number) => {
-      const [hours, minutes] = startTime.split(":").map(Number);
-      const startDate = new Date();
-      startDate.setHours(hours, minutes, 0, 0);
-
-      const endDate = new Date(startDate.getTime() + durationMinutes * 60000);
-      return endDate.toTimeString().slice(0, 5);
-    };
-
-    // 10. Location enum 변환
-    const locationEnum =
-      location === "온라인" ? Location.ONLINE : Location.OFFLINE;
-
-    // 11. 예약 생성
-    console.log("예약 생성 시작");
+    // 예약 생성
     const reservation = await prisma.reservation.create({
       data: {
-        date: new Date(date),
-        startTime: time,
-        endTime: getEndTime(time, duration),
-        location: locationEnum,
-        notes: notes || "",
-        status: ReservationStatus.CONFIRMED,
-        studentId: user.student.id,
-        teacherId: teacher.id,
+        studentId: student.id,
+        lessonType,
+        date: reservationDateTime,
+        startTime: reservationDateTime,
+        endTime: new Date(reservationDateTime.getTime() + duration * 60 * 1000),
+        duration,
+        status: "PENDING",
+        notes: notes || null,
+        teacherId: null, // 관리자가 선생님 지정
+        price: calculatePrice(lessonType, duration),
+        location: "ONLINE",
       },
       include: {
         student: {
           include: {
-            user: true,
-          },
+            user: true
+          }
+        }
+      }
+    });
+
+    console.log("수업 예약 생성 완료:", {
+      reservationId: reservation.id,
+      studentName: student.user.name,
+      lessonType,
+      startTime: reservationDateTime,
+      status: "PENDING"
+    });
+
+    // 관리자에게 예약 알림 생성
+    await prisma.adminNotification.create({
+      data: {
+        type: "NEW_RESERVATION",
+        title: "새로운 수업 예약",
+        message: `${student.user.name}님이 ${lessonType} 수업을 예약했습니다.`,
+        status: "UNREAD",
+        data: {
+          reservationId: reservation.id,
+          studentId: student.id,
+          studentName: student.user.name,
+          lessonType,
+          startTime: reservationDateTime,
         },
-        teacher: true,
       },
     });
 
-    console.log("예약 생성 성공:", reservation.id);
+    // 학생에게 예약 확인 이메일 발송 (실제 구현에서는 이메일 서비스 사용)
+    console.log(`예약 확인 이메일 발송: ${student.user.email}`);
 
-    // 12. 알림 전송
-    const notificationData = {
-      ...reservation,
-      student: {
-        ...reservation.student,
-        email: user.email,
-      },
-    };
-
-    // 이메일 알림 (비동기)
-    sendReservationNotification(notificationData).catch((error) => {
-      console.error("이메일 알림 전송 실패:", error);
-    });
-
-    // LINE 알림 (비동기)
-    sendLineNotification(notificationData).catch((error) => {
-      console.error("LINE 알림 전송 실패:", error);
-    });
-
-    // 13. 성공 응답
-    console.log("예약 생성 완료 - 성공 응답 반환");
     return NextResponse.json({
       success: true,
-      message: "예약이 성공적으로 완료되었습니다.",
+      message: "수업 예약이 완료되었습니다. 관리자 승인 후 확정됩니다.",
       reservation: {
         id: reservation.id,
-        date: reservation.date,
+        lessonType: reservation.lessonType,
         startTime: reservation.startTime,
         endTime: reservation.endTime,
-        location: reservation.location,
         status: reservation.status,
-        notes: reservation.notes,
-        createdAt: reservation.createdAt,
-        teacher: reservation.teacher,
-      },
+        price: reservation.price,
+      }
     });
-  } catch (error) {
-    console.error("=== 예약 생성 API 오류 ===");
-    console.error(
-      "오류 타입:",
-      error instanceof Error ? error.constructor.name : typeof error,
-    );
-    console.error(
-      "오류 메시지:",
-      error instanceof Error ? error.message : String(error),
-    );
-    console.error(
-      "오류 스택:",
-      error instanceof Error ? error.stack : "No stack trace",
-    );
 
+  } catch (error) {
+    console.error("수업 예약 오류:", error);
     return NextResponse.json(
-      { error: "예약 생성 중 오류가 발생했습니다. 다시 시도해주세요." },
-      { status: 500 },
+      { 
+        success: false,
+        message: "수업 예약 중 오류가 발생했습니다.",
+        error: error instanceof Error ? error.message : "UNKNOWN_ERROR"
+      },
+      { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
+}
+
+// 수업 유형과 시간에 따른 가격 계산
+function calculatePrice(lessonType: string, duration: number): number {
+  const basePrice = {
+    "초급 회화": 15000,
+    "중급 회화": 20000,
+    "고급 회화": 25000,
+    "문법 수업": 18000,
+    "작문 수업": 20000,
+    "듣기 수업": 17000,
+    "읽기 수업": 16000,
+    "시험 준비": 25000,
+  };
+
+  const basePricePerHour = basePrice[lessonType as keyof typeof basePrice] || 20000;
+  return Math.round((basePricePerHour * duration) / 60);
 }

@@ -40,9 +40,14 @@ model Student {
   yomigana              String
   koreanName            String?
   phone                 String?
+  birthDate             DateTime?
+  address               String?
+  emergencyContact      String?
   level                 String                  @default("초급 A")
   points                Int                     @default(0)
   avatar                String?
+  status                String                  @default("ACTIVE") // ACTIVE, INACTIVE, SUSPENDED
+  registrationDate      DateTime                @default(now())
   joinDate              DateTime                @default(now())
   createdAt             DateTime                @default(now())
   updatedAt             DateTime                @updatedAt
@@ -75,11 +80,16 @@ model Teacher {
   yomigana     String
   koreanName   String?
   phone        String?
+  birthDate    DateTime?
+  address      String?
+  emergencyContact String?
   subjects     String[]
   hourlyRate   Int                 @default(30000)
   colorCode    String              @default("#3B82F6")
   availableDays String[]           @default([])
   availableTimeSlots String[]      @default([])
+  status       String              @default("PENDING") // PENDING, ACTIVE, INACTIVE
+  hireDate     DateTime?
   isActive     Boolean             @default(true)
   createdAt    DateTime            @default(now())
   updatedAt    DateTime            @updatedAt
@@ -100,7 +110,12 @@ model Staff {
   yomigana    String
   koreanName  String?
   phone       String?
+  birthDate   DateTime?
+  address     String?
+  emergencyContact String?
   position    String
+  status      String         @default("PENDING") // PENDING, ACTIVE, INACTIVE
+  hireDate    DateTime?
   permissions Json           @default("{}")
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
@@ -112,21 +127,25 @@ model Staff {
 }
 
 model Reservation {
-  id        String            @id @default(cuid())
-  studentId String
-  teacherId String
-  date      DateTime
-  startTime String
-  endTime   String
-  status    ReservationStatus @default(CONFIRMED)
-  location  Location          @default(ONLINE)
-  notes     String?
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
-  payments  Payment[]
-  student   Student           @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  teacher   Teacher           @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-  reviews   Review[]
+  id          String            @id @default(cuid())
+  studentId   String
+  teacherId   String?
+  lessonType  String            @default("초급 회화")
+  date        DateTime
+  startTime   DateTime
+  endTime     DateTime
+  duration    Int               @default(60) // 분 단위
+  status      ReservationStatus @default(PENDING)
+  location    Location          @default(ONLINE)
+  notes       String?
+  price       Int               @default(0)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  payments    Payment[]
+  student     Student           @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  teacher     Teacher?          @relation(fields: [teacherId], references: [id], onDelete: SetNull)
+  reviews     Review[]
+  lessonNotes LessonNote[]
 
   @@map("reservations")
 }
@@ -194,6 +213,7 @@ model LessonNote {
   WritingTest           WritingTest[]
   student               Student                 @relation(fields: [studentId], references: [id], onDelete: Cascade)
   teacher               Teacher                 @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  reservation           Reservation?            @relation(fields: [reservationId], references: [id], onDelete: SetNull)
 
   @@map("lesson_notes")
 }
@@ -610,7 +630,12 @@ model Parent {
   yomigana   String
   koreanName String?
   phone      String?
+  birthDate  DateTime?
+  address    String?
+  emergencyContact String?
   studentId  String?
+  status     String   @default("ACTIVE") // ACTIVE, INACTIVE
+  registrationDate DateTime @default(now())
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   student    Student? @relation(fields: [studentId], references: [id])
@@ -672,6 +697,19 @@ model TeacherService {
 
   @@unique([teacherId, serviceId])
   @@map("teacher_services")
+}
+
+model AdminNotification {
+  id        String   @id @default(cuid())
+  type      String   // NEW_USER_REGISTRATION, NEW_RESERVATION, etc.
+  title     String
+  message   String
+  status    String   @default("UNREAD") // UNREAD, READ
+  data      Json?    // 추가 데이터
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("admin_notifications")
 }
 
 enum UserRole {

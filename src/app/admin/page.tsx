@@ -20,6 +20,47 @@ import {
 import ProtectedRoute from "@/components/common/ProtectedRoute";
 import Navigation from "@/components/common/Navigation";
 
+// 이벤트 텍스트 한 줄 표시를 위한 CSS 스타일
+const eventStyles = `
+  /* 이벤트 박스 전체 (둥근 모서리 박스) */
+  .reservation-item {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: block !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    line-height: 1.2 !important;
+    height: 1.2em !important;
+    flex-shrink: 0 !important;
+  }
+  
+  /* 이벤트 내부 텍스트 */
+  .reservation-text,
+  .reservation-text * {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: inline !important;
+  }
+  
+  /* 이벤트 시간 */
+  .event-time {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: inline !important;
+  }
+  
+  /* 이벤트 제목 */
+  .event-title {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: inline !important;
+  }
+`;
+
 interface Reservation {
   id: string;
   date: string;
@@ -33,14 +74,18 @@ interface Reservation {
   isTagged: boolean;
   tagTime?: string;
   location?: string;
+  duration?: number;
 }
 
 export default function AdminDashboard() {
   return (
     <ProtectedRoute allowedRoles={["ADMIN", "MASTER"]}>
       <div className="min-h-screen bg-gray-50">
+        <style dangerouslySetInnerHTML={{ __html: eventStyles }} />
         <Navigation userRole="ADMIN" />
-        <AdminDashboardContent />
+        <div className="ml-64">
+          <AdminDashboardContent />
+        </div>
       </div>
     </ProtectedRoute>
   );
@@ -52,6 +97,7 @@ function AdminDashboardContent() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [activeTab, setActiveTab] = useState<"calendar" | "overview" | "details">("calendar");
 
   // 샘플 예약 데이터
   useEffect(() => {
@@ -68,6 +114,7 @@ function AdminDashboardContent() {
         isCompleted: false,
         isTagged: false,
         location: "교실 A",
+        duration: 40,
       },
       {
         id: "2",
@@ -81,6 +128,7 @@ function AdminDashboardContent() {
         isCompleted: false,
         isTagged: false,
         location: "Zoom",
+        duration: 60,
       },
       {
         id: "3",
@@ -95,6 +143,7 @@ function AdminDashboardContent() {
         isTagged: true,
         tagTime: "14:05",
         location: "교실 B",
+        duration: 40,
       },
       {
         id: "4",
@@ -108,6 +157,7 @@ function AdminDashboardContent() {
         isCompleted: false,
         isTagged: false,
         location: "Zoom",
+        duration: 60,
       },
       {
         id: "5",
@@ -121,6 +171,147 @@ function AdminDashboardContent() {
         isCompleted: false,
         isTagged: false,
         location: "교실 A",
+        duration: 40,
+      },
+      {
+        id: "6",
+        date: "2025-08-01",
+        startTime: "08:00",
+        endTime: "08:40",
+        studentName: "伊藤優子",
+        serviceName: "온라인 수업 40분",
+        teacherName: "田中先生",
+        status: "confirmed",
+        isCompleted: false,
+        isTagged: false,
+        location: "Zoom",
+        duration: 40,
+      },
+      {
+        id: "7",
+        date: "2025-08-01",
+        startTime: "09:30",
+        endTime: "10:30",
+        studentName: "渡辺健一",
+        serviceName: "대면 수업 60분",
+        teacherName: "佐藤先生",
+        status: "confirmed",
+        isCompleted: false,
+        isTagged: false,
+        location: "교실 B",
+        duration: 60,
+      },
+      {
+        id: "8",
+        date: "2025-08-01",
+        startTime: "10:30",
+        endTime: "11:10",
+        studentName: "中村美咲",
+        serviceName: "온라인 수업 40분",
+        teacherName: "田中先生",
+        status: "confirmed",
+        isCompleted: false,
+        isTagged: false,
+        location: "Zoom",
+        duration: 40,
+      },
+      {
+        id: "9",
+        date: "2025-08-01",
+        startTime: "13:00",
+        endTime: "13:40",
+        studentName: "小林健太",
+        serviceName: "대면 수업 40분",
+        teacherName: "佐藤先生",
+        status: "confirmed",
+        isCompleted: false,
+        isTagged: false,
+        location: "교실 A",
+        duration: 40,
+      },
+      {
+        id: "10",
+        date: "2025-08-01",
+        startTime: "14:00",
+        endTime: "15:00",
+        studentName: "加藤美咲",
+        serviceName: "온라인 수업 60분",
+        teacherName: "田中先生",
+        status: "confirmed",
+        isCompleted: false,
+        isTagged: false,
+        location: "Zoom",
+        duration: 60,
+      },
+      {
+        id: "11",
+        date: "2025-08-02",
+        startTime: "09:00",
+        endTime: "09:40",
+        studentName: "佐藤花子",
+        serviceName: "대면 수업 40분",
+        teacherName: "佐藤先生",
+        status: "confirmed",
+        isCompleted: false,
+        isTagged: false,
+        location: "교실 B",
+        duration: 40,
+      },
+      {
+        id: "12",
+        date: "2025-08-02",
+        startTime: "10:00",
+        endTime: "11:00",
+        studentName: "田中次郎",
+        serviceName: "온라인 수업 60분",
+        teacherName: "田中先生",
+        status: "confirmed",
+        isCompleted: false,
+        isTagged: false,
+        location: "Zoom",
+        duration: 60,
+      },
+      {
+        id: "13",
+        date: "2025-08-03",
+        startTime: "11:00",
+        endTime: "11:40",
+        studentName: "山田太郎",
+        serviceName: "대면 수업 40분",
+        teacherName: "佐藤先生",
+        status: "confirmed",
+        isCompleted: false,
+        isTagged: false,
+        location: "교실 A",
+        duration: 40,
+      },
+      {
+        id: "14",
+        date: "2025-08-04",
+        startTime: "15:00",
+        endTime: "16:00",
+        studentName: "高橋美咲",
+        serviceName: "온라인 수업 60분",
+        teacherName: "田中先生",
+        status: "confirmed",
+        isCompleted: false,
+        isTagged: false,
+        location: "Zoom",
+        duration: 60,
+      },
+      {
+        id: "15",
+        date: "2025-08-05",
+        startTime: "11:00",
+        endTime: "11:40",
+        studentName: "佐々木健太",
+        serviceName: "대면 수업 40분",
+        teacherName: "佐藤先生",
+        status: "cancelled",
+        isCompleted: false,
+        isTagged: false,
+        location: "교실 A",
+        duration: 40,
       },
     ];
     setReservations(sampleReservations);
@@ -273,42 +464,80 @@ function AdminDashboardContent() {
       {/* 헤더 */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <h1 className="text-2xl font-bold text-gray-900">예약 일정 관리</h1>
+          <h1 className="text-2xl font-bold text-gray-900">관리자 대시보드</h1>
+          
+          {/* 탭 메뉴 */}
           <div className="flex items-center space-x-2">
             <button
-              onClick={() => setViewMode("month")}
+              onClick={() => setActiveTab("calendar")}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                viewMode === "month"
+                activeTab === "calendar"
                   ? "bg-blue-600 text-white shadow-sm"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
             >
-              월별
+              예약 일정
             </button>
             <button
-              onClick={() => setViewMode("week")}
+              onClick={() => setActiveTab("overview")}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                viewMode === "week"
+                activeTab === "overview"
                   ? "bg-blue-600 text-white shadow-sm"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
             >
-              주별
+              개요
             </button>
             <button
-              onClick={() => setViewMode("day")}
+              onClick={() => setActiveTab("details")}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                viewMode === "day"
+                activeTab === "details"
                   ? "bg-blue-600 text-white shadow-sm"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
             >
-              일별
+              상세정보
             </button>
           </div>
         </div>
 
-        <div className="flex items-center space-x-4">
+        {/* 캘린더 뷰 모드 (캘린더 탭에서만 표시) */}
+        {activeTab === "calendar" && (
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setViewMode("month")}
+                className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
+                  viewMode === "month"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                월별
+              </button>
+              <button
+                onClick={() => setViewMode("week")}
+                className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
+                  viewMode === "week"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                주별
+              </button>
+              <button
+                onClick={() => setViewMode("day")}
+                className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
+                  viewMode === "day"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                일별
+              </button>
+            </div>
+
+            <div className="flex items-center space-x-4">
           <button
             onClick={handlePreviousMonth}
             className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
@@ -349,7 +578,10 @@ function AdminDashboardContent() {
         </div>
       )}
 
-      {/* 월별 뷰 */}
+      {/* 탭 콘텐츠 */}
+      {activeTab === "calendar" && (
+        <>
+          {/* 월별 뷰 */}
       {viewMode === "month" && (
         <div className="bg-white rounded-xl shadow-lg border border-gray-100">
           {/* 요일 헤더 */}
@@ -378,7 +610,7 @@ function AdminDashboardContent() {
                 <div
                   key={index}
                   onClick={() => handleDateClick(day)}
-                  className={`min-h-[120px] p-2 bg-white cursor-pointer hover:bg-gray-50 transition-colors ${
+                  className={`min-h-[180px] p-1 bg-white cursor-pointer hover:bg-gray-50 transition-colors calendar-cell ${
                     !isCurrentMonth ? "text-gray-400" : ""
                   } ${isToday ? "bg-blue-50 border-2 border-blue-300" : ""} ${
                     isSelected ? "bg-blue-100 border-2 border-blue-500" : ""
@@ -388,45 +620,41 @@ function AdminDashboardContent() {
                     {day.getDate()}
                   </div>
 
-                  <div className="space-y-1">
-                    {dayReservations.slice(0, 2).map((reservation) => (
-                      <div
-                        key={reservation.id}
-                        className={`p-1 rounded-lg text-xs border ${
-                          reservation.isCompleted
-                            ? "bg-green-50 border-green-200"
-                            : "bg-blue-50 border-blue-200"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-medium">
-                            {reservation.startTime}-{reservation.endTime}
-                          </span>
-                          {getStatusIcon(
-                            reservation.status,
-                            reservation.isTagged,
-                          )}
+                  <div className="space-y-1 overflow-hidden">
+                    {dayReservations
+                      .sort((a, b) => {
+                        // 시작 시간으로 정렬
+                        if (a.startTime !== b.startTime) {
+                          return a.startTime.localeCompare(b.startTime);
+                        }
+                        // 시작 시간이 같으면 끝나는 시간으로 정렬
+                        return a.endTime.localeCompare(b.endTime);
+                      })
+                      .slice(0, 6)
+                      .map((reservation) => (
+                        <div
+                          key={reservation.id}
+                          className={`p-1 rounded text-xs border w-full reservation-item ${
+                            reservation.isCompleted
+                              ? "bg-green-50 border-green-200"
+                              : "bg-blue-50 border-blue-200"
+                          }`}
+                          title={`${reservation.startTime}-${reservation.endTime} ${reservation.studentName} ${reservation.serviceName} ${reservation.duration}분`}
+                        >
+                          <div className="text-gray-700 text-xs reservation-text">
+                            <span className="font-medium text-gray-900 event-time">
+                              {reservation.startTime}~{reservation.endTime}
+                            </span>
+                            <span className="ml-1">{reservation.studentName}</span>
+                            <span className="ml-1">{reservation.serviceName.includes('대면') ? '대면' : '온라인'}</span>
+                            <span className="ml-1 text-gray-500">{reservation.duration || 40}분</span>
+                            {getStatusIcon(reservation.status, reservation.isTagged)}
+                          </div>
                         </div>
-                        <div className="text-gray-700">
-                          <div className="flex items-center space-x-1">
-                            <User className="w-3 h-3" />
-                            <span>{reservation.studentName}</span>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            <BookOpen className="w-3 h-3" />
-                            <span>{reservation.serviceName}</span>
-                          </div>
-                        </div>
-                        {reservation.tagTime && (
-                          <div className="text-xs text-green-600 mt-1">
-                            태깅: {reservation.tagTime}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                    {dayReservations.length > 2 && (
-                      <div className="text-xs text-gray-500 text-center">
-                        +{dayReservations.length - 2} more
+                      ))}
+                    {dayReservations.length > 6 && (
+                      <div className="text-xs text-gray-500 text-center bg-gray-100 rounded px-1 py-0.5">
+                        +{dayReservations.length - 6}개 더
                       </div>
                     )}
                   </div>
@@ -442,13 +670,15 @@ function AdminDashboardContent() {
         <div className="bg-white rounded-xl shadow-lg border border-gray-100">
           {/* 요일 헤더 */}
           <div className="grid grid-cols-8 gap-px bg-gray-200 border-b">
-            <div className="p-3 text-center text-sm font-medium text-gray-700 bg-white">
+            <div className="p-3 text-center text-sm font-medium text-gray-700 bg-white border-r">
               시간
             </div>
-            {weekDays.map((day) => (
+            {weekDays.map((day, dayIndex) => (
               <div
                 key={day.toDateString()}
-                className="p-3 text-center text-sm font-medium text-gray-700 bg-white"
+                className={`p-3 text-center text-sm font-medium text-gray-700 bg-white ${
+                  dayIndex === 6 ? 'border-r-0' : 'border-r'
+                }`}
               >
                 <div>
                   {day.toLocaleDateString("ja-JP", { weekday: "short" })}
@@ -465,7 +695,7 @@ function AdminDashboardContent() {
                 <div className="p-2 text-xs text-gray-500 border-r border-b">
                   {timeSlot}
                 </div>
-                {weekDays.map((day) => {
+                {weekDays.map((day, dayIndex) => {
                   const dayReservations = getReservationsForDate(day);
                   const timeReservations = dayReservations.filter(
                     (reservation) => reservation.startTime === timeSlot,
@@ -474,28 +704,26 @@ function AdminDashboardContent() {
                   return (
                     <div
                       key={`${day.toDateString()}-${timeSlot}`}
-                      className="min-h-[60px] p-1 border-r border-b"
+                      className={`min-h-[60px] p-1 border-b ${
+                        dayIndex === 6 ? 'border-r-0' : 'border-r'
+                      }`}
                     >
                       {timeReservations.map((reservation) => (
                         <div
                           key={reservation.id}
-                          className={`p-1 rounded text-xs border ${
+                          className={`p-1 rounded text-xs border w-full reservation-item ${
                             reservation.isCompleted
                               ? "bg-green-50 border-green-200"
                               : "bg-blue-50 border-blue-200"
                           }`}
                         >
-                          <div className="font-medium">
-                            {reservation.studentName}
-                          </div>
-                          <div className="text-gray-600">
-                            {reservation.serviceName}
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            <MapPin className="w-2 h-2" />
-                            <span className="text-xs">
-                              {reservation.location}
+                          <div className="reservation-text">
+                            <span className="font-medium event-time">
+                              {reservation.startTime}~{reservation.endTime}
                             </span>
+                            <span className="ml-1">{reservation.studentName}</span>
+                            <span className="ml-1">{reservation.serviceName.includes('대면') ? '대면' : '온라인'}</span>
+                            <span className="ml-1 text-gray-500">{reservation.duration || 40}분</span>
                           </div>
                         </div>
                       ))}
@@ -550,28 +778,15 @@ function AdminDashboardContent() {
                           className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                         >
                           <div className="flex-1">
-                            <div className="flex items-center space-x-4">
-                              <div className="flex items-center space-x-2">
-                                <Clock className="w-4 h-4 text-gray-500" />
-                                <span className="font-medium">
-                                  {reservation.startTime} -{" "}
-                                  {reservation.endTime}
-                                </span>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <User className="w-4 h-4 text-gray-500" />
-                                <span>{reservation.studentName}</span>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <BookOpen className="w-4 h-4 text-gray-500" />
-                                <span>{reservation.serviceName}</span>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <MapPin className="w-4 h-4 text-gray-500" />
-                                <span>{reservation.location}</span>
-                              </div>
+                            <div className="reservation-text">
+                              <span className="font-medium event-time">
+                                {reservation.startTime}~{reservation.endTime}
+                              </span>
+                              <span className="ml-2">{reservation.studentName}</span>
+                              <span className="ml-2">{reservation.serviceName.includes('대면') ? '대면' : '온라인'}</span>
+                              <span className="ml-2 text-gray-500">{reservation.duration || 40}분</span>
                               <span
-                                className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(reservation.status)}`}
+                                className={`ml-2 px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(reservation.status)}`}
                               >
                                 {reservation.status === "confirmed" && "확정"}
                                 {reservation.status === "completed" && "완료"}
@@ -641,27 +856,15 @@ function AdminDashboardContent() {
                 className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 <div className="flex-1">
-                  <div className="flex items-center space-x-4">
-                    <div className="flex items-center space-x-2">
-                      <Clock className="w-4 h-4 text-gray-500" />
-                      <span className="font-medium">
-                        {reservation.startTime} - {reservation.endTime}
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <User className="w-4 h-4 text-gray-500" />
-                      <span>{reservation.studentName}</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <BookOpen className="w-4 h-4 text-gray-500" />
-                      <span>{reservation.serviceName}</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <MapPin className="w-4 h-4 text-gray-500" />
-                      <span>{reservation.location}</span>
-                    </div>
+                  <div className="reservation-text">
+                    <span className="font-medium event-time">
+                      {reservation.startTime}~{reservation.endTime}
+                    </span>
+                    <span className="ml-2">{reservation.studentName}</span>
+                    <span className="ml-2">{reservation.serviceName.includes('대면') ? '대면' : '온라인'}</span>
+                    <span className="ml-2 text-gray-500">{reservation.duration || 40}분</span>
                     <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(reservation.status)}`}
+                      className={`ml-2 px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(reservation.status)}`}
                     >
                       {reservation.status === "confirmed" && "확정"}
                       {reservation.status === "completed" && "완료"}
@@ -705,6 +908,64 @@ function AdminDashboardContent() {
                 해당 날짜에 예약이 없습니다.
               </div>
             )}
+          </div>
+        </div>
+      )}
+        </>
+      )}
+
+      {/* 개요 탭 */}
+      {activeTab === "overview" && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">오늘의 예약</h3>
+              <div className="text-3xl font-bold text-blue-600">12</div>
+              <p className="text-gray-600">확정된 예약</p>
+            </div>
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">이번 주 수업</h3>
+              <div className="text-3xl font-bold text-green-600">45</div>
+              <p className="text-gray-600">완료된 수업</p>
+            </div>
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">총 수익</h3>
+              <div className="text-3xl font-bold text-purple-600">₩2,450,000</div>
+              <p className="text-gray-600">이번 달</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 상세정보 탭 */}
+      {activeTab === "details" && (
+        <div className="space-y-6">
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">시스템 정보</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <h4 className="font-medium text-gray-700 mb-2">서버 상태</h4>
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-green-600">정상</span>
+                </div>
+              </div>
+              <div>
+                <h4 className="font-medium text-gray-700 mb-2">데이터베이스</h4>
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-green-600">연결됨</span>
+                </div>
+              </div>
+              <div>
+                <h4 className="font-medium text-gray-700 mb-2">마지막 백업</h4>
+                <span className="text-gray-600">2025-08-05 14:30</span>
+              </div>
+              <div>
+                <h4 className="font-medium text-gray-700 mb-2">시스템 버전</h4>
+                <span className="text-gray-600">v1.2.3</span>
+              </div>
+            </div>
           </div>
         </div>
       )}

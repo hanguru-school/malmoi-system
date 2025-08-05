@@ -33,10 +33,10 @@ interface MasterInfo {
 export default function AdminSettingsPage() {
   const [admins, setAdmins] = useState<Admin[]>([]);
   const [masterInfo, setMasterInfo] = useState<MasterInfo>({
-    name: "마스터 관리자",
-    email: "master@hanguru.com",
-    phone: "010-1234-5678",
-    twoFactorEnabled: true,
+    name: "",
+    email: "",
+    phone: "",
+    twoFactorEnabled: false,
   });
   const [loading, setLoading] = useState(true);
   const [isEditMasterModalOpen, setIsEditMasterModalOpen] = useState(false);
@@ -45,54 +45,51 @@ export default function AdminSettingsPage() {
   const [twoFactorCode, setTwoFactorCode] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  // 샘플 데이터
+  // 실제 데이터베이스에서 관리자 목록 조회
   useEffect(() => {
-    setTimeout(() => {
-      const sampleAdmins: Admin[] = [
-        {
-          id: "1",
-          name: "마스터 관리자",
-          email: "master@hanguru.com",
-          role: "master",
-          isActive: true,
-          twoFactorEnabled: true,
-          lastLogin: "2024-01-15 14:30",
-          createdAt: "2024-01-01",
-        },
-        {
-          id: "2",
-          name: "김선생님",
-          email: "kim@hanguru.com",
-          role: "admin",
-          isActive: true,
-          twoFactorEnabled: false,
-          lastLogin: "2024-01-14 16:20",
-          createdAt: "2024-01-05",
-        },
-        {
-          id: "3",
-          name: "이선생님",
-          email: "lee@hanguru.com",
-          role: "admin",
-          isActive: true,
-          twoFactorEnabled: true,
-          lastLogin: "2024-01-13 09:15",
-          createdAt: "2024-01-10",
-        },
-        {
-          id: "4",
-          name: "박선생님",
-          email: "park@hanguru.com",
-          role: "admin",
-          isActive: false,
-          twoFactorEnabled: false,
-          lastLogin: "2024-01-10 11:45",
-          createdAt: "2024-01-12",
-        },
-      ];
-      setAdmins(sampleAdmins);
-      setLoading(false);
-    }, 1000);
+    const fetchAdmins = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch("/api/admin/admins");
+        const data = await response.json();
+
+        if (data.success) {
+          // 데이터베이스 데이터를 UI 형식으로 변환
+          const formattedAdmins: Admin[] = data.admins.map((admin: any) => ({
+            id: admin.id,
+            name: admin.name,
+            email: admin.email,
+            role: admin.role === "ADMIN" ? "admin" : "master",
+            isActive: admin.status === "ACTIVE",
+            twoFactorEnabled: false, // 2단계 인증은 별도 구현 필요
+            lastLogin: admin.lastLogin || "로그인 기록 없음",
+            createdAt: new Date(admin.createdAt).toLocaleDateString(),
+          }));
+          setAdmins(formattedAdmins);
+
+          // 마스터 정보 설정 (첫 번째 관리자를 마스터로 간주)
+          if (data.admins.length > 0) {
+            const master = data.admins[0];
+            setMasterInfo({
+              name: master.name,
+              email: master.email,
+              phone: master.admin?.phone || "010-0000-0000",
+              twoFactorEnabled: false,
+            });
+          }
+        } else {
+          console.error("관리자 목록 조회 실패:", data.error);
+          setAdmins([]);
+        }
+      } catch (error) {
+        console.error("관리자 목록 조회 오류:", error);
+        setAdmins([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAdmins();
   }, []);
 
   const handleEditMasterInfo = (data: MasterInfo) => {
@@ -113,17 +110,58 @@ export default function AdminSettingsPage() {
     setIsAddAdminModalOpen(false);
   };
 
-  const handleToggleAdminStatus = (id: string) => {
-    setAdmins((prev) =>
-      prev.map((admin) =>
-        admin.id === id ? { ...admin, isActive: !admin.isActive } : admin,
-      ),
-    );
+  const handleToggleAdminStatus = async (id: string) => {
+    try {
+      const admin = admins.find(a => a.id === id);
+      if (!admin) return;
+
+      const newStatus = admin.isActive ? "INACTIVE" : "ACTIVE";
+      
+      const response = await fetch(`/api/admin/admins/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        // 목록에서 해당 관리자 상태 업데이트
+        setAdmins((prev) =>
+          prev.map((admin) =>
+            admin.id === id ? { ...admin, isActive: !admin.isActive } : admin,
+          ),
+        );
+        alert("관리자 상태가 변경되었습니다.");
+      } else {
+        alert(data.error || "상태 변경 실패");
+      }
+    } catch (error) {
+      console.error("관리자 상태 변경 오류:", error);
+      alert("관리자 상태 변경 중 오류가 발생했습니다.");
+    }
   };
 
-  const handleDeleteAdmin = (id: string) => {
+  const handleDeleteAdmin = async (id: string) => {
     if (confirm("정말로 이 관리자를 삭제하시겠습니까?")) {
-      setAdmins((prev) => prev.filter((admin) => admin.id !== id));
+      try {
+        const response = await fetch(`/api/admin/admins/${id}`, {
+          method: "DELETE",
+        });
+        const data = await response.json();
+
+        if (data.success) {
+          // 목록에서 삭제된 관리자 제거
+          setAdmins((prev) => prev.filter((admin) => admin.id !== id));
+          alert("관리자가 삭제되었습니다.");
+        } else {
+          alert(data.error || "관리자 삭제 실패");
+        }
+      } catch (error) {
+        console.error("관리자 삭제 오류:", error);
+        alert("관리자 삭제 중 오류가 발생했습니다.");
+      }
     }
   };
 

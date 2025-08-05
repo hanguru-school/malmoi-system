@@ -16,6 +16,7 @@ import {
   Building,
   User,
   Shield,
+  Globe,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -54,6 +55,23 @@ const translations = {
       classes: "完了したレッスン",
       satisfaction: "平均満足度",
     },
+    benefits: {
+      title: "教室で学ぶ生徒たちの特別なメリット",
+      subtitle: "このシステムを使うことで得られるメリット",
+      items: [
+        "24時間いつでも学習可能",
+        "個別の学習進捗管理",
+        "専門講師による質の高い指導",
+        "柔軟なスケジュール調整",
+        "豊富な学習リソース",
+        "リアルタイムでのフィードバック",
+      ],
+    },
+    cta: {
+      title: "今すぐ始めましょう！",
+      subtitle: "専門の先生たちと一緒に楽しい韓国語学習",
+      button: "ログイン",
+    },
   },
   ko: {
     title: "한국어교실MalMoi",
@@ -75,18 +93,35 @@ const translations = {
     employeeLogin: "직원 로그인",
     teacherLogin: "선생님 로그인",
     adminLogin: "관리자 로그인",
-    loginAs: "로 로그인",
+    loginAs: "으로 로그인",
     features: {
       title: "학생들을 위한 특별한 기능",
       reservation: "간편한 수업 예약",
       materials: "수업 자료 관리",
       progress: "학습 진도 추적",
-      communication: "선생님과 소통",
+      communication: "선생님과의 소통",
     },
     stats: {
       students: "활발한 학생들",
       classes: "완료된 수업",
       satisfaction: "평균 만족도",
+    },
+    benefits: {
+      title: "교실에서 수강하는 학생들의 특별한 혜택",
+      subtitle: "이 시스템을 쓰면 얻을 수 있는 메리트",
+      items: [
+        "24시간 언제든지 학습 가능",
+        "개별 학습 진도 관리",
+        "전문 강사의 질 높은 지도",
+        "유연한 스케줄 조정",
+        "풍부한 학습 리소스",
+        "실시간 피드백",
+      ],
+    },
+    cta: {
+      title: "지금 시작해보세요!",
+      subtitle: "전문 선생님들과 함께하는 재미있는 한국어 학습",
+      button: "로그인",
     },
   },
 };
@@ -99,6 +134,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [testResult, setTestResult] = useState("");
 
   const t = translations[language];
 
@@ -108,6 +144,8 @@ export default function LoginPage() {
     setError("");
 
     try {
+      console.log("로그인 시도:", { email, password });
+      
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
@@ -116,21 +154,60 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await response.json();
-
+      console.log("응답 상태:", response.status);
+      
       if (!response.ok) {
-        setError(data.error || "로그인에 실패했습니다.");
+        const errorData = await response.json();
+        console.error("로그인 오류:", errorData);
+        setError(errorData.error || "로그인 중 오류가 발생했습니다.");
         return;
       }
 
-      // 로그인 성공 시 해당 대시보드로 리다이렉트
-      if (data.dashboardPath) {
-        router.push(data.dashboardPath);
+      const data = await response.json();
+      console.log("로그인 성공:", data);
+      
+      // 사용자 역할에 따른 리다이렉트
+      if (data.success && data.user) {
+        const userRole = data.user.role;
+        let redirectUrl = "/";
+        
+        switch (userRole) {
+          case "ADMIN":
+            redirectUrl = "/admin";
+            break;
+          case "TEACHER":
+            redirectUrl = "/teacher";
+            break;
+          case "STUDENT":
+            redirectUrl = "/student";
+            break;
+          case "PARENT":
+            redirectUrl = "/parent";
+            break;
+          case "EMPLOYEE":
+            redirectUrl = "/employee";
+            break;
+          case "STAFF":
+            redirectUrl = "/staff";
+            break;
+          default:
+            redirectUrl = "/admin"; // 기본값
+        }
+        
+        console.log(`사용자 역할: ${userRole}, 리다이렉트: ${redirectUrl}`);
+        
+        // 강제로 페이지 이동
+        window.location.href = redirectUrl;
+      } else if (data.redirectUrl) {
+        // 기존 redirectUrl이 있는 경우
+        window.location.href = data.redirectUrl;
       } else {
-        router.push("/student");
+        // 기본 리다이렉트
+        window.location.href = "/admin";
       }
     } catch (error) {
-      setError("로그인에 실패했습니다. 다시 시도해주세요.");
+      console.error("로그인 오류:", error);
+      setError("로그인 중 오류가 발생했습니다.");
     } finally {
       setIsLoading(false);
     }
@@ -138,6 +215,25 @@ export default function LoginPage() {
 
   const handleRegister = () => {
     router.push("/auth/register");
+  };
+
+  const testApiConnection = async () => {
+    try {
+      setTestResult("테스트 중...");
+      
+      const response = await fetch("/api/test-simple", {
+        method: "GET",
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setTestResult(`API 연결 성공: ${JSON.stringify(data, null, 2)}`);
+      } else {
+        setTestResult(`API 연결 실패: ${response.status} ${response.statusText}`);
+      }
+    } catch (error) {
+      setTestResult(`API 연결 오류: ${error}`);
+    }
   };
 
   return (
@@ -245,10 +341,7 @@ export default function LoginPage() {
                 {isLoading ? (
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                 ) : (
-                  <>
-                    {t.loginButton}
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </>
+                  <span>{t.loginButton}</span>
                 )}
               </button>
             </div>
@@ -396,6 +489,61 @@ export default function LoginPage() {
             <div className="text-2xl font-bold text-purple-600">4.9</div>
             <div className="text-xs text-gray-600">{t.stats.satisfaction}</div>
           </div>
+        </div>
+
+        {/* Benefits Preview */}
+        <div className="bg-white rounded-2xl shadow-xl p-6 mt-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">
+            {t.benefits.title}
+          </h3>
+          <ul className="space-y-3 text-gray-700 text-sm">
+            {t.benefits.items.map((item, index) => (
+              <li key={index} className="flex items-start">
+                <svg
+                  className="w-5 h-5 text-green-500 mr-2 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* CTA */}
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-lg p-8 text-center text-white">
+          <h3 className="text-2xl font-bold mb-2">{t.cta.title}</h3>
+          <p className="text-lg mb-4">{t.cta.subtitle}</p>
+          <button
+            onClick={() => router.push("/auth/register")}
+            className="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+          >
+            {t.cta.button}
+          </button>
+        </div>
+
+        {/* API 테스트 버튼 */}
+        <div className="mt-6 pt-6 border-t border-gray-200">
+          <button
+            onClick={testApiConnection}
+            className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors"
+          >
+            API 연결 테스트
+          </button>
+          {testResult && (
+            <div className="mt-3 p-3 bg-gray-50 rounded-lg text-xs">
+              <pre className="whitespace-pre-wrap">{testResult}</pre>
+            </div>
+          )}
         </div>
       </div>
     </div>
