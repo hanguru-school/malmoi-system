@@ -190,6 +190,7 @@ export default function HomePage() {
   const t = translations[language as keyof typeof translations];
 
   const handleStart = () => {
+    // 바로 로그인 페이지로 이동
     router.push('/auth/login');
   };
 
@@ -260,23 +261,35 @@ export default function HomePage() {
         {/* Features Grid */}
         <section className="mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">
-            체계적인 커리큘럼과 전문 강사진
+            {t.heroSubtitle}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
               <BookOpen className="w-16 h-16 text-blue-600 mb-4 mx-auto" />
-              <h3 className="font-semibold text-xl mb-3 text-center">체계적인 커리큘럼</h3>
-              <p className="text-gray-600 text-center">초급부터 고급까지 단계적 실력 향상</p>
+              <h3 className="font-semibold text-xl mb-3 text-center">
+                {language === 'ko' ? '체계적인 커리큘럼' : '体系的なカリキュラム'}
+              </h3>
+              <p className="text-gray-600 text-center">
+                {language === 'ko' ? '초급부터 고급까지 단계적 실력 향상' : '初級から上級まで段階的に実力向上'}
+              </p>
             </div>
             <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
               <Users className="w-16 h-16 text-purple-600 mb-4 mx-auto" />
-              <h3 className="font-semibold text-xl mb-3 text-center">전문 강사진</h3>
-              <p className="text-gray-600 text-center">경험 풍부한 전문 강사</p>
+              <h3 className="font-semibold text-xl mb-3 text-center">
+                {language === 'ko' ? '전문 강사진' : '専門講師陣'}
+              </h3>
+              <p className="text-gray-600 text-center">
+                {language === 'ko' ? '경험 풍부한 전문 강사' : '経験豊富な専門講師'}
+              </p>
             </div>
             <div className="bg-gradient-to-br from-blue-50 to-purple-100 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
               <Clock className="w-16 h-16 text-blue-600 mb-4 mx-auto" />
-              <h3 className="font-semibold text-xl mb-3 text-center">언제든 어디서든</h3>
-              <p className="text-gray-600 text-center">학습 가능한 환경</p>
+              <h3 className="font-semibold text-xl mb-3 text-center">
+                {language === 'ko' ? '언제든 어디서든' : 'いつでもどこでも'}
+              </h3>
+              <p className="text-gray-600 text-center">
+                {language === 'ko' ? '학습 가능한 환경' : '学習可能な環境'}
+              </p>
             </div>
           </div>
         </section>
@@ -284,23 +297,35 @@ export default function HomePage() {
         {/* Learning Features */}
         <section className="mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">
-            실전적인 학습 기능
+            {language === 'ko' ? '실전적인 학습 기능' : '実践的な学習機能'}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
               <MessageSquare className="w-16 h-16 text-green-600 mb-4 mx-auto" />
-              <h3 className="font-semibold text-xl mb-3 text-center">실전 대화 연습</h3>
-              <p className="text-gray-600 text-center">네이티브처럼 자연스러운 한국어</p>
+              <h3 className="font-semibold text-xl mb-3 text-center">
+                {language === 'ko' ? '실전 대화 연습' : '実践的な会話練習'}
+              </h3>
+              <p className="text-gray-600 text-center">
+                {language === 'ko' ? '네이티브처럼 자연스러운 한국어' : 'ネイティブのような自然な韓国語'}
+              </p>
             </div>
             <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
               <TrendingUp className="w-16 h-16 text-orange-600 mb-4 mx-auto" />
-              <h3 className="font-semibold text-xl mb-3 text-center">학습 결과 시각화</h3>
-              <p className="text-gray-600 text-center">정기적인 평가와 피드백</p>
+              <h3 className="font-semibold text-xl mb-3 text-center">
+                {language === 'ko' ? '학습 결과 시각화' : '学習結果の視覚化'}
+              </h3>
+              <p className="text-gray-600 text-center">
+                {language === 'ko' ? '정기적인 평가와 피드백' : '定期的な評価とフィードバック'}
+              </p>
             </div>
             <div className="bg-gradient-to-br from-teal-50 to-teal-100 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
               <Shield className="w-16 h-16 text-teal-600 mb-4 mx-auto" />
-              <h3 className="font-semibold text-xl mb-3 text-center">안전한 학습 환경</h3>
-              <p className="text-gray-600 text-center">안심하고 집중할 수 있는 환경</p>
+              <h3 className="font-semibold text-xl mb-3 text-center">
+                {language === 'ko' ? '안전한 학습 환경' : '安全な学習環境'}
+              </h3>
+              <p className="text-gray-600 text-center">
+                {language === 'ko' ? '안심하고 집중할 수 있는 환경' : '安心して集中できる環境'}
+              </p>
             </div>
           </div>
         </section>
@@ -308,28 +333,40 @@ export default function HomePage() {
         {/* Learning Process */}
         <section className="mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">
-            MalMoi의 학습 과정
+            {language === 'ko' ? 'MalMoi의 학습 과정' : 'MalMoiの学習過程'}
           </h2>
           <div className="space-y-6 max-w-4xl mx-auto">
             <div className="flex items-center space-x-6 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl shadow-lg">
               <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full flex items-center justify-center font-bold text-2xl">1</div>
               <div className="flex-1">
-                <h3 className="font-semibold text-xl mb-2">기초 탄탄히 다지기</h3>
-                <p className="text-gray-600">한글부터 기본 문법까지</p>
+                <h3 className="font-semibold text-xl mb-2">
+                  {language === 'ko' ? '기초 탄탄히 다지기' : '基礎をしっかり固める'}
+                </h3>
+                <p className="text-gray-600">
+                  {language === 'ko' ? '한글부터 기본 문법까지' : 'ハングルから基本文法まで'}
+                </p>
               </div>
             </div>
             <div className="flex items-center space-x-6 p-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl shadow-lg">
               <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-full flex items-center justify-center font-bold text-2xl">2</div>
               <div className="flex-1">
-                <h3 className="font-semibold text-xl mb-2">응용력 강화</h3>
-                <p className="text-gray-600">다양한 표현과 어휘 습득</p>
+                <h3 className="font-semibold text-xl mb-2">
+                  {language === 'ko' ? '응용력 강화' : '応用力強化'}
+                </h3>
+                <p className="text-gray-600">
+                  {language === 'ko' ? '다양한 표현과 어휘 습득' : '多様な表現と語彙習得'}
+                </p>
               </div>
             </div>
             <div className="flex items-center space-x-6 p-6 bg-gradient-to-r from-pink-50 to-red-50 rounded-2xl shadow-lg">
               <div className="w-16 h-16 bg-gradient-to-r from-pink-500 to-red-600 text-white rounded-full flex items-center justify-center font-bold text-2xl">3</div>
               <div className="flex-1">
-                <h3 className="font-semibold text-xl mb-2">고급 레벨</h3>
-                <p className="text-gray-600">네이티브 수준의 회화력</p>
+                <h3 className="font-semibold text-xl mb-2">
+                  {language === 'ko' ? '고급 레벨' : '上級レベル'}
+                </h3>
+                <p className="text-gray-600">
+                  {language === 'ko' ? '네이티브 수준의 회화력' : 'ネイティブレベルの会話力'}
+                </p>
               </div>
             </div>
           </div>
@@ -338,23 +375,35 @@ export default function HomePage() {
         {/* Benefits */}
         <section className="mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">
-            더 많은 혜택
+            {language === 'ko' ? '더 많은 혜택' : 'より多くのメリット'}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-gradient-to-br from-red-50 to-pink-100 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
               <Heart className="w-16 h-16 text-red-600 mb-4 mx-auto" />
-              <h3 className="font-semibold text-xl mb-3 text-center">특별한 혜택</h3>
-              <p className="text-gray-600 text-center">무료 학습 자료, 24시간 지원</p>
+              <h3 className="font-semibold text-xl mb-3 text-center">
+                {language === 'ko' ? '특별한 혜택' : '特別なメリット'}
+              </h3>
+              <p className="text-gray-600 text-center">
+                {language === 'ko' ? '무료 학습 자료, 24시간 지원' : '無料学習資料、24時間サポート'}
+              </p>
             </div>
             <div className="bg-gradient-to-br from-yellow-50 to-orange-100 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
               <Gift className="w-16 h-16 text-yellow-600 mb-4 mx-auto" />
-              <h3 className="font-semibold text-xl mb-3 text-center">편리한 기능</h3>
-              <p className="text-gray-600 text-center">모바일 앱, 자동 예약 시스템</p>
+              <h3 className="font-semibold text-xl mb-3 text-center">
+                {language === 'ko' ? '편리한 기능' : '便利な機能'}
+              </h3>
+              <p className="text-gray-600 text-center">
+                {language === 'ko' ? '모바일 앱, 자동 예약 시스템' : 'モバイルアプリ、自動予約システム'}
+              </p>
             </div>
             <div className="bg-gradient-to-br from-indigo-50 to-purple-100 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
               <Award className="w-16 h-16 text-indigo-600 mb-4 mx-auto" />
-              <h3 className="font-semibold text-xl mb-3 text-center">학습의 장점</h3>
-              <p className="text-gray-600 text-center">체계적인 커리큘럼, 전문 강사진</p>
+              <h3 className="font-semibold text-xl mb-3 text-center">
+                {language === 'ko' ? '학습의 장점' : '学習の利点'}
+              </h3>
+              <p className="text-gray-600 text-center">
+                {language === 'ko' ? '체계적인 커리큘럼, 전문 강사진' : '体系的なカリキュラム、専門講師陣'}
+              </p>
             </div>
           </div>
         </section>
@@ -362,7 +411,7 @@ export default function HomePage() {
         {/* Detailed Merits */}
         <section className="mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800">
-            상세한 혜택 안내
+            {language === 'ko' ? '상세한 혜택 안내' : '詳細なメリット案内'}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-gradient-to-br from-emerald-50 to-teal-100 p-8 rounded-2xl shadow-lg">
@@ -414,9 +463,17 @@ export default function HomePage() {
           <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 text-white p-12 rounded-3xl shadow-2xl">
             <h2 className="text-4xl md:text-5xl font-bold mb-6">{t.loginCTA.title}</h2>
             <p className="text-2xl mb-8 opacity-90">{t.loginCTA.subtitle}</p>
+            <div className="mb-6">
+              <p className="text-lg opacity-80 mb-4">
+                {language === 'ko' ? '아래 버튼을 클릭하면 로그인 페이지로 이동합니다' : '下のボタンをクリックするとログインページに移動します'}
+              </p>
+              <p className="text-sm opacity-70">
+                {language === 'ko' ? '입회 신청을 원하시면 로그인 후 "입회하기" 버튼을 클릭하세요' : '入会申し込みをご希望の場合は、ログイン後に「入会申し込み」ボタンをクリックしてください'}
+              </p>
+            </div>
             <button
               onClick={handleStart}
-              className="bg-white text-blue-600 px-10 py-4 rounded-xl font-semibold text-xl hover:bg-gray-100 transition-all duration-300 mx-auto shadow-lg"
+              className="bg-white text-blue-800 px-10 py-4 rounded-xl font-semibold text-xl hover:bg-gray-100 transition-all duration-300 mx-auto shadow-lg"
             >
               {t.loginCTA.button}
             </button>
@@ -427,12 +484,17 @@ export default function HomePage() {
 
       {/* Bottom Start Button */}
       <div className="flex justify-center pb-8">
-        <button
-          onClick={handleStart}
-          className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-3 rounded-lg font-semibold text-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg"
-        >
-          {t.startButton}
-        </button>
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">
+            {language === 'ko' ? '준비되셨나요? 아래 버튼을 클릭하세요!' : '準備はできましたか？下のボタンをクリックしてください！'}
+          </p>
+          <button
+            onClick={handleStart}
+            className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-3 rounded-lg font-semibold text-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg"
+          >
+            {t.startButton}
+          </button>
+        </div>
       </div>
 
       {/* Bottom URL Bar */}
