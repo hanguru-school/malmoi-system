@@ -209,14 +209,16 @@ export default function LoginPage() {
         contentType: response.headers.get("content-type")
       });
       
-      // 사용자 역할에 따른 리다이렉트
-      if (data.success && data.user) {
+      // API에서 반환한 redirectUrl을 우선 사용
+      let redirectUrl = data.redirectUrl;
+      
+      // redirectUrl이 없으면 사용자 역할에 따른 기본 리다이렉트
+      if (!redirectUrl && data.success && data.user) {
         const userRole = data.user.role;
-        let redirectUrl = "/";
         
         switch (userRole) {
           case "ADMIN":
-            redirectUrl = "/admin";
+            redirectUrl = "/admin/dashboard";
             break;
           case "TEACHER":
             redirectUrl = "/teacher";
@@ -234,24 +236,23 @@ export default function LoginPage() {
             redirectUrl = "/staff";
             break;
           default:
-            redirectUrl = "/admin"; // 기본값
+            redirectUrl = "/admin/dashboard"; // 기본값
         }
-        
-        console.log(`사용자 역할: ${userRole}, 리다이렉트: ${redirectUrl}`);
-        console.log("쿠키 확인:", document.cookie);
-        
-        // 쿠키가 설정될 시간을 주기 위해 약간의 딜레이 추가
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // 강제로 페이지 이동
-        window.location.href = redirectUrl;
-      } else if (data.redirectUrl) {
-        // 기존 redirectUrl이 있는 경우
-        window.location.href = data.redirectUrl;
-      } else {
-        // 기본 리다이렉트
-        window.location.href = "/admin";
       }
+      
+      // redirectUrl이 여전히 없으면 기본값
+      if (!redirectUrl) {
+        redirectUrl = "/admin/dashboard";
+      }
+      
+      console.log(`리다이렉트 URL: ${redirectUrl}`);
+      console.log("쿠키 확인:", document.cookie);
+      
+      // 쿠키가 설정될 시간을 주기 위해 약간의 딜레이 추가
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // 강제로 페이지 이동
+      window.location.href = redirectUrl;
     } catch (error) {
       console.error("로그인 네트워크 오류:", error);
       let errorMessage = "로그인 중 오류가 발생했습니다.";
