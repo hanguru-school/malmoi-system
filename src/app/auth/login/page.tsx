@@ -142,13 +142,27 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("=== 로그인 버튼 클릭됨 ===");
+    
+    // 입력 검증
+    if (!email || !password) {
+      console.log("입력 검증 실패: 이메일 또는 비밀번호가 비어있음");
+      setError("이메일과 비밀번호를 입력해주세요.");
+      return;
+    }
+    
+    console.log("로딩 상태 시작");
     setIsLoading(true);
     setError("");
 
     try {
-      console.log("로그인 시도:", { email, password });
+      console.log("=== 로그인 API 호출 시작 ===");
+      console.log("요청 데이터:", { email: email.substring(0, 3) + "***", hasPassword: !!password });
       
-      const response = await fetch("/api/auth/login", {
+      const apiUrl = "/api/auth/login";
+      console.log("API URL:", apiUrl);
+      
+      const response = await fetch(apiUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -157,12 +171,27 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password }),
       });
 
-      console.log("응답 상태:", response.status);
+      console.log("=== 응답 받음 ===");
+      console.log("응답 상태:", response.status, response.statusText);
+      console.log("응답 헤더:", {
+        contentType: response.headers.get("content-type"),
+        status: response.status,
+        statusText: response.statusText
+      });
       
       if (!response.ok) {
-        const errorData = await response.json();
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch (parseError) {
+          errorData = { 
+            message: `서버 오류 (${response.status}): ${response.statusText}`,
+            error: "SERVER_ERROR"
+          };
+        }
         console.error("로그인 오류:", errorData);
-        setError(errorData.error || "로그인 중 오류가 발생했습니다.");
+        setError(errorData.message || errorData.error || "로그인 중 오류가 발생했습니다.");
+        setIsLoading(false);
         return;
       }
 
@@ -217,10 +246,16 @@ export default function LoginPage() {
         window.location.href = "/admin";
       }
     } catch (error) {
-      console.error("로그인 오류:", error);
-      const errorMessage = error instanceof Error ? error.message : "로그인 중 오류가 발생했습니다.";
+      console.error("로그인 네트워크 오류:", error);
+      let errorMessage = "로그인 중 오류가 발생했습니다.";
+      
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        errorMessage = "서버에 연결할 수 없습니다. 네트워크 연결을 확인해주세요.";
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
       setError(errorMessage);
-    } finally {
       setIsLoading(false);
     }
   };
