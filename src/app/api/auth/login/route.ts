@@ -7,7 +7,7 @@ import prisma from "@/lib/prisma";
 function getRedirectUrlByRole(role: string): string {
   switch (role) {
     case "ADMIN":
-      return "/admin";
+      return "/admin/dashboard";
     case "TEACHER":
       return "/teacher";
     case "STUDENT":
@@ -19,7 +19,7 @@ function getRedirectUrlByRole(role: string): string {
     case "STAFF":
       return "/staff";
     default:
-      return "/admin";
+      return "/admin/dashboard";
   }
 }
 
