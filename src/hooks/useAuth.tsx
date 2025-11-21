@@ -38,10 +38,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const data = await response.json();
         setUser(data.user);
       } else {
+        // 401은 로그인하지 않은 상태이므로 정상 - 콘솔에 에러로 표시하지 않음
         setUser(null);
       }
     } catch (error) {
-      console.error("Auth check error:", error);
+      // 네트워크 에러만 콘솔에 표시
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        console.error("Auth check network error:", error);
+      }
       setUser(null);
     } finally {
       setLoading(false);

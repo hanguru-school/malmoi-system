@@ -133,19 +133,6 @@ export async function POST(request: NextRequest) {
     // 로그인 성공 - 세션 설정
     const sessionToken = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     
-    // 쿠키 설정
-    const cookieStore = await cookies();
-    // HTTP 환경에서도 작동하도록 secure 플래그 조정
-    const isSecure = process.env.NODE_ENV === "production" && request.url.startsWith("https://");
-    
-    cookieStore.set("session", sessionToken, {
-      httpOnly: true,
-      secure: isSecure,
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 7, // 7일
-      path: "/",
-    });
-    
     // 사용자 정보 쿠키 설정 (비밀번호 제외)
     const userData = {
       id: user.id,
@@ -153,22 +140,6 @@ export async function POST(request: NextRequest) {
       name: user.name,
       role: user.role,
     };
-    
-    cookieStore.set("user", JSON.stringify(userData), {
-      httpOnly: true,
-      secure: isSecure,
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 7, // 7일
-      path: "/",
-    });
-
-    console.log("로그인 성공:", {
-      userId: user.id,
-      email: user.email,
-      role: user.role,
-      isFirstLogin: user.isFirstLogin,
-      sessionToken: sessionToken.substring(0, 20) + "..."
-    });
 
     // 첫 로그인 체크 및 리다이렉트 URL 결정
     let redirectUrl = getRedirectUrlByRole(user.role);
@@ -185,13 +156,45 @@ export async function POST(request: NextRequest) {
       redirectUrl = "/admin/master-setup";
     }
 
-    return NextResponse.json({
+    // 응답 생성
+    const response = NextResponse.json({
       success: true,
       message: "로그인 성공",
       user: userData,
       isFirstLogin: user.isFirstLogin,
       redirectUrl: redirectUrl
     });
+    
+    // HTTP 환경에서도 작동하도록 secure 플래그 조정
+    const isSecure = process.env.NODE_ENV === "production" && request.url.startsWith("https://");
+    
+    // 응답 객체에 쿠키 설정 (이 방법이 Next.js에서 올바른 방법)
+    response.cookies.set("session", sessionToken, {
+      httpOnly: true,
+      secure: isSecure,
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 7, // 7일
+      path: "/",
+    });
+    
+    response.cookies.set("user", JSON.stringify(userData), {
+      httpOnly: true,
+      secure: isSecure,
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 7, // 7일
+      path: "/",
+    });
+
+    console.log("로그인 성공:", {
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+      isFirstLogin: user.isFirstLogin,
+      sessionToken: sessionToken.substring(0, 20) + "...",
+      redirectUrl: redirectUrl
+    });
+    
+    return response;
     
   } catch (error) {
     // 개발환경에서만 에러 로그 출력

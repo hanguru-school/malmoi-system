@@ -168,6 +168,10 @@ export default function LoginPage() {
 
       const data = await response.json();
       console.log("로그인 성공:", data);
+      console.log("응답 헤더:", {
+        cookies: response.headers.get("set-cookie"),
+        contentType: response.headers.get("content-type")
+      });
       
       // 사용자 역할에 따른 리다이렉트
       if (data.success && data.user) {
@@ -198,6 +202,10 @@ export default function LoginPage() {
         }
         
         console.log(`사용자 역할: ${userRole}, 리다이렉트: ${redirectUrl}`);
+        console.log("쿠키 확인:", document.cookie);
+        
+        // 쿠키가 설정될 시간을 주기 위해 약간의 딜레이 추가
+        await new Promise(resolve => setTimeout(resolve, 500));
         
         // 강제로 페이지 이동
         window.location.href = redirectUrl;
@@ -210,7 +218,8 @@ export default function LoginPage() {
       }
     } catch (error) {
       console.error("로그인 오류:", error);
-      setError("로그인 중 오류가 발생했습니다.");
+      const errorMessage = error instanceof Error ? error.message : "로그인 중 오류가 발생했습니다.";
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
