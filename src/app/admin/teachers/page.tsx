@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import {
   GraduationCap,
   Search,
@@ -33,7 +33,7 @@ interface Teacher {
   notes?: string;
 }
 
-export default function AdminTeachers() {
+export default function AdminTeachersPage() {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [filteredTeachers, setFilteredTeachers] = useState<Teacher[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -43,107 +43,52 @@ export default function AdminTeachers() {
   const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
   const [showTeacherModal, setShowTeacherModal] = useState(false);
 
-  useEffect(() => {
-    loadTeachers();
+  const loadTeachers = useCallback(async () => {
+    try {
+      // 실제 데이터베이스에서 선생님 데이터 로드
+      const response = await fetch("/api/admin/teachers", {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await response.json();
+      
+      if (data.success && data.teachers && data.teachers.length > 0) {
+        // 실제 데이터를 Teacher 형식으로 변환
+        const formattedTeachers: Teacher[] = data.teachers.map((teacher: any) => ({
+          id: teacher.id,
+          name: teacher.name,
+          email: teacher.email || "",
+          phone: teacher.phone || "",
+          subject: teacher.subject || "미정",
+          experience: teacher.experience || 0,
+          joinDate: teacher.createdAt?.split('T')[0] || "",
+          totalStudents: 0, // 실제 데이터가 없으므로 기본값
+          totalLessons: 0, // 실제 데이터가 없으므로 기본값
+          averageRating: 0, // 실제 데이터가 없으므로 기본값
+          salary: 0, // 실제 데이터가 없으므로 기본값
+          status: "active" as "active" | "inactive" | "suspended", // 기본값으로 active 설정
+          specialization: [], // 실제 데이터가 없으므로 빈 배열
+          lastLessonDate: "", // 실제 데이터가 없으므로 빈 문자열
+          notes: teacher.notes || "",
+        }));
+        setTeachers(formattedTeachers);
+      } else {
+        // 데이터가 없으면 빈 배열
+        setTeachers([]);
+      }
+    } catch (error) {
+      console.error("선생님 목록 로딩 실패:", error);
+      setTeachers([]);
+    }
   }, []);
 
   useEffect(() => {
-    filterAndSortTeachers();
-  }, [teachers, searchTerm, filterSubject, filterStatus, sortBy]);
+    loadTeachers();
+  }, [loadTeachers]);
 
-  const loadTeachers = () => {
-    const mockTeachers: Teacher[] = [
-      {
-        id: "1",
-        name: "김선생님",
-        email: "kim.teacher@example.com",
-        phone: "010-1234-5678",
-        subject: "한국어 문법",
-        experience: 5,
-        joinDate: "2020-03-15",
-        totalStudents: 25,
-        totalLessons: 320,
-        averageRating: 4.8,
-        salary: 3500000,
-        status: "active",
-        specialization: ["초급 문법", "중급 회화", "TOPIK 준비"],
-        lastLessonDate: "2024-01-15",
-        notes: "매우 성실하고 학생들의 평가가 좋은 선생님입니다.",
-      },
-      {
-        id: "2",
-        name: "박선생님",
-        email: "park.teacher@example.com",
-        phone: "010-2345-6789",
-        subject: "한국어 회화",
-        experience: 3,
-        joinDate: "2021-06-20",
-        totalStudents: 18,
-        totalLessons: 245,
-        averageRating: 4.6,
-        salary: 3200000,
-        status: "active",
-        specialization: ["초급 회화", "비즈니스 한국어"],
-        lastLessonDate: "2024-01-14",
-        notes: "회화 수업에 특화되어 있고 학생들이 좋아합니다.",
-      },
-      {
-        id: "3",
-        name: "이선생님",
-        email: "lee.teacher@example.com",
-        phone: "010-3456-7890",
-        subject: "한국어 작문",
-        experience: 7,
-        joinDate: "2018-09-10",
-        totalStudents: 30,
-        totalLessons: 450,
-        averageRating: 4.9,
-        salary: 4000000,
-        status: "active",
-        specialization: ["고급 작문", "에세이 작성", "학술 한국어"],
-        lastLessonDate: "2024-01-13",
-        notes: "고급 수준의 수업을 담당하는 베테랑 선생님입니다.",
-      },
-      {
-        id: "4",
-        name: "최선생님",
-        email: "choi.teacher@example.com",
-        phone: "010-4567-8901",
-        subject: "한국어 발음",
-        experience: 2,
-        joinDate: "2022-01-05",
-        totalStudents: 12,
-        totalLessons: 180,
-        averageRating: 4.3,
-        salary: 2800000,
-        status: "inactive",
-        specialization: ["발음 교정", "초급 회화"],
-        lastLessonDate: "2023-12-20",
-        notes: "발음 교정에 특화되어 있지만 최근 수업이 줄어들고 있습니다.",
-      },
-      {
-        id: "5",
-        name: "정선생님",
-        email: "jung.teacher@example.com",
-        phone: "010-5678-9012",
-        subject: "한국어 문화",
-        experience: 4,
-        joinDate: "2020-08-15",
-        totalStudents: 20,
-        totalLessons: 280,
-        averageRating: 4.7,
-        salary: 3300000,
-        status: "active",
-        specialization: ["한국 문화", "중급 회화", "K-컨텐츠"],
-        lastLessonDate: "2024-01-12",
-        notes: "한국 문화와 K-컨텐츠를 활용한 수업을 진행합니다.",
-      },
-    ];
-
-    setTeachers(mockTeachers);
-  };
-
-  const filterAndSortTeachers = () => {
+  const filterAndSortTeachers = useMemo(() => {
     const filtered = teachers.filter((teacher) => {
       const matchesSearch =
         teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -176,10 +121,14 @@ export default function AdminTeachers() {
       }
     });
 
-    setFilteredTeachers(filtered);
-  };
+    return filtered;
+  }, [teachers, searchTerm, filterSubject, filterStatus, sortBy]);
 
-  const getStatusColor = (status: string) => {
+  useEffect(() => {
+    setFilteredTeachers(filterAndSortTeachers);
+  }, [filterAndSortTeachers]);
+
+  const getStatusColor = useCallback((status: string) => {
     switch (status) {
       case "active":
         return "text-green-600 bg-green-100";
@@ -190,9 +139,9 @@ export default function AdminTeachers() {
       default:
         return "text-gray-600 bg-gray-100";
     }
-  };
+  }, []);
 
-  const getStatusText = (status: string) => {
+  const getStatusText = useCallback((status: string) => {
     switch (status) {
       case "active":
         return "활성";
@@ -203,9 +152,9 @@ export default function AdminTeachers() {
       default:
         return "미정";
     }
-  };
+  }, []);
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = useCallback((status: string) => {
     switch (status) {
       case "active":
         return <CheckCircle className="w-4 h-4" />;
@@ -216,30 +165,30 @@ export default function AdminTeachers() {
       default:
         return <Clock className="w-4 h-4" />;
     }
-  };
+  }, []);
 
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = useCallback((amount: number) => {
     return amount.toLocaleString("ko-KR") + "원";
-  };
+  }, []);
 
-  const handleDeleteTeacher = (teacherId: string) => {
+  const handleDeleteTeacher = useCallback((teacherId: string) => {
     if (confirm("정말로 이 선생님을 삭제하시겠습니까?")) {
-      setTeachers(teachers.filter((teacher) => teacher.id !== teacherId));
+      setTeachers(prev => prev.filter((teacher) => teacher.id !== teacherId));
     }
-  };
+  }, []);
 
-  const stats = {
+  const stats = useMemo(() => ({
     total: teachers.length,
     active: teachers.filter((t) => t.status === "active").length,
     inactive: teachers.filter((t) => t.status === "inactive").length,
     suspended: teachers.filter((t) => t.status === "suspended").length,
-  };
+  }), [teachers]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* 헤더 */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
+    <div className="p-6 bg-gray-50 min-h-screen">
+      <div className="max-w-7xl mx-auto">
+        {/* 헤더 */}
+        <div className="mb-6 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">선생님 관리</h1>
             <p className="text-sm text-gray-600">
@@ -250,13 +199,22 @@ export default function AdminTeachers() {
             <UserPlus className="w-4 h-4 mr-2" />새 선생님 등록
           </button>
         </div>
-      </header>
-
-      {/* 메인 콘텐츠 */}
-      <main className="p-4 sm:p-6 lg:p-8">
         {/* 통계 카드 */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-lg p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <button
+            onClick={() => {
+              setFilterStatus("all");
+              setFilterSubject("all");
+              setSearchTerm("");
+              setTimeout(() => {
+                const element = document.getElementById("teacher-list");
+                if (element) {
+                  element.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
+              }, 100);
+            }}
+            className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all cursor-pointer text-left"
+          >
             <div className="flex items-center">
               <div className="p-2 bg-blue-100 rounded-lg">
                 <GraduationCap className="w-6 h-6 text-blue-600" />
@@ -268,9 +226,22 @@ export default function AdminTeachers() {
                 </p>
               </div>
             </div>
-          </div>
+          </button>
 
-          <div className="bg-white rounded-xl shadow-lg p-6">
+          <button
+            onClick={() => {
+              setFilterStatus("active");
+              setFilterSubject("all");
+              setSearchTerm("");
+              setTimeout(() => {
+                const element = document.getElementById("teacher-list");
+                if (element) {
+                  element.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
+              }, 100);
+            }}
+            className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all cursor-pointer text-left"
+          >
             <div className="flex items-center">
               <div className="p-2 bg-green-100 rounded-lg">
                 <CheckCircle className="w-6 h-6 text-green-600" />
@@ -282,9 +253,22 @@ export default function AdminTeachers() {
                 </p>
               </div>
             </div>
-          </div>
+          </button>
 
-          <div className="bg-white rounded-xl shadow-lg p-6">
+          <button
+            onClick={() => {
+              setFilterStatus("inactive");
+              setFilterSubject("all");
+              setSearchTerm("");
+              setTimeout(() => {
+                const element = document.getElementById("teacher-list");
+                if (element) {
+                  element.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
+              }, 100);
+            }}
+            className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all cursor-pointer text-left"
+          >
             <div className="flex items-center">
               <div className="p-2 bg-gray-100 rounded-lg">
                 <Clock className="w-6 h-6 text-gray-600" />
@@ -296,9 +280,22 @@ export default function AdminTeachers() {
                 </p>
               </div>
             </div>
-          </div>
+          </button>
 
-          <div className="bg-white rounded-xl shadow-lg p-6">
+          <button
+            onClick={() => {
+              setFilterStatus("suspended");
+              setFilterSubject("all");
+              setSearchTerm("");
+              setTimeout(() => {
+                const element = document.getElementById("teacher-list");
+                if (element) {
+                  element.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
+              }, 100);
+            }}
+            className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all cursor-pointer text-left"
+          >
             <div className="flex items-center">
               <div className="p-2 bg-red-100 rounded-lg">
                 <XCircle className="w-6 h-6 text-red-600" />
@@ -310,11 +307,11 @@ export default function AdminTeachers() {
                 </p>
               </div>
             </div>
-          </div>
+          </button>
         </div>
 
         {/* 검색 및 필터 */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
@@ -365,47 +362,69 @@ export default function AdminTeachers() {
         </div>
 
         {/* 선생님 목록 */}
-        <div className="bg-white rounded-xl shadow-lg">
-          <div className="px-6 py-4 border-b border-gray-200">
+        <div id="teacher-list" className="bg-white rounded-xl shadow-lg">
+          <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900">선생님 목록</h2>
           </div>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto max-w-full">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     선생님 정보
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     과목
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     경력
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     담당 학생
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     총 수업
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     평점
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     급여
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     상태
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     작업
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredTeachers.map((teacher) => (
+                {filteredTeachers.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="px-6 py-12 text-center">
+                      <div className="flex flex-col items-center justify-center">
+                        <GraduationCap className="h-16 w-16 text-gray-400 mb-4" />
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">
+                          등록된 선생님이 없습니다
+                        </h3>
+                        <p className="text-gray-600 mb-6">
+                          아직 등록된 선생님이 없습니다. 새로운 선생님을 등록해보세요.
+                        </p>
+                        <button
+                          onClick={() => setShowTeacherModal(true)}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                        >
+                          <UserPlus className="h-4 w-4" />
+                          선생님 추가하기
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  filteredTeachers.map((teacher) => (
                   <tr key={teacher.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
                           <User className="w-5 h-5 text-green-600" />
@@ -435,7 +454,7 @@ export default function AdminTeachers() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {teacher.totalLessons}회
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <Star className="w-4 h-4 text-yellow-400 fill-current mr-1" />
                         <span className="text-sm text-gray-900">
@@ -446,7 +465,7 @@ export default function AdminTeachers() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {formatCurrency(teacher.salary)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                       <span
                         className={`inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(teacher.status)}`}
                       >
@@ -479,12 +498,13 @@ export default function AdminTeachers() {
                       </div>
                     </td>
                   </tr>
-                ))}
+                  ))
+                )}
               </tbody>
             </table>
           </div>
         </div>
-      </main>
+      </div>
 
       {/* 선생님 상세 모달 */}
       {showTeacherModal && selectedTeacher && (

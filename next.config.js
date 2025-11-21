@@ -21,6 +21,22 @@ const nextConfig = {
   experimental: {
     typedRoutes: false,
   },
+  // HMR 및 개발 서버 설정
+  webpack: (config, { dev, isServer }) => {
+    if (dev && !isServer) {
+      // HMR 설정 개선
+      config.watchOptions = {
+        poll: 1000,
+        aggregateTimeout: 300,
+      };
+    }
+    return config;
+  },
+  // 개발 서버 설정
+  devIndicators: {
+    buildActivity: true,
+    buildActivityPosition: 'bottom-right',
+  },
 };
 
 module.exports = nextConfig;

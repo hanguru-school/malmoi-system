@@ -66,137 +66,61 @@ export default function ICCardManagementPage() {
     const initializeData = async () => {
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      const mockUsers: ICUser[] = [
-        {
-          uid: "STU001",
-          name: "김학생",
-          type: "student",
-          cardId: "CARD001",
-          isRegistered: true,
-          lastActivity: "2024-01-15 14:30",
-          totalSessions: 24,
-          totalPayments: 120000,
-          currentBalance: 50000,
-        },
-        {
-          uid: "STU002",
-          name: "이학생",
-          type: "student",
-          cardId: "CARD002",
-          isRegistered: true,
-          lastActivity: "2024-01-15 16:20",
-          totalSessions: 18,
-          totalPayments: 90000,
-          currentBalance: 30000,
-        },
-        {
-          uid: "STU003",
-          name: "박학생",
-          type: "student",
-          isRegistered: false,
-          totalSessions: 0,
-          totalPayments: 0,
-          currentBalance: 0,
-        },
-        {
-          uid: "TCH001",
-          name: "김선생님",
-          type: "teacher",
-          cardId: "CARD101",
-          isRegistered: true,
-          lastActivity: "2024-01-15 08:15",
-          totalSessions: 156,
-          totalPayments: 0,
-          currentBalance: 0,
-        },
-        {
-          uid: "TCH002",
-          name: "이선생님",
-          type: "teacher",
-          cardId: "CARD102",
-          isRegistered: true,
-          lastActivity: "2024-01-15 09:00",
-          totalSessions: 142,
-          totalPayments: 0,
-          currentBalance: 0,
-        },
-        {
-          uid: "STAFF001",
-          name: "박사무직원",
-          type: "staff",
-          cardId: "CARD201",
-          isRegistered: true,
-          lastActivity: "2024-01-15 08:30",
-          totalSessions: 0,
-          totalPayments: 0,
-          currentBalance: 0,
-        },
-      ];
+      // 실제 데이터베이스에서 사용자 데이터 로드 시도
+      let mockUsers: ICUser[] = [];
+      
+      try {
+        const usersResponse = await fetch("/api/admin/users");
+        const usersData = await usersResponse.json();
+        
+        if (usersData.success && usersData.users && usersData.users.length > 0) {
+          // 실제 데이터가 있으면 변환
+          mockUsers = usersData.users.map((user: any) => ({
+            uid: user.id,
+            name: user.name,
+            type: user.role.toLowerCase(),
+            cardId: user.cardId || "",
+            isRegistered: !!user.cardId,
+            lastActivity: user.lastActivity || "",
+            totalSessions: user.totalSessions || 0,
+            totalPayments: user.totalPayments || 0,
+            currentBalance: user.currentBalance || 0,
+          }));
+        } else {
+          // 데이터가 없으면 빈 배열 (데이터 없음 상태 테스트)
+          mockUsers = [];
+        }
+      } catch (error) {
+        console.error("사용자 데이터 로드 오류:", error);
+        mockUsers = [];
+      }
 
-      const mockRecords: TaggingRecord[] = [
-        {
-          id: "1",
-          uid: "STU001",
-          userName: "김학생",
-          userType: "student",
-          timestamp: "2024-01-15 14:30:00",
-          action: "attendance",
-          sessionId: "SESS001",
-          status: "success",
-          location: "교실 A",
-        },
-        {
-          id: "2",
-          uid: "STU001",
-          userName: "김학생",
-          userType: "student",
-          timestamp: "2024-01-15 14:35:00",
-          action: "payment",
-          amount: 10000,
-          status: "success",
-          location: "결제기 1",
-        },
-        {
-          id: "3",
-          uid: "TCH001",
-          userName: "김선생님",
-          userType: "teacher",
-          timestamp: "2024-01-15 08:15:00",
-          action: "checkin",
-          status: "success",
-          location: "출입구",
-        },
-        {
-          id: "4",
-          uid: "STU002",
-          userName: "이학생",
-          userType: "student",
-          timestamp: "2024-01-15 16:20:00",
-          action: "attendance",
-          sessionId: "SESS002",
-          status: "success",
-          location: "교실 B",
-        },
-        {
-          id: "5",
-          uid: "UNKNOWN",
-          userName: "미등록 카드",
-          userType: "student",
-          timestamp: "2024-01-15 15:00:00",
-          action: "attendance",
-          status: "failed",
-          location: "교실 A",
-        },
-      ];
+      // 태깅 기록도 실제 데이터베이스에서 로드 시도
+      let mockRecords: TaggingRecord[] = [];
+      
+      try {
+        const recordsResponse = await fetch("/api/admin/tagging-logs");
+        const recordsData = await recordsResponse.json();
+        
+        if (recordsData.success && recordsData.records && recordsData.records.length > 0) {
+          mockRecords = recordsData.records;
+        } else {
+          // 데이터가 없으면 빈 배열
+          mockRecords = [];
+        }
+      } catch (error) {
+        console.error("태깅 기록 로드 오류:", error);
+        mockRecords = [];
+      }
 
+      // 통계 계산 (실제 데이터 기반)
       const mockStats: AttendanceStats = {
-        totalStudents: 45,
-        presentToday: 38,
-        absentToday: 7,
-        totalTeachers: 8,
-        presentTeachers: 7,
-        totalStaff: 3,
-        presentStaff: 3,
+        totalStudents: mockUsers.filter(u => u.type === 'student').length,
+        presentStudents: mockUsers.filter(u => u.type === 'student' && u.isRegistered).length,
+        totalTeachers: mockUsers.filter(u => u.type === 'teacher').length,
+        presentTeachers: mockUsers.filter(u => u.type === 'teacher' && u.isRegistered).length,
+        totalStaff: mockUsers.filter(u => u.type === 'staff').length,
+        presentStaff: mockUsers.filter(u => u.type === 'staff' && u.isRegistered).length,
       };
 
       setUsers(mockUsers);
@@ -316,8 +240,8 @@ export default function ICCardManagementPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="max-w-full overflow-hidden">
+      <div className="px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -522,32 +446,50 @@ export default function ICCardManagementPage() {
                 사용자 관리
               </h2>
 
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        사용자
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        유형
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        카드 상태
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        마지막 활동
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        통계
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        작업
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {users.map((user) => (
+              {users.length === 0 ? (
+                <div className="p-8 text-center">
+                  <Users className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    등록된 사용자가 없습니다
+                  </h3>
+                  <p className="text-gray-600 mb-6">
+                    아직 등록된 사용자가 없습니다. 새로운 사용자를 등록해보세요.
+                  </p>
+                  <button
+                    onClick={() => window.location.href = '/admin/students'}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 mx-auto"
+                  >
+                    <Users className="h-4 w-4" />
+                    사용자 관리로 이동
+                  </button>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          사용자
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          유형
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          카드 상태
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          마지막 활동
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          통계
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          작업
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {users.map((user) => (
                       <tr key={user.uid} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div>
@@ -636,6 +578,7 @@ export default function ICCardManagementPage() {
                   </tbody>
                 </table>
               </div>
+              )}
             </div>
           )}
 
@@ -645,32 +588,50 @@ export default function ICCardManagementPage() {
                 태깅 기록
               </h2>
 
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        시간
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        사용자
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        작업
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        상태
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        위치
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        상세
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {taggingRecords.map((record) => (
+              {taggingRecords.length === 0 ? (
+                <div className="p-8 text-center">
+                  <CreditCard className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    태깅 기록이 없습니다
+                  </h3>
+                  <p className="text-gray-600 mb-6">
+                    아직 IC 카드 태깅 기록이 없습니다. 사용자가 카드를 사용하면 기록이 표시됩니다.
+                  </p>
+                  <button
+                    onClick={simulateTagging}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 mx-auto"
+                  >
+                    <CreditCard className="h-4 w-4" />
+                    태깅 시뮬레이션
+                  </button>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          시간
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          사용자
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          작업
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          상태
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          위치
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          상세
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {taggingRecords.map((record) => (
                       <tr key={record.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {record.timestamp}
@@ -718,6 +679,7 @@ export default function ICCardManagementPage() {
                   </tbody>
                 </table>
               </div>
+              )}
             </div>
           )}
 

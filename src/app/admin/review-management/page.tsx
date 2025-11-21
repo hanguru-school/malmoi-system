@@ -12,6 +12,8 @@ import {
   Eye,
   Reply,
 } from "lucide-react";
+import ProtectedRoute from "@/components/common/ProtectedRoute";
+import Navigation from "@/components/common/Navigation";
 
 interface Review {
   id: string;
@@ -31,7 +33,7 @@ interface Review {
   flaggedReason?: string;
 }
 
-export default function ReviewManagementPage() {
+function ReviewManagementContent() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -56,78 +58,42 @@ export default function ReviewManagementPage() {
   const fetchReviews = async () => {
     setIsLoading(true);
     try {
-      // 실제 API 호출로 대체
-      const mockReviews: Review[] = [
-        {
-          id: "1",
-          authorName: "김학생",
-          authorUid: "ST001",
-          classDate: "2024-01-15",
-          courseName: "초급 한국어",
-          teacherName: "이선생님",
-          reviewDate: "2024-01-16",
-          rating: 5,
-          content:
-            "매우 만족스러운 수업이었습니다. 선생님이 친절하고 이해하기 쉽게 설명해주셔서 감사합니다. 다음 수업도 기대됩니다!",
-          replyStatus: "no_reply",
-          isLiked: false,
-          isFlagged: false,
+      // 실제 데이터베이스에서 리뷰 데이터 로드
+      const response = await fetch("/api/admin/reviews", {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
         },
-        {
-          id: "2",
-          authorName: "박학생",
-          authorUid: "ST002",
-          classDate: "2024-01-14",
-          courseName: "중급 한국어",
-          teacherName: "김선생님",
-          reviewDate: "2024-01-15",
-          rating: 4,
-          content:
-            "수업 내용은 좋았지만, 조금 더 천천히 설명해주시면 좋겠습니다. 전반적으로 만족합니다.",
-          replyStatus: "replied",
-          adminReply:
-            "박학생님, 피드백 감사합니다. 다음 수업부터는 더 천천히 설명하도록 하겠습니다. 꾸준히 함께 공부해요!",
-          replyDate: "2024-01-16",
-          isLiked: true,
-          isFlagged: false,
-        },
-        {
-          id: "3",
-          authorName: "이학생",
-          authorUid: "ST003",
-          classDate: "2024-01-13",
-          courseName: "고급 한국어",
-          teacherName: "최선생님",
-          reviewDate: "2024-01-14",
-          rating: 3,
-          content: "수업이 너무 어려웠습니다. 제 수준에 맞지 않는 것 같아요.",
-          replyStatus: "no_reply",
-          isLiked: false,
-          isFlagged: true,
-          flaggedReason: "부정적인 리뷰",
-        },
-        {
-          id: "4",
-          authorName: "최학생",
-          authorUid: "ST004",
-          classDate: "2024-01-12",
-          courseName: "초급 한국어",
-          teacherName: "이선생님",
-          reviewDate: "2024-01-13",
-          rating: 5,
-          content:
-            "정말 재미있고 유익한 수업이었습니다. 한국어에 대한 흥미가 더욱 생겼어요!",
-          replyStatus: "replied",
-          adminReply:
-            "최학생님, 좋은 리뷰 감사합니다! 한국어 학습에 대한 열정이 느껴져서 기쁩니다. 앞으로도 함께 즐겁게 공부해요!",
-          replyDate: "2024-01-14",
-          isLiked: true,
-          isFlagged: false,
-        },
-      ];
-      setReviews(mockReviews);
+      });
+      const data = await response.json();
+      
+      if (data.success && data.reviews && data.reviews.length > 0) {
+        // 실제 데이터를 Review 형식으로 변환
+        const formattedReviews: Review[] = data.reviews.map((review: any) => ({
+          id: review.id,
+          authorName: review.authorName || "",
+          authorUid: review.authorUid || "",
+          classDate: review.classDate || "",
+          courseName: review.courseName || "",
+          teacherName: review.teacherName || "",
+          reviewDate: review.reviewDate || "",
+          rating: review.rating || 0,
+          content: review.content || "",
+          replyStatus: review.replyStatus || "no_reply",
+          adminReply: review.adminReply || "",
+          replyDate: review.replyDate || "",
+          isLiked: review.isLiked || false,
+          isFlagged: review.isFlagged || false,
+          flaggedReason: review.flaggedReason || "",
+        }));
+        setReviews(formattedReviews);
+      } else {
+        // 데이터가 없으면 빈 배열
+        setReviews([]);
+      }
     } catch (error) {
       console.error("리뷰 목록 로딩 실패:", error);
+      setReviews([]);
     } finally {
       setIsLoading(false);
     }
@@ -292,7 +258,7 @@ export default function ReviewManagementPage() {
   ).length;
 
   return (
-    <div className="p-6">
+    <div className="max-w-full overflow-hidden">
       <div className="mb-6">
         <h1 className="text-2xl font-bold">리뷰 관리</h1>
         <p className="text-gray-600">학생 리뷰를 확인하고 답변을 관리합니다.</p>
@@ -716,5 +682,15 @@ export default function ReviewManagementPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function ReviewManagementPage() {
+  return (
+    <ProtectedRoute allowedRoles={["ADMIN", "MASTER"]}>
+      <Navigation>
+        <ReviewManagementContent />
+      </Navigation>
+    </ProtectedRoute>
   );
 }

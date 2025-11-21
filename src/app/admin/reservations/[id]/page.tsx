@@ -65,30 +65,51 @@ export default function ReservationDetailPage() {
   const fetchReservationDetail = async () => {
     setIsLoading(true);
     try {
-      // 실제 API 호출로 대체
-      const mockReservation: ReservationDetail = {
-        id: reservationId,
-        bookingCode: "BK20240115001",
-        bookingDate: "2024-01-15",
-        startTime: "2024-01-15T10:00:00",
-        endTime: "2024-01-15T11:00:00",
-        duration: 60,
-        type: "in-person",
-        studentName: "김학생",
-        studentId: "ST001",
-        teacherName: "이선생님",
-        courseName: "초급 한국어",
-        status: "scheduled",
-        completionStatus: "not-started",
-        memo: "학생이 문법에 어려움을 겪고 있습니다.",
-        location: "교실 A",
-        isRecurring: true,
-        recurringId: "RC001",
-        recurringNumber: 3,
-      };
-      setReservation(mockReservation);
-      setNewStatus(mockReservation.status);
-      setNewCompletionStatus(mockReservation.completionStatus);
+      const response = await fetch(`/api/admin/reservations/${reservationId}`, {
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        console.error("예약 상세 정보 로딩 실패:", response.status, response.statusText);
+        setIsLoading(false);
+        return;
+      }
+      
+      const data = await response.json();
+      
+      if (data.success && data.reservation) {
+        const res = data.reservation;
+        const reservationDetail: ReservationDetail = {
+          id: res.id,
+          bookingCode: res.id.substring(0, 12).toUpperCase(),
+          bookingDate: res.date ? new Date(res.date).toISOString().split('T')[0] : '',
+          startTime: res.startTime ? new Date(res.startTime).toISOString() : '',
+          endTime: res.endTime ? new Date(res.endTime).toISOString() : '',
+          duration: res.duration || 60,
+          type: res.location === 'ONLINE' ? 'online' : 'in-person',
+          studentName: res.student?.kanjiName || res.student?.name || '알 수 없음',
+          studentId: res.studentId || '',
+          teacherName: res.teacher?.kanjiName || res.teacher?.name || '미설정',
+          courseName: res.lessonType || '미설정',
+          status: res.status === 'ATTENDED' ? 'completed' :
+                  res.status === 'CANCELLED' ? 'same-day-cancelled' :
+                  res.status === 'CONFIRMED' ? 'scheduled' :
+                  res.status === 'PENDING' ? 'scheduled' :
+                  res.status === 'NO_SHOW' ? 'completed' : 'scheduled',
+          completionStatus: res.status === 'ATTENDED' ? 'completed' :
+                           res.status === 'CANCELLED' ? 'not-started' :
+                           res.status === 'PENDING' ? 'not-started' :
+                           res.status === 'CONFIRMED' ? 'in-progress' : 'not-started',
+          memo: res.notes || '',
+          location: res.location === 'ONLINE' ? '온라인' : '대면',
+          isRecurring: false,
+        };
+        setReservation(reservationDetail);
+        setNewStatus(reservationDetail.status);
+        setNewCompletionStatus(reservationDetail.completionStatus);
+      } else {
+        console.error("예약 데이터 형식 오류:", data);
+      }
     } catch (error) {
       console.error("예약 상세 정보 로딩 실패:", error);
     } finally {
@@ -194,9 +215,13 @@ export default function ReservationDetailPage() {
   };
 
   const handleViewHistory = () => {
-    router.push(
-      `/admin/reservations/history?studentId=${reservation?.studentId}`,
-    );
+    if (reservation?.studentId) {
+      router.push(
+        `/admin/reservations/history?studentId=${reservation.studentId}`,
+      );
+    } else {
+      alert('학생 ID를 찾을 수 없습니다.');
+    }
   };
 
   const formatDateTime = (dateString: string) => {

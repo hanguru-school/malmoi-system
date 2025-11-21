@@ -19,7 +19,7 @@ export default function TermsPage() {
   const handleAgree = () => {
     // 약관 동의 상태를 localStorage에 저장
     localStorage.setItem("termsAgreed", "true");
-    // 회원가입 페이지로 돌아가기
+    // 입회 페이지로 돌아가기
     router.push("/auth/register");
   };
 
@@ -59,12 +59,12 @@ export default function TermsPage() {
               <div>
                 <p className="text-sm text-blue-800 font-medium">
                   {language === "ko"
-                    ? "회원가입을 완료하려면 아래 약관을 읽고 동의해주세요."
+                    ? "입회를 완료하려면 아래 약관을 읽고 동의해주세요."
                     : "会員登録を完了するには、以下の規約をお読みいただき、同意してください。"}
                 </p>
                 <p className="text-xs text-blue-600 mt-1">
                   {language === "ko"
-                    ? "약관에 동의하시면 자동으로 회원가입 페이지로 돌아가며 약관 동의가 체크됩니다."
+                    ? "약관에 동의하시면 자동으로 입회 페이지로 돌아가며 약관 동의가 체크됩니다."
                     : "規約に同意すると、自動的に会員登録ページに戻り、規約同意がチェックされます。"}
                 </p>
               </div>
@@ -89,13 +89,13 @@ export default function TermsPage() {
                   </p>
                 </div>
 
-                {/* 2. 회원가입 및 계정 */}
+                {/* 2. 입회 및 계정 */}
                 <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-lg border-l-4 border-green-500 shadow-sm">
                   <h2 className="text-xl font-bold text-gray-900 mb-3 flex items-center">
                     <span className="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-3">
                       2
                     </span>
-                    회원가입 및 계정
+                    입회 및 계정
                   </h2>
                   <ul className="space-y-2 text-gray-700 pl-11">
                     <li className="flex items-start">
@@ -103,7 +103,7 @@ export default function TermsPage() {
                         •
                       </span>
                       <span>
-                        서비스 이용을 위해 정확한 정보로 회원가입을 해야 합니다.
+                        서비스 이용을 위해 정확한 정보로 입회를 해야 합니다.
                       </span>
                     </li>
                     <li className="flex items-start">
@@ -419,7 +419,7 @@ export default function TermsPage() {
               onClick={handleBack}
               className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
             >
-              ← {language === "ko" ? "회원가입으로 돌아가기" : "会員登録に戻る"}
+              ← {language === "ko" ? "입회로 돌아가기" : "入会申し込みに戻る"}
             </button>
 
             <button

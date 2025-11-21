@@ -130,14 +130,18 @@ export function createAuthSuccessResponse(user: AuthUser, token: string): NextRe
 // 쿠키에서 세션 가져오기
 export function getSessionFromCookies(request: NextRequest): Session | null {
   try {
-    const token = request.cookies.get("auth-token")?.value;
+    // session과 user 쿠키 확인
+    const sessionCookie = request.cookies.get("session")?.value;
+    const userCookie = request.cookies.get("user")?.value;
     
-    if (!token) {
+    if (!sessionCookie || !userCookie) {
       return null;
     }
 
-    const user = verifyToken(token);
-    if (!user) {
+    // user 쿠키에서 사용자 정보 파싱
+    const user = JSON.parse(userCookie);
+    
+    if (!user || !user.id) {
       return null;
     }
 

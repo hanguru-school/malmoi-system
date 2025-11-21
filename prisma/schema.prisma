@@ -9,15 +9,16 @@ datasource db {
 }
 
 model User {
-  id               String            @id @default(cuid())
-  email            String            @unique
+  id               String               @id @default(cuid())
+  email            String               @unique
   name             String
-  uid              String?           @unique
+  uid              String?              @unique
   password         String
   phone            String?
-  role             UserRole          @default(STUDENT)
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
+  role             UserRole             @default(STUDENT)
+  isFirstLogin     Boolean              @default(true)
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
   UIDDevice        UIDDevice[]
   UIDTag           UIDTag[]
   admin            Admin?
@@ -28,29 +29,63 @@ model User {
   student          Student?
   taggingLogs      TaggingLog[]
   teacher          Teacher?
+  trialLessons     TrialLessonRequest[]
+  contactInquiries ContactInquiry[]
+  sessions         UserSession[]
+  preferences      UserPreferences?
+  agreements       Agreement[]
 
   @@map("users")
 }
 
 model Student {
-  id                    String                  @id @default(cuid())
-  userId                String                  @unique
-  name                  String
-  kanjiName             String
-  yomigana              String
-  koreanName            String?
-  phone                 String?
-  birthDate             DateTime?
-  address               String?
-  emergencyContact      String?
-  level                 String                  @default("초급 A")
-  points                Int                     @default(0)
-  avatar                String?
-  status                String                  @default("ACTIVE") // ACTIVE, INACTIVE, SUSPENDED
-  registrationDate      DateTime                @default(now())
-  joinDate              DateTime                @default(now())
-  createdAt             DateTime                @default(now())
-  updatedAt             DateTime                @updatedAt
+  id                String    @id @default(cuid())
+  userId            String    @unique
+  name              String
+  kanjiName         String
+  yomigana          String
+  koreanName        String?
+  phone             String?
+  birthDate         DateTime?
+  address           String?
+  emergencyContact  String?
+  emergencyRelation String?
+  postalCode        String?
+  addressDetail     String?
+  level             String    @default("초급 A")
+  points            Int       @default(0)
+  avatar            String?
+  status            String    @default("ACTIVE")
+  registrationDate  DateTime  @default(now())
+  joinDate          DateTime  @default(now())
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // 입회 관련 필드들
+  studentId String? @unique // 학번
+  email     String? // 이메일 주소
+  isMinor   Boolean @default(false) // 미성년자 여부
+
+  // 긴급연락처 정보 (성인용)
+  emergencyContactNameKanji    String?
+  emergencyContactNameYomigana String?
+  emergencyContactPhone        String?
+  emergencyContactRelation     String?
+  emergencyContactEmail        String?
+
+  // 보호자 정보 (미성년자용)
+  parentNameKanji    String?
+  parentNameYomigana String?
+  parentPhone        String?
+  parentRelation     String?
+
+  // 입회 동의 관련
+  rulesAgreed           Boolean                 @default(false)
+  rulesAgreedAt         DateTime?
+  signatureData         String? // 디지털 서명 데이터 (base64)
+  agreementData         Json?
+  enrollmentStatus      EnrollmentStatus        @default(PENDING)
+  isFirstLogin          Boolean                 @default(true) // 첫 로그인 여부
   LearningStat          LearningStat[]
   MemoSummary           MemoSummary[]
   StudentBadge          StudentBadge[]
@@ -64,6 +99,7 @@ model Student {
   curriculumProgress    CurriculumProgress[]
   homework              Homework[]
   lessonNotes           LessonNote[]
+  agreements            Agreement[]
   parents               Parent[]
   reservations          Reservation[]
   reviews               Review[]
@@ -73,55 +109,77 @@ model Student {
 }
 
 model Teacher {
-  id           String              @id @default(cuid())
-  userId       String              @unique
-  name         String
-  kanjiName    String
-  yomigana     String
-  koreanName   String?
-  phone        String?
-  birthDate    DateTime?
-  address      String?
-  emergencyContact String?
-  subjects     String[]
-  hourlyRate   Int                 @default(30000)
-  colorCode    String              @default("#3B82F6")
-  availableDays String[]           @default([])
-  availableTimeSlots String[]      @default([])
-  status       String              @default("PENDING") // PENDING, ACTIVE, INACTIVE
-  hireDate     DateTime?
-  isActive     Boolean             @default(true)
-  createdAt    DateTime            @default(now())
-  updatedAt    DateTime            @updatedAt
-  notes        LessonNote[]
-  reservations Reservation[]
-  attendances  TeacherAttendance[]
-  services     TeacherService[]
-  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                 String              @id @default(cuid())
+  userId             String              @unique
+  name               String
+  kanjiName          String
+  yomigana           String
+  koreanName         String?
+  englishName        String?
+  phone              String?
+  emergencyContact   String?
+  emergencyRelation  String?
+  postalCode         String?
+  address            String?
+  addressDetail      String?
+  birthDate          DateTime?
+  transportation     Json?               @default("[]")
+  bankName           String?
+  bankBranch         String?
+  accountType        String?
+  accountNumber      String?
+  accountHolder      String?
+  subjects           String[]
+  hourlyRate         Int                 @default(30000)
+  colorCode          String              @default("#3B82F6")
+  availableDays      String[]            @default([])
+  availableTimeSlots String[]            @default([])
+  status             String              @default("PENDING")
+  hireDate           DateTime?
+  isActive           Boolean             @default(true)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  notes              LessonNote[]
+  reservations       Reservation[]
+  attendances        TeacherAttendance[]
+  services           TeacherService[]
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("teachers")
 }
 
 model Staff {
-  id          String         @id @default(cuid())
-  userId      String         @unique
-  name        String
-  kanjiName   String
-  yomigana    String
-  koreanName  String?
-  phone       String?
-  birthDate   DateTime?
-  address     String?
-  emergencyContact String?
-  position    String
-  status      String         @default("PENDING") // PENDING, ACTIVE, INACTIVE
-  hireDate    DateTime?
-  permissions Json           @default("{}")
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  Payroll     Payroll[]
-  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  workLogs    StaffWorkLog[]
+  id                String         @id @default(cuid())
+  userId            String         @unique
+  name              String
+  kanjiName         String
+  yomigana          String
+  koreanName        String?
+  englishName       String?
+  phone             String?
+  emergencyContact  String?
+  emergencyRelation String?
+  postalCode        String?
+  address           String?
+  addressDetail     String?
+  birthDate         DateTime?
+  transportation    Json?          @default("[]")
+  bankName          String?
+  bankBranch        String?
+  accountType       String?
+  accountNumber     String?
+  accountHolder     String?
+  position          String
+  department        String
+  hireDate          DateTime       @default(now())
+  salary            Int
+  status            String         @default("ACTIVE")
+  isActive          Boolean        @default(true)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  workLogs          StaffWorkLog[]
+  payrolls          Payroll[]
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("staff")
 }
@@ -623,54 +681,67 @@ model LearningStat {
 }
 
 model Parent {
-  id         String   @id @default(cuid())
-  userId     String   @unique
-  name       String
-  kanjiName  String
-  yomigana   String
-  koreanName String?
-  phone      String?
-  birthDate  DateTime?
-  address    String?
+  id               String    @id @default(cuid())
+  userId           String    @unique
+  name             String
+  kanjiName        String
+  yomigana         String
+  koreanName       String?
+  phone            String?
+  birthDate        DateTime?
+  address          String?
   emergencyContact String?
-  studentId  String?
-  status     String   @default("ACTIVE") // ACTIVE, INACTIVE
-  registrationDate DateTime @default(now())
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  student    Student? @relation(fields: [studentId], references: [id])
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  studentId        String?
+  status           String    @default("ACTIVE") // ACTIVE, INACTIVE
+  registrationDate DateTime  @default(now())
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  student          Student?  @relation(fields: [studentId], references: [id])
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("parents")
 }
 
 model Admin {
-  id          String   @id @default(cuid())
-  userId      String   @unique
-  name        String
-  kanjiName   String
-  yomigana    String
-  koreanName  String?
-  phone       String?
-  permissions Json     @default("{}")
-  isApproved  Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                String    @id @default(cuid())
+  userId            String    @unique
+  name              String
+  kanjiName         String
+  yomigana          String
+  koreanName        String?
+  englishName       String?
+  phone             String?
+  emergencyContact  String?
+  emergencyRelation String?
+  postalCode        String?
+  address           String?
+  addressDetail     String?
+  birthDate         DateTime?
+  transportation    Json?     @default("[]")
+  bankName          String?
+  bankBranch        String?
+  accountType       String?
+  accountNumber     String?
+  accountHolder     String?
+  permissions       Json      @default("{}")
+  isApproved        Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("admins")
 }
 
 model Service {
-  id          String   @id @default(cuid())
+  id          String           @id @default(cuid())
   name        String
   description String?
-  duration    Int      // 분 단위
-  bufferTime  Int      // 분 단위
-  isActive    Boolean  @default(true)
+  duration    Int // 분 단위
+  bufferTime  Int // 분 단위
+  isActive    Boolean          @default(true)
   imageUrl    String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
   teachers    TeacherService[]
 
   @@map("services")
@@ -688,12 +759,12 @@ model MemoType {
 }
 
 model TeacherService {
-  id         String   @id @default(cuid())
-  teacherId  String
-  serviceId  String
-  createdAt  DateTime @default(now())
-  teacher    Teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-  service    Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  id        String   @id @default(cuid())
+  teacherId String
+  serviceId String
+  createdAt DateTime @default(now())
+  teacher   Teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  service   Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
 
   @@unique([teacherId, serviceId])
   @@map("teacher_services")
@@ -701,15 +772,149 @@ model TeacherService {
 
 model AdminNotification {
   id        String   @id @default(cuid())
-  type      String   // NEW_USER_REGISTRATION, NEW_RESERVATION, etc.
+  type      String // NEW_USER_REGISTRATION, NEW_RESERVATION, etc.
   title     String
   message   String
   status    String   @default("UNREAD") // UNREAD, READ
-  data      Json?    // 추가 데이터
+  data      Json? // 추가 데이터
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("admin_notifications")
+}
+
+// 체험레슨 신청
+model TrialLessonRequest {
+  id              String            @id @default(cuid())
+  name            String
+  nameKanji       String?
+  nameYomigana    String?
+  email           String
+  phone           String
+  preferredDate   DateTime?
+  preferredTime   String?
+  lessonType      String?
+  message         String?
+  status          TrialLessonStatus @default(PENDING)
+  assignedTeacher String?
+  scheduledAt     DateTime?
+  notes           String?
+  userId          String? // 로그인한 사용자의 경우
+  user            User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@map("trial_lesson_requests")
+}
+
+// 문의사항
+model ContactInquiry {
+  id          String        @id @default(cuid())
+  name        String
+  email       String
+  phone       String?
+  subject     String
+  message     String
+  status      InquiryStatus @default(PENDING)
+  userId      String? // 로그인한 사용자의 경우
+  userRole    String        @default("GUEST")
+  user        User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  response    String?
+  respondedAt DateTime?
+  respondedBy String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@map("contact_inquiries")
+}
+
+// 시스템 설정
+model SystemSettings {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  description String?
+  category    String   @default("GENERAL") // GENERAL, EMAIL, PAYMENT, NOTIFICATION, etc.
+  isPublic    Boolean  @default(false) // 공개 설정 여부
+  updatedBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("system_settings")
+}
+
+// 사용자 세션
+model UserSession {
+  id             String   @id @default(cuid())
+  userId         String
+  token          String   @unique
+  refreshToken   String?
+  deviceInfo     Json?
+  ipAddress      String?
+  userAgent      String?
+  expiresAt      DateTime
+  lastActivityAt DateTime @default(now())
+  isActive       Boolean  @default(true)
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("user_sessions")
+}
+
+// 사용자 설정
+model UserPreferences {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  language      String   @default("ko")
+  timezone      String   @default("Asia/Tokyo")
+  theme         String   @default("light")
+  notifications Json     @default("{}")
+  preferences   Json     @default("{}")
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("user_preferences")
+}
+
+// 활동 로그
+model ActivityLog {
+  id          String   @id @default(cuid())
+  userId      String?
+  userRole    String?
+  action      String // CREATE, UPDATE, DELETE, LOGIN, LOGOUT, etc.
+  entityType  String // Student, Reservation, Payment, etc.
+  entityId    String?
+  description String
+  metadata    Json?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("activity_logs")
+}
+
+// 시스템 로그
+model SystemLog {
+  id         String   @id @default(cuid())
+  level      LogLevel @default(INFO) // INFO, WARN, ERROR, DEBUG
+  category   String // API, AUTH, PAYMENT, EMAIL, etc.
+  message    String
+  details    Json?
+  stackTrace String?
+  userId     String?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@index([level])
+  @@index([category])
+  @@index([createdAt])
+  @@map("system_logs")
 }
 
 enum UserRole {
@@ -801,4 +1006,62 @@ enum PayrollStatus {
   PENDING
   CONFIRMED
   PAID
+}
+
+enum EnrollmentStatus {
+  PENDING
+  AGREED
+  COMPLETED
+  REJECTED
+}
+
+enum TrialLessonStatus {
+  PENDING
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum InquiryStatus {
+  PENDING
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum LogLevel {
+  DEBUG
+  INFO
+  WARN
+  ERROR
+}
+
+enum AgreementType {
+  RULES_AGREEMENT // 규정 동의서
+  ENROLLMENT_AGREEMENT // 입회 동의서
+}
+
+// 동의서 저장
+model Agreement {
+  id            String        @id @default(cuid())
+  studentId     String
+  userId        String? // User ID (optional, for tracking)
+  agreementType AgreementType
+  studentData   Json // 학생 정보
+  agreementData Json // 동의 내용 및 체크리스트
+  signatureData String? // 서명 데이터 (base64)
+  pdfData       String? // PDF 데이터 (base64, optional)
+  agreedItems   String[] // 동의한 항목 ID 목록
+  isCompleted   Boolean       @default(false)
+  completedAt   DateTime?
+  student       Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  user          User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([studentId])
+  @@index([agreementType])
+  @@index([createdAt])
+  @@map("agreements")
 }

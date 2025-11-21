@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
   const state = searchParams.get("state");
   const error = searchParams.get("error");
 
-  // 회원가입/로그인 모드 구분
+  // 입회/로그인 모드 구분
   const isRegisterMode = state?.startsWith("register_");
 
   if (error) {
@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
 
     console.log("LINE profile data:", profileData);
 
-    // 사용자 정보 처리 및 로그인/회원가입
+    // 사용자 정보 처리 및 로그인/입회
     const lineUserId = profileData.userId;
     const displayName = profileData.displayName;
     const pictureUrl = profileData.pictureUrl;
@@ -130,7 +130,7 @@ export async function GET(request: NextRequest) {
     const response = NextResponse.redirect(
       new URL(
         isRegisterMode
-          ? `/auth/line-register?success=line_register&message=${encodeURIComponent("LINE 회원가입이 성공했습니다!")}`
+          ? `/auth/line-register?success=line_register&message=${encodeURIComponent("LINE 입회가 성공했습니다!")}`
           : `/auth/login?success=line_login&message=${encodeURIComponent("LINE 로그인이 성공했습니다!")}`,
         request.url,
       ),

@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { Calendar, Star, BookOpen, Target, Download } from "lucide-react";
+import ProtectedRoute from "@/components/common/ProtectedRoute";
+import Navigation from "@/components/common/Navigation";
 
 interface AnalyticsData {
   bookingStats: {
@@ -56,7 +58,7 @@ interface AnalyticsData {
   };
 }
 
-export default function AnalyticsPage() {
+function AnalyticsContent() {
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(
     null,
   );
@@ -67,98 +69,167 @@ export default function AnalyticsPage() {
 
   // Mock data initialization
   useEffect(() => {
-    const initializeAnalytics = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      const mockData: AnalyticsData = {
-        bookingStats: {
-          totalBookings: 1247,
-          completedBookings: 1189,
-          cancelledBookings: 58,
-          completionRate: 95.3,
-          monthlyData: [
-            { month: "10월", bookings: 120, completed: 115 },
-            { month: "11월", bookings: 135, completed: 128 },
-            { month: "12월", bookings: 142, completed: 138 },
-            { month: "1월", bookings: 156, completed: 152 },
-          ],
-        },
-        reviewStats: {
-          totalReviews: 892,
-          averageRating: 4.6,
-          ratingDistribution: [
-            { rating: 5, count: 456 },
-            { rating: 4, count: 298 },
-            { rating: 3, count: 98 },
-            { rating: 2, count: 28 },
-            { rating: 1, count: 12 },
-          ],
-          monthlyTrend: [
-            { month: "10월", averageRating: 4.5, reviewCount: 85 },
-            { month: "11월", averageRating: 4.6, reviewCount: 92 },
-            { month: "12월", averageRating: 4.7, reviewCount: 88 },
-            { month: "1월", averageRating: 4.6, reviewCount: 95 },
-          ],
-        },
-        homeworkStats: {
-          totalAssigned: 1567,
-          totalSubmitted: 1423,
-          submissionRate: 90.8,
-          averageScore: 87.5,
-          monthlyData: [
-            { month: "10월", assigned: 145, submitted: 132 },
-            { month: "11월", assigned: 158, submitted: 145 },
-            { month: "12월", assigned: 167, submitted: 152 },
-            { month: "1월", assigned: 178, submitted: 165 },
-          ],
-        },
-        levelProgression: {
-          totalStudents: 89,
-          studentsWithProgress: 67,
-          averageTimeToNextLevel: 3.2,
-          levelDistribution: [
-            { level: "초급", count: 23 },
-            { level: "중급", count: 34 },
-            { level: "고급", count: 28 },
-            { level: "최고급", count: 4 },
-          ],
-        },
-        studentActivity: {
-          activeStudents: 76,
-          averageAttendanceRate: 94.2,
-          topStudents: [
-            { name: "김학생", attendanceRate: 98.5, homeworkRate: 95.2 },
-            { name: "이학생", attendanceRate: 97.8, homeworkRate: 92.1 },
-            { name: "박학생", attendanceRate: 96.3, homeworkRate: 89.7 },
-          ],
-        },
-        teacherStats: {
-          totalTeachers: 8,
-          averageRating: 4.7,
-          topTeachers: [
-            { name: "김선생님", rating: 4.9, studentCount: 15 },
-            { name: "이선생님", rating: 4.8, studentCount: 12 },
-            { name: "박선생님", rating: 4.7, studentCount: 18 },
-          ],
-        },
-        notificationStats: {
-          totalSent: 2341,
-          clickRate: 78.5,
-          confirmationRate: 85.2,
-          byType: [
-            { type: "수업 리마인드", sent: 892, clicked: 723 },
-            { type: "리뷰 요청", sent: 445, clicked: 356 },
-            { type: "숙제 알림", sent: 567, clicked: 445 },
-            { type: "월말 예약 알림", sent: 437, clicked: 321 },
-          ],
-        },
-      };
-
-      setAnalyticsData(mockData);
-      setIsLoading(false);
+    const loadAnalyticsData = async () => {
+      setIsLoading(true);
+      try {
+        // 실제 데이터베이스에서 통계 데이터 로드
+        const response = await fetch("/api/admin/analytics", {
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        const data = await response.json();
+        
+        if (data.success && data.analytics) {
+          // 실제 데이터를 AnalyticsData 형식으로 변환
+          const formattedData: AnalyticsData = {
+            bookingStats: {
+              totalBookings: data.analytics.bookingStats?.totalBookings || 0,
+              completedBookings: data.analytics.bookingStats?.completedBookings || 0,
+              cancelledBookings: data.analytics.bookingStats?.cancelledBookings || 0,
+              completionRate: data.analytics.bookingStats?.completionRate || 0,
+              monthlyData: data.analytics.bookingStats?.monthlyData || [],
+            },
+            reviewStats: {
+              totalReviews: data.analytics.reviewStats?.totalReviews || 0,
+              averageRating: data.analytics.reviewStats?.averageRating || 0,
+              ratingDistribution: data.analytics.reviewStats?.ratingDistribution || [],
+              monthlyTrend: data.analytics.reviewStats?.monthlyTrend || [],
+            },
+            homeworkStats: {
+              totalAssigned: data.analytics.homeworkStats?.totalAssigned || 0,
+              totalSubmitted: data.analytics.homeworkStats?.totalSubmitted || 0,
+              submissionRate: data.analytics.homeworkStats?.submissionRate || 0,
+              averageScore: data.analytics.homeworkStats?.averageScore || 0,
+              monthlyData: data.analytics.homeworkStats?.monthlyData || [],
+            },
+            levelProgression: {
+              totalStudents: data.analytics.levelProgression?.totalStudents || 0,
+              studentsWithProgress: data.analytics.levelProgression?.studentsWithProgress || 0,
+              averageTimeToNextLevel: data.analytics.levelProgression?.averageTimeToNextLevel || 0,
+              levelDistribution: data.analytics.levelProgression?.levelDistribution || [],
+            },
+            studentActivity: {
+              activeStudents: data.analytics.studentActivity?.activeStudents || 0,
+              averageAttendanceRate: data.analytics.studentActivity?.averageAttendanceRate || 0,
+              topStudents: data.analytics.studentActivity?.topStudents || [],
+            },
+            teacherStats: {
+              totalTeachers: data.analytics.teacherStats?.totalTeachers || 0,
+              averageRating: data.analytics.teacherStats?.averageRating || 0,
+              topTeachers: data.analytics.teacherStats?.topTeachers || [],
+            },
+            notificationStats: {
+              totalSent: data.analytics.notificationStats?.totalSent || 0,
+              clickRate: data.analytics.notificationStats?.clickRate || 0,
+              confirmationRate: data.analytics.notificationStats?.confirmationRate || 0,
+              byType: data.analytics.notificationStats?.byType || [],
+            },
+          };
+          setAnalyticsData(formattedData);
+        } else {
+          // 데이터가 없으면 기본값으로 설정
+          const emptyData: AnalyticsData = {
+            bookingStats: {
+              totalBookings: 0,
+              completedBookings: 0,
+              cancelledBookings: 0,
+              completionRate: 0,
+              monthlyData: [],
+            },
+            reviewStats: {
+              totalReviews: 0,
+              averageRating: 0,
+              ratingDistribution: [],
+              monthlyTrend: [],
+            },
+            homeworkStats: {
+              totalAssigned: 0,
+              totalSubmitted: 0,
+              submissionRate: 0,
+              averageScore: 0,
+              monthlyData: [],
+            },
+            levelProgression: {
+              totalStudents: 0,
+              studentsWithProgress: 0,
+              averageTimeToNextLevel: 0,
+              levelDistribution: [],
+            },
+            studentActivity: {
+              activeStudents: 0,
+              averageAttendanceRate: 0,
+              topStudents: [],
+            },
+            teacherStats: {
+              totalTeachers: 0,
+              averageRating: 0,
+              topTeachers: [],
+            },
+            notificationStats: {
+              totalSent: 0,
+              clickRate: 0,
+              confirmationRate: 0,
+              byType: [],
+            },
+          };
+          setAnalyticsData(emptyData);
+        }
+      } catch (error) {
+        console.error("통계 데이터 로딩 실패:", error);
+        // 오류 시 기본값으로 설정
+        const emptyData: AnalyticsData = {
+          bookingStats: {
+            totalBookings: 0,
+            completedBookings: 0,
+            cancelledBookings: 0,
+            completionRate: 0,
+            monthlyData: [],
+          },
+          reviewStats: {
+            totalReviews: 0,
+            averageRating: 0,
+            ratingDistribution: [],
+            monthlyTrend: [],
+          },
+          homeworkStats: {
+            totalAssigned: 0,
+            totalSubmitted: 0,
+            submissionRate: 0,
+            averageScore: 0,
+            monthlyData: [],
+          },
+          levelProgression: {
+            totalStudents: 0,
+            studentsWithProgress: 0,
+            averageTimeToNextLevel: 0,
+            levelDistribution: [],
+          },
+          studentActivity: {
+            activeStudents: 0,
+            averageAttendanceRate: 0,
+            topStudents: [],
+          },
+          teacherStats: {
+            totalTeachers: 0,
+            averageRating: 0,
+            topTeachers: [],
+          },
+          notificationStats: {
+            totalSent: 0,
+            clickRate: 0,
+            confirmationRate: 0,
+            byType: [],
+          },
+        };
+        setAnalyticsData(emptyData);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    initializeAnalytics();
+    loadAnalyticsData();
   }, []);
 
   const generateReport = () => {
@@ -189,8 +260,8 @@ export default function AnalyticsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="max-w-full overflow-hidden">
+      <div className="px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex justify-between items-center">
@@ -539,5 +610,15 @@ export default function AnalyticsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AnalyticsPage() {
+  return (
+    <ProtectedRoute allowedRoles={["ADMIN", "MASTER"]}>
+      <Navigation>
+        <AnalyticsContent />
+      </Navigation>
+    </ProtectedRoute>
   );
 }

@@ -1,955 +1,1445 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import {
-  Search,
+  ChevronLeft,
+  ChevronRight,
+  Calendar as CalendarIcon,
   Plus,
-  Calendar,
+  FileText,
+  X,
   Clock,
   User,
-  CheckCircle,
-  XCircle,
-  Trash2,
-  Eye,
+  MapPin,
 } from "lucide-react";
 
 interface Reservation {
   id: string;
+  date: string;
+  startTime: string;
+  endTime: string;
   studentName: string;
-  studentId: string;
-  courseName: string;
   teacherName: string;
+  status: string;
+  location: string;
+}
+
+interface Memo {
+  id: string;
   date: string;
   time: string;
-  duration: number;
-  status: "confirmed" | "completed" | "canceled" | "pending";
-  price: number;
-  paymentStatus: "paid" | "unpaid" | "partial";
-  notes?: string;
-  createdAt: string;
+  content: string;
+  memoType: string;
+  isPublic: boolean;
+  authorName: string;
+  reservationId?: string;
+  relatedTeacherId?: string;
+  relatedStaffId?: string;
 }
 
-interface Student {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  grade: string;
-  parentName: string;
-  parentPhone: string;
-}
-
-const AdminReservationsPage = () => {
+const AdminReservationsContent = () => {
+  const router = useRouter();
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [viewMode, setViewMode] = useState<"month" | "week" | "day">("month");
+  const [activeTab, setActiveTab] = useState<"schedule" | "overview">("schedule");
   const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [students, setStudents] = useState<Student[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [dateFilter, setDateFilter] = useState<string>("");
-  const [selectedReservation, setSelectedReservation] =
-    useState<Reservation | null>(null);
-  const [showNewReservationModal, setShowNewReservationModal] = useState(false);
-  const [showHistoryModal, setShowHistoryModal] = useState(false);
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
-  const [newReservationData, setNewReservationData] = useState({
-    courseName: "",
-    teacherName: "",
-    date: "",
-    time: "",
-    duration: 60,
-    price: 0,
-    notes: "",
+  const [memos, setMemos] = useState<Memo[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showMemoModal, setShowMemoModal] = useState(false);
+  const [showReservationModal, setShowReservationModal] = useState(false);
+  const [selectedMemo, setSelectedMemo] = useState<Memo | null>(null);
+  const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
+  const [isEditingMemo, setIsEditingMemo] = useState(false);
+  const [memoFormData, setMemoFormData] = useState({
+    date: '',
+    time: '',
+    content: '',
+    memoType: 'class',
+    isPublic: false,
+    reservationId: '',
+    relatedTeacherId: '',
+    relatedStaffId: '',
   });
+  const [savingMemo, setSavingMemo] = useState(false);
+  const [memoReservations, setMemoReservations] = useState<Reservation[]>([]);
+  const [memoTeachers, setMemoTeachers] = useState<any[]>([]);
+  const [memoStaff, setMemoStaff] = useState<any[]>([]);
 
-  // Mock data
   useEffect(() => {
-    const mockReservations: Reservation[] = [
-      {
-        id: "1",
-        studentName: "김민수",
-        studentId: "ST001",
-        courseName: "수학 기초",
-        teacherName: "이선생님",
-        date: "2024-01-15",
-        time: "14:00",
-        duration: 60,
-        status: "confirmed",
-        price: 50000,
-        paymentStatus: "paid",
-        notes: "기초 수학 개념 정리",
-        createdAt: "2024-01-10",
-      },
-      {
-        id: "2",
-        studentName: "박지영",
-        studentId: "ST002",
-        courseName: "영어 회화",
-        teacherName: "김선생님",
-        date: "2024-01-16",
-        time: "16:00",
-        duration: 90,
-        status: "completed",
-        price: 75000,
-        paymentStatus: "paid",
-        notes: "일상 회화 연습",
-        createdAt: "2024-01-11",
-      },
-      {
-        id: "3",
-        studentName: "이준호",
-        studentId: "ST003",
-        courseName: "과학 실험",
-        teacherName: "최선생님",
-        date: "2024-01-17",
-        time: "10:00",
-        duration: 120,
-        status: "pending",
-        price: 100000,
-        paymentStatus: "unpaid",
-        notes: "화학 실험 준비",
-        createdAt: "2024-01-12",
-      },
-      {
-        id: "4",
-        studentName: "정수진",
-        studentId: "ST004",
-        courseName: "국어 문학",
-        teacherName: "박선생님",
-        date: "2024-01-18",
-        time: "13:00",
-        duration: 60,
-        status: "canceled",
-        price: 50000,
-        paymentStatus: "unpaid",
-        notes: "고전 문학 읽기",
-        createdAt: "2024-01-13",
-      },
-    ];
+    // 병렬로 데이터 가져오기
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        // 예약과 메모를 병렬로 가져오기
+        const [reservationsResponse, memosResponse] = await Promise.all([
+          fetch('/api/reservations/list', {
+            credentials: 'include',
+          }),
+          fetch('/api/admin/memos', {
+            credentials: 'include',
+          }),
+        ]);
 
-    const mockStudents: Student[] = [
-      {
-        id: "ST001",
-        name: "김민수",
-        email: "kim@example.com",
-        phone: "010-1234-5678",
-        grade: "중2",
-        parentName: "김부모",
-        parentPhone: "010-1234-5679",
-      },
-      {
-        id: "ST002",
-        name: "박지영",
-        email: "park@example.com",
-        phone: "010-2345-6789",
-        grade: "고1",
-        parentName: "박부모",
-        parentPhone: "010-2345-6790",
-      },
-      {
-        id: "ST003",
-        name: "이준호",
-        email: "lee@example.com",
-        phone: "010-3456-7890",
-        grade: "중3",
-        parentName: "이부모",
-        parentPhone: "010-3456-7891",
-      },
-      {
-        id: "ST004",
-        name: "정수진",
-        email: "jung@example.com",
-        phone: "010-4567-8901",
-        grade: "고2",
-        parentName: "정부모",
-        parentPhone: "010-4567-8902",
-      },
-    ];
+        // 예약 데이터 처리
+        if (reservationsResponse.ok) {
+          const reservationsData = await reservationsResponse.json();
+          if (reservationsData.success && reservationsData.reservations) {
+            const mappedReservations = reservationsData.reservations.map((res: any) => ({
+              id: res.id,
+              date: res.date,
+              startTime: res.startTime,
+              endTime: res.endTime,
+              studentName: res.studentName || '알 수 없음',
+              teacherName: res.teacherName || '미설정',
+              status: res.status || 'pending',
+              location: res.location || 'ONLINE',
+            }));
+            setReservations(mappedReservations);
+          } else {
+            setReservations([]);
+          }
+        } else {
+          setReservations([]);
+        }
 
-    setReservations(mockReservations);
-    setStudents(mockStudents);
-  }, []);
+        // 메모 데이터 처리
+        if (memosResponse.ok) {
+          const memosData = await memosResponse.json();
+          if (memosData.success && memosData.memos) {
+            setMemos(memosData.memos);
+          } else {
+            setMemos([]);
+          }
+        } else {
+          setMemos([]);
+        }
+      } catch (error) {
+        console.error('데이터 로드 오류:', error);
+        setReservations([]);
+        setMemos([]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const filteredReservations = reservations.filter((reservation) => {
-    const matchesSearch =
-      reservation.studentName
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      reservation.courseName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      reservation.teacherName.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      statusFilter === "all" || reservation.status === statusFilter;
-    const matchesDate = !dateFilter || reservation.date === dateFilter;
+    loadData();
+  }, [currentDate]);
 
-    return matchesSearch && matchesStatus && matchesDate;
-  });
+  const fetchMemoRelatedData = async (date: string) => {
+    try {
+      // 병렬로 모든 데이터 가져오기 (최적화)
+      const [resResponse, teachersResponse, staffResponse] = await Promise.all([
+        fetch('/api/reservations/list', { credentials: 'include' }),
+        fetch('/api/admin/teachers', { credentials: 'include' }),
+        fetch('/api/admin/staff', { credentials: 'include' }).catch(() => null), // staff API가 없을 수 있음
+      ]);
 
-  const reservationStats = {
-    total: reservations.length,
-    confirmed: reservations.filter((r) => r.status === "confirmed").length,
-    completed: reservations.filter((r) => r.status === "completed").length,
-    canceled: reservations.filter((r) => r.status === "canceled").length,
-  };
+      // 예약 목록 처리
+      if (resResponse.ok) {
+        const resData = await resResponse.json();
+        if (resData.success && resData.reservations) {
+          const dateReservations = resData.reservations
+            .filter((r: any) => {
+              const resDate = r.date ? new Date(r.date).toISOString().split('T')[0] : '';
+              return resDate === date;
+            })
+            .map((r: any) => ({
+              id: r.id,
+              date: r.date,
+              startTime: r.startTime,
+              studentName: r.studentName || '알 수 없음',
+            }));
+          setMemoReservations(dateReservations);
+        }
+      }
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "confirmed":
-        return "bg-blue-100 text-blue-800";
-      case "completed":
-        return "bg-green-100 text-green-800";
-      case "canceled":
-        return "bg-red-100 text-red-800";
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+      // 선생님 목록 처리
+      if (teachersResponse.ok) {
+        const teachersData = await teachersResponse.json();
+        if (teachersData.success && teachersData.teachers) {
+          setMemoTeachers(teachersData.teachers.map((t: any) => ({
+            id: t.id,
+            name: t.kanjiName || t.name || '알 수 없음',
+          })));
+        }
+      }
+
+      // 직원 목록 처리
+      if (staffResponse && staffResponse.ok) {
+        const staffData = await staffResponse.json();
+        if (staffData.success && staffData.staff) {
+          setMemoStaff(staffData.staff.map((s: any) => ({
+            id: s.id,
+            name: s.kanjiName || s.name || '알 수 없음',
+          })));
+        }
+      }
+    } catch (error) {
+      console.error('관련 데이터 로드 오류:', error);
     }
   };
 
-  const getPaymentStatusColor = (status: string) => {
-    switch (status) {
-      case "paid":
-        return "bg-green-100 text-green-800";
-      case "unpaid":
-        return "bg-red-100 text-red-800";
-      case "partial":
-        return "bg-yellow-100 text-yellow-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+  const handleSaveMemo = async () => {
+    if (!selectedMemo) return;
+
+    setSavingMemo(true);
+    try {
+      const response = await fetch(`/api/admin/memos/${selectedMemo.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          date: memoFormData.date,
+          time: memoFormData.time,
+          reservationId: memoFormData.reservationId || null,
+          relatedTeacherId: memoFormData.relatedTeacherId || null,
+          relatedStaffId: memoFormData.relatedStaffId || null,
+          content: memoFormData.content,
+          memoType: memoFormData.memoType,
+          isPublic: memoFormData.isPublic,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        // 메모 목록 업데이트
+        const updatedMemos = memos.map(m => 
+          m.id === selectedMemo.id 
+            ? {
+                ...m,
+                date: memoFormData.date,
+                time: memoFormData.time,
+                content: memoFormData.content,
+                memoType: memoFormData.memoType,
+                isPublic: memoFormData.isPublic,
+                reservationId: memoFormData.reservationId || undefined,
+                relatedTeacherId: memoFormData.relatedTeacherId || undefined,
+                relatedStaffId: memoFormData.relatedStaffId || undefined,
+              }
+            : m
+        );
+        setMemos(updatedMemos);
+        
+        // 선택된 메모도 업데이트
+        setSelectedMemo({
+          ...selectedMemo,
+          date: memoFormData.date,
+          time: memoFormData.time,
+          content: memoFormData.content,
+          memoType: memoFormData.memoType,
+          isPublic: memoFormData.isPublic,
+        });
+
+        setIsEditingMemo(false);
+        alert('메모가 성공적으로 수정되었습니다.');
+      } else {
+        alert(data.message || '메모 수정에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('메모 수정 오류:', error);
+      alert('메모 수정 중 오류가 발생했습니다.');
+    } finally {
+      setSavingMemo(false);
     }
   };
 
-  const handleCreateReservation = () => {
-    if (
-      selectedStudent &&
-      newReservationData.courseName &&
-      newReservationData.date &&
-      newReservationData.time
-    ) {
-      const newReservation: Reservation = {
-        id: Date.now().toString(),
-        studentName: selectedStudent.name,
-        studentId: selectedStudent.id,
-        courseName: newReservationData.courseName,
-        teacherName: newReservationData.teacherName,
-        date: newReservationData.date,
-        time: newReservationData.time,
-        duration: newReservationData.duration,
-        status: "pending",
-        price: newReservationData.price,
-        paymentStatus: "unpaid",
-        notes: newReservationData.notes,
-        createdAt: new Date().toISOString().split("T")[0],
-      };
-
-      setReservations([...reservations, newReservation]);
-      setShowNewReservationModal(false);
-      setSelectedStudent(null);
-      setNewReservationData({
-        courseName: "",
-        teacherName: "",
-        date: "",
-        time: "",
-        duration: 60,
-        price: 0,
-        notes: "",
+  // 날짜 계산 메모이제이션
+  const daysInMonth = useMemo(() => {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDayOfWeek = firstDay.getDay();
+    
+    // 월요일을 시작으로 하기 위해 조정 (0=일요일 -> 1=월요일)
+    const adjustedStartingDay = startingDayOfWeek === 0 ? 6 : startingDayOfWeek - 1;
+    
+    const days = [];
+    
+    // 이전 달의 마지막 날들
+    const prevMonth = new Date(year, month - 1, 0);
+    for (let i = adjustedStartingDay - 1; i >= 0; i--) {
+      days.push({
+        date: new Date(year, month - 1, prevMonth.getDate() - i),
+        isCurrentMonth: false,
       });
     }
+    
+    // 현재 달의 날들
+    for (let i = 1; i <= daysInMonth; i++) {
+      days.push({
+        date: new Date(year, month, i),
+        isCurrentMonth: true,
+      });
+    }
+    
+    // 다음 달의 첫 날들 (총 42개 셀을 채우기 위해)
+    const remainingDays = 42 - days.length;
+    for (let i = 1; i <= remainingDays; i++) {
+      days.push({
+        date: new Date(year, month + 1, i),
+        isCurrentMonth: false,
+      });
+    }
+    
+    return days;
+  }, [currentDate]);
+
+  const getDaysInMonth = useCallback(() => daysInMonth, [daysInMonth]);
+
+  // 주간 날짜 계산 메모이제이션
+  const daysInWeek = useMemo(() => {
+    const currentDay = currentDate.getDay();
+    // 월요일을 시작으로 하기 위해 조정 (0=일요일 -> 1=월요일)
+    const adjustedDay = currentDay === 0 ? 6 : currentDay - 1;
+    const monday = new Date(currentDate);
+    monday.setDate(currentDate.getDate() - adjustedDay);
+    
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+      const day = new Date(monday);
+      day.setDate(monday.getDate() + i);
+      days.push({
+        date: day,
+        isCurrentMonth: day.getMonth() === currentDate.getMonth(),
+      });
+    }
+    
+    return days;
+  }, [currentDate]);
+
+  const getDaysInWeek = useCallback(() => daysInWeek, [daysInWeek]);
+
+  // 예약 필터링 메모이제이션
+  const reservationsByDate = useMemo(() => {
+    const map = new Map<string, Reservation[]>();
+    reservations.forEach(res => {
+      if (res.date) {
+        const dateStr = new Date(res.date).toISOString().split('T')[0];
+        if (!map.has(dateStr)) {
+          map.set(dateStr, []);
+        }
+        map.get(dateStr)!.push(res);
+      }
+    });
+    return map;
+  }, [reservations]);
+
+  const getReservationsForDate = useCallback((date: Date) => {
+    const dateStr = date.toISOString().split('T')[0];
+    return reservationsByDate.get(dateStr) || [];
+  }, [reservationsByDate]);
+
+  // 메모 필터링 및 정렬 메모이제이션
+  const memosByDate = useMemo(() => {
+    const map = new Map<string, Memo[]>();
+    memos.forEach(memo => {
+      if (memo.date) {
+        const memoDate = new Date(memo.date);
+        const dateKey = `${memoDate.getFullYear()}-${memoDate.getMonth()}-${memoDate.getDate()}`;
+        if (!map.has(dateKey)) {
+          map.set(dateKey, []);
+        }
+        map.get(dateKey)!.push(memo);
+      }
+    });
+    
+    // 각 날짜별로 시간순 정렬
+    map.forEach((memoList, key) => {
+      memoList.sort((a, b) => {
+        try {
+          const timeA = a.time || '';
+          const timeB = b.time || '';
+          
+          if (timeA.includes(':') && timeB.includes(':')) {
+            const [hoursA, minutesA] = timeA.split(':').map(Number);
+            const [hoursB, minutesB] = timeB.split(':').map(Number);
+            return (hoursA * 60 + minutesA) - (hoursB * 60 + minutesB);
+          }
+          
+          const dateA = new Date(timeA).getTime();
+          const dateB = new Date(timeB).getTime();
+          if (!isNaN(dateA) && !isNaN(dateB)) {
+            return dateA - dateB;
+          }
+          
+          return timeA.localeCompare(timeB);
+        } catch {
+          return 0;
+        }
+      });
+    });
+    
+    return map;
+  }, [memos]);
+
+  const getMemosForDate = useCallback((date: Date) => {
+    const dateKey = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+    return memosByDate.get(dateKey) || [];
+  }, [memosByDate]);
+
+  const getMemoTypeColor = (type: string) => {
+    switch (type) {
+      case "class":
+        return "bg-sky-100 text-sky-800 border-sky-300";
+      case "staff":
+        return "bg-yellow-100 text-yellow-800 border-yellow-300";
+      case "schedule":
+        return "bg-purple-100 text-purple-800 border-purple-300";
+      case "admin":
+        return "bg-green-100 text-green-800 border-green-300";
+      case "personal":
+        return "bg-emerald-100 text-emerald-800 border-emerald-300";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-300";
+    }
   };
 
-  const handleStatusChange = (
-    reservationId: string,
-    newStatus: Reservation["status"],
-  ) => {
-    setReservations(
-      reservations.map((r) =>
-        r.id === reservationId ? { ...r, status: newStatus } : r,
-      ),
-    );
+  const goToPreviousMonth = () => {
+    if (viewMode === 'month') {
+      setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+    } else if (viewMode === 'week') {
+      // 주별 보기: 이전 주로 이동
+      const newDate = new Date(currentDate);
+      newDate.setDate(newDate.getDate() - 7);
+      setCurrentDate(newDate);
+    } else {
+      // 일별 보기: 이전 날로 이동
+      const newDate = new Date(currentDate);
+      newDate.setDate(newDate.getDate() - 1);
+      setCurrentDate(newDate);
+    }
   };
 
-  const handleDeleteReservation = (reservationId: string) => {
-    setReservations(reservations.filter((r) => r.id !== reservationId));
-    setSelectedReservation(null);
+  const goToNextMonth = () => {
+    if (viewMode === 'month') {
+      setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+    } else if (viewMode === 'week') {
+      // 주별 보기: 다음 주로 이동
+      const newDate = new Date(currentDate);
+      newDate.setDate(newDate.getDate() + 7);
+      setCurrentDate(newDate);
+    } else {
+      // 일별 보기: 다음 날로 이동
+      const newDate = new Date(currentDate);
+      newDate.setDate(newDate.getDate() + 1);
+      setCurrentDate(newDate);
+    }
   };
+
+  const goToToday = () => {
+    setCurrentDate(new Date());
+    setViewMode('day');
+  };
+
+  // 날짜 포맷팅 메모이제이션
+  const formattedDate = useMemo(() => {
+    if (viewMode === 'month') {
+      return `${currentDate.getFullYear()}년 ${currentDate.getMonth() + 1}월`;
+    } else if (viewMode === 'week') {
+      const startDate = daysInWeek[0].date;
+      const endDate = daysInWeek[6].date;
+      if (startDate.getMonth() === endDate.getMonth()) {
+        return `${startDate.getFullYear()}년 ${startDate.getMonth() + 1}월 ${startDate.getDate()}일 - ${endDate.getDate()}일`;
+      } else {
+        return `${startDate.getFullYear()}년 ${startDate.getMonth() + 1}월 ${startDate.getDate()}일 - ${endDate.getMonth() + 1}월 ${endDate.getDate()}일`;
+      }
+    } else {
+      return `${currentDate.getFullYear()}년 ${currentDate.getMonth() + 1}월 ${currentDate.getDate()}일`;
+    }
+  }, [currentDate, viewMode, daysInWeek]);
+
+  // 시간 포맷팅 메모이제이션
+  const formatTime = useCallback((timeStr: string) => {
+    if (!timeStr) return '';
+    try {
+      const time = new Date(timeStr);
+      if (isNaN(time.getTime())) {
+        // 문자열 형식인 경우 (HH:MM)
+        return timeStr;
+      }
+      return time.toLocaleTimeString('ko-KR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      });
+    } catch {
+      return timeStr;
+    }
+  }, []);
+
+  const weekDays = useMemo(() => ['월', '화', '수', '목', '금', '토', '일'], []);
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">예약 관리</h1>
-          <p className="text-gray-600">
-            학생 예약을 관리하고 새로운 예약을 생성할 수 있습니다.
-          </p>
-        </div>
-
-        {/* Reservation Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Calendar className="h-6 w-6 text-blue-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">전체 예약</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {reservationStats.total}
-                </p>
-              </div>
+        {/* 탭 */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between border-b border-gray-200">
+            <div className="flex">
+              <button
+                onClick={() => setActiveTab('schedule')}
+                className={`px-6 py-3 font-medium text-sm ${
+                  activeTab === 'schedule'
+                    ? 'text-blue-600 border-b-2 border-blue-600'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                예약 일정
+              </button>
+              <button
+                onClick={() => setActiveTab('overview')}
+                className={`px-6 py-3 font-medium text-sm ${
+                  activeTab === 'overview'
+                    ? 'text-blue-600 border-b-2 border-blue-600'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                개요
+              </button>
             </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <CheckCircle className="h-6 w-6 text-blue-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">확정된 예약</p>
-                <p className="text-2xl font-bold text-blue-600">
-                  {reservationStats.confirmed}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <CheckCircle className="h-6 w-6 text-green-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">완료된 예약</p>
-                <p className="text-2xl font-bold text-green-600">
-                  {reservationStats.completed}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-red-100 rounded-lg">
-                <XCircle className="h-6 w-6 text-red-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">취소된 예약</p>
-                <p className="text-2xl font-bold text-red-600">
-                  {reservationStats.canceled}
-                </p>
-              </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => router.push('/admin/reservations/new')}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+              >
+                <Plus className="w-4 h-4" />
+                예약 추가
+              </button>
+              <button
+                onClick={() => router.push('/admin/reservations/memo/new')}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+              >
+                <FileText className="w-4 h-4" />
+                메모 추가
+              </button>
             </div>
           </div>
         </div>
 
-        {/* Controls */}
-        <div className="bg-white rounded-lg shadow mb-6">
-          <div className="p-6 border-b border-gray-200">
-            <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-              <div className="flex flex-col sm:flex-row gap-4 flex-1">
-                <div className="relative flex-1 max-w-md">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <input
-                    type="text"
-                    placeholder="학생명, 코스명, 선생님명으로 검색..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="all">전체 상태</option>
-                  <option value="pending">대기중</option>
-                  <option value="confirmed">확정</option>
-                  <option value="completed">완료</option>
-                  <option value="canceled">취소</option>
-                </select>
-
-                <input
-                  type="date"
-                  value={dateFilter}
-                  onChange={(e) => setDateFilter(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-              <div className="flex gap-2">
+        {activeTab === 'schedule' && (
+          <div className="bg-white rounded-lg shadow-sm">
+            {/* 캘린더 네비게이션 */}
+            <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+              <div className="flex items-center gap-4">
                 <button
-                  onClick={() => setShowHistoryModal(true)}
-                  className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center gap-2"
+                  onClick={goToPreviousMonth}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                 >
-                  <Clock className="h-4 w-4" />
-                  예약 히스토리
+                  <ChevronLeft className="w-5 h-5 text-gray-600" />
+                </button>
+                <h2 className="text-lg font-semibold text-gray-900 min-w-[140px] text-center">
+                  {formattedDate}
+                </h2>
+                <button
+                  onClick={goToNextMonth}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <ChevronRight className="w-5 h-5 text-gray-600" />
+                </button>
+              </div>
+              <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+                <button
+                  onClick={goToToday}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                    viewMode === 'day'
+                      ? 'bg-blue-600 text-white'
+                      : 'text-blue-600 hover:bg-white'
+                  }`}
+                >
+                  오늘
+                </button>
+                <div className="w-px h-6 bg-gray-300"></div>
+                <button
+                  onClick={() => setViewMode('month')}
+                  className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                    viewMode === 'month'
+                      ? 'bg-blue-600 text-white'
+                      : 'text-gray-700 hover:bg-white'
+                  }`}
+                >
+                  월별
                 </button>
                 <button
-                  onClick={() => setShowNewReservationModal(true)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                  onClick={() => setViewMode('week')}
+                  className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                    viewMode === 'week'
+                      ? 'bg-blue-600 text-white'
+                      : 'text-gray-700 hover:bg-white'
+                  }`}
                 >
-                  <Plus className="h-4 w-4" />새 예약
+                  주별
                 </button>
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Reservations Table */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    학생 정보
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    코스 정보
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    일정
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    상태
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    결제
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    가격
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    작업
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredReservations.map((reservation) => (
-                  <tr key={reservation.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10">
-                          <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                            <User className="h-5 w-5 text-blue-600" />
+            {/* 캘린더 */}
+            {loading ? (
+              <div className="p-12 text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                <p className="mt-4 text-gray-600">로딩 중...</p>
+              </div>
+            ) : (
+              <div className="p-4">
+                {/* 캘린더 그리드 */}
+                {viewMode === 'day' ? (
+                  <div className="border border-gray-200 rounded-lg overflow-hidden">
+                    {/* 날짜 헤더 */}
+                    <div className="bg-gray-50 p-4 border-b border-gray-200">
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        {formattedDate}
+                      </h3>
+                    </div>
+                    
+                    {/* 예약 및 메모 목록 */}
+                    <div className="p-4">
+                      {(() => {
+                        const dayReservations = getReservationsForDate(currentDate);
+                        const dayMemos = getMemosForDate(currentDate);
+                        
+                        // 예약과 메모를 시간순으로 합치기 (이미 정렬된 메모 사용)
+                        const allItems = [
+                          ...dayReservations
+                            .slice()
+                            .sort((a, b) => {
+                              try {
+                                const timeA = a.startTime ? new Date(a.startTime).getTime() : 0;
+                                const timeB = b.startTime ? new Date(b.startTime).getTime() : 0;
+                                if (!isNaN(timeA) && !isNaN(timeB)) {
+                                  return timeA - timeB;
+                                }
+                                if (typeof a.startTime === 'string' && typeof b.startTime === 'string') {
+                                  return a.startTime.localeCompare(b.startTime);
+                                }
+                                return 0;
+                              } catch {
+                                return 0;
+                              }
+                            })
+                            .map(r => ({ type: 'reservation' as const, item: r, time: r.startTime })),
+                          ...dayMemos.map(m => ({ type: 'memo' as const, item: m, time: m.time }))
+                        ].sort((a, b) => {
+                          try {
+                            const timeA = a.time || '';
+                            const timeB = b.time || '';
+                            
+                            if (timeA.includes(':') && timeB.includes(':')) {
+                              const [hoursA, minutesA] = timeA.split(':').map(Number);
+                              const [hoursB, minutesB] = timeB.split(':').map(Number);
+                              return (hoursA * 60 + minutesA) - (hoursB * 60 + minutesB);
+                            }
+                            
+                            const dateA = new Date(timeA).getTime();
+                            const dateB = new Date(timeB).getTime();
+                            if (!isNaN(dateA) && !isNaN(dateB)) {
+                              return dateA - dateB;
+                            }
+                            
+                            return timeA.localeCompare(timeB);
+                          } catch {
+                            return 0;
+                          }
+                        });
+
+                        if (allItems.length === 0) {
+                          return (
+                            <div className="text-center py-12">
+                              <CalendarIcon className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                              <p className="text-sm font-medium text-gray-900 mb-1">
+                                이 날짜에 등록된 예약이나 메모가 없습니다
+                              </p>
+                            </div>
+                          );
+                        }
+
+                        return (
+                          <div className="space-y-3">
+                            {allItems.map(({ type, item }) => {
+                              if (type === 'reservation') {
+                                const reservation = item as Reservation;
+                                return (
+                              <div
+                                key={reservation.id}
+                                className="bg-blue-50 border border-blue-200 rounded-lg p-4 cursor-pointer hover:bg-blue-100 transition-colors"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedReservation(reservation);
+                                  setShowReservationModal(true);
+                                }}
+                              >
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-3 mb-2">
+                                      <span className="text-lg font-semibold text-blue-700">
+                                        {formatTime(reservation.startTime)}
+                                      </span>
+                                      {reservation.endTime && (
+                                        <>
+                                          <span className="text-gray-400">-</span>
+                                          <span className="text-sm text-gray-600">
+                                            {formatTime(reservation.endTime)}
+                                          </span>
+                                        </>
+                                      )}
+                                    </div>
+                                    <div className="text-base font-medium text-gray-900 mb-1">
+                                      {reservation.studentName}
+                                    </div>
+                                    <div className="text-sm text-gray-600">
+                                      {reservation.teacherName}
+                                    </div>
+                                    {reservation.location && (
+                                      <div className="text-xs text-gray-500 mt-1">
+                                        {reservation.location === 'ONLINE' ? '온라인' : '대면'}
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className="ml-4">
+                                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                      reservation.status === 'ATTENDED' || reservation.status === 'attended'
+                                        ? 'bg-green-100 text-green-800'
+                                        : reservation.status === 'CANCELLED' || reservation.status === 'cancelled'
+                                        ? 'bg-red-100 text-red-800'
+                                        : reservation.status === 'CONFIRMED' || reservation.status === 'confirmed'
+                                        ? 'bg-blue-100 text-blue-800'
+                                        : 'bg-yellow-100 text-yellow-800'
+                                    }`}>
+                                      {reservation.status === 'ATTENDED' || reservation.status === 'attended' ? '완료' :
+                                       reservation.status === 'CANCELLED' || reservation.status === 'cancelled' ? '취소' :
+                                       reservation.status === 'CONFIRMED' || reservation.status === 'confirmed' ? '확정' :
+                                       '대기'}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                                );
+                              } else {
+                                const memo = item as Memo;
+                                return (
+                                  <div
+                                    key={memo.id}
+                                    className={`border rounded-lg p-4 cursor-pointer hover:opacity-80 transition-colors ${getMemoTypeColor(memo.memoType)}`}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      // 이미 로드된 데이터를 사용 (API 호출 없이)
+                                      setSelectedMemo(memo);
+                                      setShowMemoModal(true);
+                                      setIsEditingMemo(false);
+                                    }}
+                                  >
+                                    <div className="flex items-start justify-between">
+                                      <div className="flex-1">
+                                        <div className="flex items-center gap-3 mb-2">
+                                          <FileText className="w-4 h-4" />
+                                          <span className="text-sm font-semibold">
+                                            {formatTime(memo.time)} 메모
+                                          </span>
+                                          <span className="text-xs opacity-75">
+                                            {memo.authorName}
+                                          </span>
+                                        </div>
+                                        <div className="text-sm text-gray-700">
+                                          {memo.content}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              }
+                            })}
                           </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                ) : viewMode === 'month' ? (
+                  <>
+                    {/* 요일 헤더 */}
+                    <div className="grid grid-cols-7 gap-1 mb-2">
+                      {weekDays.map((day) => (
+                        <div
+                          key={day}
+                          className="p-2 text-center text-sm font-medium text-gray-600"
+                        >
+                          {day}
                         </div>
-                        <div className="ml-4">
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-7 gap-1">
+                    {daysInMonth.map((day, index) => {
+                      const dayReservations = getReservationsForDate(day.date);
+                      const dayMemos = getMemosForDate(day.date);
+                      const isToday =
+                        day.date.toDateString() === new Date().toDateString();
+
+                      // 일정 개수에 따라 높이 계산 (최소 100px, 각 항목당 약 30px)
+                      const totalItems = dayReservations.length + dayMemos.length;
+                      const dynamicHeight = Math.max(100, 60 + (totalItems * 30));
+
+                      return (
+                        <div
+                          key={index}
+                          className={`border border-gray-200 p-2 ${
+                            day.isCurrentMonth ? 'bg-white' : 'bg-gray-50'
+                          } ${isToday ? 'ring-2 ring-blue-500' : ''}`}
+                          style={{ minHeight: `${dynamicHeight}px` }}
+                        >
                           <div
-                            className="text-sm font-medium text-gray-900 cursor-pointer hover:text-blue-600"
-                            onClick={() => setSelectedReservation(reservation)}
+                            className={`text-sm font-medium mb-1 cursor-pointer hover:text-blue-600 transition-colors ${
+                              day.isCurrentMonth
+                                ? isToday
+                                  ? 'text-blue-600'
+                                  : 'text-gray-900'
+                                : 'text-gray-400'
+                            }`}
+                            onClick={() => {
+                              setCurrentDate(day.date);
+                              setViewMode('day');
+                            }}
                           >
-                            {reservation.studentName}
+                            {day.date.getDate()}
                           </div>
-                          <div className="text-sm text-gray-500">
-                            {reservation.studentId}
+                          <div className="space-y-1">
+                            {dayReservations.length === 0 && dayMemos.length === 0 ? (
+                              <div className="text-xs text-gray-400">예약 없음</div>
+                            ) : (
+                              <>
+                                {dayReservations.slice(0, 2).map((reservation) => (
+                                  <div
+                                    key={reservation.id}
+                                    className="text-xs p-1 bg-blue-100 text-blue-800 rounded truncate cursor-pointer hover:bg-blue-200"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedReservation(reservation);
+                                      setShowReservationModal(true);
+                                    }}
+                                    title={`${reservation.studentName} - ${formatTime(reservation.startTime)}`}
+                                  >
+                                    {formatTime(reservation.startTime)} {reservation.studentName}
+                                  </div>
+                                ))}
+                                {dayMemos.slice(0, 2 - dayReservations.length).map((memo) => (
+                                  <div
+                                    key={memo.id}
+                                    className={`text-xs p-1 rounded truncate cursor-pointer hover:opacity-80 border ${getMemoTypeColor(memo.memoType)}`}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedMemo(memo);
+                                      setShowMemoModal(true);
+                                    }}
+                                    title={`${memo.content.substring(0, 50)}...`}
+                                  >
+                                    <FileText className="w-3 h-3 inline mr-1" />
+                                    {formatTime(memo.time)} 메모
+                                  </div>
+                                ))}
+                                {(dayReservations.length + dayMemos.length) > 3 && (
+                                  <div className="text-xs text-gray-500">
+                                    +{(dayReservations.length + dayMemos.length) - 3}개 더
+                                  </div>
+                                )}
+                              </>
+                            )}
                           </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {reservation.courseName}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {reservation.teacherName}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {reservation.date}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {reservation.time} ({reservation.duration}분)
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(reservation.status)}`}
-                      >
-                        {reservation.status === "confirmed" && "확정"}
-                        {reservation.status === "completed" && "완료"}
-                        {reservation.status === "canceled" && "취소"}
-                        {reservation.status === "pending" && "대기중"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getPaymentStatusColor(reservation.paymentStatus)}`}
-                      >
-                        {reservation.paymentStatus === "paid" && "결제완료"}
-                        {reservation.paymentStatus === "unpaid" && "미결제"}
-                        {reservation.paymentStatus === "partial" && "부분결제"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {reservation.price.toLocaleString()}원
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => setSelectedReservation(reservation)}
-                          className="text-blue-600 hover:text-blue-900"
+                      );
+                    })}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {/* 요일 헤더 */}
+                    <div className="grid grid-cols-7 gap-1 mb-2">
+                      {weekDays.map((day) => (
+                        <div
+                          key={day}
+                          className="p-2 text-center text-sm font-medium text-gray-600"
                         >
-                          <Eye className="h-4 w-4" />
-                        </button>
-                        <select
-                          value={reservation.status}
-                          onChange={(e) =>
-                            handleStatusChange(
-                              reservation.id,
-                              e.target.value as Reservation["status"],
-                            )
-                          }
-                          className="text-xs border border-gray-300 rounded px-2 py-1"
+                          {day}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-7 gap-1">
+                    {daysInWeek.map((day, index) => {
+                      const dayReservations = getReservationsForDate(day.date);
+                      const dayMemos = getMemosForDate(day.date);
+                      const isToday =
+                        day.date.toDateString() === new Date().toDateString();
+
+                      return (
+                        <div
+                          key={index}
+                          className={`min-h-[400px] border border-gray-200 p-3 ${
+                            day.isCurrentMonth ? 'bg-white' : 'bg-gray-50'
+                          } ${isToday ? 'ring-2 ring-blue-500' : ''}`}
                         >
-                          <option value="pending">대기중</option>
-                          <option value="confirmed">확정</option>
-                          <option value="completed">완료</option>
-                          <option value="canceled">취소</option>
-                        </select>
-                        <button
-                          onClick={() =>
-                            handleDeleteReservation(reservation.id)
-                          }
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                          <div
+                            className={`text-sm font-medium mb-2 cursor-pointer hover:text-blue-600 transition-colors ${
+                              day.isCurrentMonth
+                                ? isToday
+                                  ? 'text-blue-600'
+                                  : 'text-gray-900'
+                                : 'text-gray-400'
+                            }`}
+                            onClick={() => {
+                              setCurrentDate(day.date);
+                              setViewMode('day');
+                            }}
+                          >
+                            {day.date.getMonth() + 1}/{day.date.getDate()}
+                          </div>
+                          <div className="space-y-1">
+                            {dayReservations.length === 0 && dayMemos.length === 0 ? (
+                              <div className="text-xs text-gray-400 text-center py-4">
+                                예약 없음
+                              </div>
+                            ) : (
+                              <>
+                                {dayReservations.map((reservation) => (
+                                  <div
+                                    key={reservation.id}
+                                    className="text-xs p-2 bg-blue-100 text-blue-800 rounded cursor-pointer hover:bg-blue-200 mb-1"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedReservation(reservation);
+                                      setShowReservationModal(true);
+                                    }}
+                                    title={`${reservation.studentName} - ${formatTime(reservation.startTime)}`}
+                                  >
+                                    <div className="font-medium">
+                                      {formatTime(reservation.startTime)}
+                                    </div>
+                                    <div className="truncate">{reservation.studentName}</div>
+                                  </div>
+                                ))}
+                                {dayMemos.map((memo) => (
+                              <div
+                                key={memo.id}
+                                className={`text-xs p-2 rounded cursor-pointer hover:opacity-80 mb-1 border ${getMemoTypeColor(memo.memoType)}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  // 이미 로드된 데이터를 사용 (API 호출 없이)
+                                  setSelectedMemo(memo);
+                                  setShowMemoModal(true);
+                                  setIsEditingMemo(false);
+                                }}
+                                    title={`${memo.content.substring(0, 50)}...`}
+                                  >
+                                    <div className="font-medium flex items-center gap-1">
+                                      <FileText className="w-3 h-3" />
+                                      {formatTime(memo.time)} 메모
+                                    </div>
+                                    <div className="truncate text-[10px] mt-1">{memo.content.substring(0, 30)}...</div>
+                                  </div>
+                                ))}
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                    </div>
+                  </>
+                )}
+
+                {/* 예약이 없을 때 하단 메시지 */}
+                {reservations.length === 0 && (
+                  <div className="mt-6 p-6 text-center border-t border-gray-200">
+                    <CalendarIcon className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                    <p className="text-sm font-medium text-gray-900 mb-1">
+                      등록된 예약이 없습니다
+                    </p>
+                    <p className="text-xs text-gray-600 mb-4">
+                      아직 등록된 예약이 없습니다. 새로운 예약을 생성해보세요.
+                    </p>
+                    <button
+                      onClick={() => router.push('/admin/reservations/manage')}
+                      className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      예약 관리로 이동
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-        </div>
+        )}
+
+        {activeTab === 'overview' && (
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <p className="text-gray-600">개요 탭 내용</p>
+          </div>
+        )}
       </div>
 
-      {/* New Reservation Modal */}
-      {showNewReservationModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900">새 예약 생성</h2>
-              <button
-                onClick={() => setShowNewReservationModal(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <XCircle className="h-6 w-6" />
-              </button>
-            </div>
-
-            <div className="space-y-6">
-              {/* Student Selection */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  학생 선택
-                </label>
-                <select
-                  value={selectedStudent?.id || ""}
-                  onChange={(e) => {
-                    const student = students.find(
-                      (s) => s.id === e.target.value,
-                    );
-                    setSelectedStudent(student || null);
+      {/* 메모 상세 모달 */}
+      {showMemoModal && selectedMemo && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => {
+          if (!isEditingMemo) {
+            setShowMemoModal(false);
+            setIsEditingMemo(false);
+          }
+        }}>
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <FileText className={`w-6 h-6 ${getMemoTypeColor(selectedMemo.memoType).split(' ')[1]}`} />
+                  <h2 className="text-xl font-bold text-gray-900">{isEditingMemo ? '메모 수정' : '메모 상세'}</h2>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowMemoModal(false);
+                    setIsEditingMemo(false);
                   }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
                 >
-                  <option value="">학생을 선택하세요</option>
-                  {students.map((student) => (
-                    <option key={student.id} value={student.id}>
-                      {student.name} ({student.id}) - {student.grade}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Course and Teacher */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    코스명
-                  </label>
-                  <input
-                    type="text"
-                    value={newReservationData.courseName}
-                    onChange={(e) =>
-                      setNewReservationData({
-                        ...newReservationData,
-                        courseName: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="코스명을 입력하세요"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    담당 선생님
-                  </label>
-                  <input
-                    type="text"
-                    value={newReservationData.teacherName}
-                    onChange={(e) =>
-                      setNewReservationData({
-                        ...newReservationData,
-                        teacherName: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="선생님명을 입력하세요"
-                  />
-                </div>
-              </div>
-
-              {/* Date and Time */}
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    날짜
-                  </label>
-                  <input
-                    type="date"
-                    value={newReservationData.date}
-                    onChange={(e) =>
-                      setNewReservationData({
-                        ...newReservationData,
-                        date: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    시간
-                  </label>
-                  <input
-                    type="time"
-                    value={newReservationData.time}
-                    onChange={(e) =>
-                      setNewReservationData({
-                        ...newReservationData,
-                        time: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    수업 시간 (분)
-                  </label>
-                  <input
-                    type="number"
-                    value={newReservationData.duration}
-                    onChange={(e) =>
-                      setNewReservationData({
-                        ...newReservationData,
-                        duration: parseInt(e.target.value),
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    min="30"
-                    max="180"
-                    step="30"
-                  />
-                </div>
-              </div>
-
-              {/* Price and Notes */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    가격 (원)
-                  </label>
-                  <input
-                    type="number"
-                    value={newReservationData.price}
-                    onChange={(e) =>
-                      setNewReservationData({
-                        ...newReservationData,
-                        price: parseInt(e.target.value),
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="0"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    메모
-                  </label>
-                  <input
-                    type="text"
-                    value={newReservationData.notes}
-                    onChange={(e) =>
-                      setNewReservationData({
-                        ...newReservationData,
-                        notes: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="메모를 입력하세요"
-                  />
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex justify-end gap-3 pt-4">
-                <button
-                  onClick={() => setShowNewReservationModal(false)}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  취소
-                </button>
-                <button
-                  onClick={handleCreateReservation}
-                  disabled={
-                    !selectedStudent ||
-                    !newReservationData.courseName ||
-                    !newReservationData.date ||
-                    !newReservationData.time
-                  }
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  예약 생성
+                  <X className="w-5 h-5" />
                 </button>
               </div>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Reservation Detail Modal */}
-      {selectedReservation && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900">
-                예약 상세 정보
-              </h2>
-              <button
-                onClick={() => setSelectedReservation(null)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <XCircle className="h-6 w-6" />
-              </button>
-            </div>
-
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-6">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                    학생 정보
-                  </h3>
-                  <div className="space-y-3">
+            {!isEditingMemo ? (
+              <>
+                <div className="p-6 space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <span className="text-sm font-medium text-gray-500">
-                        이름:
-                      </span>
-                      <span className="ml-2 text-sm text-gray-900">
-                        {selectedReservation.studentName}
-                      </span>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">날짜</label>
+                      <div className="p-2 bg-gray-50 rounded border">
+                        {selectedMemo.date ? new Date(selectedMemo.date).toLocaleDateString('ko-KR', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                          weekday: 'long'
+                        }) : '없음'}
+                      </div>
                     </div>
                     <div>
-                      <span className="text-sm font-medium text-gray-500">
-                        학생 ID:
-                      </span>
-                      <span className="ml-2 text-sm text-gray-900">
-                        {selectedReservation.studentId}
-                      </span>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">시간</label>
+                      <div className="p-2 bg-gray-50 rounded border">
+                        {formatTime(selectedMemo.time)}
+                      </div>
                     </div>
                   </div>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                    수업 정보
-                  </h3>
-                  <div className="space-y-3">
-                    <div>
-                      <span className="text-sm font-medium text-gray-500">
-                        코스:
-                      </span>
-                      <span className="ml-2 text-sm text-gray-900">
-                        {selectedReservation.courseName}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium text-gray-500">
-                        선생님:
-                      </span>
-                      <span className="ml-2 text-sm text-gray-900">
-                        {selectedReservation.teacherName}
-                      </span>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">메모 유형</label>
+                    <div className={`p-2 rounded border inline-block ${getMemoTypeColor(selectedMemo.memoType)}`}>
+                      {selectedMemo.memoType === "class" ? "수업관련" :
+                       selectedMemo.memoType === "staff" ? "직원 관련" :
+                       selectedMemo.memoType === "schedule" ? "일정관련" :
+                       selectedMemo.memoType === "admin" ? "관리자 업무" :
+                       selectedMemo.memoType === "personal" ? "개인메모" : selectedMemo.memoType}
                     </div>
                   </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-6">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                    일정 정보
-                  </h3>
-                  <div className="space-y-3">
-                    <div>
-                      <span className="text-sm font-medium text-gray-500">
-                        날짜:
-                      </span>
-                      <span className="ml-2 text-sm text-gray-900">
-                        {selectedReservation.date}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium text-gray-500">
-                        시간:
-                      </span>
-                      <span className="ml-2 text-sm text-gray-900">
-                        {selectedReservation.time} (
-                        {selectedReservation.duration}분)
-                      </span>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">작성자</label>
+                    <div className="p-2 bg-gray-50 rounded border">
+                      {selectedMemo.authorName}
                     </div>
                   </div>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                    결제 정보
-                  </h3>
-                  <div className="space-y-3">
-                    <div>
-                      <span className="text-sm font-medium text-gray-500">
-                        가격:
-                      </span>
-                      <span className="ml-2 text-sm text-gray-900">
-                        {selectedReservation.price.toLocaleString()}원
-                      </span>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">공개 여부</label>
+                    <div className="p-2 bg-gray-50 rounded border">
+                      {selectedMemo.isPublic ? "공개" : "비공개"}
                     </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">내용</label>
+                    <div className="p-4 bg-gray-50 rounded border min-h-[150px] whitespace-pre-wrap">
+                      {selectedMemo.content}
+                    </div>
+                  </div>
+                  {selectedMemo.reservationId && (
                     <div>
-                      <span className="text-sm font-medium text-gray-500">
-                        결제 상태:
-                      </span>
-                      <span
-                        className={`ml-2 inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getPaymentStatusColor(selectedReservation.paymentStatus)}`}
+                      <label className="block text-sm font-medium text-gray-700 mb-1">관련 예약</label>
+                      <button
+                        onClick={() => {
+                          setShowMemoModal(false);
+                          router.push(`/admin/reservations/${selectedMemo.reservationId}`);
+                        }}
+                        className="text-blue-600 hover:text-blue-800 underline"
                       >
-                        {selectedReservation.paymentStatus === "paid" &&
-                          "결제완료"}
-                        {selectedReservation.paymentStatus === "unpaid" &&
-                          "미결제"}
-                        {selectedReservation.paymentStatus === "partial" &&
-                          "부분결제"}
-                      </span>
+                        예약 상세 보기
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <div className="p-6 border-t border-gray-200 flex justify-end gap-3">
+                  <button
+                    onClick={async () => {
+                      // 편집 모드로 전환 - 최신 데이터 가져오기
+                      try {
+                        const response = await fetch(`/api/admin/memos/${selectedMemo.id}`, {
+                          credentials: 'include',
+                        });
+                        
+                        if (response.ok) {
+                          const data = await response.json();
+                          if (data.success && data.memo) {
+                            const memo = data.memo;
+                            setMemoFormData({
+                              date: memo.date || new Date().toISOString().split('T')[0],
+                              time: memo.time || new Date().toTimeString().slice(0, 5),
+                              content: memo.content || '',
+                              memoType: memo.memoType || 'class',
+                              isPublic: memo.isPublic || false,
+                              reservationId: memo.reservationId || '',
+                              relatedTeacherId: memo.relatedTeacherId || '',
+                              relatedStaffId: memo.relatedStaffId || '',
+                            });
+                            setIsEditingMemo(true);
+                            // 예약, 선생님, 직원 목록 불러오기
+                            fetchMemoRelatedData(memo.date || new Date().toISOString().split('T')[0]);
+                          } else {
+                            // API 실패 시 기존 데이터 사용
+                            setMemoFormData({
+                              date: selectedMemo.date || new Date().toISOString().split('T')[0],
+                              time: selectedMemo.time || new Date().toTimeString().slice(0, 5),
+                              content: selectedMemo.content || '',
+                              memoType: selectedMemo.memoType || 'class',
+                              isPublic: selectedMemo.isPublic || false,
+                              reservationId: selectedMemo.reservationId || '',
+                              relatedTeacherId: (selectedMemo as any).relatedTeacherId || '',
+                              relatedStaffId: (selectedMemo as any).relatedStaffId || '',
+                            });
+                            setIsEditingMemo(true);
+                            fetchMemoRelatedData(selectedMemo.date || new Date().toISOString().split('T')[0]);
+                          }
+                        } else {
+                          // API 실패 시 기존 데이터 사용
+                          setMemoFormData({
+                            date: selectedMemo.date || new Date().toISOString().split('T')[0],
+                            time: selectedMemo.time || new Date().toTimeString().slice(0, 5),
+                            content: selectedMemo.content || '',
+                            memoType: selectedMemo.memoType || 'class',
+                            isPublic: selectedMemo.isPublic || false,
+                            reservationId: selectedMemo.reservationId || '',
+                            relatedTeacherId: (selectedMemo as any).relatedTeacherId || '',
+                            relatedStaffId: (selectedMemo as any).relatedStaffId || '',
+                          });
+                          setIsEditingMemo(true);
+                          fetchMemoRelatedData(selectedMemo.date || new Date().toISOString().split('T')[0]);
+                        }
+                      } catch (error) {
+                        console.error('메모 데이터 로드 오류:', error);
+                        // 오류 발생 시 기존 데이터 사용
+                        setMemoFormData({
+                          date: selectedMemo.date || new Date().toISOString().split('T')[0],
+                          time: selectedMemo.time || new Date().toTimeString().slice(0, 5),
+                          content: selectedMemo.content || '',
+                          memoType: selectedMemo.memoType || 'class',
+                          isPublic: selectedMemo.isPublic || false,
+                          reservationId: selectedMemo.reservationId || '',
+                          relatedTeacherId: (selectedMemo as any).relatedTeacherId || '',
+                          relatedStaffId: (selectedMemo as any).relatedStaffId || '',
+                        });
+                        setIsEditingMemo(true);
+                        fetchMemoRelatedData(selectedMemo.date || new Date().toISOString().split('T')[0]);
+                      }
+                    }}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    수정
+                  </button>
+                  <button
+                    onClick={() => setShowMemoModal(false)}
+                    className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                  >
+                    닫기
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="p-6 space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">날짜 <span className="text-red-500">*</span></label>
+                      <input
+                        type="date"
+                        value={memoFormData.date}
+                        onChange={(e) => {
+                          setMemoFormData({ ...memoFormData, date: e.target.value, reservationId: '' });
+                          fetchMemoRelatedData(e.target.value);
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">시간 <span className="text-red-500">*</span></label>
+                      <input
+                        type="time"
+                        value={memoFormData.time}
+                        onChange={(e) => setMemoFormData({ ...memoFormData, time: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
                     </div>
                   </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">메모 유형 <span className="text-red-500">*</span></label>
+                    <div className="grid grid-cols-2 gap-3">
+                      {[
+                        { value: "class", label: "수업관련", color: "bg-sky-100 text-sky-800 border-sky-300" },
+                        { value: "staff", label: "직원 관련", color: "bg-yellow-100 text-yellow-800 border-yellow-300" },
+                        { value: "schedule", label: "일정관련", color: "bg-purple-100 text-purple-800 border-purple-300" },
+                        { value: "admin", label: "관리자 업무", color: "bg-green-100 text-green-800 border-green-300" },
+                        { value: "personal", label: "개인메모", color: "bg-emerald-100 text-emerald-800 border-emerald-300" },
+                      ].map((type) => (
+                        <button
+                          key={type.value}
+                          type="button"
+                          onClick={() => setMemoFormData({ ...memoFormData, memoType: type.value, reservationId: '', relatedTeacherId: '', relatedStaffId: '' })}
+                          className={`px-4 py-2 border-2 rounded-lg font-medium transition-all ${
+                            memoFormData.memoType === type.value
+                              ? `${type.color} border-current`
+                              : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                          }`}
+                        >
+                          {type.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  {memoFormData.memoType === "class" && memoReservations.length > 0 && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">관련 예약 (선택사항)</label>
+                      <select
+                        value={memoFormData.reservationId}
+                        onChange={(e) => setMemoFormData({ ...memoFormData, reservationId: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="">예약을 선택하세요 (선택사항)</option>
+                        {memoReservations.map((reservation) => (
+                          <option key={reservation.id} value={reservation.id}>
+                            {formatTime(reservation.startTime)} - {reservation.studentName}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                  {memoFormData.memoType === "staff" && memoStaff.length > 0 && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">관련 직원 (선택사항)</label>
+                      <select
+                        value={memoFormData.relatedStaffId}
+                        onChange={(e) => setMemoFormData({ ...memoFormData, relatedStaffId: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="">직원을 선택하세요 (선택사항)</option>
+                        {memoStaff.map((s) => (
+                          <option key={s.id} value={s.id}>
+                            {s.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                  {memoFormData.memoType === "schedule" && (
+                    <div className="grid grid-cols-2 gap-4">
+                      {memoTeachers.length > 0 && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">관련 선생님 (선택사항)</label>
+                          <select
+                            value={memoFormData.relatedTeacherId}
+                            onChange={(e) => setMemoFormData({ ...memoFormData, relatedTeacherId: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="">선생님을 선택하세요</option>
+                            {memoTeachers.map((teacher) => (
+                              <option key={teacher.id} value={teacher.id}>
+                                {teacher.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+                      {memoStaff.length > 0 && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">관련 직원 (선택사항)</label>
+                          <select
+                            value={memoFormData.relatedStaffId}
+                            onChange={(e) => setMemoFormData({ ...memoFormData, relatedStaffId: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="">직원을 선택하세요</option>
+                            {memoStaff.map((s) => (
+                              <option key={s.id} value={s.id}>
+                                {s.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">내용 <span className="text-red-500">*</span></label>
+                    <textarea
+                      value={memoFormData.content}
+                      onChange={(e) => setMemoFormData({ ...memoFormData, content: e.target.value })}
+                      rows={10}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="메모 내용을 입력하세요"
+                      required
+                    />
+                  </div>
+                  <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+                    <input
+                      type="checkbox"
+                      id="memoIsPublic"
+                      checked={memoFormData.isPublic}
+                      onChange={(e) => setMemoFormData({ ...memoFormData, isPublic: e.target.checked })}
+                      className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <label htmlFor="memoIsPublic" className="text-sm font-medium text-gray-700 cursor-pointer">
+                      공개 (관련 직원과 함께 열람 가능)
+                    </label>
+                  </div>
                 </div>
-              </div>
-
-              {selectedReservation.notes && (
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                    메모
-                  </h3>
-                  <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg">
-                    {selectedReservation.notes}
-                  </p>
+                <div className="p-6 border-t border-gray-200 flex justify-end gap-3">
+                  <button
+                    onClick={() => {
+                      setIsEditingMemo(false);
+                      setMemoFormData({
+                        date: '',
+                        time: '',
+                        content: '',
+                        memoType: 'class',
+                        isPublic: false,
+                        reservationId: '',
+                        relatedTeacherId: '',
+                        relatedStaffId: '',
+                      });
+                    }}
+                    className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                  >
+                    취소
+                  </button>
+                  <button
+                    onClick={handleSaveMemo}
+                    disabled={savingMemo || !memoFormData.content || !memoFormData.date || !memoFormData.time}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {savingMemo ? '저장 중...' : '저장'}
+                  </button>
                 </div>
-              )}
-
-              <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
-                <button
-                  onClick={() =>
-                    handleDeleteReservation(selectedReservation.id)
-                  }
-                  className="px-4 py-2 text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
-                >
-                  예약 삭제
-                </button>
-                <button
-                  onClick={() => setSelectedReservation(null)}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  닫기
-                </button>
-              </div>
-            </div>
+              </>
+            )}
           </div>
         </div>
       )}
 
-      {/* Reservation History Modal */}
-      {showHistoryModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900">예약 히스토리</h2>
-              <button
-                onClick={() => setShowHistoryModal(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <XCircle className="h-6 w-6" />
-              </button>
+      {/* 예약 상세 모달 */}
+      {showReservationModal && selectedReservation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowReservationModal(false)}>
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <CalendarIcon className="w-6 h-6 text-blue-600" />
+                  <h2 className="text-xl font-bold text-gray-900">예약 상세</h2>
+                </div>
+                <button
+                  onClick={() => setShowReservationModal(false)}
+                  className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
             </div>
-
-            <div className="space-y-4">
-              {reservations
-                .sort(
-                  (a, b) =>
-                    new Date(b.date).getTime() - new Date(a.date).getTime(),
-                )
-                .map((reservation) => (
-                  <div
-                    key={reservation.id}
-                    className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <div className="flex-shrink-0 h-10 w-10">
-                          <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                            <User className="h-5 w-5 text-blue-600" />
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">
-                            {reservation.studentName}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {reservation.courseName} - {reservation.teacherName}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-sm font-medium text-gray-900">
-                          {reservation.date} {reservation.time}
-                        </div>
-                        <div className="flex items-center space-x-2 mt-1">
-                          <span
-                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(reservation.status)}`}
-                          >
-                            {reservation.status === "confirmed" && "확정"}
-                            {reservation.status === "completed" && "완료"}
-                            {reservation.status === "canceled" && "취소"}
-                            {reservation.status === "pending" && "대기중"}
-                          </span>
-                          <span className="text-sm text-gray-500">
-                            {reservation.price.toLocaleString()}원
-                          </span>
-                        </div>
-                      </div>
-                    </div>
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">날짜</label>
+                  <div className="p-2 bg-gray-50 rounded border">
+                    {selectedReservation.date ? new Date(selectedReservation.date).toLocaleDateString('ko-KR', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      weekday: 'long'
+                    }) : '없음'}
                   </div>
-                ))}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">시간</label>
+                  <div className="p-2 bg-gray-50 rounded border">
+                    {formatTime(selectedReservation.startTime)}
+                    {selectedReservation.endTime && ` - ${formatTime(selectedReservation.endTime)}`}
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">학생</label>
+                  <div className="p-2 bg-gray-50 rounded border">
+                    {selectedReservation.studentName}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">선생님</label>
+                  <div className="p-2 bg-gray-50 rounded border">
+                    {selectedReservation.teacherName}
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">상태</label>
+                  <div className="p-2">
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                      selectedReservation.status === 'ATTENDED' || selectedReservation.status === 'attended'
+                        ? 'bg-green-100 text-green-800'
+                        : selectedReservation.status === 'CANCELLED' || selectedReservation.status === 'cancelled'
+                        ? 'bg-red-100 text-red-800'
+                        : selectedReservation.status === 'CONFIRMED' || selectedReservation.status === 'confirmed'
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {selectedReservation.status === 'ATTENDED' || selectedReservation.status === 'attended' ? '완료' :
+                       selectedReservation.status === 'CANCELLED' || selectedReservation.status === 'cancelled' ? '취소' :
+                       selectedReservation.status === 'CONFIRMED' || selectedReservation.status === 'confirmed' ? '확정' :
+                       '대기'}
+                    </span>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">수업 형식</label>
+                  <div className="p-2 bg-gray-50 rounded border">
+                    {selectedReservation.location === 'ONLINE' ? '온라인' : '대면'}
+                  </div>
+                </div>
+              </div>
             </div>
-
-            <div className="flex justify-end pt-4 border-t border-gray-200">
+            <div className="p-6 border-t border-gray-200 flex justify-end gap-3">
               <button
-                onClick={() => setShowHistoryModal(false)}
-                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                onClick={() => setShowReservationModal(false)}
+                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
               >
                 닫기
+              </button>
+              <button
+                onClick={() => {
+                  setShowReservationModal(false);
+                  router.push(`/admin/reservations/${selectedReservation.id}?edit=true`);
+                }}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                수정
+              </button>
+              <button
+                onClick={() => {
+                  setShowReservationModal(false);
+                  router.push(`/admin/reservations/${selectedReservation.id}`);
+                }}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              >
+                상세 페이지 보기
               </button>
             </div>
           </div>
@@ -959,4 +1449,6 @@ const AdminReservationsPage = () => {
   );
 };
 
-export default AdminReservationsPage;
+export default function AdminReservationsPage() {
+  return <AdminReservationsContent />;
+}

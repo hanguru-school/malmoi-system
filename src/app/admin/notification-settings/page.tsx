@@ -84,103 +84,49 @@ export default function AdminNotificationSettingsPage() {
   });
 
   useEffect(() => {
-    // 실제 API 호출로 대체
-    setTimeout(() => {
-      const mockTemplates: NotificationTemplate[] = [
-        {
-          id: "1",
-          type: "reservation_reminder",
-          name: "수업 리마인드",
-          title: "내일 수업 리마인드",
-          content:
-            "안녕하세요! 내일 {date} {time}에 {studentName}님의 수업이 예정되어 있습니다. 잊지 마세요!",
-          channels: ["line", "email"],
-          timing: "scheduled",
-          delayHours: 24,
-          conditions: {
-            userType: "student",
-            hasReservation: true,
-            hasLineConnected: true,
-          },
-          isActive: true,
-          usageCount: 156,
-          lastUsed: "2024-01-15T09:00:00Z",
-        },
-        {
-          id: "2",
-          type: "review_request",
-          name: "리뷰 요청",
-          title: "수업 리뷰 작성 요청",
-          content:
-            "오늘 수업은 어떠셨나요? 소중한 의견을 들려주세요. 리뷰 작성 시 포인트를 드립니다!",
-          channels: ["line", "email"],
-          timing: "delayed",
-          delayHours: 5,
-          conditions: {
-            userType: "student",
-            hasLineConnected: true,
-          },
-          isActive: true,
-          usageCount: 89,
-          lastUsed: "2024-01-15T16:00:00Z",
-        },
-        {
-          id: "3",
-          type: "attendance_alert",
-          name: "출석 확인",
-          title: "출석 확인 요청",
-          content:
-            "{startTime}에 예약된 수업이 있습니다. 교실에 도착하셨다면 UID 카드로 태깅해주세요.",
-          channels: ["line", "email"],
-          timing: "delayed",
-          delayHours: 0.17, // 10분
-          conditions: {
-            userType: "student",
-            hasReservation: true,
-          },
-          isActive: true,
-          usageCount: 23,
-          lastUsed: "2024-01-15T14:10:00Z",
-        },
-      ];
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        const [templatesResponse, statsResponse] = await Promise.all([
+          fetch('/api/admin/push-notifications', { credentials: 'include' }).catch(() => ({ ok: false })),
+          fetch('/api/admin/notification-stats', { credentials: 'include' }).catch(() => ({ ok: false })),
+        ]);
 
-      const mockStats: NotificationStats = {
-        totalSent: 1234,
-        deliveryRate: 94.2,
-        channelStats: {
-          line: { sent: 567, delivered: 545, rate: 96.1 },
-          email: { sent: 445, delivered: 418, rate: 93.9 },
-          push: { sent: 222, delivered: 198, rate: 89.2 },
-        },
-        typeStats: {
-          reservation_reminder: 456,
-          review_request: 234,
-          attendance_alert: 123,
-          points_low: 45,
-        },
-        recentActivity: [
-          {
-            type: "reservation_reminder",
-            count: 12,
-            timestamp: "2024-01-15T09:00:00Z",
-          },
-          {
-            type: "review_request",
-            count: 8,
-            timestamp: "2024-01-15T16:00:00Z",
-          },
-          {
-            type: "attendance_alert",
-            count: 3,
-            timestamp: "2024-01-15T14:10:00Z",
-          },
-        ],
-      };
+        const templatesData = templatesResponse.ok ? await templatesResponse.json() : { notificationTypes: [] };
+        const statsData = statsResponse.ok ? await statsResponse.json() : { stats: null };
 
-      setTemplates(mockTemplates);
-      setStats(mockStats);
-      setLoading(false);
-    }, 1000);
+        setTemplates(templatesData.notificationTypes || []);
+        setStats(statsData.stats || {
+          totalSent: 0,
+          deliveryRate: 0,
+          channelStats: {
+            line: { sent: 0, delivered: 0, rate: 0 },
+            email: { sent: 0, delivered: 0, rate: 0 },
+            push: { sent: 0, delivered: 0, rate: 0 },
+          },
+          typeStats: {},
+          recentActivity: [],
+        });
+      } catch (error) {
+        console.error('알림 설정 데이터 로딩 실패:', error);
+        setTemplates([]);
+        setStats({
+          totalSent: 0,
+          deliveryRate: 0,
+          channelStats: {
+            line: { sent: 0, delivered: 0, rate: 0 },
+            email: { sent: 0, delivered: 0, rate: 0 },
+            push: { sent: 0, delivered: 0, rate: 0 },
+          },
+          typeStats: {},
+          recentActivity: [],
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
   }, []);
 
   const handleCreateTemplate = async (e: React.FormEvent) => {

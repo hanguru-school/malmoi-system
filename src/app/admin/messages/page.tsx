@@ -57,128 +57,30 @@ const AdminMessagesPage = () => {
     scheduledAt: "",
   });
 
-  // Mock data
   useEffect(() => {
-    const mockMessages: Message[] = [
-      {
-        id: "1",
-        title: "수업 일정 변경 안내",
-        content:
-          "안녕하세요. 다음 주 수업 일정이 변경되었습니다. 자세한 내용은 첨부된 파일을 확인해 주세요.",
-        type: "announcement",
-        recipients: ["all_students"],
-        sender: "김관리자",
-        status: "sent",
-        sentAt: "2024-01-15 14:30",
-        createdAt: "2024-01-15 14:25",
-        readCount: 45,
-        totalRecipients: 60,
-      },
-      {
-        id: "2",
-        title: "월말 결제 안내",
-        content: "이번 달 수업료 결제가 완료되었습니다. 감사합니다.",
-        type: "reminder",
-        recipients: ["unpaid_students"],
-        sender: "이관리자",
-        status: "sent",
-        sentAt: "2024-01-16 09:15",
-        createdAt: "2024-01-16 09:10",
-        readCount: 28,
-        totalRecipients: 35,
-      },
-      {
-        id: "3",
-        title: "신규 코스 오픈 안내",
-        content: "새로운 코스가 오픈되었습니다. 많은 관심 부탁드립니다.",
-        type: "notification",
-        recipients: ["all_students", "all_parents"],
-        sender: "박관리자",
-        status: "scheduled",
-        scheduledAt: "2024-01-20 10:00",
-        createdAt: "2024-01-17 16:20",
-        readCount: 0,
-        totalRecipients: 120,
-      },
-      {
-        id: "4",
-        title: "출석 확인 요청",
-        content: "오늘 수업에 참석하지 못한 학생들의 사유를 확인해 주세요.",
-        type: "reminder",
-        recipients: ["absent_students"],
-        sender: "최관리자",
-        status: "draft",
-        createdAt: "2024-01-18 11:30",
-        readCount: 0,
-        totalRecipients: 8,
-      },
-      {
-        id: "5",
-        title: "시스템 점검 안내",
-        content: "내일 오전 2시부터 4시까지 시스템 점검이 있을 예정입니다.",
-        type: "announcement",
-        recipients: ["all_users"],
-        sender: "정관리자",
-        status: "failed",
-        createdAt: "2024-01-19 15:45",
-        readCount: 0,
-        totalRecipients: 150,
-      },
-    ];
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        const [messagesResponse, templatesResponse] = await Promise.all([
+          fetch('/api/admin/messages', { credentials: 'include' }).catch(() => ({ ok: false })),
+          fetch('/api/admin/message-templates', { credentials: 'include' }).catch(() => ({ ok: false })),
+        ]);
 
-    const mockTemplates: MessageTemplate[] = [
-      {
-        id: "1",
-        name: "수업 일정 변경",
-        type: "announcement",
-        title: "수업 일정 변경 안내",
-        content:
-          "안녕하세요. {date} 수업 일정이 변경되었습니다. 자세한 내용은 첨부된 파일을 확인해 주세요.",
-        category: "일정 관리",
-        isDefault: true,
-      },
-      {
-        id: "2",
-        name: "결제 안내",
-        type: "reminder",
-        title: "월말 결제 안내",
-        content: "이번 달 수업료 결제가 완료되었습니다. 감사합니다.",
-        category: "결제 관리",
-        isDefault: true,
-      },
-      {
-        id: "3",
-        name: "신규 코스 안내",
-        type: "notification",
-        title: "신규 코스 오픈 안내",
-        content:
-          '새로운 코스 "{course_name}"이 오픈되었습니다. 많은 관심 부탁드립니다.',
-        category: "코스 관리",
-        isDefault: false,
-      },
-      {
-        id: "4",
-        name: "출석 확인",
-        type: "reminder",
-        title: "출석 확인 요청",
-        content: "오늘 수업에 참석하지 못한 학생들의 사유를 확인해 주세요.",
-        category: "출석 관리",
-        isDefault: false,
-      },
-      {
-        id: "5",
-        name: "시스템 점검",
-        type: "announcement",
-        title: "시스템 점검 안내",
-        content:
-          "{date} {time}부터 {duration}시간 동안 시스템 점검이 있을 예정입니다.",
-        category: "시스템 관리",
-        isDefault: true,
-      },
-    ];
+        const messagesData = messagesResponse.ok ? await messagesResponse.json() : { messages: [] };
+        const templatesData = templatesResponse.ok ? await templatesResponse.json() : { templates: [] };
 
-    setMessages(mockMessages);
-    setTemplates(mockTemplates);
+        setMessages(messagesData.messages || []);
+        setTemplates(templatesData.templates || []);
+      } catch (error) {
+        console.error('메시지 데이터 로딩 실패:', error);
+        setMessages([]);
+        setTemplates([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
   }, []);
 
   const filteredMessages = messages.filter((message) => {
@@ -455,7 +357,12 @@ const AdminMessagesPage = () => {
 
         {/* Messages Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredMessages.map((message) => (
+          {filteredMessages.length === 0 ? (
+            <div className="col-span-full text-center py-12 text-gray-500">
+              등록된 메시지가 없습니다.
+            </div>
+          ) : (
+            filteredMessages.map((message) => (
             <div
               key={message.id}
               className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow"
@@ -540,7 +447,8 @@ const AdminMessagesPage = () => {
                 </div>
               </div>
             </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
 
@@ -715,7 +623,12 @@ const AdminMessagesPage = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {templates.map((template) => (
+              {templates.length === 0 ? (
+                <div className="col-span-full text-center py-8 text-gray-500">
+                  등록된 템플릿이 없습니다.
+                </div>
+              ) : (
+                templates.map((template) => (
                 <div
                   key={template.id}
                   className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50"
@@ -751,7 +664,8 @@ const AdminMessagesPage = () => {
                     </button>
                   </div>
                 </div>
-              ))}
+                ))
+              )}
             </div>
 
             <div className="flex justify-end pt-4 border-t border-gray-200">

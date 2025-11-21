@@ -23,17 +23,6 @@ export async function GET(request: NextRequest) {
             name: true,
           },
         },
-        reservations: {
-          where: {
-            status: "completed",
-          },
-          select: {
-            id: true,
-            startTime: true,
-            endTime: true,
-            duration: true,
-          },
-        },
       },
     });
 
@@ -44,19 +33,43 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // 예약 정보 조회 (별도 쿼리)
+    const reservations = await prisma.reservation.findMany({
+      where: {
+        studentId: student.id,
+        status: "ATTENDED",
+      },
+      select: {
+        id: true,
+        duration: true,
+      },
+    });
+
     // 통계 계산
-    const totalAttendance = student.reservations.length;
-    const totalStudyTime = student.reservations.reduce((total, reservation) => {
+    const totalAttendance = reservations.length;
+    const totalStudyTime = reservations.reduce((total, reservation) => {
       return total + (reservation.duration || 0);
     }, 0);
 
     // 평균 점수 계산 (예시)
     const averageScore = 85; // 실제로는 데이터베이스에서 계산
 
+    // 생년월일 형식 변환
+    let formattedBirthDate = "";
+    if (student.birthDate) {
+      const birthDate = new Date(student.birthDate);
+      if (!isNaN(birthDate.getTime())) {
+        formattedBirthDate = birthDate.toISOString().split('T')[0];
+      }
+    }
+
     const profileData = {
       studentId: student.id,
       name: student.name,
       email: student.user.email,
+      phone: student.phone,
+      address: student.address,
+      birthDate: formattedBirthDate,
       level: student.level,
       points: student.points,
       totalAttendance,
@@ -68,7 +81,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: profileData,
+      student: profileData,
     });
   } catch (error) {
     console.error("학생 프로필 조회 오류:", error);
@@ -91,15 +104,16 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, level, avatar } = body;
+    const { name, email, phone, address, birthDate } = body;
 
     // 학생 정보 업데이트
     const updatedStudent = await prisma.student.update({
       where: { userId: session.user.id },
       data: {
         name: name || undefined,
-        level: level || undefined,
-        avatar: avatar || undefined,
+        phone: phone || undefined,
+        address: address || undefined,
+        birthDate: birthDate ? new Date(birthDate) : undefined,
       },
       include: {
         user: {
@@ -111,12 +125,32 @@ export async function PUT(request: NextRequest) {
       },
     });
 
+    // 사용자 이메일 업데이트
+    if (email) {
+      await prisma.user.update({
+        where: { id: session.user.id },
+        data: { email },
+      });
+    }
+
+    // 생년월일 형식 변환
+    let formattedBirthDate = "";
+    if (updatedStudent.birthDate) {
+      const birthDate = new Date(updatedStudent.birthDate);
+      if (!isNaN(birthDate.getTime())) {
+        formattedBirthDate = birthDate.toISOString().split('T')[0];
+      }
+    }
+
     return NextResponse.json({
       success: true,
-      data: {
+      student: {
         studentId: updatedStudent.id,
         name: updatedStudent.name,
-        email: updatedStudent.user.email,
+        email: email || updatedStudent.user.email,
+        phone: updatedStudent.phone,
+        address: updatedStudent.address,
+        birthDate: formattedBirthDate,
         level: updatedStudent.level,
         points: updatedStudent.points,
         avatar: updatedStudent.avatar,

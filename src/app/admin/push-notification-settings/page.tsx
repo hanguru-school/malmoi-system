@@ -11,6 +11,8 @@ import {
   Clock,
   Users,
 } from "lucide-react";
+import ProtectedRoute from "@/components/common/ProtectedRoute";
+import Navigation from "@/components/common/Navigation";
 
 interface NotificationType {
   id: string;
@@ -43,7 +45,7 @@ interface NotificationHistory {
   failureCount: number;
 }
 
-export default function PushNotificationSettingsPage() {
+function PushNotificationSettingsContent() {
   const [notificationTypes, setNotificationTypes] = useState<
     NotificationType[]
   >([]);
@@ -66,119 +68,58 @@ export default function PushNotificationSettingsPage() {
   const [activeTab, setActiveTab] = useState<"types" | "history">("types");
   const [loading, setLoading] = useState(true);
 
-  // 샘플 데이터
+  // 실제 데이터베이스에서 푸시 알림 데이터 로드
   useEffect(() => {
-    setTimeout(() => {
-      const sampleTypes: NotificationType[] = [
-        {
-          id: "1",
-          name: "예약 확인 알림",
-          description: "학생이 예약을 완료했을 때 발송되는 알림",
-          category: "reservation",
-          isActive: true,
-          template:
-            "안녕하세요, {student_name}님! {date} {time}에 {service_name} 수업이 예약되었습니다.",
-          variables: ["student_name", "date", "time", "service_name"],
-          conditions: [
-            {
-              field: "reservation_status",
-              operator: "equals",
-              value: "confirmed",
-            },
-          ],
-          createdAt: "2024-01-15",
-          updatedAt: "2024-01-15",
-        },
-        {
-          id: "2",
-          name: "수업 전날 리마인더",
-          description: "수업 전날 학생에게 발송되는 리마인더",
-          category: "reminder",
-          isActive: true,
-          template:
-            "내일 {date} {time}에 {service_name} 수업이 있습니다. 준비물을 확인해주세요!",
-          variables: ["date", "time", "service_name"],
-          conditions: [
-            { field: "days_before", operator: "equals", value: "1" },
-          ],
-          createdAt: "2024-01-15",
-          updatedAt: "2024-01-15",
-        },
-        {
-          id: "3",
-          name: "결제 완료 알림",
-          description: "결제가 완료되었을 때 발송되는 알림",
-          category: "payment",
-          isActive: true,
-          template:
-            "결제가 완료되었습니다. 결제 금액: {amount}원, 남은 수업: {remaining_lessons}회",
-          variables: ["amount", "remaining_lessons"],
-          conditions: [
-            { field: "payment_status", operator: "equals", value: "completed" },
-          ],
-          createdAt: "2024-01-15",
-          updatedAt: "2024-01-15",
-        },
-        {
-          id: "4",
-          name: "공지사항",
-          description: "중요한 공지사항을 모든 학생에게 발송",
-          category: "announcement",
-          isActive: false,
-          template: "[공지] {title}\n\n{content}",
-          variables: ["title", "content"],
-          conditions: [],
-          createdAt: "2024-01-15",
-          updatedAt: "2024-01-15",
-        },
-      ];
-
-      const sampleHistory: NotificationHistory[] = [
-        {
-          id: "1",
-          typeId: "1",
-          typeName: "예약 확인 알림",
-          message:
-            "안녕하세요, 김학생님! 2024-01-20 14:00에 영어회화 수업이 예약되었습니다.",
-          recipients: 25,
-          sentAt: "2024-01-15 14:30",
-          status: "sent",
-          successCount: 24,
-          failureCount: 1,
-        },
-        {
-          id: "2",
-          typeId: "2",
-          typeName: "수업 전날 리마인더",
-          message:
-            "내일 2024-01-16 15:00에 수학 수업이 있습니다. 준비물을 확인해주세요!",
-          recipients: 18,
-          sentAt: "2024-01-15 09:00",
-          status: "sent",
-          successCount: 17,
-          failureCount: 1,
-        },
-        {
-          id: "3",
-          typeId: "3",
-          typeName: "결제 완료 알림",
-          message:
-            "결제가 완료되었습니다. 결제 금액: 100,000원, 남은 수업: 10회",
-          recipients: 5,
-          sentAt: "2024-01-14 16:45",
-          status: "sent",
-          successCount: 5,
-          failureCount: 0,
-        },
-      ];
-
-      setNotificationTypes(sampleTypes);
-      setFilteredTypes(sampleTypes);
-      setNotificationHistory(sampleHistory);
-      setFilteredHistory(sampleHistory);
-      setLoading(false);
-    }, 1000);
+    loadNotificationData();
   }, []);
+
+  const loadNotificationData = async () => {
+    setLoading(true);
+    try {
+      // 실제 데이터베이스에서 푸시 알림 유형 데이터 로드
+      const response = await fetch("/api/admin/push-notifications", {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await response.json();
+      
+      if (data.success && data.notificationTypes && data.notificationTypes.length > 0) {
+        // 실제 데이터를 NotificationType 형식으로 변환
+        const formattedTypes: NotificationType[] = data.notificationTypes.map((type: any) => ({
+          id: type.id,
+          name: type.name,
+          description: type.description || "",
+          category: type.category || "custom",
+          isActive: type.isActive !== undefined ? type.isActive : true,
+          template: type.template || "",
+          variables: type.variables || [],
+          conditions: type.conditions || [],
+          createdAt: type.createdAt?.split('T')[0] || "",
+          updatedAt: type.updatedAt?.split('T')[0] || "",
+        }));
+        setNotificationTypes(formattedTypes);
+        setFilteredTypes(formattedTypes);
+      } else {
+        // 데이터가 없으면 빈 배열
+        setNotificationTypes([]);
+        setFilteredTypes([]);
+      }
+
+      // 알림 발송 기록도 빈 배열로 설정 (실제 데이터가 없으므로)
+      setNotificationHistory([]);
+      setFilteredHistory([]);
+    } catch (error) {
+      console.error("푸시 알림 데이터 로딩 실패:", error);
+      setNotificationTypes([]);
+      setFilteredTypes([]);
+      setNotificationHistory([]);
+      setFilteredHistory([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // 검색 및 필터링
   useEffect(() => {
@@ -300,7 +241,7 @@ export default function PushNotificationSettingsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-full overflow-hidden">
       {/* 헤더 */}
       <div className="flex items-center justify-between">
         <div>
@@ -424,7 +365,38 @@ export default function PushNotificationSettingsPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredTypes.map((type) => (
+                {loading ? (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-12 text-center">
+                      <div className="flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                        <span className="ml-2 text-gray-600">알림 유형 목록을 불러오는 중...</span>
+                      </div>
+                    </td>
+                  </tr>
+                ) : filteredTypes.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-12 text-center">
+                      <div className="flex flex-col items-center justify-center">
+                        <Send className="h-16 w-16 text-gray-400 mb-4" />
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">
+                          등록된 알림 유형이 없습니다
+                        </h3>
+                        <p className="text-gray-600 mb-6">
+                          아직 등록된 알림 유형이 없습니다. 새로운 알림 유형을 추가해보세요.
+                        </p>
+                        <button
+                          onClick={() => handleAddType()}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                        >
+                          <Plus className="h-4 w-4" />
+                          알림 유형 추가하기
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  filteredTypes.map((type) => (
                   <tr key={type.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
@@ -523,7 +495,8 @@ export default function PushNotificationSettingsPage() {
                       </div>
                     </td>
                   </tr>
-                ))}
+                  ))
+                )}
               </tbody>
             </table>
           </div>
@@ -941,5 +914,15 @@ function NotificationTypeModal({
         </form>
       </div>
     </div>
+  );
+}
+
+export default function PushNotificationSettingsPage() {
+  return (
+    <ProtectedRoute allowedRoles={["ADMIN", "MASTER"]}>
+      <Navigation>
+        <PushNotificationSettingsContent />
+      </Navigation>
+    </ProtectedRoute>
   );
 }

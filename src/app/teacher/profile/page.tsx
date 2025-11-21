@@ -366,7 +366,7 @@ export default function TeacherProfilePage() {
                     />
                   ) : (
                     <div className="text-lg font-semibold text-gray-900">
-                      {formatDate(profile.birthDate)}
+                      {profile.birthDate ? formatDate(profile.birthDate) : "미입력"}
                     </div>
                   )}
                 </div>

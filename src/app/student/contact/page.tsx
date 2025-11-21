@@ -84,7 +84,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-1">이메일</h3>
-                  <p className="text-gray-600">info@hanguru.school</p>
+                  <p className="text-gray-600">office@hanguru.school</p>
                   <p className="text-sm text-gray-500">24시간 접수 가능</p>
                 </div>
               </div>

@@ -60,126 +60,30 @@ const AdminReportsPage = () => {
     format: "pdf" as Report["format"],
   });
 
-  // Mock data
   useEffect(() => {
-    const mockReports: Report[] = [
-      {
-        id: "1",
-        title: "2024년 1월 학생 현황 보고서",
-        type: "student",
-        status: "published",
-        author: "김관리자",
-        createdAt: "2024-01-15",
-        updatedAt: "2024-01-15",
-        description: "2024년 1월 학생 등록, 출석, 성과 현황",
-        dataRange: "2024-01-01 ~ 2024-01-31",
-        format: "pdf",
-        size: "2.3MB",
-        downloadCount: 15,
-      },
-      {
-        id: "2",
-        title: "2024년 1월 재무 보고서",
-        type: "financial",
-        status: "published",
-        author: "이관리자",
-        createdAt: "2024-01-16",
-        updatedAt: "2024-01-16",
-        description: "2024년 1월 매출, 지출, 수익성 분석",
-        dataRange: "2024-01-01 ~ 2024-01-31",
-        format: "excel",
-        size: "1.8MB",
-        downloadCount: 8,
-      },
-      {
-        id: "3",
-        title: "선생님 성과 평가 보고서",
-        type: "teacher",
-        status: "draft",
-        author: "박관리자",
-        createdAt: "2024-01-17",
-        updatedAt: "2024-01-17",
-        description: "선생님별 수업 성과 및 학생 만족도",
-        dataRange: "2024-01-01 ~ 2024-01-31",
-        format: "pdf",
-        size: "3.1MB",
-        downloadCount: 0,
-      },
-      {
-        id: "4",
-        title: "코스별 수강생 분석",
-        type: "course",
-        status: "published",
-        author: "최관리자",
-        createdAt: "2024-01-18",
-        updatedAt: "2024-01-18",
-        description: "코스별 수강생 현황 및 성과 분석",
-        dataRange: "2024-01-01 ~ 2024-01-31",
-        format: "csv",
-        size: "0.9MB",
-        downloadCount: 12,
-      },
-      {
-        id: "5",
-        title: "출석률 통계 보고서",
-        type: "attendance",
-        status: "archived",
-        author: "정관리자",
-        createdAt: "2024-01-10",
-        updatedAt: "2024-01-10",
-        description: "월별 출석률 및 결석 사유 분석",
-        dataRange: "2023-12-01 ~ 2023-12-31",
-        format: "pdf",
-        size: "1.5MB",
-        downloadCount: 25,
-      },
-    ];
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        const [reportsResponse, templatesResponse] = await Promise.all([
+          fetch('/api/admin/reports', { credentials: 'include' }).catch(() => ({ ok: false })),
+          fetch('/api/admin/report-templates', { credentials: 'include' }).catch(() => ({ ok: false })),
+        ]);
 
-    const mockTemplates: ReportTemplate[] = [
-      {
-        id: "1",
-        name: "월간 학생 현황 보고서",
-        type: "student",
-        description: "월별 학생 등록, 출석, 성과 현황을 포함한 표준 보고서",
-        category: "학생 관리",
-        isDefault: true,
-      },
-      {
-        id: "2",
-        name: "재무 성과 보고서",
-        type: "financial",
-        description: "매출, 지출, 수익성 분석을 포함한 재무 보고서",
-        category: "재무 관리",
-        isDefault: true,
-      },
-      {
-        id: "3",
-        name: "선생님 평가 보고서",
-        type: "teacher",
-        description: "선생님별 수업 성과 및 학생 만족도 평가",
-        category: "인사 관리",
-        isDefault: false,
-      },
-      {
-        id: "4",
-        name: "코스 분석 보고서",
-        type: "course",
-        description: "코스별 수강생 현황 및 성과 분석",
-        category: "코스 관리",
-        isDefault: true,
-      },
-      {
-        id: "5",
-        name: "출석 통계 보고서",
-        type: "attendance",
-        description: "출석률 및 결석 사유 분석",
-        category: "학습 관리",
-        isDefault: false,
-      },
-    ];
+        const reportsData = reportsResponse.ok ? await reportsResponse.json() : { reports: [] };
+        const templatesData = templatesResponse.ok ? await templatesResponse.json() : { templates: [] };
 
-    setReports(mockReports);
-    setTemplates(mockTemplates);
+        setReports(reportsData.reports || []);
+        setTemplates(templatesData.templates || []);
+      } catch (error) {
+        console.error('리포트 데이터 로딩 실패:', error);
+        setReports([]);
+        setTemplates([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
   }, []);
 
   const filteredReports = reports.filter((report) => {
@@ -421,7 +325,12 @@ const AdminReportsPage = () => {
 
         {/* Reports Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredReports.map((report) => (
+          {filteredReports.length === 0 ? (
+            <div className="col-span-full text-center py-12 text-gray-500">
+              등록된 보고서가 없습니다.
+            </div>
+          ) : (
+            filteredReports.map((report) => (
             <div
               key={report.id}
               className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow"
@@ -506,7 +415,8 @@ const AdminReportsPage = () => {
                 </div>
               </div>
             </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
 
@@ -660,7 +570,12 @@ const AdminReportsPage = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {templates.map((template) => (
+              {templates.length === 0 ? (
+                <div className="col-span-full text-center py-8 text-gray-500">
+                  등록된 템플릿이 없습니다.
+                </div>
+              ) : (
+                templates.map((template) => (
                 <div
                   key={template.id}
                   className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50"
@@ -700,7 +615,8 @@ const AdminReportsPage = () => {
                     </button>
                   </div>
                 </div>
-              ))}
+                ))
+              )}
             </div>
 
             <div className="flex justify-end pt-4 border-t border-gray-200">

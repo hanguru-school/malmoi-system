@@ -5,7 +5,7 @@ import prisma from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
   try {
-    console.log("회원가입 API 시작");
+    console.log("입회 API 시작");
     
     const {
       email,
@@ -225,7 +225,7 @@ export async function POST(request: NextRequest) {
       maxAge: 60 * 60 * 24 * 7, // 7일
     });
 
-    console.log("회원가입 완료:", {
+    console.log("입회 완료:", {
       userId: user.id,
       email: user.email,
       role: user.role,
@@ -234,16 +234,16 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: "회원가입이 완료되었습니다.",
+      message: "입회가 완료되었습니다.",
       user: userData,
       redirectUrl: getRedirectUrlByRole(user.role)
     });
   } catch (error) {
-    console.error("회원가입 오류:", error);
+    console.error("입회 오류:", error);
     return NextResponse.json(
       { 
         success: false,
-        message: "회원가입 중 오류가 발생했습니다.",
+        message: "입회 중 오류가 발생했습니다.",
         error: error instanceof Error ? error.message : "UNKNOWN_ERROR"
       },
       { status: 500 },

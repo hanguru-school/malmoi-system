@@ -108,7 +108,7 @@ function JapaneseLoginPageContent() {
       if (result.success) {
         setIsLogin(true);
         setError("");
-        // 회원가입 성공 메시지
+        // 입회 성공 메시지
         alert("アカウントが正常に作成されました。ログインしてください。");
       } else {
         setError(result.error || "アカウント作成に失敗しました");

@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2, Search, Filter } from "lucide-react";
+import ProtectedRoute from "@/components/common/ProtectedRoute";
+import Navigation from "@/components/common/Navigation";
 
 interface MemoType {
   id: string;
@@ -13,7 +15,7 @@ interface MemoType {
   updatedAt: string;
 }
 
-export default function MemoTypeManagementPage() {
+function MemoTypeManagementContent() {
   const [memoTypes, setMemoTypes] = useState<MemoType[]>([]);
   const [filteredMemoTypes, setFilteredMemoTypes] = useState<MemoType[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -24,61 +26,49 @@ export default function MemoTypeManagementPage() {
   const [editingMemoType, setEditingMemoType] = useState<MemoType | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // 샘플 데이터
+  // 실제 데이터베이스에서 메모 유형 데이터 로드
   useEffect(() => {
-    setTimeout(() => {
-      const sampleData: MemoType[] = [
-        {
-          id: "1",
-          name: "학습 진도",
-          description: "학생의 학습 진도 및 이해도 관련 메모",
-          color: "#3B82F6",
-          isActive: true,
-          createdAt: "2024-01-15",
-          updatedAt: "2024-01-15",
-        },
-        {
-          id: "2",
-          name: "행동 관찰",
-          description: "수업 중 학생의 행동 및 태도 관찰 메모",
-          color: "#10B981",
-          isActive: true,
-          createdAt: "2024-01-15",
-          updatedAt: "2024-01-15",
-        },
-        {
-          id: "3",
-          name: "숙제 완료도",
-          description: "숙제 완료 상황 및 품질 관련 메모",
-          color: "#F59E0B",
-          isActive: true,
-          createdAt: "2024-01-15",
-          updatedAt: "2024-01-15",
-        },
-        {
-          id: "4",
-          name: "특별 주의사항",
-          description: "학생에게 특별히 주의해야 할 사항들",
-          color: "#EF4444",
-          isActive: false,
-          createdAt: "2024-01-15",
-          updatedAt: "2024-01-15",
-        },
-        {
-          id: "5",
-          name: "부모님 연락",
-          description: "부모님과의 연락 내용 및 요청사항",
-          color: "#8B5CF6",
-          isActive: true,
-          createdAt: "2024-01-15",
-          updatedAt: "2024-01-15",
-        },
-      ];
-      setMemoTypes(sampleData);
-      setFilteredMemoTypes(sampleData);
-      setLoading(false);
-    }, 1000);
+    loadMemoTypes();
   }, []);
+
+  const loadMemoTypes = async () => {
+    setLoading(true);
+    try {
+      // 실제 데이터베이스에서 메모 유형 데이터 로드
+      const response = await fetch("/api/admin/memo-types", {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await response.json();
+      
+      if (data.success && data.memoTypes && data.memoTypes.length > 0) {
+        // 실제 데이터를 MemoType 형식으로 변환
+        const formattedMemoTypes: MemoType[] = data.memoTypes.map((memoType: any) => ({
+          id: memoType.id,
+          name: memoType.name,
+          description: memoType.description || "",
+          color: memoType.color || "#3B82F6",
+          isActive: memoType.isActive !== undefined ? memoType.isActive : true,
+          createdAt: memoType.createdAt?.split('T')[0] || "",
+          updatedAt: memoType.updatedAt?.split('T')[0] || "",
+        }));
+        setMemoTypes(formattedMemoTypes);
+        setFilteredMemoTypes(formattedMemoTypes);
+      } else {
+        // 데이터가 없으면 빈 배열
+        setMemoTypes([]);
+        setFilteredMemoTypes([]);
+      }
+    } catch (error) {
+      console.error("메모 유형 목록 로딩 실패:", error);
+      setMemoTypes([]);
+      setFilteredMemoTypes([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // 검색 및 필터링
   useEffect(() => {
@@ -168,7 +158,7 @@ export default function MemoTypeManagementPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-full overflow-hidden">
       {/* 헤더 */}
       <div className="flex items-center justify-between">
         <div>
@@ -243,7 +233,38 @@ export default function MemoTypeManagementPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredMemoTypes.map((memoType) => (
+              {loading ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center">
+                    <div className="flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                      <span className="ml-2 text-gray-600">메모 유형 목록을 불러오는 중...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredMemoTypes.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center">
+                    <div className="flex flex-col items-center justify-center">
+                      <Plus className="h-16 w-16 text-gray-400 mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">
+                        등록된 메모 유형이 없습니다
+                      </h3>
+                      <p className="text-gray-600 mb-6">
+                        아직 등록된 메모 유형이 없습니다. 새로운 메모 유형을 추가해보세요.
+                      </p>
+                      <button
+                        onClick={() => handleAddMemoType()}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                      >
+                        <Plus className="h-4 w-4" />
+                        메모 유형 추가하기
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                filteredMemoTypes.map((memoType) => (
                 <tr key={memoType.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">
@@ -307,7 +328,8 @@ export default function MemoTypeManagementPage() {
                     </div>
                   </td>
                 </tr>
-              ))}
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -454,5 +476,15 @@ function MemoTypeModal({ memoType, onSave, onClose }: MemoTypeModalProps) {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function MemoTypeManagementPage() {
+  return (
+    <ProtectedRoute allowedRoles={["ADMIN", "MASTER"]}>
+      <Navigation>
+        <MemoTypeManagementContent />
+      </Navigation>
+    </ProtectedRoute>
   );
 }

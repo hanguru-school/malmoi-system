@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: "회원가입이 완료되었습니다.",
+      message: "입회가 완료되었습니다.",
       user: {
         id: user.id,
         email: user.email,
@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("Registration error:", error);
     return NextResponse.json(
-      { error: "회원가입 중 오류가 발생했습니다." },
+      { error: "입회 중 오류가 발생했습니다." },
       { status: 500 },
     );
   }

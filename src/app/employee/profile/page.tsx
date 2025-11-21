@@ -8,6 +8,7 @@ interface EmployeeProfile {
   name: string;
   email: string;
   phone: string;
+  birthDate: string;
   profileImage?: string;
   introduction: string;
   pushNotifications: {
@@ -36,6 +37,7 @@ export default function EmployeeProfilePage() {
     name: "",
     email: "",
     phone: "",
+    birthDate: "",
     introduction: "",
     pushNotifications: {
       lessonReminders: true,
@@ -60,6 +62,7 @@ export default function EmployeeProfilePage() {
         name: "田中先生",
         email: "tanaka@hanguru.com",
         phone: "010-1234-5678",
+        birthDate: "1990-01-01",
         profileImage: "/api/placeholder/150/150",
         introduction:
           "안녕하세요! 저는 영어와 수학을 가르치는 선생님입니다. 학생들이 재미있게 학습할 수 있도록 노력하고 있습니다.",
@@ -78,6 +81,7 @@ export default function EmployeeProfilePage() {
         name: sampleProfile.name,
         email: sampleProfile.email,
         phone: sampleProfile.phone,
+        birthDate: sampleProfile.birthDate,
         introduction: sampleProfile.introduction,
         pushNotifications: sampleProfile.pushNotifications,
       });
@@ -111,6 +115,7 @@ export default function EmployeeProfilePage() {
         name: profile.name,
         email: profile.email,
         phone: profile.phone,
+        birthDate: profile.birthDate,
         introduction: profile.introduction,
         pushNotifications: profile.pushNotifications,
       });
@@ -266,6 +271,29 @@ export default function EmployeeProfilePage() {
                     />
                   ) : (
                     <p className="text-gray-900">{profile.phone}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    생년월일
+                  </label>
+                  {isEditing ? (
+                    <input
+                      type="date"
+                      value={formData.birthDate}
+                      onChange={(e) =>
+                        setFormData({ ...formData, birthDate: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  ) : (
+                    <p className="text-gray-900">
+                      {profile.birthDate ? 
+                        new Date(profile.birthDate).toLocaleDateString('ko-KR') : 
+                        "미입력"
+                      }
+                    </p>
                   )}
                 </div>
 

@@ -138,65 +138,21 @@ export default function IntegratedAdminPage() {
   const fetchInitialData = async () => {
     setIsLoading(true);
     try {
-      // 실제 API 호출로 대체
-      const mockStudents: Student[] = [
-        {
-          id: "1",
-          name: "김학생",
-          email: "kim@example.com",
-          uid: "ST001",
-          totalPurchasedTime: 1200,
-          totalUsedTime: 800,
-          remainingTime: 400,
-        },
-        {
-          id: "2",
-          name: "박학생",
-          email: "park@example.com",
-          uid: "ST002",
-          totalPurchasedTime: 1800,
-          totalUsedTime: 1200,
-          remainingTime: 600,
-        },
-      ];
+      // 실제 API 호출
+      const [studentsResponse, reservationsResponse] = await Promise.all([
+        fetch('/api/admin/students', { credentials: 'include' }),
+        fetch('/api/admin/reservations', { credentials: 'include' }),
+      ]);
 
-      const mockReservations: Reservation[] = [
-        {
-          id: "1",
-          bookingCode: "BK001",
-          bookingDate: "2024-01-15",
-          startTime: "14:00",
-          endTime: "15:00",
-          duration: 60,
-          type: "online",
-          studentName: "김학생",
-          studentId: "1",
-          teacherName: "이선생님",
-          courseName: "초급 한국어",
-          status: "completed",
-          completionStatus: "completed",
-        },
-        {
-          id: "2",
-          bookingCode: "BK002",
-          bookingDate: "2024-01-16",
-          startTime: "16:00",
-          endTime: "17:00",
-          duration: 60,
-          type: "in-person",
-          studentName: "박학생",
-          studentId: "2",
-          teacherName: "김선생님",
-          courseName: "중급 한국어",
-          status: "scheduled",
-          completionStatus: "not-started",
-        },
-      ];
+      const studentsData = studentsResponse.ok ? await studentsResponse.json() : { students: [] };
+      const reservationsData = reservationsResponse.ok ? await reservationsResponse.json() : { reservations: [] };
 
-      setStudents(mockStudents);
-      setReservations(mockReservations);
+      setStudents(studentsData.students || []);
+      setReservations(reservationsData.reservations || []);
     } catch (error) {
       console.error("초기 데이터 로딩 실패:", error);
+      setStudents([]);
+      setReservations([]);
     } finally {
       setIsLoading(false);
     }
@@ -205,74 +161,45 @@ export default function IntegratedAdminPage() {
   const fetchRelatedData = async () => {
     try {
       const studentId = selectedStudent?.id || selectedReservation?.studentId;
-      if (!studentId) return;
+      if (!studentId) {
+        setMemos([]);
+        setMessages([]);
+        setReviews([]);
+        setTemplates([]);
+        return;
+      }
 
-      // 실제 API 호출로 대체
-      const mockMemos: Memo[] = [
-        {
-          id: "1",
-          createdAt: "2024-01-15T10:30:00",
-          authorName: "이선생님",
-          authorId: "T001",
-          content:
-            "수업 중 학생이 문법에 어려움을 보임. 다음 수업에서 더 자세히 설명 필요.",
-          type: "class",
-          permission: "teacher-public",
-          studentName:
-            selectedStudent?.name || selectedReservation?.studentName,
-          studentId: studentId,
-          relatedReservationId: selectedReservation?.id,
-        },
-      ];
+      // 실제 API 호출 (API가 없는 경우 빈 배열로 설정)
+      try {
+        const [memosResponse, messagesResponse, reviewsResponse, templatesResponse] = await Promise.all([
+          fetch(`/api/admin/memos?studentId=${studentId}`, { credentials: 'include' }).catch(() => ({ ok: false })),
+          fetch(`/api/admin/messages?studentId=${studentId}`, { credentials: 'include' }).catch(() => ({ ok: false })),
+          fetch(`/api/admin/reviews?studentId=${studentId}`, { credentials: 'include' }).catch(() => ({ ok: false })),
+          fetch('/api/admin/push-notifications', { credentials: 'include' }).catch(() => ({ ok: false })),
+        ]);
 
-      const mockMessages: SentMessage[] = [
-        {
-          id: "1",
-          sendTime: "2024-01-15T10:00:00",
-          recipientName:
-            selectedStudent?.name || selectedReservation?.studentName || "",
-          recipientUid: selectedStudent?.uid || "",
-          channel: "email",
-          messageType: "booking_confirmation",
-          content: "예약이 확정되었습니다.",
-          status: "delivered",
-        },
-      ];
+        const memosData = memosResponse.ok ? await memosResponse.json() : { memos: [] };
+        const messagesData = messagesResponse.ok ? await messagesResponse.json() : { messages: [] };
+        const reviewsData = reviewsResponse.ok ? await reviewsResponse.json() : { reviews: [] };
+        const templatesData = templatesResponse.ok ? await templatesResponse.json() : { notificationTypes: [] };
 
-      const mockReviews: Review[] = [
-        {
-          id: "1",
-          authorName:
-            selectedStudent?.name || selectedReservation?.studentName || "",
-          authorUid: selectedStudent?.uid || "",
-          classDate: "2024-01-15",
-          courseName: selectedReservation?.courseName || "",
-          teacherName: selectedReservation?.teacherName || "",
-          reviewDate: "2024-01-16",
-          rating: 5,
-          content: "매우 만족스러운 수업이었습니다.",
-          replyStatus: "no_reply",
-        },
-      ];
-
-      const mockTemplates: NotificationTemplate[] = [
-        {
-          id: "1",
-          name: "예약 확정 알림",
-          type: "booking_confirmation",
-          title: "예약이 확정되었습니다",
-          body: "{名前}님, {予約日時} {コース名} 수업 예약이 확정되었습니다.",
-          isActive: true,
-          channels: ["email", "line"],
-        },
-      ];
-
-      setMemos(mockMemos);
-      setMessages(mockMessages);
-      setReviews(mockReviews);
-      setTemplates(mockTemplates);
+        setMemos(memosData.memos || []);
+        setMessages(messagesData.messages || []);
+        setReviews(reviewsData.reviews || []);
+        setTemplates(templatesData.notificationTypes || []);
+      } catch (apiError) {
+        console.error("API 호출 오류:", apiError);
+        setMemos([]);
+        setMessages([]);
+        setReviews([]);
+        setTemplates([]);
+      }
     } catch (error) {
       console.error("관련 데이터 로딩 실패:", error);
+      setMemos([]);
+      setMessages([]);
+      setReviews([]);
+      setTemplates([]);
     }
   };
 
@@ -372,8 +299,23 @@ export default function IntegratedAdminPage() {
                     .toLowerCase()
                     .includes(searchTerm.toLowerCase()) ||
                   student.uid.toLowerCase().includes(searchTerm.toLowerCase()),
-              )
-              .map((student) => (
+              ).length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  등록된 학생이 없습니다.
+                </div>
+              ) : (
+                students
+                  .filter(
+                    (student) =>
+                      student.name
+                        .toLowerCase()
+                        .includes(searchTerm.toLowerCase()) ||
+                      student.email
+                        .toLowerCase()
+                        .includes(searchTerm.toLowerCase()) ||
+                      student.uid.toLowerCase().includes(searchTerm.toLowerCase()),
+                  )
+                  .map((student) => (
                 <button
                   key={student.id}
                   onClick={() => handleStudentSelect(student)}
@@ -400,7 +342,8 @@ export default function IntegratedAdminPage() {
                     </div>
                   </div>
                 </button>
-              ))}
+                  ))
+              )}
           </div>
         </div>
 
@@ -408,40 +351,46 @@ export default function IntegratedAdminPage() {
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-semibold mb-4">예약 선택</h3>
           <div className="space-y-2 max-h-60 overflow-y-auto">
-            {reservations.map((reservation) => (
-              <button
-                key={reservation.id}
-                onClick={() => handleReservationSelect(reservation)}
-                className={`w-full p-3 text-left rounded-lg border transition-colors ${
-                  selectedReservation?.id === reservation.id
-                    ? "border-blue-500 bg-blue-50"
-                    : "border-gray-200 hover:bg-gray-50"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-medium">{reservation.studentName}</div>
-                    <div className="text-sm text-gray-600">
-                      {reservation.bookingDate} {reservation.startTime}-
-                      {reservation.endTime}
+            {reservations.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                등록된 예약이 없습니다.
+              </div>
+            ) : (
+              reservations.map((reservation) => (
+                <button
+                  key={reservation.id}
+                  onClick={() => handleReservationSelect(reservation)}
+                  className={`w-full p-3 text-left rounded-lg border transition-colors ${
+                    selectedReservation?.id === reservation.id
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-200 hover:bg-gray-50"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-medium">{reservation.studentName}</div>
+                      <div className="text-sm text-gray-600">
+                        {reservation.bookingDate} {reservation.startTime}-
+                        {reservation.endTime}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {reservation.courseName} • {reservation.teacherName}
+                      </div>
                     </div>
-                    <div className="text-xs text-gray-500">
-                      {reservation.courseName} • {reservation.teacherName}
+                    <div className="text-right">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(reservation.status)}`}
+                      >
+                        {getStatusText(reservation.status)}
+                      </span>
+                      <div className="text-xs text-gray-500 mt-1">
+                        {reservation.bookingCode}
+                      </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(reservation.status)}`}
-                    >
-                      {getStatusText(reservation.status)}
-                    </span>
-                    <div className="text-xs text-gray-500 mt-1">
-                      {reservation.bookingCode}
-                    </div>
-                  </div>
-                </div>
-              </button>
-            ))}
+                </button>
+              ))
+            )}
           </div>
         </div>
       </div>
@@ -580,50 +529,63 @@ export default function IntegratedAdminPage() {
                         selectedStudent
                           ? r.studentId === selectedStudent.id
                           : r.id === selectedReservation?.id,
-                      )
-                      .map((reservation) => (
-                        <div
-                          key={reservation.id}
-                          className="border rounded-lg p-4"
-                        >
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="font-medium">
-                              {reservation.bookingCode}
-                            </div>
-                            <span
-                              className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(reservation.status)}`}
-                            >
-                              {getStatusText(reservation.status)}
-                            </span>
-                          </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                            <div>
-                              <span className="text-gray-600">학생:</span>{" "}
-                              {reservation.studentName}
-                            </div>
-                            <div>
-                              <span className="text-gray-600">선생님:</span>{" "}
-                              {reservation.teacherName}
-                            </div>
-                            <div>
-                              <span className="text-gray-600">코스:</span>{" "}
-                              {reservation.courseName}
-                            </div>
-                            <div>
-                              <span className="text-gray-600">시간:</span>{" "}
-                              {reservation.startTime}-{reservation.endTime}
-                            </div>
-                            <div>
-                              <span className="text-gray-600">유형:</span>{" "}
-                              {reservation.type}
-                            </div>
-                            <div>
-                              <span className="text-gray-600">완료:</span>{" "}
-                              {reservation.completionStatus}
-                            </div>
-                          </div>
+                      ).length === 0 ? (
+                        <div className="text-center py-8 text-gray-500">
+                          예약 정보가 없습니다.
                         </div>
-                      ))}
+                      ) : (
+                        reservations
+                          .filter((r) =>
+                            selectedStudent
+                              ? r.studentId === selectedStudent.id
+                              : r.id === selectedReservation?.id,
+                          )
+                          .map((reservation) => (
+                            <div
+                              key={reservation.id}
+                              className="border rounded-lg p-4"
+                            >
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="font-medium">
+                                  {reservation.bookingCode}
+                                </div>
+                                <span
+                                  className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                                    reservation.status,
+                                  )}`}
+                                >
+                                  {getStatusText(reservation.status)}
+                                </span>
+                              </div>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                <div>
+                                  <span className="text-gray-600">학생:</span>{" "}
+                                  {reservation.studentName}
+                                </div>
+                                <div>
+                                  <span className="text-gray-600">선생님:</span>{" "}
+                                  {reservation.teacherName}
+                                </div>
+                                <div>
+                                  <span className="text-gray-600">코스:</span>{" "}
+                                  {reservation.courseName}
+                                </div>
+                                <div>
+                                  <span className="text-gray-600">시간:</span>{" "}
+                                  {reservation.startTime}-{reservation.endTime}
+                                </div>
+                                <div>
+                                  <span className="text-gray-600">유형:</span>{" "}
+                                  {reservation.type}
+                                </div>
+                                <div>
+                                  <span className="text-gray-600">완료:</span>{" "}
+                                  {reservation.completionStatus}
+                                </div>
+                              </div>
+                            </div>
+                          ))
+                      )}
                   </div>
                 </div>
               )}
@@ -668,20 +630,26 @@ export default function IntegratedAdminPage() {
                     메모 및 세무 내용
                   </h3>
                   <div className="space-y-4">
-                    {memos.map((memo) => (
-                      <div key={memo.id} className="border rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="font-medium">{memo.authorName}</div>
-                          <div className="text-sm text-gray-500">
-                            {formatDate(memo.createdAt)}
-                          </div>
-                        </div>
-                        <div className="text-sm text-gray-600 mb-2">
-                          {memo.type}
-                        </div>
-                        <div className="text-gray-900">{memo.content}</div>
+                    {memos.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        메모가 없습니다.
                       </div>
-                    ))}
+                    ) : (
+                      memos.map((memo) => (
+                        <div key={memo.id} className="border rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="font-medium">{memo.authorName}</div>
+                            <div className="text-sm text-gray-500">
+                              {formatDate(memo.createdAt)}
+                            </div>
+                          </div>
+                          <div className="text-sm text-gray-600 mb-2">
+                            {memo.type}
+                          </div>
+                          <div className="text-gray-900">{memo.content}</div>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
               )}
@@ -693,22 +661,28 @@ export default function IntegratedAdminPage() {
                     송신 메시지 관리
                   </h3>
                   <div className="space-y-4">
-                    {messages.map((message) => (
-                      <div key={message.id} className="border rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="font-medium">
-                            {message.recipientName}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {formatDate(message.sendTime)}
-                          </div>
-                        </div>
-                        <div className="text-sm text-gray-600 mb-2">
-                          {message.channel} • {message.messageType}
-                        </div>
-                        <div className="text-gray-900">{message.content}</div>
+                    {messages.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        메시지가 없습니다.
                       </div>
-                    ))}
+                    ) : (
+                      messages.map((message) => (
+                        <div key={message.id} className="border rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="font-medium">
+                              {message.recipientName}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {formatDate(message.sendTime)}
+                            </div>
+                          </div>
+                          <div className="text-sm text-gray-600 mb-2">
+                            {message.channel} • {message.messageType}
+                          </div>
+                          <div className="text-gray-900">{message.content}</div>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
               )}
@@ -718,7 +692,12 @@ export default function IntegratedAdminPage() {
                 <div>
                   <h3 className="text-lg font-semibold mb-4">리뷰 관리</h3>
                   <div className="space-y-4">
-                    {reviews.map((review) => (
+                    {reviews.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        리뷰가 없습니다.
+                      </div>
+                    ) : (
+                      reviews.map((review) => (
                       <div key={review.id} className="border rounded-lg p-4">
                         <div className="flex items-center justify-between mb-2">
                           <div className="font-medium">{review.authorName}</div>
@@ -743,7 +722,8 @@ export default function IntegratedAdminPage() {
                             </div>
                           )}
                       </div>
-                    ))}
+                      ))
+                    )}
                   </div>
                 </div>
               )}

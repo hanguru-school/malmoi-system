@@ -439,7 +439,10 @@ export default function StudentMyPage() {
                       <span className="text-sm text-gray-600">생년월일</span>
                     </div>
                     <div className="text-lg font-semibold text-gray-900">
-                      {studentInfo.birthDate}
+                      {studentInfo.birthDate ? 
+                        new Date(studentInfo.birthDate).toLocaleDateString('ko-KR') : 
+                        "미입력"
+                      }
                     </div>
                   </div>
 

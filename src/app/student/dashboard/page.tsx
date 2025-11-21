@@ -1,79 +1,73 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { User, Calendar, BookOpen, Settings, LogOut, CheckCircle } from 'lucide-react';
 
-interface StudentStats {
-  totalClasses: number;
-  completedClasses: number;
-  upcomingClasses: number;
-  totalPoints: number;
-}
-
-interface RecentClass {
+interface Student {
   id: string;
-  date: string;
-  time: string;
-  teacher: string;
-  subject: string;
-  status: "completed" | "upcoming" | "cancelled";
+  studentId: string;
+  nameKanji: string;
+  nameYomigana: string;
+  birthDate: string;
+  phone: string;
+  email: string;
+  emergencyContactName: string;
+  emergencyContactYomigana: string;
+  emergencyContactRelation: string;
+  emergencyContactPhone: string;
+  emergencyContactEmail: string;
+  isFirstLogin: boolean;
 }
 
 export default function StudentDashboard() {
   const router = useRouter();
-  const [stats, setStats] = useState<StudentStats>({
-    totalClasses: 0,
-    completedClasses: 0,
-    upcomingClasses: 0,
-    totalPoints: 0,
-  });
-  const [recentClasses, setRecentClasses] = useState<RecentClass[]>([]);
+  const [student, setStudent] = useState<Student | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchDashboardData();
-  }, []);
-
-  const fetchDashboardData = async () => {
     try {
-      // 실제 API 호출로 대체 예정
-      setStats({
-        totalClasses: 12,
-        completedClasses: 8,
-        upcomingClasses: 4,
-        totalPoints: 1250,
-      });
-
-      setRecentClasses([
-        {
-          id: "1",
-          date: "2025-08-01",
-          time: "10:00-11:30",
-          teacher: "田中先生",
-          subject: "일본어 회화",
-          status: "upcoming",
-        },
-        {
-          id: "2",
-          date: "2025-07-29",
-          time: "14:00-15:30",
-          teacher: "田中先生",
-          subject: "일본어 문법",
-          status: "completed",
-        },
-        {
-          id: "3",
-          date: "2025-07-25",
-          time: "16:00-17:30",
-          teacher: "田中先生",
-          subject: "일본어 읽기",
-          status: "completed",
-        },
-      ]);
+      // localStorage에서 학생 정보 가져오기
+      const studentData = localStorage.getItem('student');
+      const token = localStorage.getItem('token');
+      
+      if (!studentData || !token) {
+        alert('로그인이 필요합니다.');
+        router.push('/auth/login');
+        return;
+      }
+      
+      const parsedStudent = JSON.parse(studentData);
+      setStudent(parsedStudent);
+      
+      // 첫 로그인인 경우 비밀번호 변경 페이지로 이동
+      if (parsedStudent.isFirstLogin) {
+        router.push('/student/change-password');
+        return;
+      }
+      
     } catch (error) {
-      console.error("Dashboard data fetch error:", error);
+      console.error('학생 정보 로드 오류:', error);
+      alert('학생 정보를 불러오는 중 오류가 발생했습니다.');
+      router.push('/auth/login');
     } finally {
       setLoading(false);
+    }
+  }, [router]);
+
+  const handleLogout = () => {
+    try {
+      // localStorage 정리
+      if (typeof Storage !== 'undefined') {
+        localStorage.removeItem('token');
+        localStorage.removeItem('student');
+        localStorage.removeItem('initialPassword');
+      }
+      
+      alert('로그아웃되었습니다.');
+      router.push('/');
+    } catch (error) {
+      console.error('로그아웃 오류:', error);
     }
   };
 
@@ -81,185 +75,172 @@ export default function StudentDashboard() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">로딩 중...</p>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* 헤더 */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            학생 대시보드
-          </h1>
-          <p className="text-gray-600">
-            학습 진행 상황과 예정된 수업을 확인하세요.
-          </p>
-        </div>
-
-        {/* 통계 카드 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <span className="text-2xl">📚</span>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">총 수업</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {stats.totalClasses}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <span className="text-2xl">✅</span>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">완료된 수업</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {stats.completedClasses}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-orange-100 rounded-lg">
-                <span className="text-2xl">📅</span>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">예정된 수업</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {stats.upcomingClasses}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <span className="text-2xl">⭐</span>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">총 포인트</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {stats.totalPoints}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 빠른 액션 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">
-              수업 예약
-            </h3>
-            <p className="text-gray-600 mb-4">새로운 수업을 예약하세요.</p>
-            <button
-              onClick={() => router.push("/student/reservations/new")}
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
-            >
-              수업 예약하기
-            </button>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">
-              레슨 노트
-            </h3>
-            <p className="text-gray-600 mb-4">과거 수업 노트를 확인하세요.</p>
-            <button
-              onClick={() => router.push("/student/notes")}
-              className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
-            >
-              레슨 노트 보기
-            </button>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">
-              프로필 설정
-            </h3>
-            <p className="text-gray-600 mb-4">개인 정보를 관리하세요.</p>
-            <button
-              onClick={() => router.push("/student/settings/profile")}
-              className="w-full bg-purple-500 hover:bg-purple-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
-            >
-              프로필 설정
-            </button>
-          </div>
-        </div>
-
-        {/* 최근 수업 */}
-        <div className="bg-white rounded-lg shadow-md">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-medium text-gray-900">최근 수업</h2>
-          </div>
-          <div className="p-6">
-            <div className="space-y-4">
-              {recentClasses.map((classItem) => (
-                <div
-                  key={classItem.id}
-                  className="flex items-center p-4 border border-gray-200 rounded-lg"
-                >
-                  <div
-                    className={`p-2 rounded-lg mr-4 ${
-                      classItem.status === "completed"
-                        ? "bg-green-100"
-                        : classItem.status === "upcoming"
-                          ? "bg-blue-100"
-                          : "bg-red-100"
-                    }`}
-                  >
-                    <span className="text-lg">
-                      {classItem.status === "completed"
-                        ? "✅"
-                        : classItem.status === "upcoming"
-                          ? "📅"
-                          : "❌"}
-                    </span>
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">
-                      {classItem.subject} - {classItem.teacher}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      {classItem.date} {classItem.time}
-                    </p>
-                  </div>
-                  <span
-                    className={`text-xs px-2 py-1 rounded-full ${
-                      classItem.status === "completed"
-                        ? "bg-green-100 text-green-800"
-                        : classItem.status === "upcoming"
-                          ? "bg-blue-100 text-blue-800"
-                          : "bg-red-100 text-red-800"
-                    }`}
-                  >
-                    {classItem.status === "completed"
-                      ? "완료"
-                      : classItem.status === "upcoming"
-                        ? "예정"
-                        : "취소"}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
+  if (!student) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600">학생 정보를 찾을 수 없습니다.</p>
+          <button 
+            onClick={() => router.push('/auth/login')}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            로그인으로 돌아가기
+          </button>
         </div>
       </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* 헤더 */}
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center">
+              <h1 className="text-xl font-semibold text-gray-800">MalMoi Student Portal</h1>
+            </div>
+            <div className="flex items-center space-x-4">
+              <span className="text-sm text-gray-600">안녕하세요, {student.nameKanji}님</span>
+              <button
+                onClick={handleLogout}
+                className="flex items-center px-3 py-2 text-sm text-gray-600 hover:text-gray-800"
+              >
+                <LogOut className="w-4 h-4 mr-1" />
+                로그아웃
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* 메인 콘텐츠 */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* 환영 메시지 */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+          <div className="flex items-center">
+            <CheckCircle className="w-8 h-8 text-blue-600 mr-3" />
+            <div>
+              <h2 className="text-lg font-semibold text-blue-800">입회 완료!</h2>
+              <p className="text-blue-700">
+                {student.nameKanji}님의 입회가 성공적으로 완료되었습니다.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* 학생 정보 카드 */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+            <User className="w-5 h-5 mr-2" />
+            학생 정보
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-3">
+              <div className="flex">
+                <span className="font-medium text-gray-600 w-24">학생 ID:</span>
+                <span className="text-gray-800 font-mono">{student.studentId}</span>
+              </div>
+              <div className="flex">
+                <span className="font-medium text-gray-600 w-24">이름:</span>
+                <span className="text-gray-800">{student.nameKanji}</span>
+              </div>
+              <div className="flex">
+                <span className="font-medium text-gray-600 w-24">후리가나:</span>
+                <span className="text-gray-800">{student.nameYomigana}</span>
+              </div>
+              <div className="flex">
+                <span className="font-medium text-gray-600 w-24">생년월일:</span>
+                <span className="text-gray-800">{student.birthDate}</span>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div className="flex">
+                <span className="font-medium text-gray-600 w-24">전화번호:</span>
+                <span className="text-gray-800">{student.phone}</span>
+              </div>
+              <div className="flex">
+                <span className="font-medium text-gray-600 w-24">이메일:</span>
+                <span className="text-gray-800">{student.email}</span>
+              </div>
+              <div className="flex">
+                <span className="font-medium text-gray-600 w-24">긴급연락처:</span>
+                <span className="text-gray-800">{student.emergencyContactName}</span>
+              </div>
+              <div className="flex">
+                <span className="font-medium text-gray-600 w-24">관계:</span>
+                <span className="text-gray-800">{student.emergencyContactRelation}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 기능 카드들 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* 예약 관리 */}
+          <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+            <div className="flex items-center mb-4">
+              <Calendar className="w-8 h-8 text-blue-600 mr-3" />
+              <h3 className="text-lg font-semibold text-gray-800">예약 관리</h3>
+            </div>
+            <p className="text-gray-600 mb-4">
+              레슨 예약을 확인하고 관리하세요.
+            </p>
+            <button className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+              예약 확인
+            </button>
+          </div>
+
+          {/* 학습 자료 */}
+          <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+            <div className="flex items-center mb-4">
+              <BookOpen className="w-8 h-8 text-green-600 mr-3" />
+              <h3 className="text-lg font-semibold text-gray-800">학습 자료</h3>
+            </div>
+            <p className="text-gray-600 mb-4">
+              교재와 학습 자료를 확인하세요.
+            </p>
+            <button className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+              자료 확인
+            </button>
+          </div>
+
+          {/* 설정 */}
+          <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+            <div className="flex items-center mb-4">
+              <Settings className="w-8 h-8 text-purple-600 mr-3" />
+              <h3 className="text-lg font-semibold text-gray-800">설정</h3>
+            </div>
+            <p className="text-gray-600 mb-4">
+              개인정보와 비밀번호를 관리하세요.
+            </p>
+            <button 
+              onClick={() => router.push('/student/change-password')}
+              className="w-full px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+            >
+              비밀번호 변경
+            </button>
+          </div>
+        </div>
+
+        {/* 안내 메시지 */}
+        <div className="mt-8 bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-yellow-800 mb-2">중요 안내</h3>
+          <ul className="text-yellow-700 space-y-1">
+            <li>• 학생 ID와 초기 비밀번호는 안전하게 보관해주세요.</li>
+            <li>• 첫 로그인 시 비밀번호 변경을 권장합니다.</li>
+            <li>• 레슨 예약은 최소 24시간 전에 해주세요.</li>
+            <li>• 문의사항이 있으시면 관리자에게 연락해주세요.</li>
+          </ul>
+        </div>
+      </main>
     </div>
   );
 }
