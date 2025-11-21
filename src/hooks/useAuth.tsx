@@ -55,6 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include", // 쿠키를 포함하여 전송
         body: JSON.stringify({ email, password }),
       });
 
