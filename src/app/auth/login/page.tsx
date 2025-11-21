@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   BookOpen,
@@ -139,6 +139,13 @@ export default function LoginPage() {
   const [testResult, setTestResult] = useState("");
 
   const t = translations[language];
+
+  // 컴포넌트 마운트 확인
+  useEffect(() => {
+    console.log("=== LoginPage 컴포넌트 마운트됨 ===");
+    console.log("브라우저:", navigator.userAgent);
+    console.log("현재 URL:", window.location.href);
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -386,6 +393,10 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={isLoading}
+                onClick={(e) => {
+                  console.log("=== 버튼 클릭 이벤트 발생 ===");
+                  // form submit은 자동으로 처리되지만, 명시적으로 확인
+                }}
                 className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-all duration-200"
               >
                 {isLoading ? (
