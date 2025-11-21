@@ -337,11 +337,11 @@ export default function AdminLayout({
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
-          <h1 className="text-xl font-bold text-gray-900">관리자</h1>
+        {/* 모바일에서만 닫기 버튼 표시 */}
+        <div className="lg:hidden flex items-center justify-end h-16 px-6 border-b border-gray-200">
           <button
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-600"
+            className="p-2 rounded-md text-gray-400 hover:text-gray-600"
           >
             <X className="w-5 h-5" />
           </button>
