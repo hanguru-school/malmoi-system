@@ -1,51 +1,123 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useState, useEffect, useRef } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
+  Bell,
   Home,
   Users,
   Calendar,
-  BarChart3,
-  Bell,
+  MessageSquare,
+  Settings,
+  Database,
+  LogOut,
   Menu,
   X,
-  LogOut,
+  CheckCircle,
+  AlertTriangle,
+  Clock,
+  UserPlus,
+  FileText,
+  Mail,
   GraduationCap,
   DollarSign,
-  Shield,
-  MessageSquare,
+  BarChart3,
   Star,
-  Package,
+  CreditCard,
+  BookOpen,
   Tag,
-  MessageCircle,
-  Eye,
-} from "lucide-react";
+  Shield,
+  TrendingUp,
+  Activity,
+  ChevronDown,
+  ChevronRight,
+} from 'lucide-react';
 
-const navigation = [
-  { name: "대시보드", href: "/admin", icon: Home },
-  { name: "서비스 관리", href: "/admin/service-management", icon: Package },
+interface Notification {
+  id: string;
+  type: 'NEW_ENROLLMENT' | 'NEW_RESERVATION' | 'NEW_INQUIRY' | 'NEW_TRIAL_LESSON' | 'SYSTEM';
+  title: string;
+  message: string;
+  time: string;
+  read: boolean;
+  priority: 'low' | 'medium' | 'high';
+  data?: any;
+}
+
+interface NavigationItem {
+  name: string;
+  href?: string;
+  icon: any;
+  children?: NavigationItem[];
+}
+
+const navigation: NavigationItem[] = [
   {
-    name: "선생님 관리",
-    href: "/admin/teacher-management",
+    name: '대시보드',
+    href: '/admin/dashboard',
+    icon: Home,
+  },
+  {
+    name: '예약 관리',
+    href: '/admin/reservations',
+    icon: Calendar,
+  },
+  {
+    name: '학생 관리',
+    href: '/admin/students',
+    icon: Users,
+  },
+  {
+    name: '선생님 관리',
+    href: '/admin/teachers',
     icon: GraduationCap,
   },
-  { name: "고객 관리", href: "/admin/customer-management", icon: Users },
-  { name: "메모 유형 관리", href: "/admin/memo-management", icon: Tag },
-  { name: "관리자 설정", href: "/admin/settings", icon: Shield },
   {
-    name: "푸시 알림 관리",
-    href: "/admin/push-notification-settings",
+    name: '결제 관리',
+    href: '/admin/payments',
+    icon: DollarSign,
+  },
+  {
+    name: '메시지 관리',
+    href: '/admin/messages',
+    icon: MessageSquare,
+  },
+  {
+    name: '리뷰 관리',
+    href: '/admin/review-management',
+    icon: Star,
+  },
+  {
+    name: '푸시 알림',
+    href: '/admin/push-notification-settings',
     icon: Bell,
   },
-  { name: "예약 상세정보", href: "/admin/reservations", icon: Calendar },
-  { name: "결제 정보", href: "/admin/payments", icon: DollarSign },
-  { name: "메모 내용", href: "/admin/memo-management", icon: MessageCircle },
-  { name: "송신 메시지", href: "/admin/message-history", icon: MessageSquare },
-  { name: "리뷰 관리", href: "/admin/review-management", icon: Star },
-  { name: "상세정보", href: "/admin/integrated", icon: Eye },
-  { name: "통계", href: "/admin/analytics", icon: BarChart3 },
+  {
+    name: '데이터 관리',
+    href: '/admin/data-management',
+    icon: Database,
+  },
+  {
+    name: '태깅 관리',
+    href: '/admin/tagging-management',
+    icon: Tag,
+  },
+  {
+    name: '통계',
+    href: '/admin/statistics',
+    icon: BarChart3,
+  },
+  {
+    name: '분석',
+    href: '/admin/analytics',
+    icon: TrendingUp,
+  },
+  {
+    name: '설정',
+    href: '/admin/settings',
+    icon: Settings,
+  },
 ];
 
 export default function AdminLayout({
@@ -55,87 +127,221 @@ export default function AdminLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [expandedMenus, setExpandedMenus] = useState<Set<string>>(new Set());
   const pathname = usePathname();
+  const router = useRouter();
+  const notificationRef = useRef<HTMLDivElement>(null);
+  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleLogout = async () => {
-    try {
-      // API 호출로 로그아웃
-      const response = await fetch("/api/auth/logout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (response.ok) {
-        // 로컬 스토리지 삭제
-        localStorage.removeItem("user-session");
-        // 로그인 페이지로 리다이렉트
-        window.location.href = "/auth/login";
+  const toggleMenu = (menuName: string) => {
+    setExpandedMenus((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(menuName)) {
+        newSet.delete(menuName);
       } else {
-        throw new Error("로그아웃 실패");
+        newSet.add(menuName);
+      }
+      return newSet;
+    });
+  };
+
+  // 알림 가져오기
+  const fetchNotifications = async () => {
+    try {
+      const response = await fetch('/api/admin/notifications', {
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setNotifications(data.notifications || []);
+        }
       }
     } catch (error) {
-      console.error("로그아웃 오류:", error);
-      // 오류 발생 시 강제로 로그아웃 처리
-      document.cookie =
-        "user-session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-      localStorage.removeItem("user-session");
-      window.location.href = "/auth/login";
+      console.error('알림 가져오기 오류:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const notifications = [
-    {
-      id: 1,
-      message: "새로운 예약이 등록되었습니다.",
-      time: "5분 전",
-      read: false,
-    },
-    { id: 2, message: "결제가 완료되었습니다.", time: "10분 전", read: false },
-    {
-      id: 3,
-      message: "새로운 학생이 등록되었습니다.",
-      time: "1시간 전",
-      read: true,
-    },
-    {
-      id: 4,
-      message: "시스템 업데이트가 완료되었습니다.",
-      time: "2시간 전",
-      read: true,
-    },
-    {
-      id: 5,
-      message: "월간 리포트가 준비되었습니다.",
-      time: "1일 전",
-      read: true,
-    },
-  ];
+  // 알림 읽음 처리
+  const markAsRead = async (id: string) => {
+    try {
+      // 즉시 UI 업데이트 (낙관적 업데이트)
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+      );
+
+      const response = await fetch(`/api/admin/notifications/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ read: true }),
+      });
+      
+      if (!response.ok) {
+        // 실패 시 원래 상태로 복구
+        fetchNotifications();
+      }
+    } catch (error) {
+      console.error('알림 읽음 처리 오류:', error);
+      // 오류 시 알림 목록 다시 가져오기
+      fetchNotifications();
+    }
+  };
+
+  // 모든 알림 읽음 처리
+  const markAllAsRead = async () => {
+    try {
+      // 즉시 UI 업데이트 (낙관적 업데이트)
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+
+      const response = await fetch('/api/admin/notifications/read-all', {
+        method: 'PUT',
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        // 실패 시 원래 상태로 복구
+        fetchNotifications();
+      }
+    } catch (error) {
+      console.error('모든 알림 읽음 처리 오류:', error);
+      // 오류 시 알림 목록 다시 가져오기
+      fetchNotifications();
+    }
+  };
+
+  // 시간 포맷팅
+  const formatTime = (date: string) => {
+    const now = new Date();
+    const notificationDate = new Date(date);
+    const diffMs = now.getTime() - notificationDate.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return '방금 전';
+    if (diffMins < 60) return `${diffMins}분 전`;
+    if (diffHours < 24) return `${diffHours}시간 전`;
+    if (diffDays < 7) return `${diffDays}일 전`;
+    return notificationDate.toLocaleDateString('ko-KR');
+  };
+
+  // 알림 타입별 아이콘
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case 'NEW_ENROLLMENT':
+        return <UserPlus className="w-4 h-4 text-blue-600" />;
+      case 'NEW_RESERVATION':
+        return <Calendar className="w-4 h-4 text-green-600" />;
+      case 'NEW_INQUIRY':
+        return <Mail className="w-4 h-4 text-yellow-600" />;
+      case 'NEW_TRIAL_LESSON':
+        return <FileText className="w-4 h-4 text-purple-600" />;
+      default:
+        return <Bell className="w-4 h-4 text-gray-600" />;
+    }
+  };
+
+  // 알림 클릭 처리
+  const handleNotificationClick = async (notification: Notification) => {
+    // 읽음 처리
+    await markAsRead(notification.id);
+    
+    // 알림 타입에 따라 적절한 페이지로 이동
+    if (notification.data) {
+      switch (notification.type) {
+        case 'NEW_ENROLLMENT':
+          router.push(`/admin/data-management?tab=students&studentId=${notification.data.studentId}`);
+          break;
+        case 'NEW_RESERVATION':
+          router.push(`/admin/data-management?tab=reservations&reservationId=${notification.data.reservationId}`);
+          break;
+        case 'NEW_INQUIRY':
+          router.push(`/admin/data-management?tab=inquiries&inquiryId=${notification.data.inquiryId}`);
+          break;
+        case 'NEW_TRIAL_LESSON':
+          router.push(`/admin/data-management?tab=trial-lessons&trialId=${notification.data.trialId}`);
+          break;
+      }
+    }
+    setNotificationOpen(false);
+  };
+
+  // 외부 클릭 감지
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(event.target as Node)
+      ) {
+        setNotificationOpen(false);
+      }
+    };
+
+    if (notificationOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [notificationOpen]);
+
+  // 초기 알림 로드 및 폴링
+  useEffect(() => {
+    fetchNotifications();
+    
+    // 30초마다 알림 업데이트
+    pollIntervalRef.current = setInterval(() => {
+      fetchNotifications();
+    }, 30000);
+
+    return () => {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+      }
+    };
+  }, []);
+
 
   const unreadCount = notifications.filter((n) => !n.read).length;
+
+  const handleLogout = async () => {
+    try {
+      document.cookie = 'user-session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      localStorage.removeItem('authToken');
+      window.location.href = '/auth/login';
+    } catch (error) {
+      console.error('로그아웃 오류:', error);
+      window.location.href = '/auth/login';
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* 모바일 사이드바 오버레이 */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
+          className="fixed inset-0 z-40 bg-black bg-opacity-30 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* 사이드바 */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-gray-900 shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="flex items-center justify-between h-16 px-6 border-b border-gray-800">
-          <h1 className="text-xl font-bold text-white">관리자 포털</h1>
+        <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
+          <h1 className="text-xl font-bold text-gray-900">관리자</h1>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden p-2 rounded-md text-gray-400 hover:text-white"
+            className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-600"
           >
             <X className="w-5 h-5" />
           </button>
@@ -144,32 +350,81 @@ export default function AdminLayout({
         <nav className="mt-6 px-3">
           <div className="space-y-1">
             {navigation.map((item) => {
-              const isActive = pathname === item.href;
+              const hasChildren = item.children && item.children.length > 0;
+              const isExpanded = expandedMenus.has(item.name);
+              const isActive = pathname === item.href || (hasChildren && item.children?.some(child => pathname === child.href));
+
+              if (hasChildren) {
+                return (
+                  <div key={item.name}>
+                    <button
+                      onClick={() => toggleMenu(item.name)}
+                      className={`w-full flex items-center justify-between px-3 py-3 text-sm font-medium rounded-lg transition-colors ${
+                        isActive
+                          ? 'bg-blue-100 text-blue-700'
+                          : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                      }`}
+                    >
+                      <div className="flex items-center">
+                        <item.icon className="w-5 h-5 mr-3" />
+                        {item.name}
+                      </div>
+                      {isExpanded ? (
+                        <ChevronDown className="w-4 h-4" />
+                      ) : (
+                        <ChevronRight className="w-4 h-4" />
+                      )}
+                    </button>
+                    {isExpanded && (
+                      <div className="ml-4 mt-1 space-y-1">
+                        {item.children?.map((child) => {
+                          const isChildActive = pathname === child.href;
+                          return (
+                            <Link
+                              key={child.name}
+                              href={child.href || '#'}
+                              onClick={() => setSidebarOpen(false)}
+                              className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                                isChildActive
+                                  ? 'bg-blue-100 text-blue-700 border-r-2 border-blue-700'
+                                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                              }`}
+                            >
+                              <child.icon className="w-4 h-4 mr-3" />
+                              {child.name}
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
               return (
-                <div key={item.name} className="relative">
-                  <Link
-                    href={item.href}
-                    onClick={() => setSidebarOpen(false)}
-                    className={`flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                      isActive
-                        ? "bg-gray-800 text-white"
-                        : "text-gray-300 hover:bg-gray-700 hover:text-white"
-                    }`}
-                  >
-                    <item.icon className="w-5 h-5 mr-3" />
-                    {item.name}
-                  </Link>
-                </div>
+                <Link
+                  key={item.name}
+                  href={item.href || '#'}
+                  onClick={() => setSidebarOpen(false)}
+                  className={`flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors ${
+                    isActive
+                      ? 'bg-blue-100 text-blue-700 border-r-2 border-blue-700'
+                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                  }`}
+                >
+                  <item.icon className="w-5 h-5 mr-3" />
+                  {item.name}
+                </Link>
               );
             })}
           </div>
         </nav>
 
         {/* 로그아웃 버튼 */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-800">
+        <div className="absolute bottom-4 left-0 right-0 px-3">
           <button
             onClick={handleLogout}
-            className="flex items-center w-full px-3 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-700 hover:text-white transition-colors"
+            className="w-full flex items-center px-3 py-3 text-sm font-medium text-red-600 rounded-lg hover:bg-red-50 transition-colors"
           >
             <LogOut className="w-5 h-5 mr-3" />
             로그아웃
@@ -189,16 +444,9 @@ export default function AdminLayout({
               <Menu className="w-5 h-5" />
             </button>
 
-            <div className="flex items-center space-x-4">
-              <div className="hidden sm:block">
-                <div className="text-sm text-gray-500">관리자</div>
-                <div className="text-lg font-semibold text-gray-900">
-                  시스템 관리자
-                </div>
-              </div>
-
+            <div className="flex items-center space-x-4 ml-auto">
               {/* 알림 아이콘 */}
-              <div className="relative">
+              <div className="relative" ref={notificationRef}>
                 <button
                   onClick={() => setNotificationOpen(!notificationOpen)}
                   className="p-2 text-gray-400 hover:text-gray-600 relative"
@@ -213,49 +461,59 @@ export default function AdminLayout({
 
                 {/* 알림 드롭다운 */}
                 {notificationOpen && (
-                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                  <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
                     <div className="p-4 border-b border-gray-200">
                       <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-semibold text-gray-900">
-                          알림
-                        </h3>
-                        <button className="text-xs text-blue-600 hover:text-blue-800">
-                          모두 읽음으로 표시
-                        </button>
+                        <h3 className="text-sm font-semibold text-gray-900">알림</h3>
+                        {unreadCount > 0 && (
+                          <button
+                            onClick={markAllAsRead}
+                            className="text-xs text-blue-600 hover:text-blue-800"
+                          >
+                            모두 읽음으로 표시
+                          </button>
+                        )}
                       </div>
                     </div>
-                    <div className="max-h-64 overflow-y-auto">
-                      {notifications.map((notification) => (
-                        <div
-                          key={notification.id}
-                          className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${
-                            !notification.read ? "bg-blue-50" : ""
-                          }`}
-                        >
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <p className="text-sm text-gray-900">
-                                {notification.message}
-                              </p>
-                              <p className="text-xs text-gray-500 mt-1">
-                                {notification.time}
-                              </p>
+                    <div className="max-h-96 overflow-y-auto">
+                      {loading ? (
+                        <div className="p-4 text-center text-gray-500">로딩 중...</div>
+                      ) : notifications.length === 0 ? (
+                        <div className="p-4 text-center text-gray-500">알림이 없습니다</div>
+                      ) : (
+                        notifications.map((notification) => (
+                          <div
+                            key={notification.id}
+                            className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${
+                              !notification.read ? 'bg-blue-50' : ''
+                            }`}
+                            onClick={() => handleNotificationClick(notification)}
+                          >
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                  {getNotificationIcon(notification.type)}
+                                  <h4 className="text-sm font-medium text-gray-900">
+                                    {notification.title}
+                                  </h4>
+                                  {notification.priority === 'high' && (
+                                    <span className="px-1.5 py-0.5 bg-red-100 text-red-800 text-xs rounded">
+                                      긴급
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-sm text-gray-600">{notification.message}</p>
+                                <p className="text-xs text-gray-400 mt-1">
+                                  {formatTime(notification.time)}
+                                </p>
+                              </div>
+                              {!notification.read && (
+                                <div className="w-2 h-2 bg-blue-600 rounded-full ml-2"></div>
+                              )}
                             </div>
-                            {!notification.read && (
-                              <div className="w-2 h-2 bg-blue-500 rounded-full ml-2"></div>
-                            )}
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="p-4 border-t border-gray-200">
-                      <Link
-                        href="/admin/messages"
-                        className="text-sm text-blue-600 hover:text-blue-800 text-center block"
-                        onClick={() => setNotificationOpen(false)}
-                      >
-                        모든 알림 보기
-                      </Link>
+                        ))
+                      )}
                     </div>
                   </div>
                 )}
@@ -265,7 +523,7 @@ export default function AdminLayout({
         </header>
 
         {/* 페이지 콘텐츠 */}
-        <main className="p-4 sm:p-6 lg:p-8">{children}</main>
+        <main>{children}</main>
       </div>
     </div>
   );
