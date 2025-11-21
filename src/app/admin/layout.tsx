@@ -32,6 +32,10 @@ import {
   Activity,
   ChevronDown,
   ChevronRight,
+  Plus,
+  Edit,
+  Receipt,
+  Wallet,
 } from 'lucide-react';
 
 interface Notification {
@@ -59,64 +63,157 @@ const navigation: NavigationItem[] = [
     icon: Home,
   },
   {
-    name: '예약 관리',
-    href: '/admin/reservations',
+    name: '예약관리',
     icon: Calendar,
+    children: [
+      {
+        name: '예약하기',
+        href: '/admin/reservations/new',
+        icon: Plus,
+      },
+      {
+        name: '예약관리',
+        href: '/admin/reservations',
+        icon: Calendar,
+      },
+      {
+        name: '예약설정',
+        href: '/admin/reservations/settings',
+        icon: Settings,
+      },
+    ],
   },
   {
-    name: '학생 관리',
-    href: '/admin/students',
+    name: '수업관리',
+    icon: BookOpen,
+    children: [
+      {
+        name: '수업관리',
+        href: '/admin/lessons',
+        icon: BookOpen,
+      },
+      {
+        name: '수업 추가',
+        href: '/admin/lessons/new',
+        icon: Plus,
+      },
+      {
+        name: '수업 시간 관리',
+        href: '/admin/settings/durations',
+        icon: Clock,
+      },
+    ],
+  },
+  {
+    name: '학생관리',
     icon: Users,
+    children: [
+      {
+        name: '학생관리',
+        href: '/admin/students',
+        icon: Users,
+      },
+    ],
   },
   {
-    name: '선생님 관리',
-    href: '/admin/teachers',
+    name: '선생님관리',
     icon: GraduationCap,
+    children: [
+      {
+        name: '선생님관리',
+        href: '/admin/teachers',
+        icon: GraduationCap,
+      },
+      {
+        name: '선생님 업무시간',
+        href: '/admin/teachers/schedule',
+        icon: Clock,
+      },
+    ],
   },
   {
-    name: '결제 관리',
-    href: '/admin/payments',
+    name: '결제관리',
     icon: DollarSign,
+    children: [
+      {
+        name: '학생결제관리',
+        href: '/admin/payments',
+        icon: CreditCard,
+      },
+      {
+        name: '선생님 및 직원 급여',
+        href: '/admin/payments/salary',
+        icon: Receipt,
+      },
+      {
+        name: '교실 지출입 관리',
+        href: '/admin/payments/expenses',
+        icon: Wallet,
+      },
+    ],
   },
   {
-    name: '메시지 관리',
-    href: '/admin/messages',
+    name: '메시지관리',
     icon: MessageSquare,
+    children: [
+      {
+        name: '메시지관리',
+        href: '/admin/messages',
+        icon: MessageSquare,
+      },
+      {
+        name: '리뷰관리',
+        href: '/admin/review-management',
+        icon: Star,
+      },
+      {
+        name: '푸시알림관리',
+        href: '/admin/push-notification-settings',
+        icon: Bell,
+      },
+    ],
   },
   {
-    name: '리뷰 관리',
-    href: '/admin/review-management',
-    icon: Star,
-  },
-  {
-    name: '푸시 알림',
-    href: '/admin/push-notification-settings',
-    icon: Bell,
-  },
-  {
-    name: '데이터 관리',
-    href: '/admin/data-management',
+    name: '데이터관리',
     icon: Database,
-  },
-  {
-    name: '태깅 관리',
-    href: '/admin/tagging-management',
-    icon: Tag,
-  },
-  {
-    name: '통계',
-    href: '/admin/statistics',
-    icon: BarChart3,
-  },
-  {
-    name: '분석',
-    href: '/admin/analytics',
-    icon: TrendingUp,
+    children: [
+      {
+        name: '데이터관리',
+        href: '/admin/data-management',
+        icon: Database,
+      },
+      {
+        name: '통계관리',
+        href: '/admin/statistics',
+        icon: BarChart3,
+      },
+      {
+        name: '분석관리',
+        href: '/admin/analytics',
+        icon: TrendingUp,
+      },
+      {
+        name: '태깅관리',
+        href: '/admin/tagging-management',
+        icon: Tag,
+      },
+    ],
   },
   {
     name: '설정',
-    href: '/admin/settings',
     icon: Settings,
+    children: [
+      {
+        name: '교실운영시간관리',
+        href: '/admin/settings/operating-hours',
+        icon: Clock,
+      },
+      {
+        name: '관리자 설정',
+        href: '/admin/admin-management',
+        icon: Shield,
+      },
+    ],
   },
 ];
 
