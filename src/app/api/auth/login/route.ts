@@ -60,18 +60,42 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log("사용자 조회 시작:", body.email.toLowerCase());
+    console.log("사용자 조회 시작:", body.email);
     
-    // 사용자 조회
-    const user = await prisma.user.findUnique({
-      where: { email: body.email.toLowerCase() },
-      include: {
-        student: true,
-        teacher: true,
-        admin: true,
-        staff: true,
-      },
-    });
+    // 이메일 또는 학번으로 사용자 조회
+    let user = null;
+    
+    // 이메일로 조회
+    if (body.email.includes('@')) {
+      user = await prisma.user.findUnique({
+        where: { email: body.email.toLowerCase() },
+        include: {
+          student: true,
+          teacher: true,
+          admin: true,
+          staff: true,
+        },
+      });
+    } else {
+      // 학번으로 조회 (Student 테이블에서 studentId로 조회 후 User 가져오기)
+      const student = await prisma.student.findUnique({
+        where: { studentId: body.email },
+        include: {
+          user: {
+            include: {
+              student: true,
+              teacher: true,
+              admin: true,
+              staff: true,
+            },
+          },
+        },
+      });
+      
+      if (student) {
+        user = student.user;
+      }
+    }
 
     console.log("사용자 조회 결과:", user ? "사용자 발견" : "사용자 없음");
 
@@ -111,11 +135,15 @@ export async function POST(request: NextRequest) {
     
     // 쿠키 설정
     const cookieStore = await cookies();
+    // HTTP 환경에서도 작동하도록 secure 플래그 조정
+    const isSecure = process.env.NODE_ENV === "production" && request.url.startsWith("https://");
+    
     cookieStore.set("session", sessionToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: isSecure,
       sameSite: "lax",
       maxAge: 60 * 60 * 24 * 7, // 7일
+      path: "/",
     });
     
     // 사용자 정보 쿠키 설정 (비밀번호 제외)
@@ -128,23 +156,41 @@ export async function POST(request: NextRequest) {
     
     cookieStore.set("user", JSON.stringify(userData), {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: isSecure,
       sameSite: "lax",
       maxAge: 60 * 60 * 24 * 7, // 7일
+      path: "/",
     });
 
     console.log("로그인 성공:", {
       userId: user.id,
       email: user.email,
       role: user.role,
+      isFirstLogin: user.isFirstLogin,
       sessionToken: sessionToken.substring(0, 20) + "..."
     });
+
+    // 첫 로그인 체크 및 리다이렉트 URL 결정
+    let redirectUrl = getRedirectUrlByRole(user.role);
+    
+    // 학생의 경우 첫 로그인 체크
+    if (user.role === "STUDENT" && user.student?.isFirstLogin) {
+      // 첫 로그인인 경우 패스워드 변경 페이지로
+      redirectUrl = "/student/change-password";
+    }
+    
+    // 마스터 관리자의 경우 첫 로그인 체크
+    if (user.role === "ADMIN" && user.admin?.permissions?.isMaster) {
+      // 마스터 관리자 설정 페이지로
+      redirectUrl = "/admin/master-setup";
+    }
 
     return NextResponse.json({
       success: true,
       message: "로그인 성공",
       user: userData,
-      redirectUrl: getRedirectUrlByRole(user.role)
+      isFirstLogin: user.isFirstLogin,
+      redirectUrl: redirectUrl
     });
     
   } catch (error) {

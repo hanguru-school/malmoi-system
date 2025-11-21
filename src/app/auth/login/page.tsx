@@ -26,12 +26,13 @@ const translations = {
     title: "韓国語教室MalMoi",
     subtitle: "スマートな韓国語学習を始めましょう",
     description: "教室でレッスンを受ける生徒のためのデジタルプラットフォーム",
-    emailLabel: "メールアドレス",
-    emailPlaceholder: "your.email@example.com",
+    emailLabel: "メールアドレスまたは学番",
+    emailPlaceholder: "メールアドレスまたは学番を入力してください",
+    emailHelp: "メールアドレスまたは学番（例：2501150114）でログインしてください",
     passwordLabel: "パスワード",
     passwordPlaceholder: "パスワードを入力してください",
     loginButton: "ログイン",
-    registerButton: "新規登録",
+    registerButton: "入会申し込み",
     forgotPassword: "パスワードを忘れた方",
     orText: "または",
     loginWith: "でログイン",
@@ -77,12 +78,13 @@ const translations = {
     title: "한국어교실MalMoi",
     subtitle: "스마트한 한국어 학습을 시작하세요",
     description: "교실에서 수업을 듣는 학생들을 위한 디지털 플랫폼",
-    emailLabel: "이메일 주소",
-    emailPlaceholder: "your.email@example.com",
+    emailLabel: "이메일 주소 또는 학번",
+    emailPlaceholder: "이메일 또는 학번을 입력하세요",
+    emailHelp: "이메일 주소 또는 학번(예: 2501150114)으로 로그인하세요",
     passwordLabel: "비밀번호",
     passwordPlaceholder: "비밀번호를 입력하세요",
     loginButton: "로그인",
-    registerButton: "회원가입",
+    registerButton: "입회하기",
     forgotPassword: "비밀번호를 잊으셨나요",
     orText: "또는",
     loginWith: "로 로그인",
@@ -151,6 +153,7 @@ export default function LoginPage() {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include", // 쿠키를 포함하여 전송
         body: JSON.stringify({ email, password }),
       });
 
@@ -214,7 +217,7 @@ export default function LoginPage() {
   };
 
   const handleRegister = () => {
-    router.push("/auth/register");
+    router.push("/enrollment");
   };
 
   const testApiConnection = async () => {
@@ -281,7 +284,7 @@ export default function LoginPage() {
                 <input
                   id="email"
                   name="email"
-                  type="email"
+                  type="text"
                   autoComplete="email"
                   required
                   value={email}
@@ -290,6 +293,9 @@ export default function LoginPage() {
                   placeholder={t.emailPlaceholder}
                 />
               </div>
+              <p className="mt-1 text-xs text-gray-500">
+                {t.emailHelp}
+              </p>
             </div>
 
             <div>
@@ -387,7 +393,7 @@ export default function LoginPage() {
               className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <Users className="w-5 h-5 text-blue-600" />
-              <span className="text-sm font-medium">{t.studentLogin}</span>
+              <span className="text-sm font-medium text-gray-900">{t.studentLogin}</span>
             </button>
 
             <button
@@ -398,7 +404,7 @@ export default function LoginPage() {
               className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <User className="w-5 h-5 text-green-600" />
-              <span className="text-sm font-medium">{t.parentLogin}</span>
+              <span className="text-sm font-medium text-gray-900">{t.parentLogin}</span>
             </button>
 
             <button
@@ -409,7 +415,7 @@ export default function LoginPage() {
               className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <Building className="w-5 h-5 text-purple-600" />
-              <span className="text-sm font-medium">{t.employeeLogin}</span>
+              <span className="text-sm font-medium text-gray-900">{t.employeeLogin}</span>
             </button>
 
             <button
@@ -420,7 +426,7 @@ export default function LoginPage() {
               className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <GraduationCap className="w-5 h-5 text-orange-600" />
-              <span className="text-sm font-medium">{t.teacherLogin}</span>
+              <span className="text-sm font-medium text-gray-900">{t.teacherLogin}</span>
             </button>
 
             <button
@@ -431,7 +437,7 @@ export default function LoginPage() {
               className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <Shield className="w-5 h-5 text-red-600" />
-              <span className="text-sm font-medium">{t.adminLogin}</span>
+              <span className="text-sm font-medium text-gray-900">{t.adminLogin}</span>
             </button>
           </div>
         </div>
@@ -525,7 +531,7 @@ export default function LoginPage() {
           <p className="text-lg mb-4">{t.cta.subtitle}</p>
           <button
             onClick={() => router.push("/auth/register")}
-            className="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+            className="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-blue-800 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
           >
             {t.cta.button}
           </button>
