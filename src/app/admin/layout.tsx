@@ -109,9 +109,24 @@ const navigation: NavigationItem[] = [
     icon: Users,
     children: [
       {
-        name: '학생관리',
+        name: '학생 정보',
         href: '/admin/students',
         icon: Users,
+      },
+      {
+        name: '결제 정보',
+        href: '/admin/students/payments',
+        icon: CreditCard,
+      },
+      {
+        name: '수업 정보',
+        href: '/admin/students/lessons',
+        icon: BookOpen,
+      },
+      {
+        name: '레벨 정보',
+        href: '/admin/students/levels',
+        icon: TrendingUp,
       },
     ],
   },
@@ -120,12 +135,12 @@ const navigation: NavigationItem[] = [
     icon: GraduationCap,
     children: [
       {
-        name: '선생님관리',
+        name: '기본 정보',
         href: '/admin/teachers',
         icon: GraduationCap,
       },
       {
-        name: '선생님 업무시간',
+        name: '업무 시간',
         href: '/admin/teachers/schedule',
         icon: Clock,
       },
@@ -149,6 +164,16 @@ const navigation: NavigationItem[] = [
         name: '교실 지출입 관리',
         href: '/admin/payments/expenses',
         icon: Wallet,
+      },
+      {
+        name: '부기 정산',
+        href: '/admin/payments/bookkeeping',
+        icon: FileText,
+      },
+      {
+        name: '연말 정산',
+        href: '/admin/payments/year-end',
+        icon: Calendar,
       },
     ],
   },
