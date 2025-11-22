@@ -68,6 +68,7 @@ function StudentHomeContent() {
     RecentReservation[]
   >([]);
   const [recentNotes, setRecentNotes] = useState<RecentNote[]>([]);
+  const [mustChangePassword, setMustChangePassword] = useState(false);
 
   // 언어 설정
   const [currentLanguage, setCurrentLanguage] = useState<"ko" | "ja">(() => {
@@ -202,18 +203,16 @@ function StudentHomeContent() {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        // setLoading(true); // useAuth에서 처리
-
-        // 세션에서 사용자 정보 가져오기
-        // const sessionResponse = await fetch('/api/auth/session'); // useAuth에서 처리
-        // if (sessionResponse.ok) {
-        //   const sessionData = await sessionResponse.json();
-
-        //   if (sessionData.user) {
-        //     setUser(sessionData.user);
-        //     ...
-        //   }
-        // }
+        // 세션에서 사용자 정보 가져오기 (패스워드 변경 필수 여부 확인)
+        const sessionResponse = await fetch('/api/auth/session', {
+          credentials: 'include',
+        });
+        if (sessionResponse.ok) {
+          const sessionData = await sessionResponse.json();
+          if (sessionData.user) {
+            setMustChangePassword(sessionData.mustChangePassword || sessionData.isFirstLogin || false);
+          }
+        }
 
         // 학생 통계 데이터 가져오기
         const statsResponse = await fetch("/api/student/profile");
@@ -336,6 +335,31 @@ function StudentHomeContent() {
 
   return (
     <div className="max-w-7xl mx-auto p-4">
+      {/* 패스워드 변경 요청 알림 */}
+      {mustChangePassword && (
+        <div className="mb-6 bg-orange-50 border-l-4 border-orange-500 p-4 rounded-lg">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <AlertCircle className="w-5 h-5 text-orange-600 mr-3" />
+              <div>
+                <h3 className="text-sm font-semibold text-orange-800">
+                  패스워드 변경이 필요합니다
+                </h3>
+                <p className="text-sm text-orange-700 mt-1">
+                  보안을 위해 패스워드를 변경해주세요.
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/student/change-password"
+              className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 text-sm font-medium"
+            >
+              패스워드 변경
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* 환영 메시지 */}
       <div className="mb-8">
         <div className="flex flex-col lg:flex-row justify-between items-start gap-4">

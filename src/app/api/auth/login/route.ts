@@ -144,9 +144,12 @@ export async function POST(request: NextRequest) {
     // 첫 로그인 체크 및 리다이렉트 URL 결정
     let redirectUrl = getRedirectUrlByRole(user.role);
     
-    // 학생의 경우 첫 로그인 체크
-    if (user.role === "STUDENT" && user.student?.isFirstLogin) {
-      // 첫 로그인인 경우 패스워드 변경 페이지로
+    // 패스워드 변경 필수 여부 확인 (mustChangePassword 필드가 있으면 사용, 없으면 isFirstLogin 사용)
+    const mustChangePassword = (user as any).mustChangePassword || user.isFirstLogin;
+    
+    // 학생의 경우 첫 로그인 또는 패스워드 변경 필수 체크
+    if (user.role === "STUDENT" && (user.student?.isFirstLogin || mustChangePassword)) {
+      // 첫 로그인 또는 패스워드 변경 필수인 경우 패스워드 변경 페이지로
       redirectUrl = "/student/change-password";
     }
     
@@ -162,6 +165,7 @@ export async function POST(request: NextRequest) {
       message: "로그인 성공",
       user: userData,
       isFirstLogin: user.isFirstLogin,
+      mustChangePassword: mustChangePassword,
       redirectUrl: redirectUrl
     });
     

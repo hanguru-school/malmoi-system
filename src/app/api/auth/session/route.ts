@@ -65,7 +65,11 @@ export async function GET(request: NextRequest) {
     // 비밀번호 제거
     const { password: _, ...userWithoutPassword } = dbUser;
 
-    return NextResponse.json({ user: userWithoutPassword });
+    return NextResponse.json({ 
+      user: userWithoutPassword,
+      mustChangePassword: dbUser.isFirstLogin || false,
+      isFirstLogin: dbUser.isFirstLogin || false,
+    });
   } catch (error) {
     console.error("=== 세션 확인 API 오류 ===");
     console.error(

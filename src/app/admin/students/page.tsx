@@ -13,7 +13,10 @@ import {
   CheckCircle,
   AlertCircle,
   Users,
+  Key,
+  ChevronRight,
 } from "lucide-react";
+import Link from "next/link";
 
 interface Student {
   id: string;
@@ -1311,9 +1314,18 @@ export default function AdminStudentsPage() {
 
                   {activeTab === 'reservations' && (
                     <div>
-                      <h4 className="text-lg font-semibold text-gray-900 mb-4">
-                        예약 내역 ({detailedStudent.reservations?.length || 0}건)
-                      </h4>
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-lg font-semibold text-gray-900">
+                          예약 내역 ({detailedStudent.reservations?.length || 0}건)
+                        </h4>
+                        <Link
+                          href={`/admin/students/lessons?studentId=${detailedStudent.id}`}
+                          className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm font-medium"
+                        >
+                          전체 보기
+                          <ChevronRight className="w-4 h-4" />
+                        </Link>
+                      </div>
                       {detailedStudent.reservations && detailedStudent.reservations.length > 0 ? (
                         <div className="space-y-3">
                           {detailedStudent.reservations.map((reservation: any) => (
@@ -1371,9 +1383,18 @@ export default function AdminStudentsPage() {
 
                   {activeTab === 'payments' && (
                     <div>
-                      <h4 className="text-lg font-semibold text-gray-900 mb-4">
-                        결제 내역 ({detailedStudent.payments?.length || 0}건)
-                      </h4>
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-lg font-semibold text-gray-900">
+                          결제 내역 ({detailedStudent.payments?.length || 0}건)
+                        </h4>
+                        <Link
+                          href={`/admin/students/payments?studentId=${detailedStudent.id}`}
+                          className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm font-medium"
+                        >
+                          전체 보기
+                          <ChevronRight className="w-4 h-4" />
+                        </Link>
+                      </div>
                       {detailedStudent.payments && detailedStudent.payments.length > 0 ? (
                         <div className="space-y-3">
                           {detailedStudent.payments.map((payment: any) => (
@@ -2491,23 +2512,59 @@ export default function AdminStudentsPage() {
               )}
             </div>
 
-            <div className="flex justify-end gap-3 mt-6">
+            <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200">
               <button
-                onClick={() => {
-                  setShowEditModal(false);
-                  setSelectedStudent(null);
-                  setEditFormData({});
+                onClick={async () => {
+                  if (!selectedStudent?.email) {
+                    alert('이메일이 등록되지 않은 학생입니다.');
+                    return;
+                  }
+                  
+                  if (!confirm(`${selectedStudent.name} 학생의 이메일(${selectedStudent.email})로 임시 패스워드를 전송하시겠습니까?`)) {
+                    return;
+                  }
+
+                  try {
+                    const response = await fetch(`/api/admin/students/${selectedStudent.id}/reset-password`, {
+                      method: 'POST',
+                      credentials: 'include',
+                    });
+
+                    if (response.ok) {
+                      const data = await response.json();
+                      alert(`임시 패스워드가 ${selectedStudent.email}로 전송되었습니다.\n임시 패스워드: ${data.temporaryPassword}`);
+                    } else {
+                      const errorData = await response.json();
+                      alert(`패스워드 재설정 실패: ${errorData.error || '알 수 없는 오류'}`);
+                    }
+                  } catch (error) {
+                    console.error('패스워드 재설정 오류:', error);
+                    alert('패스워드 재설정 중 오류가 발생했습니다.');
+                  }
                 }}
-                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+                className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
               >
-                취소
+                <Key className="w-4 h-4" />
+                패스워드 재설정
               </button>
-              <button
-                onClick={handleSaveEdit}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              >
-                저장
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setSelectedStudent(null);
+                    setEditFormData({});
+                  }}
+                  className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  취소
+                </button>
+                <button
+                  onClick={handleSaveEdit}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  저장
+                </button>
+              </div>
             </div>
           </div>
         </div>

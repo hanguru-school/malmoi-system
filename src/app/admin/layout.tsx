@@ -263,6 +263,8 @@ export default function AdminLayout({
       if (newSet.has(menuName)) {
         newSet.delete(menuName);
       } else {
+        // 다른 메뉴는 닫기
+        newSet.clear();
         newSet.add(menuName);
       }
       return newSet;
@@ -455,12 +457,12 @@ export default function AdminLayout({
 
       {/* 사이드바 */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 flex flex-col ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         {/* 모바일에서만 닫기 버튼 표시 */}
-        <div className="lg:hidden flex items-center justify-end h-16 px-6 border-b border-gray-200">
+        <div className="lg:hidden flex items-center justify-end h-16 px-6 border-b border-gray-200 flex-shrink-0">
           <button
             onClick={() => setSidebarOpen(false)}
             className="p-2 rounded-md text-gray-400 hover:text-gray-600"
@@ -469,7 +471,8 @@ export default function AdminLayout({
           </button>
         </div>
 
-        <nav className="mt-6 px-3">
+        {/* 스크롤 가능한 메뉴 영역 */}
+        <nav className="flex-1 overflow-y-auto mt-6 px-3 pb-20">
           <div className="space-y-1">
             {navigation.map((item) => {
               const hasChildren = item.children && item.children.length > 0;
@@ -542,8 +545,8 @@ export default function AdminLayout({
           </div>
         </nav>
 
-        {/* 로그아웃 버튼 */}
-        <div className="absolute bottom-4 left-0 right-0 px-3">
+        {/* 로그아웃 버튼 - 고정 위치 */}
+        <div className="border-t border-gray-200 bg-white px-3 py-4 flex-shrink-0">
           <button
             onClick={handleLogout}
             className="w-full flex items-center px-3 py-3 text-sm font-medium text-red-600 rounded-lg hover:bg-red-50 transition-colors"
