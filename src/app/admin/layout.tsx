@@ -217,11 +217,6 @@ const navigation: NavigationItem[] = [
         href: '/admin/analytics',
         icon: TrendingUp,
       },
-      {
-        name: '태깅관리',
-        href: '/admin/tagging-management',
-        icon: Tag,
-      },
     ],
   },
   {
@@ -232,6 +227,11 @@ const navigation: NavigationItem[] = [
         name: '교실운영시간관리',
         href: '/admin/settings/operating-hours',
         icon: Clock,
+      },
+      {
+        name: '태깅관리',
+        href: '/admin/tagging-management',
+        icon: Tag,
       },
       {
         name: '관리자 설정',

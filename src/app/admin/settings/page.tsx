@@ -11,7 +11,7 @@ export default function SettingsPage() {
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <div className="max-w-4xl mx-auto">
-        {/* 헤더 */}
+      {/* 헤더 */}
         <div className="mb-6 flex items-center gap-4">
           <button
             onClick={() => router.back()}
@@ -22,8 +22,8 @@ export default function SettingsPage() {
           <div className="flex items-center gap-3">
             <Settings className="w-6 h-6 text-gray-700" />
             <h1 className="text-2xl font-bold text-gray-900">설정</h1>
-          </div>
         </div>
+      </div>
 
         {/* 설정 메뉴 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -35,13 +35,13 @@ export default function SettingsPage() {
             <div className="flex items-center gap-4">
               <div className="p-3 bg-blue-100 rounded-lg">
                 <BookOpen className="w-6 h-6 text-blue-600" />
-              </div>
-              <div>
+            </div>
+            <div>
                 <h2 className="text-lg font-semibold text-gray-900">코스 설정</h2>
                 <p className="text-sm text-gray-600 mt-1">
                   예약에 사용할 코스명을 관리합니다
                 </p>
-              </div>
+            </div>
             </div>
           </Link>
 
@@ -71,7 +71,7 @@ export default function SettingsPage() {
             <div className="flex items-center gap-4">
               <div className="p-3 bg-purple-100 rounded-lg">
                 <Users className="w-6 h-6 text-purple-600" />
-              </div>
+          </div>
               <div>
                 <h2 className="text-lg font-semibold text-gray-900">수업형태 관리</h2>
                 <p className="text-sm text-gray-600 mt-1">

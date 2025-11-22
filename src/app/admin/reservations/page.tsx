@@ -69,12 +69,12 @@ const AdminReservationsContent = () => {
   useEffect(() => {
     // 병렬로 데이터 가져오기
     const loadData = async () => {
-      setLoading(true);
+        setLoading(true);
       try {
         // 예약과 메모를 병렬로 가져오기
         const [reservationsResponse, memosResponse] = await Promise.all([
           fetch('/api/reservations/list', {
-            credentials: 'include',
+          credentials: 'include',
           }),
           fetch('/api/admin/memos', {
             credentials: 'include',
@@ -83,7 +83,7 @@ const AdminReservationsContent = () => {
 
         // 예약 데이터 처리
         if (reservationsResponse.ok) {
-          const reservationsData = await reservationsResponse.json();
+        const reservationsData = await reservationsResponse.json();
           if (reservationsData.success && reservationsData.reservations) {
             const mappedReservations = reservationsData.reservations.map((res: any) => ({
               id: res.id,
@@ -108,7 +108,7 @@ const AdminReservationsContent = () => {
           const memosData = await memosResponse.json();
           if (memosData.success && memosData.memos) {
             setMemos(memosData.memos);
-          } else {
+        } else {
             setMemos([]);
           }
         } else {
@@ -116,7 +116,7 @@ const AdminReservationsContent = () => {
         }
       } catch (error) {
         console.error('데이터 로드 오류:', error);
-        setReservations([]);
+          setReservations([]);
         setMemos([]);
       } finally {
         setLoading(false);
@@ -187,9 +187,9 @@ const AdminReservationsContent = () => {
     try {
       const response = await fetch(`/api/admin/memos/${selectedMemo.id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+          headers: {
+            'Content-Type': 'application/json',
+          },
         credentials: 'include',
         body: JSON.stringify({
           date: memoFormData.date,
@@ -236,13 +236,13 @@ const AdminReservationsContent = () => {
 
         setIsEditingMemo(false);
         alert('메모가 성공적으로 수정되었습니다.');
-      } else {
+        } else {
         alert(data.message || '메모 수정에 실패했습니다.');
-      }
-    } catch (error) {
+        }
+      } catch (error) {
       console.error('메모 수정 오류:', error);
       alert('메모 수정 중 오류가 발생했습니다.');
-    } finally {
+      } finally {
       setSavingMemo(false);
     }
   };
@@ -647,17 +647,17 @@ const AdminReservationsContent = () => {
                         });
 
                         if (allItems.length === 0) {
-                          return (
+    return (
                             <div className="text-center py-12">
                               <CalendarIcon className="w-12 h-12 text-gray-400 mx-auto mb-3" />
                               <p className="text-sm font-medium text-gray-900 mb-1">
                                 이 날짜에 등록된 예약이나 메모가 없습니다
                               </p>
-                            </div>
-                          );
-                        }
+      </div>
+    );
+  }
 
-                        return (
+  return (
                           <div className="space-y-3">
                             {allItems.map(({ type, item }) => {
                               if (type === 'reservation') {
@@ -686,7 +686,7 @@ const AdminReservationsContent = () => {
                                           </span>
                                         </>
                                       )}
-                                    </div>
+        </div>
                                     <div className="text-base font-medium text-gray-900 mb-1">
                                       {reservation.studentName}
                                     </div>
@@ -698,8 +698,8 @@ const AdminReservationsContent = () => {
                                         {reservation.location === 'ONLINE' ? '온라인' : '대면'}
                                       </div>
                                     )}
-                                  </div>
-                                  <div className="ml-4">
+              </div>
+              <div className="ml-4">
                                     <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                                       reservation.status === 'ATTENDED' || reservation.status === 'attended'
                                         ? 'bg-green-100 text-green-800'
@@ -714,9 +714,9 @@ const AdminReservationsContent = () => {
                                        reservation.status === 'CONFIRMED' || reservation.status === 'confirmed' ? '확정' :
                                        '대기'}
                                     </span>
-                                  </div>
-                                </div>
-                              </div>
+              </div>
+            </div>
+          </div>
                                 );
                               } else {
                                 const memo = item as Memo;
@@ -742,21 +742,21 @@ const AdminReservationsContent = () => {
                                           <span className="text-xs opacity-75">
                                             {memo.authorName}
                                           </span>
-                                        </div>
+              </div>
                                         <div className="text-sm text-gray-700">
                                           {memo.content}
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
+              </div>
+            </div>
+          </div>
+              </div>
                                 );
                               }
                             })}
-                          </div>
+              </div>
                         );
                       })()}
-                    </div>
-                  </div>
+            </div>
+          </div>
                 ) : viewMode === 'month' ? (
                   <>
                     {/* 요일 헤더 */}
@@ -803,7 +803,7 @@ const AdminReservationsContent = () => {
                             }}
                           >
                             {day.date.getDate()}
-                          </div>
+              </div>
                           <div className="space-y-1">
                             {dayReservations.length === 0 && dayMemos.length === 0 ? (
                               <div className="text-xs text-gray-400">예약 없음</div>
@@ -821,7 +821,7 @@ const AdminReservationsContent = () => {
                                     title={`${reservation.studentName} - ${formatTime(reservation.startTime)}`}
                                   >
                                     {formatTime(reservation.startTime)} {reservation.studentName}
-                                  </div>
+              </div>
                                 ))}
                                 {dayMemos.slice(0, 2 - dayReservations.length).map((memo) => (
                                   <div
@@ -836,17 +836,17 @@ const AdminReservationsContent = () => {
                                   >
                                     <FileText className="w-3 h-3 inline mr-1" />
                                     {formatTime(memo.time)} 메모
-                                  </div>
+            </div>
                                 ))}
                                 {(dayReservations.length + dayMemos.length) > 3 && (
                                   <div className="text-xs text-gray-500">
                                     +{(dayReservations.length + dayMemos.length) - 3}개 더
-                                  </div>
+          </div>
                                 )}
                               </>
                             )}
-                          </div>
-                        </div>
+        </div>
+                </div>
                       );
                     })}
                     </div>
@@ -892,7 +892,7 @@ const AdminReservationsContent = () => {
                             }}
                           >
                             {day.date.getMonth() + 1}/{day.date.getDate()}
-                          </div>
+              </div>
                           <div className="space-y-1">
                             {dayReservations.length === 0 && dayMemos.length === 0 ? (
                               <div className="text-xs text-gray-400 text-center py-4">
@@ -957,15 +957,15 @@ const AdminReservationsContent = () => {
                     <p className="text-xs text-gray-600 mb-4">
                       아직 등록된 예약이 없습니다. 새로운 예약을 생성해보세요.
                     </p>
-                    <button
+                <button
                       onClick={() => router.push('/admin/reservations/manage')}
                       className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                    >
+                >
                       예약 관리로 이동
-                    </button>
-                  </div>
-                )}
+                </button>
               </div>
+                )}
+            </div>
             )}
           </div>
         )}
@@ -975,7 +975,7 @@ const AdminReservationsContent = () => {
             <p className="text-gray-600">개요 탭 내용</p>
           </div>
         )}
-      </div>
+        </div>
 
       {/* 메모 상세 모달 */}
       {showMemoModal && selectedMemo && (
@@ -992,7 +992,7 @@ const AdminReservationsContent = () => {
                   <FileText className={`w-6 h-6 ${getMemoTypeColor(selectedMemo.memoType).split(' ')[1]}`} />
                   <h2 className="text-xl font-bold text-gray-900">{isEditingMemo ? '메모 수정' : '메모 상세'}</h2>
                 </div>
-                <button
+            <button
                   onClick={() => {
                     setShowMemoModal(false);
                     setIsEditingMemo(false);
@@ -1000,9 +1000,9 @@ const AdminReservationsContent = () => {
                   className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
                 >
                   <X className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
+            </button>
+          </div>
+                            </div>
             {!isEditingMemo ? (
               <>
                 <div className="p-6 space-y-4">
@@ -1016,15 +1016,15 @@ const AdminReservationsContent = () => {
                           day: 'numeric',
                           weekday: 'long'
                         }) : '없음'}
-                      </div>
-                    </div>
+                          </div>
+                            </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">시간</label>
                       <div className="p-2 bg-gray-50 rounded border">
                         {formatTime(selectedMemo.time)}
-                      </div>
-                    </div>
-                  </div>
+                            </div>
+                          </div>
+                        </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">메모 유형</label>
                     <div className={`p-2 rounded border inline-block ${getMemoTypeColor(selectedMemo.memoType)}`}>
@@ -1033,14 +1033,14 @@ const AdminReservationsContent = () => {
                        selectedMemo.memoType === "schedule" ? "일정관련" :
                        selectedMemo.memoType === "admin" ? "관리자 업무" :
                        selectedMemo.memoType === "personal" ? "개인메모" : selectedMemo.memoType}
-                    </div>
-                  </div>
+                        </div>
+                        </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">작성자</label>
                     <div className="p-2 bg-gray-50 rounded border">
                       {selectedMemo.authorName}
-                    </div>
-                  </div>
+                        </div>
+                        </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">공개 여부</label>
                     <div className="p-2 bg-gray-50 rounded border">
@@ -1065,11 +1065,11 @@ const AdminReservationsContent = () => {
                       >
                         예약 상세 보기
                       </button>
-                    </div>
+                        </div>
                   )}
                 </div>
                 <div className="p-6 border-t border-gray-200 flex justify-end gap-3">
-                  <button
+                          <button
                     onClick={async () => {
                       // 편집 모드로 전환 - 최신 데이터 가져오기
                       try {
@@ -1144,14 +1144,14 @@ const AdminReservationsContent = () => {
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                   >
                     수정
-                  </button>
-                  <button
+                          </button>
+                          <button
                     onClick={() => setShowMemoModal(false)}
                     className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
-                  >
+                          >
                     닫기
-                  </button>
-                </div>
+                          </button>
+                        </div>
               </>
             ) : (
               <>
@@ -1169,7 +1169,7 @@ const AdminReservationsContent = () => {
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         required
                       />
-                    </div>
+            </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">시간 <span className="text-red-500">*</span></label>
                       <input
@@ -1179,8 +1179,8 @@ const AdminReservationsContent = () => {
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         required
                       />
-                    </div>
-                  </div>
+          </div>
+      </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">메모 유형 <span className="text-red-500">*</span></label>
                     <div className="grid grid-cols-2 gap-3">
@@ -1191,7 +1191,7 @@ const AdminReservationsContent = () => {
                         { value: "admin", label: "관리자 업무", color: "bg-green-100 text-green-800 border-green-300" },
                         { value: "personal", label: "개인메모", color: "bg-emerald-100 text-emerald-800 border-emerald-300" },
                       ].map((type) => (
-                        <button
+              <button
                           key={type.value}
                           type="button"
                           onClick={() => setMemoFormData({ ...memoFormData, memoType: type.value, reservationId: '', relatedTeacherId: '', relatedStaffId: '' })}
@@ -1202,7 +1202,7 @@ const AdminReservationsContent = () => {
                           }`}
                         >
                           {type.label}
-                        </button>
+              </button>
                       ))}
                     </div>
                   </div>
@@ -1303,8 +1303,8 @@ const AdminReservationsContent = () => {
                   </div>
                 </div>
                 <div className="p-6 border-t border-gray-200 flex justify-end gap-3">
-                  <button
-                    onClick={() => {
+              <button
+                onClick={() => {
                       setIsEditingMemo(false);
                       setMemoFormData({
                         date: '',
@@ -1327,8 +1327,8 @@ const AdminReservationsContent = () => {
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {savingMemo ? '저장 중...' : '저장'}
-                  </button>
-                </div>
+              </button>
+            </div>
               </>
             )}
           </div>
@@ -1345,7 +1345,7 @@ const AdminReservationsContent = () => {
                   <CalendarIcon className="w-6 h-6 text-blue-600" />
                   <h2 className="text-xl font-bold text-gray-900">예약 상세</h2>
                 </div>
-                <button
+              <button
                   onClick={() => setShowReservationModal(false)}
                   className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
                 >
