@@ -9,7 +9,7 @@ export default function StudentLessonsPage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">학생 수업 정보</h1>
           <p className="text-lg text-gray-600 mt-2">
-            전체 수업 이력 등을 상세히 열람하고 수정 추가가 가능한 페이지입니다.
+            전 수업 이력등을 상세히 열람하고 수정 추가가 가능한 페이지입니다.
           </p>
         </div>
 
