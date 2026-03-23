@@ -1,0 +1,905 @@
+.root {
+  display: grid;
+  gap: 0.8rem;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.topControls {
+  border: 1px solid #dfe7f3;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 0.75rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.5rem 0.7rem;
+}
+
+.schedulePanel {
+  border: 1px solid #dfe7f3;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 0.72rem;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.scheduleHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+}
+
+.scheduleToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.primaryAddBtn {
+  margin-left: auto;
+  font-weight: 800;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+}
+
+@media (max-width: 640px) {
+  .primaryAddBtn {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+.pendingTopStrip {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  border: 1px solid #fde68a;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #fffbeb 0%, #fff7ed 100%);
+  padding: 0.55rem 0.65rem;
+  max-width: 100%;
+  min-width: 0;
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.12);
+}
+
+.pendingTopStripHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem;
+  margin-bottom: 0.45rem;
+}
+
+.pendingTopStripTitle {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #92400e;
+}
+
+.pendingTopStripMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pendingTopStripScroll {
+  display: flex;
+  gap: 0.45rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 0.25rem;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  max-width: 100%;
+}
+
+.pendingStripCard {
+  flex: 0 0 min(280px, 85vw);
+  scroll-snap-align: start;
+  border: 1px solid #fcd34d;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 0.45rem 0.55rem;
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.pendingStripCardTitle {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pendingStripCardSub {
+  margin: 0;
+  font-size: 0.72rem;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pendingStripCardActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.pendingStripApprove {
+  border: 0;
+  border-radius: 6px;
+  padding: 0.2rem 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: #16a34a;
+  color: #fff;
+}
+
+.pendingStripSub {
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 0.2rem 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: #fff;
+  color: #334155;
+}
+
+.pendingTopStripEmpty {
+  margin: 0.25rem 0 0;
+  font-size: 0.8rem;
+  color: #78716c;
+}
+
+.segmented {
+  display: inline-flex;
+  border: 1px solid #d4deee;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #f8fafc;
+}
+
+.segmentButton {
+  border: 0;
+  background: transparent;
+  color: #334155;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.35rem 0.62rem;
+  cursor: pointer;
+}
+
+.segmentButtonActive {
+  background: #e0edff;
+  color: #1d4ed8;
+}
+
+.scheduleList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.45rem;
+}
+
+.statusLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.legendItem {
+  border-radius: 999px;
+  border: 1px solid transparent;
+  padding: 0.15rem 0.48rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.legendGood {
+  background: #ecfdf5;
+  border-color: #86efac;
+  color: #065f46;
+}
+
+.legendWarn {
+  background: #fef9c3;
+  border-color: #fde047;
+  color: #854d0e;
+}
+
+.legendBad {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  color: #991b1b;
+}
+
+.legendNormal {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1e3a8a;
+}
+
+.pendingQuickArea {
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+  background: #fffbeb;
+  padding: 0.5rem 0.55rem;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.pendingQuickHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+}
+
+.pendingQuickHead h4 {
+  margin: 0;
+  color: #854d0e;
+  font-size: 0.88rem;
+}
+
+.pendingQuickList {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.pendingQuickItem {
+  border: 1px solid #fcd34d;
+  border-radius: 9px;
+  background: #ffffff;
+  padding: 0.42rem 0.48rem;
+}
+
+.pendingQuickTitle {
+  margin: 0;
+  color: #92400e;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.pendingQuickActions {
+  margin-top: 0.28rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  align-items: center;
+}
+
+.pendingQuickApprove,
+.pendingQuickSecondary {
+  border-radius: 999px;
+  border: 1px solid transparent;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pendingQuickApprove {
+  background: #065f46;
+  color: #ffffff;
+}
+
+.pendingQuickSecondary {
+  background: #ffffff;
+  color: #9f1239;
+  border-color: #fda4af;
+}
+
+.calendarSurface {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.calendarHeaderNote {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  color: #334155;
+}
+
+.fullCalendarWrap {
+  border: 1px solid #d9e2ef;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 0.35rem;
+  overflow: hidden;
+}
+
+.fullCalendarWrap :global(.fc) {
+  font-size: 0.8rem;
+}
+
+.fullCalendarWrap :global(.fc .fc-timegrid-axis-cushion),
+.fullCalendarWrap :global(.fc .fc-timegrid-slot-label-cushion),
+.fullCalendarWrap :global(.fc .fc-col-header-cell-cushion) {
+  color: #475569;
+  font-weight: 700;
+}
+
+.fullCalendarWrap :global(.fc .fc-event) {
+  border-radius: 8px;
+  padding: 2px 4px;
+  cursor: pointer;
+}
+
+.fullCalendarWrap :global(.fc .fc-event-title) {
+  font-weight: 700;
+}
+
+.fullCalendarWrap :global(.fc .fc-daygrid-event-dot) {
+  display: none;
+}
+
+.monthWeekHeader {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.35rem;
+}
+
+.monthWeekHeader span {
+  border: 1px solid #d9e2ef;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: center;
+  padding: 0.34rem 0.2rem;
+}
+
+.monthGrid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.35rem;
+}
+
+.monthCell {
+  border: 1px solid #d9e2ef;
+  border-radius: 10px;
+  background: #ffffff;
+  min-height: 124px;
+  padding: 0.35rem;
+  display: grid;
+  gap: 0.28rem;
+  align-content: start;
+}
+
+.monthDateRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem;
+}
+
+.monthCellMuted {
+  background: #f8fafc;
+  opacity: 0.72;
+}
+
+.monthDateButton {
+  width: fit-content;
+  border: 0;
+  background: transparent;
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+}
+
+.pendingCountBadge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid #facc15;
+  background: #fef9c3;
+  color: #854d0e;
+  font-size: 0.64rem;
+  font-weight: 700;
+  padding: 0.08rem 0.4rem;
+  white-space: nowrap;
+}
+
+.monthItems {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.calendarEvent {
+  border: 1px solid #dbe7f8;
+  border-radius: 8px;
+  padding: 0.18rem 0.4rem;
+  text-align: left;
+  font-size: 0.74rem;
+  cursor: pointer;
+  background: #eff6ff;
+  color: #1e3a8a;
+  display: grid;
+  gap: 0.08rem;
+}
+
+.calendarEvent strong {
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.calendarMeta {
+  font-size: 0.68rem;
+  opacity: 0.9;
+}
+
+.calendarEventWide {
+  width: 100%;
+  padding: 0.35rem 0.52rem;
+}
+
+.calendarEventGood {
+  background: #ecfdf5;
+  border-color: #86efac;
+  color: #065f46;
+}
+
+.calendarEventWarn {
+  background: #fef9c3;
+  border-color: #fde047;
+  color: #854d0e;
+}
+
+.calendarEventBad {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  color: #991b1b;
+}
+
+.calendarEventNormal {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1e3a8a;
+}
+
+.moreButton {
+  border: 0;
+  background: transparent;
+  color: #2563eb;
+  font-size: 0.74rem;
+  text-align: left;
+  cursor: pointer;
+  padding: 0.12rem 0.2rem;
+}
+
+.weekGrid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.4rem;
+}
+
+.weekColumn {
+  border: 1px solid #d9e2ef;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 0.4rem;
+  min-height: 160px;
+}
+
+.weekHead {
+  margin: 0 0 0.35rem;
+  color: #0f172a;
+  font-size: 0.78rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem;
+}
+
+.weekItems {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.dayList {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.dayPendingSummary {
+  margin: 0;
+  border: 1px solid #facc15;
+  border-radius: 8px;
+  background: #fef9c3;
+  color: #854d0e;
+  font-size: 0.78rem;
+  padding: 0.3rem 0.42rem;
+}
+
+.calendarMobileFallback {
+  display: none;
+}
+
+.scheduleItem {
+  border: 1px solid #dbe7f8;
+  background: #f8fbff;
+  border-radius: 10px;
+  padding: 0.45rem 0.55rem;
+  text-align: left;
+  display: grid;
+  gap: 0.1rem;
+  cursor: pointer;
+}
+
+.scheduleItem strong {
+  color: #0f172a;
+  font-size: 0.85rem;
+}
+
+.scheduleItem span {
+  color: #475569;
+  font-size: 0.77rem;
+}
+
+.scheduleItemPending {
+  border-color: #fdba74;
+  background: #fff7ed;
+}
+
+.summaryRow {
+  display: grid;
+  gap: 0.55rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.summaryCard {
+  border: 1px solid #dfe7f3;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 0.55rem 0.65rem;
+}
+
+.summaryCard h3 {
+  margin: 0;
+  font-size: 0.84rem;
+  color: #64748b;
+}
+
+.summaryCard p {
+  margin: 0.22rem 0 0;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.bodyGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.7rem;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.mainPanel,
+.detailPanel {
+  border: 1px solid #dfe7f3;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 0.7rem;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow-x: auto;
+}
+
+.detailPanel {
+  position: sticky;
+  top: 0.7rem;
+  align-self: start;
+}
+
+.rowClickable {
+  cursor: pointer;
+}
+
+.rowSelected {
+  background: #eef6ff;
+}
+
+.statusBadge {
+  font-size: 0.72rem;
+}
+
+.pendingBadge {
+  background: #fff7ed;
+  color: #9a3412;
+  border-color: #fdba74;
+}
+
+.detailTitle {
+  margin: 0 0 0.55rem;
+  color: #1e293b;
+  font-size: 1rem;
+}
+
+.detailList {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.detailList p {
+  margin: 0;
+  color: #334155;
+}
+
+.detailSummary {
+  display: grid;
+  gap: 0.24rem;
+  border: 1px solid #dbe7f8;
+  border-radius: 10px;
+  background: #f8fbff;
+  padding: 0.55rem;
+  margin-bottom: 0.55rem;
+}
+
+.detailSummary p {
+  margin: 0;
+  color: #1f2937;
+}
+
+.statusGuide {
+  border: 1px solid #fed7aa;
+  border-radius: 10px;
+  background: #fff7ed;
+  padding: 0.5rem 0.58rem;
+  margin-bottom: 0.55rem;
+}
+
+.statusGuide p {
+  margin: 0;
+  color: #7c2d12;
+  font-size: 0.82rem;
+}
+
+.statusGuideHead {
+  font-weight: 800;
+  margin-bottom: 0.15rem !important;
+}
+
+.detailActions {
+  margin-top: 0.7rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.primaryActionGroup,
+.secondaryActionGroup,
+.linkActionGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.primaryApproveButton,
+.primarySubButton {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 0.35rem 0.72rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.primaryApproveButton {
+  background: #065f46;
+  color: #ffffff;
+}
+
+.primarySubButton {
+  background: #ffffff;
+  color: #9f1239;
+  border-color: #fda4af;
+}
+
+.timeline {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.timelineRow {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 0.5rem;
+  align-items: start;
+}
+
+.timelineTime {
+  color: #475569;
+  font-weight: 700;
+  font-size: 0.88rem;
+  padding-top: 0.2rem;
+}
+
+.timelineBlocks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.timelineBlock {
+  border: 1px solid #d6e3f5;
+  border-radius: 10px;
+  background: #f8fbff;
+  color: #1e293b;
+  min-width: 0;
+  width: 100%;
+  padding: 0.45rem 0.55rem;
+  display: grid;
+  gap: 0.1rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.mobileList {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.mobileListCard {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+  padding: 0.55rem 0.6rem;
+}
+
+.mobileListCardActive {
+  border-color: #93c5fd;
+  background: #eef6ff;
+}
+
+.inlineQuickActions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.22rem;
+}
+
+.inlineQuickApprove,
+.inlineQuickSub {
+  border-radius: 999px;
+  border: 1px solid transparent;
+  padding: 0.12rem 0.45rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.inlineQuickApprove {
+  background: #065f46;
+  color: #ffffff;
+}
+
+.inlineQuickSub {
+  background: #ffffff;
+  color: #9f1239;
+  border-color: #fda4af;
+}
+
+.mobileListHead {
+  margin: 0;
+  color: #0f172a;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.desktopTableWrap {
+  display: none;
+}
+
+.timelineBlock strong {
+  font-size: 0.9rem;
+}
+
+.timelineBlock span {
+  font-size: 0.78rem;
+  color: #475569;
+}
+
+.logsPanel {
+  border: 1px solid #dfe7f3;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 0.7rem;
+}
+
+@media (min-width: 1024px) {
+  .bodyGrid {
+    grid-template-columns: 1.45fr minmax(320px, 0.9fr);
+  }
+
+  .desktopTableWrap {
+    display: block;
+  }
+
+  .mobileList {
+    display: none;
+  }
+}
+
+@media (max-width: 860px) {
+  .bodyGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .detailPanel {
+    position: static;
+  }
+}
+
+@media (max-width: 640px) {
+  .monthWeekHeader,
+  .monthGrid,
+  .weekGrid {
+    display: none;
+  }
+
+  .dayList {
+    display: none;
+  }
+
+  .calendarMobileFallback {
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .calendarSurface {
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 0.5rem;
+    background: #f8fafc;
+  }
+
+  .fullCalendarWrap {
+    padding: 0.2rem;
+  }
+
+  .fullCalendarWrap :global(.fc .fc-toolbar-title) {
+    font-size: 0.88rem;
+  }
+
+  .dayList .calendarEvent {
+    font-size: 0.8rem;
+  }
+
+  .timelineRow {
+    grid-template-columns: 52px 1fr;
+  }
+
+  .scheduleToolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .segmented {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}

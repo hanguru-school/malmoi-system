@@ -1,0 +1,872 @@
+/* 学生ホーム — アプリ風・モバイル優先 */
+
+.homeRoot {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* —— Hero —— */
+.hero {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.05rem;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #eff6ff 0%, #ffffff 48%, #f5f3ff 100%);
+  border: 1px solid rgba(191, 219, 254, 0.85);
+  box-shadow: 0 10px 28px rgba(37, 99, 235, 0.08);
+}
+
+.heroAvatar {
+  flex-shrink: 0;
+}
+
+.heroAvatarImg {
+  width: 72px;
+  height: 72px;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 3px solid #fff;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.18);
+}
+
+.heroAvatarFallback {
+  width: 72px;
+  height: 72px;
+  border-radius: 999px;
+  background: linear-gradient(145deg, #3b82f6, #6366f1);
+  display: grid;
+  place-items: center;
+  border: 3px solid #fff;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.2);
+}
+
+.heroAvatarInitial {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.heroText {
+  min-width: 0;
+  flex: 1;
+}
+
+.heroGreeting {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+.heroMember {
+  margin: 0.35rem 0 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+/* —— セクション共通 —— */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.sectionHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.sectionLink {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--student-accent, #2563eb);
+  text-decoration: none;
+}
+
+.sectionLink:hover {
+  text-decoration: underline;
+}
+
+/* 状態カードの外枠（StudentLessonTimeFlow を包む） */
+.statusCard {
+  border-radius: 18px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  padding: 0.85rem 0.75rem 0.95rem;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.04);
+}
+
+/* —— 次の予約 —— */
+.nextCard {
+  border-radius: 18px;
+  border: 1px solid #e0e7ff;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  padding: 1rem 1.05rem;
+  box-shadow: 0 8px 24px rgba(79, 70, 229, 0.07);
+}
+
+.nextTop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.65rem;
+}
+
+.nextDateBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.nextDate {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: #312e81;
+  letter-spacing: -0.02em;
+}
+
+.nextTime {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #4338ca;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.28rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.statusBadge[data-status="confirmed"] {
+  background: #dcfce7;
+  color: #166534;
+}
+.statusBadge[data-status="requested"] {
+  background: #fef3c7;
+  color: #92400e;
+}
+.statusBadge[data-status="completed"] {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+.statusBadge[data-status="cancelled"],
+.statusBadge[data-status="rejected"] {
+  background: #f1f5f9;
+  color: #475569;
+}
+.statusBadge[data-status="change_requested"] {
+  background: #fce7f3;
+  color: #9d174d;
+}
+.statusBadge[data-status="default"] {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.nextMeta {
+  margin: 0.85rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.nextMeta li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.88rem;
+  color: #334155;
+}
+
+.nextMetaLab {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.nextMetaVal {
+  font-weight: 700;
+  text-align: right;
+}
+
+.nextSubline {
+  margin: 0.65rem 0 0;
+  font-size: 0.78rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.nextCta {
+  margin-top: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.55rem 1rem;
+  border-radius: 12px;
+  background: #4f46e5;
+  color: #ffffff !important;
+  font-weight: 800;
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+.nextCta:hover {
+  filter: brightness(1.05);
+}
+
+.nextEmpty {
+  border-radius: 18px;
+  border: 1px dashed #cbd5e1;
+  padding: 1.25rem 1rem;
+  text-align: center;
+  background: #f8fafc;
+}
+
+.nextEmpty p {
+  margin: 0 0 0.75rem;
+  font-size: 0.92rem;
+  color: #64748b;
+}
+
+.nextEmptyBtn {
+  display: inline-flex;
+  padding: 0.55rem 1.2rem;
+  border-radius: 12px;
+  background: #2563eb;
+  color: #fff !important;
+  font-weight: 800;
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+/* —— カレンダー枠 —— */
+.calendarShell {
+  border-radius: 18px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  padding: 0.65rem 0.5rem 0.85rem;
+  overflow: hidden;
+}
+
+/* —— 最近の動き —— */
+.activityCard {
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  padding: 0.75rem 0.85rem;
+}
+
+.activityBlockTitle {
+  margin: 0 0 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.activityList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.activityRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.35rem 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.activityRow:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.activityWhen {
+  font-size: 0.82rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.activityMain {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #0f172a;
+  text-align: right;
+  flex: 1;
+  min-width: 0;
+}
+
+.activityEmpty {
+  margin: 0;
+  font-size: 0.86rem;
+  color: #94a3b8;
+}
+
+/* —— クイック —— */
+.quickGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+@media (min-width: 520px) {
+  .quickGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.quickLink {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.85rem 0.5rem;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  text-decoration: none;
+  color: #0f172a;
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-align: center;
+  line-height: 1.25;
+  min-height: 76px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.quickLink:hover {
+  border-color: #93c5fd;
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.1);
+}
+
+.quickIcon {
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+/* —— ノート / お知らせ —— */
+.bottomCard {
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  padding: 0.85rem 0.95rem;
+}
+
+.bottomList {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.bottomItem {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.7rem;
+}
+
+.bottomItemMain {
+  min-width: 0;
+}
+
+.bottomItemTitle {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.35;
+}
+
+.bottomItemTitle a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.bottomItemTitle a:hover {
+  color: var(--student-accent, #2563eb);
+}
+
+.bottomItemDate {
+  margin: 0.2rem 0 0;
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.bottomPill {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.2rem 0.45rem;
+  border-radius: 6px;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.bottomMore {
+  margin: 0.65rem 0 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.bottomMore a {
+  color: var(--student-accent, #2563eb);
+  text-decoration: none;
+}
+
+.bottomMore a:hover {
+  text-decoration: underline;
+}
+
+.bottomEmpty {
+  margin: 0.25rem 0 0;
+  font-size: 0.86rem;
+  color: #94a3b8;
+}
+
+/* —— 今日の学習 · 学習フロー —— */
+.todayDatePill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748b;
+  background: #f1f5f9;
+  padding: 0.2rem 0.5rem;
+  border-radius: 8px;
+}
+
+.flowTrack {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.35rem 0.25rem;
+  padding: 0.65rem 0.5rem;
+  border-radius: 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 0.5rem;
+}
+
+.flowStep {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  flex: 1 1 16%;
+  min-width: 52px;
+  max-width: 72px;
+}
+
+.flowDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  border: 2px solid #cbd5e1;
+}
+
+.flowStep[data-active="on"] .flowDot {
+  background: #4f46e5;
+  border-color: #4338ca;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.25);
+}
+
+.flowStep[data-past="yes"] .flowDot {
+  background: #a5b4fc;
+  border-color: #818cf8;
+}
+
+.flowLab {
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: #94a3b8;
+  text-align: center;
+  line-height: 1.15;
+}
+
+.flowStep[data-active="on"] .flowLab {
+  color: #312e81;
+}
+
+.todayStack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.todayBlock {
+  border-radius: 16px;
+  padding: 0.85rem 1rem;
+  border: 1px solid #e0e7ff;
+  background: linear-gradient(135deg, #ffffff 0%, #f5f3ff 100%);
+  box-shadow: 0 6px 18px rgba(79, 70, 229, 0.06);
+}
+
+.todayBlock[data-kind="homework"] {
+  border-color: #fecaca;
+  background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
+}
+
+.todayBlock[data-kind="review"] {
+  border-color: #bae6fd;
+  background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 100%);
+}
+
+.todayBlockEyebrow {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.todayBlockTitle {
+  margin: 0.35rem 0 0;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.todayBlockMeta {
+  margin: 0.25rem 0 0;
+  font-size: 0.86rem;
+  color: #475569;
+  font-weight: 600;
+}
+
+.todayBlockCta {
+  margin-top: 0.65rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.5rem 0.85rem;
+  border-radius: 12px;
+  background: #4f46e5;
+  color: #ffffff !important;
+  font-weight: 800;
+  font-size: 0.88rem;
+  text-decoration: none;
+}
+
+.todayBlockCta:hover {
+  filter: brightness(1.05);
+}
+
+.todayBlockCtaSecondary {
+  margin-top: 0.65rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.5rem 0.85rem;
+  border-radius: 12px;
+  border: 2px solid #2563eb;
+  background: #ffffff;
+  color: #1d4ed8 !important;
+  font-weight: 800;
+  font-size: 0.88rem;
+  text-decoration: none;
+}
+
+.todayEmpty {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #94a3b8;
+  padding: 0.5rem 0;
+}
+
+/* —— 学習カード（ノート・宿題） —— */
+.learnCardList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.learnEmpty {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #94a3b8;
+}
+
+.noteCard {
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  padding: 0.85rem 0.95rem;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+}
+
+.noteCardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.noteCardDate {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.noteAudioBadge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 0.15rem 0.4rem;
+  border-radius: 6px;
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.noteAudioMuted {
+  font-size: 0.65rem;
+  color: #cbd5e1;
+  font-weight: 600;
+}
+
+.noteCardTitle {
+  margin: 0.45rem 0 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.35;
+}
+
+.noteCardSummary {
+  margin: 0.35rem 0 0;
+  font-size: 0.84rem;
+  color: #475569;
+  line-height: 1.45;
+}
+
+.noteCardTeacher {
+  margin: 0.4rem 0 0;
+  font-size: 0.78rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.noteCardBtn {
+  margin-top: 0.65rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.5rem 0.85rem;
+  border-radius: 12px;
+  background: #0ea5e9;
+  color: #ffffff !important;
+  font-weight: 800;
+  font-size: 0.88rem;
+  text-decoration: none;
+}
+
+.noteCardBtn:hover {
+  filter: brightness(1.05);
+}
+
+.hwCard {
+  border-radius: 16px;
+  border: 2px solid #fecaca;
+  background: #fffbeb;
+  padding: 0.85rem 0.95rem;
+  box-shadow: 0 4px 14px rgba(234, 179, 8, 0.08);
+  transition: opacity 0.2s ease, filter 0.2s ease;
+}
+
+.hwCard[data-done="yes"] {
+  border-color: #e2e8f0;
+  background: #f8fafc;
+  opacity: 0.72;
+  filter: grayscale(0.15);
+}
+
+.hwCardTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.65rem;
+}
+
+.hwCardTitle {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #0f172a;
+  flex: 1;
+  min-width: 0;
+}
+
+.hwStatus {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  font-weight: 900;
+  padding: 0.2rem 0.45rem;
+  border-radius: 8px;
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.hwStatus[data-done="yes"] {
+  background: #e2e8f0;
+  color: #64748b;
+}
+
+.hwDue {
+  margin: 0.4rem 0 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #b45309;
+}
+
+.hwDueMuted {
+  margin: 0.4rem 0 0;
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.hwCardBtn {
+  margin-top: 0.65rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.5rem 0.85rem;
+  border-radius: 12px;
+  background: #ea580c;
+  color: #ffffff !important;
+  font-weight: 800;
+  font-size: 0.88rem;
+  text-decoration: none;
+}
+
+.hwCardBtn:hover {
+  filter: brightness(1.05);
+}
+
+.hwCard[data-done="yes"] .hwCardBtn {
+  background: #94a3b8;
+}
+
+/* —— お知らせボード —— */
+.noticeBoard {
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  padding: 0.65rem 0.75rem;
+}
+
+.noticeBoardList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.noticeCard {
+  border-radius: 14px;
+  border: 1px solid #f1f5f9;
+  background: #fafafa;
+  padding: 0.75rem 0.85rem;
+}
+
+.noticeCardTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.noticeCardTitle {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.35;
+  flex: 1;
+  min-width: 0;
+}
+
+.noticeImportant {
+  flex-shrink: 0;
+  font-size: 0.65rem;
+  font-weight: 900;
+  padding: 0.15rem 0.4rem;
+  border-radius: 6px;
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.noticeCardDate {
+  margin: 0.35rem 0 0;
+  font-size: 0.76rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.noticeCardBtn {
+  margin-top: 0.55rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.45rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155 !important;
+  font-weight: 800;
+  font-size: 0.84rem;
+  text-decoration: none;
+}
+
+.noticeCardBtn:hover {
+  border-color: #94a3b8;
+}

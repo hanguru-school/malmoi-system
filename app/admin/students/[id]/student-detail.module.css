@@ -1,0 +1,196 @@
+.pageCard {
+  width: min(1180px, 100%);
+}
+
+.formRoot {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.headerGrid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: 2fr 1fr;
+}
+
+.heroCard,
+.summaryCard,
+.sectionCard {
+  border: 1px solid #dfe7f3;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 0.8rem;
+}
+
+.heroHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.7rem;
+}
+
+.studentName {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1.4rem;
+}
+
+.studentSub {
+  margin: 0.25rem 0 0;
+  color: #64748b;
+}
+
+.heroMetaGrid {
+  margin-top: 0.6rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.35rem 0.6rem;
+  color: #334155;
+}
+
+.heroMetaGrid p {
+  margin: 0;
+}
+
+.quickActions {
+  margin-top: 0.7rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.summaryTitle {
+  margin: 0;
+  color: #1e293b;
+  font-size: 1rem;
+}
+
+.summaryList {
+  margin: 0.55rem 0 0;
+  padding-left: 1rem;
+  color: #334155;
+}
+
+.summaryList li {
+  margin: 0.26rem 0;
+}
+
+.tabRow {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  padding-bottom: 0.1rem;
+}
+
+.tabButton {
+  border: 1px solid #d4deec;
+  border-radius: 999px;
+  background: #f8fbff;
+  color: #334155;
+  min-height: 34px;
+  padding: 0.35rem 0.72rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tabButtonActive {
+  border-color: #9db8e6;
+  background: #e8f0ff;
+  color: #1e3a8a;
+  font-weight: 700;
+}
+
+.sectionTitle {
+  margin: 0 0 0.55rem;
+  color: #1e293b;
+  font-size: 1.05rem;
+}
+
+.blockTitle {
+  margin: 0.9rem 0 0.45rem;
+  color: #334155;
+  font-size: 0.95rem;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.34rem 0.6rem;
+  color: #334155;
+}
+
+.infoGrid p {
+  margin: 0;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem 0.8rem;
+}
+
+.inlineActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.stackList {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.itemCard {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+  padding: 0.58rem 0.65rem;
+}
+
+.itemCard p {
+  margin: 0.16rem 0;
+  color: #334155;
+}
+
+.bottomBar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 960px) {
+  .headerGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .heroMetaGrid,
+  .infoGrid,
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.paymentSummaryStrip {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.65rem;
+  margin: 0.65rem 0 0.85rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+  font-size: 0.88rem;
+}
+
+.paymentSummaryStrip > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.paymentSummaryStrip strong {
+  color: #0f172a;
+  font-size: 0.95rem;
+}

@@ -33,19 +33,15 @@ yarn-error.log*
 # Environment — secrets (never commit)
 .env
 .env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
 .env*.local
-# Allow committed templates
-!.env.example
-!.env.*.example
 
 # Local deploy credentials (copy from scripts/deploy.env.example)
 scripts/deploy.env
 
 # Server deploy logs (written on remote; optional local mirror)
 deploy/logs/
+logs/
 
 # Runtime app data (JSON store, etc.) — never in Git
 .data/
@@ -56,3 +52,8 @@ deploy/logs/
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# caches / local artifacts
+.cache/
+.eslintcache
+.turbo/

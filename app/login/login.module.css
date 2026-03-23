@@ -1,0 +1,762 @@
+.shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+  background: var(--korean-bg);
+}
+
+.card {
+  width: min(760px, 100%);
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid #dfe5ef;
+  border-radius: 24px;
+  padding: 2rem 1.35rem 1.35rem;
+  box-shadow: 0 20px 42px rgba(31, 41, 55, 0.08);
+}
+
+.brandTitle {
+  margin: 0;
+  font-size: clamp(1.8rem, 5vw, 2.5rem);
+  text-align: center;
+}
+
+.brandSub {
+  margin: 0.35rem 0 0;
+  color: #5f6b7a;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.brandMood {
+  margin: 0.5rem 0 1.15rem;
+  color: #3f4d63;
+  text-align: center;
+  font-size: clamp(0.98rem, 3.6vw, 1.08rem);
+}
+
+.sectionTitle {
+  margin: 1.5rem 0 0.35rem;
+  font-size: 1.5rem;
+}
+
+.description {
+  margin: 0 0 1rem;
+  color: #4b5563;
+  line-height: 1.65;
+}
+
+.loginPanel {
+  margin: 0.25rem 0 0.95rem;
+  border: 1px solid #dfe5ef;
+  border-radius: 14px;
+  background: #f8fafc;
+  padding: 0.75rem 0.78rem 0.82rem;
+}
+
+.studentLoginCard {
+  margin: 0.2rem auto 0;
+  width: min(560px, 100%);
+  border: 1px solid #dbe4f0;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 14px 30px rgba(29, 78, 216, 0.08);
+  padding: 1rem 0.95rem 1.05rem;
+}
+
+.studentLoginTitle {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #1f2937;
+}
+
+.studentLoginLead {
+  margin: 0.45rem 0 0.5rem;
+  color: #5b6678;
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.infoCard {
+  margin-bottom: 1rem;
+  border: 1px solid #dfe5ef;
+  border-radius: 12px;
+  background: #f8fafc;
+  padding: 0.7rem 0.8rem;
+}
+
+.stepGuide {
+  margin: 0.45rem 0 0.85rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.stepItem {
+  border: 1px solid #dbe3ef;
+  border-radius: 999px;
+  padding: 0.24rem 0.58rem;
+  font-size: 0.8rem;
+  color: #64748b;
+  background: #f8fafc;
+}
+
+.stepItemActive {
+  border-color: #9db8e6;
+  color: #355a90;
+  background: #e8f0ff;
+}
+
+.stepItemDone {
+  border-color: #b7e4d5;
+  color: #2f6f64;
+  background: #ecfdf5;
+}
+
+.selectionSummary {
+  margin: 0.2rem 0 1rem;
+  border: 1px solid #dfe7f3;
+  border-radius: 10px;
+  background: #f8fbff;
+  padding: 0.55rem 0.7rem;
+  color: #334155;
+  line-height: 1.45;
+}
+
+.selectionSummary p {
+  margin: 0.1rem 0;
+  font-size: 0.88rem;
+}
+
+.stepNote {
+  margin: 0.1rem 0 0;
+  color: #64748b;
+  font-size: 0.84rem;
+}
+
+.registerSentCard {
+  margin-top: 0.5rem;
+  border: 1px solid #dbe6f5;
+  border-radius: 14px;
+  background: #f8fbff;
+  padding: 1rem 0.95rem;
+  text-align: center;
+}
+
+.registerSentIcon {
+  margin: 0 auto 0.4rem;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-size: 1.1rem;
+  color: #1e3a8a;
+  background: #dbeafe;
+}
+
+.registerSentTitle {
+  margin: 0 0 0.55rem;
+  color: #1e293b;
+  font-size: 1.2rem;
+}
+
+.registerSentEmail {
+  margin: 0.6rem 0 0;
+  color: #1e3a8a;
+  font-weight: 700;
+}
+
+.registerSentActions {
+  margin-top: 0.8rem;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.registerSecondaryButton {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef4ff;
+  color: #1e3a8a;
+}
+
+.registerSecondaryButton:hover {
+  background: #e3ecff;
+}
+
+.label {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.75rem 0;
+  color: #2f3a4b;
+}
+
+.field {
+  width: 100%;
+  max-width: 460px;
+  border: 1px solid #cfd7e5;
+  border-radius: 10px;
+  padding: 0.75rem 0.8rem;
+  font: inherit;
+  background: #fff;
+}
+
+.studentLoginCard .field {
+  max-width: none;
+}
+
+.button {
+  margin-top: 0.8rem;
+  border: 0;
+  border-radius: 10px;
+  padding: 0.82rem 1rem;
+  background: #3d5a80;
+  color: #fff;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.studentLoginCard .button {
+  width: 100%;
+  min-height: 54px;
+  border-radius: 12px;
+  font-size: 1.05rem;
+  background: linear-gradient(135deg, #2d5fa5 0%, #4f7fc2 100%);
+  box-shadow: 0 10px 20px rgba(53, 96, 165, 0.25);
+}
+
+.studentLoginCard .button:hover {
+  background: linear-gradient(135deg, #264f89 0%, #3f6eaf 100%);
+  transform: translateY(-1px);
+}
+
+.studentLoginCard .button:focus-visible {
+  outline: 3px solid rgba(59, 130, 246, 0.35);
+  outline-offset: 2px;
+}
+
+.button:hover {
+  background: #2f4768;
+}
+
+.button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.message {
+  margin-top: 1rem;
+  border: 1px solid #b7e7c3;
+  background: #ebf7ee;
+  color: #136d2f;
+  border-radius: 10px;
+  padding: 0.7rem 0.8rem;
+  line-height: 1.55;
+}
+
+.messageError {
+  border-color: #f5c4c4;
+  background: #fff1f1;
+  color: #9b1c1c;
+}
+
+.links {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.loginUtilityRow {
+  margin-top: 0.7rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  justify-content: flex-start;
+}
+
+.utilityLinkButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  border: 1px solid #c9d9f2;
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  background: #eef4ff;
+  color: #1d4fa3;
+  text-decoration: none;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.utilityLinkButton:hover {
+  background: #e1ecff;
+}
+
+.utilityLinkButtonAlt {
+  border-color: #d9dee8;
+  background: #f4f7fb;
+  color: #334155;
+}
+
+.utilityLinkButtonAlt:hover {
+  background: #eaf0f7;
+}
+
+.utilityLinkButtonStudent {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+  color: #1e3a8a;
+}
+
+.utilityLinkButtonStudent:hover {
+  background: #dbeafe;
+}
+
+.linkSection {
+  margin-top: 0.75rem;
+  border: 1px solid #dfe5ef;
+  border-radius: 12px;
+  padding: 0.55rem 0.65rem;
+  background: #f8fafc;
+}
+
+.studentSecondaryArea {
+  margin: 0.9rem auto 0;
+  width: min(560px, 100%);
+  border: 1px solid #e3e8f2;
+  border-radius: 12px;
+  background: #f8fafc;
+  padding: 0.62rem 0.68rem;
+}
+
+.studentSecondaryTitle {
+  margin: 0 0 0.45rem;
+  font-size: 0.93rem;
+  color: #334155;
+}
+
+.staffLinkRow {
+  margin: 0.95rem auto 0;
+  width: min(560px, 100%);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.48rem 0.7rem;
+  color: #64748b;
+  font-size: 0.84rem;
+}
+
+.staffLabel {
+  color: #64748b;
+}
+
+.staffLink {
+  color: #475569;
+  text-decoration: none;
+  border-bottom: 1px dashed #c6d0de;
+}
+
+.staffLink:hover {
+  color: #1e3a8a;
+  border-bottom-color: #94a3b8;
+}
+
+.footerLinks {
+  margin: 0.9rem auto 0;
+  width: min(560px, 100%);
+  display: flex;
+  justify-content: flex-start;
+}
+
+@media (max-width: 960px) {
+  .shell {
+    padding: 1rem;
+    place-items: start center;
+  }
+
+  .card {
+    border-radius: 18px;
+    padding: 1.55rem 1rem 1.1rem;
+  }
+
+  .field {
+    max-width: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .card {
+    border-radius: 18px;
+    padding: 1.45rem 0.95rem 1rem;
+  }
+
+  .brandMood {
+    margin-bottom: 0.95rem;
+  }
+
+  .studentLoginCard {
+    border-radius: 14px;
+    padding: 0.85rem 0.75rem 0.9rem;
+  }
+
+  .studentLoginCard .button {
+    min-height: 50px;
+    font-size: 1rem;
+  }
+
+  .studentSecondaryArea,
+  .staffLinkRow,
+  .footerLinks {
+    width: 100%;
+  }
+
+  .registerSentCard {
+    padding: 0.9rem 0.75rem;
+  }
+
+  .registerSentTitle {
+    font-size: 1.08rem;
+  }
+
+  .links {
+    gap: 0.5rem;
+  }
+
+  .linkButton {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+.linkSectionTitle {
+  margin: 0 0 0.4rem;
+  font-size: 0.94rem;
+  color: #334155;
+}
+
+.linkGrid {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.linkButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 0.45rem 0.62rem;
+  background: #ffffff;
+  color: #1e293b;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1.2;
+}
+
+.linkButton:hover {
+  background: #f1f5f9;
+}
+
+.linkButtonStudent {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+  color: #1e3a8a;
+}
+
+.linkButtonStudent:hover {
+  background: #dbeafe;
+}
+
+.linkButtonStaff {
+  border-color: #d7dee9;
+  background: #f8fafc;
+  color: #334155;
+}
+
+.linkButtonStaff:hover {
+  background: #f1f5f9;
+}
+
+.link {
+  color: #2f6df6;
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.timeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
+.timeBlock {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.45rem 0.5rem;
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.timeBlockAvailable {
+  background: #ecfdf5;
+  border-color: #b7e4d5;
+  color: #2f6f64;
+}
+
+.timeBlockUnavailable {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+.timeBlockSelected {
+  background: #e8f0ff;
+  border-color: #9db8e6;
+  color: #355a90;
+}
+
+.optionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.45rem;
+  margin-top: 0.35rem;
+}
+
+.optionButton {
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 0.55rem 0.6rem;
+  background: #ffffff;
+  color: #1e293b;
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+}
+
+.optionButton:hover {
+  background: #f8fafc;
+}
+
+.optionButtonSelected {
+  background: #dbeafe;
+  border-color: #2563eb;
+  color: #1e3a8a;
+}
+
+.calendarHeader {
+  margin-top: 0.35rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.calendarWeekdays {
+  margin-top: 0.5rem;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.3rem;
+  color: #64748b;
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+.calendarGrid {
+  margin-top: 0.3rem;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.3rem;
+}
+
+.calendarBlank {
+  min-height: 2.2rem;
+}
+
+.calendarDay {
+  min-height: 2.2rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.calendarDayAvailable {
+  border-color: #b7e4d5;
+  background: #ecfdf5;
+  color: #2f6f64;
+}
+
+.calendarDayLimited {
+  border-color: #e7d6b6;
+  background: #f8f1e5;
+  color: #8a7453;
+}
+
+.calendarDayUnavailable {
+  border-color: #e2e8f0;
+  background: #f8fafc;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+.calendarDaySelected {
+  border-color: #9db8e6;
+  background: #e8f0ff;
+  color: #355a90;
+}
+
+.reservationCard {
+  width: 100%;
+  border: 1px solid #dbe4f0;
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 0.9rem;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.05);
+}
+
+.reservationCardHead {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.55rem;
+}
+
+.reservationDate {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.reservationTime {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #1e3a8a;
+}
+
+.reservationStatusBadge {
+  margin-left: auto;
+  border-radius: 999px;
+  padding: 0.22rem 0.62rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.reservationStatusPending {
+  background: #fff7e6;
+  color: #8a5a00;
+}
+
+.reservationStatusConfirmed {
+  background: #e9f7ef;
+  color: #1f7a43;
+}
+
+.reservationStatusCompleted {
+  background: #e8f0ff;
+  color: #254f9c;
+}
+
+.reservationStatusScheduled {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.reservationStatusAttended {
+  background: #e8f8ef;
+  color: #166534;
+}
+
+.reservationStatusAbsent {
+  background: #fff1f2;
+  color: #b42318;
+}
+
+.reservationStatusCancelled {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.reservationMeta {
+  display: grid;
+  gap: 0.22rem;
+  color: #334155;
+  margin-bottom: 0.55rem;
+}
+
+.reservationMeta p {
+  margin: 0;
+}
+
+.reservationActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.reservationHint {
+  margin: 0.65rem 0 0;
+  color: #64748b;
+  font-size: 0.84rem;
+}
+
+.noticeSimpleCard {
+  width: 100%;
+  border: 1px solid #e5e7ef;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 0.75rem 0.8rem;
+}
+
+.noticeSimpleHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.noticeSimpleDate {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.82rem;
+}
+
+.noticeSimpleBadge {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+  border-radius: 999px;
+  padding: 0.12rem 0.45rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.noticeSimpleTitle {
+  margin: 0.35rem 0 0.15rem;
+  color: #1e293b;
+  font-weight: 700;
+}
+
+.noticeSimpleSummary {
+  margin: 0;
+  color: #64748b;
+}

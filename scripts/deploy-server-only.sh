@@ -12,7 +12,7 @@ if [[ -f "$ENV_FILE" ]]; then
 fi
 
 SSH_TARGET="${MALMOI_DEPLOY_SSH:-}"
-REMOTE_SCRIPT="${MALMOI_REMOTE_DEPLOY_SCRIPT:-/home/malmoi_deploy/apps/malmoi/deploy/deploy.sh}"
+REMOTE_SCRIPT="${MALMOI_REMOTE_DEPLOY_SCRIPT:-/home/malmoi_deploy/apps/malmoi/deploy/deploy-prod.sh}"
 
 if [[ -z "$SSH_TARGET" ]]; then
   echo "ERROR: Set MALMOI_DEPLOY_SSH in scripts/deploy.env"

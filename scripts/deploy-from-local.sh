@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Local (Cursor) → git push → SSH → server deploy/deploy.sh
+# Local (Cursor) → git push → SSH → server deploy/deploy-prod.sh
 # Usage:
 #   bash scripts/deploy-from-local.sh [commit message]
 # Config: copy scripts/deploy.env.example → scripts/deploy.env
@@ -16,7 +16,7 @@ if [[ -f "$ENV_FILE" ]]; then
 fi
 
 SSH_TARGET="${MALMOI_DEPLOY_SSH:-}"
-REMOTE_SCRIPT="${MALMOI_REMOTE_DEPLOY_SCRIPT:-/home/malmoi_deploy/apps/malmoi/deploy/deploy.sh}"
+REMOTE_SCRIPT="${MALMOI_REMOTE_DEPLOY_SCRIPT:-/home/malmoi_deploy/apps/malmoi/deploy/deploy-prod.sh}"
 
 if [[ -z "$SSH_TARGET" ]]; then
   echo "ERROR: Set MALMOI_DEPLOY_SSH in scripts/deploy.env"

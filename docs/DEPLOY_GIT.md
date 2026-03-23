@@ -27,7 +27,7 @@ sudo -u malmoi_deploy -H bash -lc '
   cd /home/malmoi_deploy/apps
   git clone git@github.com:YOUR_ORG/malmoi-integrated.git malmoi
   cd malmoi
-  chmod +x deploy/deploy.sh
+  chmod +x deploy/deploy-prod.sh
 '
 ```
 
@@ -75,7 +75,7 @@ bash scripts/deploy-from-local.sh "fix: 예약 UI"
 
 1. 변경 있으면 `git add` + `git commit`
 2. `git push origin main`
-3. SSH 로 서버에서 `deploy/deploy.sh` 실행
+3. SSH 로 서버에서 `deploy/deploy-prod.sh` 실행
 
 서버만 다시 돌리기 (푸시 없이):
 
@@ -91,4 +91,4 @@ npm run deploy:server
 
 ## 6. 기존 rsync 방식
 
-`deploy/safe-deploy-28.sh` 는 **레거시**입니다. 새로운 기준은 **Git push + 서버 `deploy/deploy.sh`** 입니다.
+`deploy/safe-deploy-28.sh` 는 **레거시**입니다. 새로운 기준은 **Git push + 서버 `deploy/deploy-prod.sh`** 입니다.

@@ -1,0 +1,231 @@
+# Git 정리 분류 리포트
+
+## 제외 대상 (Git 비포함)
+- 없음
+
+## 운영 코드/문서/배포 스크립트 (커밋 후보)
+- ` M` `.gitignore`
+- ` M` `README.md`
+- ` M` `app/globals.css`
+- ` M` `app/layout.js`
+- ` M` `app/page.js`
+- ` M` `app/page.module.css`
+- ` M` `deploy/deploy.sh`
+- ` M` `docs/DEPLOY_GIT.md`
+- ` M` `docs/README.md`
+- ` M` `next.config.mjs`
+- ` M` `package-lock.json`
+- ` M` `scripts/deploy-from-local.sh`
+- ` M` `scripts/deploy-server-only.sh`
+- ` M` `scripts/deploy.env.example`
+- `??` `app/admin/AdminAuditLogPanel.js`
+- `??` `app/admin/AdminPendingApprovalPanel.js`
+- `??` `app/admin/AdminPointRulesPanel.js`
+- `??` `app/admin/AdminStudentsPanel.js`
+- `??` `app/admin/AdminTopNav.js`
+- `??` `app/admin/admin-users/page.js`
+- `??` `app/admin/admin.module.css`
+- `??` `app/admin/homework/AdminHomeworkPanel.js`
+- `??` `app/admin/homework/page.js`
+- `??` `app/admin/lesson-notes/AdminLessonNotesPanel.js`
+- `??` `app/admin/lesson-notes/page.js`
+- `??` `app/admin/mail/AdminMailLogsPanel.js`
+- `??` `app/admin/mail/page.js`
+- `??` `app/admin/notices/AdminNoticesPanel.js`
+- `??` `app/admin/notices/page.js`
+- `??` `app/admin/page.js`
+- `??` `app/admin/parents/page.js`
+- `??` `app/admin/payments/AdminPaymentsSubNav.js`
+- `??` `app/admin/payments/PaymentHistoryClient.js`
+- `??` `app/admin/payments/PaymentInputClient.js`
+- `??` `app/admin/payments/PaymentSettingsClient.js`
+- `??` `app/admin/payments/PaymentStatisticsClient.js`
+- `??` `app/admin/payments/admin.payments.module.css`
+- `??` `app/admin/payments/history/page.js`
+- `??` `app/admin/payments/input/page.js`
+- `??` `app/admin/payments/page.js`
+- `??` `app/admin/payments/receipt/ReceiptToolbar.js`
+- `??` `app/admin/payments/receipt/[transactionId]/page.js`
+- `??` `app/admin/payments/receipt/receipt-doc.module.css`
+- `??` `app/admin/payments/settings/page.js`
+- `??` `app/admin/payments/statistics/page.js`
+- `??` `app/admin/payments/transactions/PaymentTransactionResendClient.js`
+- `??` `app/admin/payments/transactions/[transactionId]/page.js`
+- `??` `app/admin/reservations/AdminReservationsPanel.js`
+- `??` `app/admin/reservations/page.js`
+- `??` `app/admin/reservations/reservations-panel.module.css`
+- `??` `app/admin/sales-dashboard/SalesDashboardClient.js`
+- `??` `app/admin/sales-dashboard/page.js`
+- `??` `app/admin/settings/SystemSettingsPanel.js`
+- `??` `app/admin/settings/page.js`
+- `??` `app/admin/students/[id]/StudentEditForm.js`
+- `??` `app/admin/students/[id]/page.js`
+- `??` `app/admin/students/[id]/student-detail.module.css`
+- `??` `app/admin/students/page.js`
+- `??` `app/api/admin/audit-logs/route.js`
+- `??` `app/api/admin/homework-templates/[id]/route.js`
+- `??` `app/api/admin/homework-templates/route.js`
+- `??` `app/api/admin/homework/[id]/route.js`
+- `??` `app/api/admin/homework/bulk-status/route.js`
+- `??` `app/api/admin/homework/route.js`
+- `??` `app/api/admin/lesson-notes/[id]/route.js`
+- `??` `app/api/admin/lesson-notes/assign-teacher/route.js`
+- `??` `app/api/admin/lesson-notes/route.js`
+- `??` `app/api/admin/mail-logs/[id]/resend/route.js`
+- `??` `app/api/admin/mail-logs/[id]/route.js`
+- `??` `app/api/admin/mail-logs/route.js`
+- `??` `app/api/admin/mail-templates/route.js`
+- `??` `app/api/admin/notices/[id]/route.js`
+- `??` `app/api/admin/notices/route.js`
+- `??` `app/api/admin/payments/adjustment/route.js`
+- `??` `app/api/admin/payments/commit/route.js`
+- `??` `app/api/admin/payments/dashboard/route.js`
+- `??` `app/api/admin/payments/preview/route.js`
+- `??` `app/api/admin/payments/receipt/[transactionId]/pdf/route.js`
+- `??` `app/api/admin/payments/settings/route.js`
+- `??` `app/api/admin/payments/student-detail/route.js`
+- `??` `app/api/admin/payments/students/route.js`
+- `??` `app/api/admin/payments/summary-mail/route.js`
+- `??` `app/api/admin/payments/transactions/[transactionId]/resend/route.js`
+- `??` `app/api/admin/payments/transactions/route.js`
+- `??` `app/api/admin/point-rules/route.js`
+- `??` `app/api/admin/reservation-policy/route.js`
+- `??` `app/api/admin/reservation-slots/[id]/route.js`
+- `??` `app/api/admin/reservation-slots/regenerate/route.js`
+- `??` `app/api/admin/reservation-slots/route.js`
+- `??` `app/api/admin/reservations/[id]/route.js`
+- `??` `app/api/admin/reservations/route.js`
+- `??` `app/api/admin/students/[id]/learning-stats/route.js`
+- `??` `app/api/admin/students/[id]/reset-password/route.js`
+- `??` `app/api/admin/students/[id]/route.js`
+- `??` `app/api/admin/students/route.js`
+- `??` `app/api/admin/system-settings/route.js`
+- `??` `app/api/admin/system-settings/system-info/route.js`
+- `??` `app/api/admin/system-settings/test-mail/route.js`
+- `??` `app/api/admin/teacher-users/route.js`
+- `??` `app/api/auth/login/route.js`
+- `??` `app/api/auth/logout/route.js`
+- `??` `app/api/auth/password-reset/request/route.js`
+- `??` `app/api/auth/password-reset/verify/route.js`
+- `??` `app/api/auth/password/change/route.js`
+- `??` `app/api/auth/request-link/route.js`
+- `??` `app/api/auth/session/route.js`
+- `??` `app/api/auth/start-registration/route.js`
+- `??` `app/api/auth/verify/route.js`
+- `??` `app/api/student/consent/route.js`
+- `??` `app/api/student/homework/[id]/route.js`
+- `??` `app/api/student/homework/route.js`
+- `??` `app/api/student/payments/route.js`
+- `??` `app/api/student/profile/route.js`
+- `??` `app/api/student/reservation-slots/route.js`
+- `??` `app/api/student/reservations/[id]/cancel/route.js`
+- `??` `app/api/student/reservations/[id]/route.js`
+- `??` `app/api/student/reservations/route.js`
+- `??` `app/api/teacher/lesson-notes/[id]/route.js`
+- `??` `app/api/teacher/lesson-notes/route.js`
+- `??` `app/api/teacher/students/route.js`
+- `??` `app/login/StudentPasswordLoginForm.js`
+- `??` `app/login/admin/page.js`
+- `??` `app/login/login.module.css`
+- `??` `app/login/next/LogoutButton.js`
+- `??` `app/login/next/page.js`
+- `??` `app/login/page.js`
+- `??` `app/login/parent/page.js`
+- `??` `app/login/teacher/page.js`
+- `??` `app/parent/ParentTopNav.js`
+- `??` `app/parent/children/[studentId]/homework/[id]/page.js`
+- `??` `app/parent/children/[studentId]/homework/page.js`
+- `??` `app/parent/children/[studentId]/lesson-notes/page.js`
+- `??` `app/parent/children/[studentId]/notices/page.js`
+- `??` `app/parent/children/[studentId]/page.js`
+- `??` `app/parent/children/[studentId]/points/page.js`
+- `??` `app/parent/children/[studentId]/progress/page.js`
+- `??` `app/parent/children/[studentId]/reservations/page.js`
+- `??` `app/parent/page.js`
+- `??` `app/password-reset/request/page.js`
+- `??` `app/password-reset/verify/PasswordResetVerifyContent.js`
+- `??` `app/password-reset/verify/page.js`
+- `??` `app/password/change-required/PasswordChangeRequiredForm.js`
+- `??` `app/password/change-required/page.js`
+- `??` `app/student/StudentAreaLayout.js`
+- `??` `app/student/StudentDashboard.js`
+- `??` `app/student/StudentLessonTimeFlow.js`
+- `??` `app/student/StudentReservationMiniCalendar.js`
+- `??` `app/student/dashboardReservationStatus.js`
+- `??` `app/student/homework/StudentHomeworkDetailClient.js`
+- `??` `app/student/homework/StudentHomeworkPanel.js`
+- `??` `app/student/homework/[id]/page.js`
+- `??` `app/student/homework/page.js`
+- `??` `app/student/lesson-notes/LessonNoteAudio.js`
+- `??` `app/student/lesson-notes/page.js`
+- `??` `app/student/lessonTimeSummaryUtils.js`
+- `??` `app/student/notices/[id]/page.js`
+- `??` `app/student/notices/page.js`
+- `??` `app/student/page.js`
+- `??` `app/student/payments/StudentPaymentsFilterBar.js`
+- `??` `app/student/payments/[transactionId]/StudentPaymentDetailClient.js`
+- `??` `app/student/payments/[transactionId]/page.js`
+- `??` `app/student/payments/page.js`
+- `??` `app/student/payments/student-payments.module.css`
+- `??` `app/student/profile/ProfilePhotoModal.js`
+- `??` `app/student/profile/StudentProfilePanel.js`
+- `??` `app/student/profile/cropImage.js`
+- `??` `app/student/profile/page.js`
+- `??` `app/student/profile/profileFormUtils.js`
+- `??` `app/student/progress/page.js`
+- `??` `app/student/register/consent/ConsentForm.js`
+- `??` `app/student/register/consent/page.js`
+- `??` `app/student/register/profile/ProfileForm.js`
+- `??` `app/student/register/profile/page.js`
+- `??` `app/student/register/start/StartRegistrationForm.js`
+- `??` `app/student/register/start/page.js`
+- `??` `app/student/reservations/StudentReservationsPanel.js`
+- `??` `app/student/reservations/page.js`
+- `??` `app/student/student-home.module.css`
+- `??` `app/student/student.module.css`
+- `??` `app/teacher/TeacherTopNav.js`
+- `??` `app/teacher/homework/page.js`
+- `??` `app/teacher/lesson-notes/page.js`
+- `??` `app/teacher/lessons/page.js`
+- `??` `app/teacher/page.js`
+- `??` `app/teacher/progress/page.js`
+- `??` `app/teacher/students/page.js`
+- `??` `deploy/deploy-prod.sh`
+- `??` `deploy/systemd/cloudflared.service`
+- `??` `deploy/systemd/malmoi-web.service`
+- `??` `docs/access-and-notifications.md`
+- `??` `docs/beta-open-checklist.md`
+- `??` `docs/current-scope-checklist.md`
+- `??` `docs/deploy-workflow.md`
+- `??` `docs/deployment-guide.md`
+- `??` `docs/dev-and-staging-workflow.md`
+- `??` `docs/development-roadmap.md`
+- `??` `docs/final-implementation-roadmap.md`
+- `??` `docs/lesson-notes-architecture.md`
+- `??` `docs/mail-and-live-student-beta-check.md`
+- `??` `docs/mail-delivery-final-checklist.md`
+- `??` `docs/master-architecture.md`
+- `??` `docs/monthly-execution-checklist.md`
+- `??` `docs/operations-runbook.md`
+- `??` `docs/parent-account-architecture.md`
+- `??` `docs/system-architecture.md`
+- `??` `docs/ui-final-standard.md`
+- `??` `docs/ui-implementation-checklist.md`
+- `??` `lib/auth/api-session.js`
+- `??` `lib/auth/email.js`
+- `??` `lib/auth/http.js`
+- `??` `lib/auth/session.js`
+- `??` `lib/auth/store.js`
+- `??` `lib/payments/engine.js`
+- `??` `lib/payments/receipt-labels.js`
+- `??` `lib/payments/receipt-pdf.js`
+- `??` `lib/student/reservationMinutesShared.js`
+- `??` `lib/systemUrls.js`
+
+## 검토 필요
+- 없음
+
+## 요약
+- 제외 대상: 0개
+- 커밋 후보: 217개
+- 검토 필요: 0개
