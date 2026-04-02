@@ -7,7 +7,6 @@ import styles from "./admin.module.css";
 const ITEMS = [
   { href: "/admin", label: "ダッシュボード" },
   { href: "/admin/students", label: "学生管理" },
-  { href: "/admin/payments/input", label: "決済管理" },
   { href: "/admin/reservations", label: "予約管理" },
   { href: "/admin/lesson-notes", label: "レッスンノート" },
   { href: "/admin/homework", label: "宿題管理" },
@@ -15,15 +14,9 @@ const ITEMS = [
   { href: "/admin/notices", label: "お知らせ" },
   { href: "/admin/mail", label: "メール管理" },
   { href: "/admin/settings", label: "システム設定" },
+  { href: "/admin/system/db-check", label: "保存診断" },
   { href: "/admin/admin-users", label: "管理者設定" },
 ];
-
-function navItemActive(currentPath, href) {
-  const p = String(currentPath || "");
-  if (p === href) return true;
-  if (href === "/admin/payments/input" && p.startsWith("/admin/payments")) return true;
-  return false;
-}
 
 export default function AdminTopNav({ currentPath = "/admin", showPageTitle = false, pageTitle = "" }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -34,11 +27,7 @@ export default function AdminTopNav({ currentPath = "/admin", showPageTitle = fa
   }, [currentPath]);
 
   async function handleLogout() {
-    await fetch("/api/auth/logout", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ role: "admin" }),
-    });
+    await fetch("/api/auth/logout", { method: "POST" });
     router.push("/login");
     router.refresh();
   }
@@ -69,7 +58,7 @@ export default function AdminTopNav({ currentPath = "/admin", showPageTitle = fa
 
       <nav className={styles.navBar} aria-label="admin menu">
         {ITEMS.map((item) => {
-          const active = navItemActive(currentPath, item.href);
+          const active = currentPath === item.href;
           return (
             <a
               key={item.href}
@@ -85,7 +74,7 @@ export default function AdminTopNav({ currentPath = "/admin", showPageTitle = fa
       {menuOpen ? (
         <nav id="admin-mobile-menu" className={styles.navDrawer} aria-label="admin mobile menu">
           {ITEMS.map((item) => {
-            const active = navItemActive(currentPath, item.href);
+            const active = currentPath === item.href;
             return (
               <a
                 key={`mobile-${item.href}`}

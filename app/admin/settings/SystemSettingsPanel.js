@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import styles from "../../login/login.module.css";
 import adminStyles from "../admin.module.css";
@@ -378,6 +379,12 @@ export default function SystemSettingsPanel({
             <li>レッスンノート数: {systemInfo.lessonNoteCount ?? 0}</li>
             <li>宿題数: {systemInfo.homeworkCount ?? 0}</li>
             <li>メール送信数: {systemInfo.mailCount ?? 0}</li>
+            <li>
+              データ保存診断:{" "}
+              <Link href="/admin/system/db-check" className={adminStyles.inlineLink}>
+                JSON ストアの件数・サンプル確認
+              </Link>
+            </li>
           </ul>
           <div className={adminStyles.compactActions}>
             <button className={styles.button} type="button" onClick={loadSystemInfo}>再読み込み</button>
