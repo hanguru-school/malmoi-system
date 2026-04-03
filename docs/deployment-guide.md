@@ -56,14 +56,14 @@
 3. 서버에서 production build
    - `npm run build`
 4. 환경변수 확인
-   - `APP_BASE_URL`, `APP_URL`, `BASE_URL`, `NEXTAUTH_URL`, `MAIL_LINK_BASE_URL` = `https://portal.hanguru.blog`
+   - `APP_BASE_URL`, `APP_URL`, `BASE_URL`, `NEXTAUTH_URL`, `MAIL_LINK_BASE_URL` = `https://portal.hanguru.school`
    - `MAIL_SEND_MODE=smtp`, `SMTP_*`, `MAIL_FROM`
 5. 서비스 재시작
    - `sudo systemctl restart malmoi-web`
    - `sudo systemctl restart nginx`
 6. 확인
    - `systemctl is-active malmoi-web cloudflared`
-   - `curl -I https://portal.hanguru.blog/login`
+   - `curl -I https://portal.hanguru.school/login`
    - `curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:3000/login` (내부 포트)
 
 ### UI가 배포 후에도 안 바뀔 때

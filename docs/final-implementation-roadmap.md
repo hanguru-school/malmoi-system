@@ -17,7 +17,7 @@
   - 운영 환경과 배포 흐름 표준화
   - URL/인증/메일 링크 기준 단일화
 - 작업:
-  - `portal.hanguru.blog` 기준 URL 정리
+  - `portal.hanguru.school` 기준 URL 정리
   - `.env` 항목 정규화 (auth/mail/base URL)
   - 빌드/재시작 절차 고정 (`build -> restart -> health-check`)
   - systemd/cloudflared 점검
@@ -155,7 +155,7 @@
 2. 서버 업로드
 3. 서버 build
 4. 서비스 restart
-5. `portal.hanguru.blog` 실접속 검증
+5. `portal.hanguru.school` 실접속 검증
 
 ### 완료 정의
 - "코드 작성 완료"가 아니라 **"서버 반영 + 실동작 확인 완료"** 를 완료로 정의.

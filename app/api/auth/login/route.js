@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { applySessionCookies, getRequestMeta, isHttpsRequest } from "../../../../lib/auth/http";
+import { SESSION_COOKIE_NAME, getRequestMeta, isHttpsRequest } from "../../../../lib/auth/http";
 import { loginWithPassword } from "../../../../lib/auth/store";
 
 export async function POST(request) {
@@ -22,10 +22,13 @@ export async function POST(request) {
       nextPath: result.nextPath,
       user: result.user,
     });
-    applySessionCookies(response, {
-      sessionToken: result.sessionToken,
-      role: result.user?.role,
+    response.cookies.set({
+      name: SESSION_COOKIE_NAME,
+      value: result.sessionToken,
+      httpOnly: true,
+      sameSite: "lax",
       secure: isHttpsRequest(request),
+      path: "/",
       maxAge: Number(process.env.AUTH_SESSION_TTL_HOURS || 24 * 7) * 60 * 60,
     });
     return response;

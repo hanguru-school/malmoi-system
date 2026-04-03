@@ -3,21 +3,11 @@
 import { useRouter } from "next/navigation";
 import styles from "../login.module.css";
 
-export default function LogoutButton({ role = null }) {
+export default function LogoutButton() {
   const router = useRouter();
 
   async function handleLogout() {
-    const normalizedRole = String(role || "").trim().toLowerCase();
-    const hasRole = Boolean(normalizedRole);
-    await fetch("/api/auth/logout", {
-      method: "POST",
-      ...(hasRole
-        ? {
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ role: normalizedRole }),
-          }
-        : {}),
-    });
+    await fetch("/api/auth/logout", { method: "POST" });
     router.push("/login");
     router.refresh();
   }

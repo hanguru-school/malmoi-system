@@ -1,12 +1,10 @@
 import { NextResponse } from "next/server";
-import { getApiSession } from "../../../../lib/auth/api-session";
-import { SESSION_ROLES } from "../../../../lib/auth/http";
+import { SESSION_COOKIE_NAME } from "../../../../lib/auth/http";
+import { getSessionUser } from "../../../../lib/auth/store";
 
 export async function GET(request) {
-  const { searchParams } = new URL(request.url);
-  const requestedRole = String(searchParams.get("role") || "").trim().toLowerCase();
-  const preferredRoles = SESSION_ROLES.includes(requestedRole) ? [requestedRole] : [];
-  const sessionInfo = await getApiSession(request, { preferredRoles, strictRoles: preferredRoles.length > 0 });
+  const sessionToken = request.cookies.get(SESSION_COOKIE_NAME)?.value;
+  const sessionInfo = await getSessionUser(sessionToken);
 
   if (!sessionInfo) {
     return NextResponse.json({ authenticated: false, user: null });

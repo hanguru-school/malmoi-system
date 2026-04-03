@@ -210,7 +210,6 @@
 }
 
 .pendingApproveButton,
-.pendingChangeButton,
 .pendingRejectButton {
   border-radius: 999px;
   border: 1px solid transparent;
@@ -223,12 +222,6 @@
 .pendingApproveButton {
   background: #065f46;
   color: #ffffff;
-}
-
-.pendingChangeButton {
-  background: #fef9c3;
-  color: #854d0e;
-  border-color: #fde047;
 }
 
 .pendingRejectButton {
@@ -273,93 +266,6 @@
   padding: 0.5rem 0.6rem;
   color: #334155;
   font-size: 0.87rem;
-}
-
-.timelineList {
-  margin: 0.5rem 0 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  gap: 0.35rem;
-}
-
-.timelineItem {
-  border: 1px solid #dbe5f3;
-  border-radius: 9px;
-  background: #f8fafc;
-  padding: 0.45rem 0.55rem;
-  display: flex;
-  gap: 0.45rem;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.timelineItemPending {
-  border-color: #facc15;
-  background: #fef9c3;
-}
-
-.timelineItemGood {
-  border-color: #86efac;
-  background: #ecfdf5;
-}
-
-.timelineItemBad {
-  border-color: #fca5a5;
-  background: #fef2f2;
-}
-
-.timelineTime {
-  min-width: 56px;
-  color: #0f172a;
-  font-weight: 700;
-  font-size: 0.82rem;
-}
-
-.timelineSummary {
-  color: #334155;
-  font-size: 0.84rem;
-  flex: 1;
-}
-
-.actionTodoList {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  gap: 0.35rem;
-}
-
-.actionTodoList li {
-  border: 1px solid #dbe5f3;
-  border-radius: 10px;
-  background: #ffffff;
-  padding: 0.5rem 0.58rem;
-  display: grid;
-  grid-template-columns: 1fr auto auto;
-  gap: 0.45rem;
-  align-items: center;
-}
-
-.actionTodoList span {
-  color: #334155;
-  font-size: 0.84rem;
-}
-
-.actionTodoList strong {
-  color: #0f172a;
-  font-size: 0.82rem;
-}
-
-.inlineActionLink {
-  text-decoration: none;
-  color: #2563eb;
-  font-size: 0.81rem;
-  font-weight: 700;
-}
-
-.inlineActionLink:hover {
-  text-decoration: underline;
 }
 
 .sectionBlock {
@@ -574,11 +480,6 @@
     grid-template-columns: 1fr;
   }
 
-  .actionTodoList li {
-    grid-template-columns: 1fr;
-    gap: 0.22rem;
-  }
-
   .table th,
   .table td {
     font-size: 0.8rem;
@@ -588,185 +489,5 @@
   .table {
     min-width: 560px;
   }
-}
-
-/* 全画面幅でハンバーガー＋ドロワーに統一（PCでも☰を常時表示。横並びメニューは非表示のまま） */
-
-.adminQuickLinks {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  align-items: center;
-  margin: 0.75rem 0 1rem;
-  padding: 0.65rem 0.75rem;
-  border-radius: 12px;
-  border: 1px solid #dbe5f3;
-  background: #f8fbff;
-}
-
-.adminQuickLinksLabel {
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: #475569;
-  margin-right: 0.25rem;
-}
-
-.quickLink {
-  text-decoration: none;
-  font-size: 0.86rem;
-  font-weight: 700;
-  color: #1e3a8a;
-  padding: 0.35rem 0.65rem;
-  border-radius: 999px;
-  border: 1px solid #9db8e6;
-  background: #e8f0ff;
-}
-
-.quickLink:hover {
-  background: #dbeafe;
-}
-
-.quickLinkMuted {
-  text-decoration: none;
-  font-size: 0.84rem;
-  color: #2563eb;
-  padding: 0.35rem 0.5rem;
-}
-
-.quickLinkMuted:hover {
-  text-decoration: underline;
-}
-
-.settingsPaymentHint {
-  margin: 0.5rem 0 1rem;
-  padding: 0.55rem 0.7rem;
-  border-radius: 10px;
-  border: 1px dashed #93c5fd;
-  background: #eff6ff;
-  font-size: 0.86rem;
-  color: #1e3a8a;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  align-items: center;
-}
-
-.settingsPaymentHint a {
-  color: #1d4ed8;
-  font-weight: 700;
-}
-
-/* ダッシュボード — 決済サマリー（カード） */
-.paymentDashGrid {
-  margin-top: 1rem;
-  display: grid;
-  gap: 0.75rem;
-  grid-template-columns: 1fr;
-}
-
-@media (min-width: 640px) {
-  .paymentDashGrid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-.paymentDashCard {
-  border: 1px solid #dbe5f3;
-  border-radius: 14px;
-  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-  padding: 1rem 1rem 0.85rem;
-  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
-}
-
-.paymentDashLabel {
-  margin: 0 0 0.35rem;
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: #64748b;
-  letter-spacing: 0.02em;
-}
-
-.paymentDashValue {
-  margin: 0;
-  font-size: 1.65rem;
-  font-weight: 800;
-  color: #0f172a;
-  line-height: 1.15;
-}
-
-.paymentDashSub {
-  margin: 0.35rem 0 0;
-  font-size: 0.78rem;
-  color: #94a3b8;
-}
-
-.paymentRecentSection {
-  margin-top: 1.25rem;
-  padding-top: 1rem;
-  border-top: 1px solid #e2e8f0;
-}
-
-.paymentRecentHead {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  margin-bottom: 0.65rem;
-}
-
-.paymentRecentLinks {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem 0.75rem;
-  align-items: center;
-}
-
-.paymentRecentList {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  gap: 0.5rem;
-}
-
-.paymentRecentItem {
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  background: #ffffff;
-  padding: 0.65rem 0.75rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-}
-
-@media (min-width: 560px) {
-  .paymentRecentItem {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
-}
-
-.paymentRecentTime {
-  display: block;
-  font-size: 0.78rem;
-  color: #64748b;
-}
-
-.paymentRecentName {
-  display: block;
-  font-weight: 700;
-  color: #0f172a;
-  font-size: 0.92rem;
-}
-
-.paymentRecentMeta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem 0.65rem;
-  align-items: center;
-  font-size: 0.84rem;
-  color: #475569;
 }
 

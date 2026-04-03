@@ -30,14 +30,13 @@ export default function StudentAreaLayout({ title, subtitle = "", children }) {
           <nav className={styles.menuPanel}>
             <Link className={styles.menuItem} href="/student">ホーム</Link>
             <Link className={styles.menuItem} href="/student/reservations">予約</Link>
-            <Link className={styles.menuItem} href="/student/payments">決済履歴</Link>
             <Link className={styles.menuItem} href="/student/lesson-notes">レッスンノート</Link>
             <Link className={styles.menuItem} href="/student/homework">宿題</Link>
             <Link className={styles.menuItem} href="/student/progress">学習状況</Link>
             <Link className={styles.menuItem} href="/student/notices">お知らせ</Link>
             <Link className={styles.menuItem} href="/student/profile">個人情報</Link>
             <div className={styles.menuLogout}>
-              <LogoutButton role="student" />
+              <LogoutButton />
             </div>
           </nav>
         ) : null}

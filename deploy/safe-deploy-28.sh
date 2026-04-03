@@ -28,6 +28,6 @@ ssh "${SERVER}" "sudo systemctl restart malmoi-web nginx"
 
 echo "[4/4] Health check"
 ssh "${SERVER}" "systemctl is-active malmoi-web cloudflared nginx && curl -s -o /dev/null -w 'internal /login: %{http_code}\n' http://127.0.0.1:3000/login"
-curl -s -I https://portal.hanguru.blog/login | sed -n '1,12p'
+curl -s -I https://portal.hanguru.school/login | sed -n '1,12p'
 
 echo "Done."

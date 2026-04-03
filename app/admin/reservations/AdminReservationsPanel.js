@@ -1,10 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import FullCalendar from "@fullcalendar/react";
-import dayGridPlugin from "@fullcalendar/daygrid";
-import timeGridPlugin from "@fullcalendar/timegrid";
-import interactionPlugin from "@fullcalendar/interaction";
+import { useEffect, useMemo, useState } from "react";
 import styles from "../../login/login.module.css";
 import adminStyles from "../admin.module.css";
 import panelStyles from "./reservations-panel.module.css";
@@ -31,82 +27,9 @@ function formatIso(date) {
   return `${y}-${m}-${d}`;
 }
 
-function formatClock(date) {
-  if (!(date instanceof Date) || Number.isNaN(date.getTime())) return "00:00";
-  const hh = String(date.getHours()).padStart(2, "0");
-  const mm = String(date.getMinutes()).padStart(2, "0");
-  return `${hh}:${mm}`;
-}
-
-function toDateTime(date, time) {
-  const dt = new Date(`${String(date || "").trim()}T${String(time || "00:00").trim()}:00`);
-  if (Number.isNaN(dt.getTime())) return null;
-  return dt;
-}
-
-function toCalendarEvent(item) {
-  const startAt = toDateTime(item.date, item.time);
-  if (!startAt) return null;
-  const duration = Math.max(30, Number(item.durationMinutes || 50));
-  const endAt = new Date(startAt.getTime() + duration * 60 * 1000);
-  const title = item.studentNameKanji || item.studentNameFurigana || item.studentNumber || "예약";
-  const status = String(item.status || "").trim();
-
-  const palette =
-    status === "requested"
-      ? { backgroundColor: "#f59e0b", borderColor: "#d97706", textColor: "#ffffff" }
-      : status === "confirmed"
-        ? { backgroundColor: "#16a34a", borderColor: "#15803d", textColor: "#ffffff" }
-        : status === "cancelled"
-          ? { backgroundColor: "#94a3b8", borderColor: "#64748b", textColor: "#ffffff" }
-          : status === "rejected"
-            ? { backgroundColor: "#ef4444", borderColor: "#dc2626", textColor: "#ffffff" }
-            : { backgroundColor: "#3b82f6", borderColor: "#2563eb", textColor: "#ffffff" };
-
-  return {
-    id: item.id,
-    title,
-    start: startAt.toISOString(),
-    end: endAt.toISOString(),
-    allDay: false,
-    ...palette,
-    extendedProps: {
-      reservation: item,
-    },
-  };
-}
-
-function scheduleViewToCalendarView(scheduleView) {
-  if (scheduleView === "month") return "dayGridMonth";
-  if (scheduleView === "week") return "timeGridWeek";
-  return "timeGridDay";
-}
-
 function addDays(iso, amount) {
   const base = parseIso(iso) || parseIso(todayIso());
   base.setDate(base.getDate() + amount);
-  return formatIso(base);
-}
-
-function addMonths(iso, amount) {
-  const base = parseIso(iso) || parseIso(todayIso());
-  const day = base.getDate();
-  base.setDate(1);
-  base.setMonth(base.getMonth() + amount);
-  const monthLastDay = new Date(base.getFullYear(), base.getMonth() + 1, 0).getDate();
-  base.setDate(Math.min(day, monthLastDay));
-  return formatIso(base);
-}
-
-function startOfMonthIso(iso) {
-  const base = parseIso(iso) || parseIso(todayIso());
-  base.setDate(1);
-  return formatIso(base);
-}
-
-function endOfMonthIso(iso) {
-  const base = parseIso(iso) || parseIso(todayIso());
-  base.setMonth(base.getMonth() + 1, 0);
   return formatIso(base);
 }
 
@@ -154,10 +77,6 @@ function deliveryLabel(value) {
   return String(value || "") === "online" ? "オンライン" : "対面";
 }
 
-function deliveryShort(value) {
-  return String(value || "") === "online" ? "ON" : "対面";
-}
-
 function sortableKey(item) {
   return `${item.date || ""} ${item.time || ""}`;
 }
@@ -173,27 +92,16 @@ function noteExistsByUnit(notes, unitId) {
   return notes.some((note) => String(note.lessonUnitId || "") === String(unitId));
 }
 
-function statusTone(status) {
-  const key = String(status || "").trim();
-  if (key === "confirmed" || key === "completed") return "good";
-  if (key === "requested" || key === "change_requested" || key === "scheduled") return "warn";
-  if (key === "cancelled" || key === "rejected") return "bad";
-  return "normal";
-}
-
 export default function AdminReservationsPanel({
   initialReservations,
   initialFilters = {},
   initialFocus = "",
   scopeNotice = "",
 }) {
-  const calendarRef = useRef(null);
   const [selectedDate, setSelectedDate] = useState(initialFilters.fromDate || todayIso());
-  /** メイン表示: カレンダー / リスト / 時間表 */
-  const [surfaceView, setSurfaceView] = useState("calendar");
   const [scheduleView, setScheduleView] = useState("day");
   const [scheduleDate, setScheduleDate] = useState(initialFilters.fromDate || todayIso());
-  const [calendarTitle, setCalendarTitle] = useState("");
+  const [viewMode, setViewMode] = useState("list");
   const [statusFilter, setStatusFilter] = useState(initialFilters.status || "");
   const [teacherFilter, setTeacherFilter] = useState("");
   const [lessonFilter, setLessonFilter] = useState(initialFilters.lessonMode || "");
@@ -212,7 +120,6 @@ export default function AdminReservationsPanel({
   const [openCreate, setOpenCreate] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [openCancel, setOpenCancel] = useState(false);
-  const [overflowDate, setOverflowDate] = useState("");
   const [createForm, setCreateForm] = useState({
     mode: "single",
     slotId: "",
@@ -233,58 +140,6 @@ export default function AdminReservationsPanel({
     notifyStudent: true,
     reason: "",
   });
-
-  function moveSchedule(direction) {
-    const api = calendarRef.current?.getApi?.();
-    if (api) {
-      if (direction < 0) api.prev();
-      else api.next();
-      return;
-    }
-    if (scheduleView === "month") {
-      setScheduleDate(addMonths(scheduleDate, direction));
-      return;
-    }
-    if (scheduleView === "week") {
-      setScheduleDate(addDays(scheduleDate, 7 * direction));
-      return;
-    }
-    setScheduleDate(addDays(scheduleDate, direction));
-  }
-
-  const syncFromCalendar = useCallback(() => {
-    const api = calendarRef.current?.getApi?.();
-    if (!api) return;
-    const currentView = api.view?.type || "";
-    if (currentView === "dayGridMonth" && scheduleView !== "month") setScheduleView("month");
-    if (currentView === "timeGridWeek" && scheduleView !== "week") setScheduleView("week");
-    if (currentView === "timeGridDay" && scheduleView !== "day") setScheduleView("day");
-    setCalendarTitle(api.view?.title || "");
-    const currentDate = formatIso(api.getDate());
-    if (currentDate && currentDate !== scheduleDate) {
-      setScheduleDate(currentDate);
-      setSelectedDate(currentDate);
-    }
-  }, [scheduleDate, scheduleView]);
-
-  async function handleEventMoveOrResize(changeInfo) {
-    const event = changeInfo?.event;
-    const startAt = event?.start || null;
-    if (!event?.id || !startAt) {
-      changeInfo?.revert?.();
-      return;
-    }
-    const endAt = event.end || new Date(startAt.getTime() + 50 * 60 * 1000);
-    const durationMinutes = Math.max(30, Math.round((endAt.getTime() - startAt.getTime()) / 60000));
-    const ok = await updateReservation(String(event.id), {
-      date: formatIso(startAt),
-      time: formatClock(startAt),
-      durationMinutes,
-    });
-    if (!ok) {
-      changeInfo?.revert?.();
-    }
-  }
 
   const filteredReservations = useMemo(() => {
     return [...reservations]
@@ -321,11 +176,6 @@ export default function AdminReservationsPanel({
       .sort((a, b) => sortableKey(a).localeCompare(sortableKey(b)));
   }, [reservations, statusFilter, teacherFilter, lessonFilter, query]);
 
-  const calendarEvents = useMemo(
-    () => filteredReservations.map((item) => toCalendarEvent(item)).filter(Boolean),
-    [filteredReservations]
-  );
-
   const nowMinute = useMemo(() => {
     const now = new Date();
     return now.getHours() * 60 + now.getMinutes();
@@ -344,11 +194,6 @@ export default function AdminReservationsPanel({
   const pendingReservations = useMemo(
     () => filteredReservations.filter((item) => ["requested", "change_requested", "scheduled"].includes(item.status)),
     [filteredReservations]
-  );
-
-  const sortedPendingForStrip = useMemo(
-    () => [...pendingReservations].sort((a, b) => sortableKey(a).localeCompare(sortableKey(b))),
-    [pendingReservations]
   );
 
   const timelineGroups = useMemo(() => {
@@ -388,17 +233,6 @@ export default function AdminReservationsPanel({
     };
   }, [scheduleDate, scheduleView]);
 
-  const queryRange = useMemo(() => {
-    if (scheduleView === "month") {
-      return { fromDate: startOfMonthIso(scheduleDate), toDate: endOfMonthIso(scheduleDate) };
-    }
-    if (scheduleView === "week") {
-      const fromDate = startOfWeekIso(scheduleDate);
-      return { fromDate, toDate: addDays(fromDate, 6) };
-    }
-    return { fromDate: scheduleDate, toDate: scheduleDate };
-  }, [scheduleDate, scheduleView]);
-
   const scheduleItems = useMemo(
     () =>
       filteredReservations
@@ -406,67 +240,6 @@ export default function AdminReservationsPanel({
         .sort((a, b) => `${a.date || ""} ${a.time || ""}`.localeCompare(`${b.date || ""} ${b.time || ""}`)),
     [filteredReservations, scheduleRange]
   );
-
-  const calendarWeeks = useMemo(() => {
-    if (scheduleView !== "month") return [];
-    const firstDay = parseIso(startOfMonthIso(scheduleDate));
-    if (!firstDay) return [];
-    const startOffset = (firstDay.getDay() + 6) % 7;
-    const gridStart = new Date(firstDay);
-    gridStart.setDate(firstDay.getDate() - startOffset);
-    const weeks = [];
-    for (let weekIndex = 0; weekIndex < 6; weekIndex += 1) {
-      const row = [];
-      for (let dayIndex = 0; dayIndex < 7; dayIndex += 1) {
-        const cell = new Date(gridStart);
-        cell.setDate(gridStart.getDate() + weekIndex * 7 + dayIndex);
-        const dateKey = formatIso(cell);
-        const items = scheduleItems
-          .filter((item) => String(item.date || "") === dateKey)
-          .sort((a, b) => String(a.time || "").localeCompare(String(b.time || "")));
-        row.push({
-          dateKey,
-          dayNumber: cell.getDate(),
-          inMonth: cell.getMonth() === firstDay.getMonth(),
-          items,
-        });
-      }
-      weeks.push(row);
-    }
-    return weeks;
-  }, [scheduleDate, scheduleItems, scheduleView]);
-
-  const weeklyGroups = useMemo(() => {
-    if (scheduleView !== "week") return [];
-    const fromDate = startOfWeekIso(scheduleDate);
-    return Array.from({ length: 7 }, (_, index) => {
-      const date = addDays(fromDate, index);
-      return {
-        date,
-        items: scheduleItems
-          .filter((item) => String(item.date || "") === date)
-          .sort((a, b) => String(a.time || "").localeCompare(String(b.time || ""))),
-      };
-    });
-  }, [scheduleDate, scheduleItems, scheduleView]);
-
-  const dayItems = useMemo(
-    () =>
-      scheduleItems
-        .filter((item) => String(item.date || "") === scheduleDate)
-        .sort((a, b) => String(a.time || "").localeCompare(String(b.time || ""))),
-    [scheduleDate, scheduleItems]
-  );
-
-  const pendingCountByDate = useMemo(() => {
-    const map = new Map();
-    scheduleItems.forEach((item) => {
-      if (item.status !== "requested") return;
-      const key = String(item.date || "");
-      map.set(key, (map.get(key) || 0) + 1);
-    });
-    return map;
-  }, [scheduleItems]);
 
   const slotOptions = useMemo(
     () =>
@@ -482,19 +255,19 @@ export default function AdminReservationsPanel({
     setError("");
     try {
       const reservationParams = new URLSearchParams();
-      reservationParams.set("fromDate", queryRange.fromDate);
-      reservationParams.set("toDate", queryRange.toDate);
+      reservationParams.set("fromDate", selectedDate);
+      reservationParams.set("toDate", selectedDate);
       reservationParams.set("page", "1");
       reservationParams.set("pageSize", "300");
 
       const slotsParams = new URLSearchParams();
-      slotsParams.set("fromDate", queryRange.fromDate);
-      slotsParams.set("toDate", queryRange.toDate);
+      slotsParams.set("fromDate", selectedDate);
+      slotsParams.set("toDate", selectedDate);
 
       const logsParams = new URLSearchParams();
       logsParams.set("targetType", "reservation");
-      logsParams.set("fromDate", queryRange.fromDate);
-      logsParams.set("toDate", queryRange.toDate);
+      logsParams.set("fromDate", selectedDate);
+      logsParams.set("toDate", selectedDate);
       logsParams.set("page", "1");
       logsParams.set("pageSize", "40");
 
@@ -540,31 +313,16 @@ export default function AdminReservationsPanel({
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queryRange.fromDate, queryRange.toDate]);
+  }, [selectedDate]);
 
   useEffect(() => {
     setScheduleDate(selectedDate);
   }, [selectedDate]);
 
   useEffect(() => {
-    const api = calendarRef.current?.getApi?.();
-    if (!api) return;
-    const targetView = scheduleViewToCalendarView(scheduleView);
-    if (api.view?.type !== targetView) {
-      api.changeView(targetView);
-    }
-    const current = formatIso(api.getDate());
-    if (scheduleDate && current !== scheduleDate) {
-      api.gotoDate(scheduleDate);
-    }
-    syncFromCalendar();
-  }, [scheduleDate, scheduleView, syncFromCalendar]);
-
-  useEffect(() => {
     if (!initialFocus) return;
     if (initialFocus === "pending") {
       setStatusFilter("requested");
-      setPendingOnly(true);
       return;
     }
     if (initialFocus === "soon") {
@@ -670,106 +428,28 @@ export default function AdminReservationsPanel({
     <section className={panelStyles.root}>
       {scopeNotice ? <p className={styles.description}>{scopeNotice}</p> : null}
 
-      <div className={panelStyles.pendingTopStrip}>
-        <div className={panelStyles.pendingTopStripHead}>
-          <h4 className={panelStyles.pendingTopStripTitle}>承認待ち・対応が必要な予約</h4>
-          <div className={panelStyles.pendingTopStripMeta}>
-            <span className={adminStyles.smallMuted}>{sortedPendingForStrip.length}件</span>
-            <button
-              type="button"
-              className={adminStyles.inlineLinkButton}
-              onClick={() => {
-                setStatusFilter("requested");
-                setSurfaceView("list");
-              }}
-            >
-              承認待ちで絞り込み
-            </button>
-          </div>
-        </div>
-        <div className={panelStyles.pendingTopStripScroll}>
-          {sortedPendingForStrip.slice(0, 16).map((item) => (
-            <article key={`pending-strip-${item.id}`} className={panelStyles.pendingStripCard}>
-              <p className={panelStyles.pendingStripCardTitle}>
-                {item.date} {item.time || "--:--"} · {item.studentNameKanji || "-"}
-              </p>
-              <p className={panelStyles.pendingStripCardSub}>
-                {statusLabel(item.status)} / {item.instructorName || "講師未定"} / {deliveryShort(item.lessonDeliveryType)}
-              </p>
-              <div className={panelStyles.pendingStripCardActions}>
-                {item.status === "requested" ? (
-                  <>
-                    <button
-                      type="button"
-                      className={panelStyles.pendingStripApprove}
-                      onClick={() => updateReservation(item.id, { status: "confirmed" })}
-                      disabled={saving}
-                    >
-                      承認
-                    </button>
-                    <button
-                      type="button"
-                      className={panelStyles.pendingStripSub}
-                      onClick={() => updateReservation(item.id, { status: "rejected" })}
-                      disabled={saving}
-                    >
-                      却下
-                    </button>
-                  </>
-                ) : null}
-                <button
-                  type="button"
-                  className={panelStyles.pendingStripSub}
-                  onClick={() => {
-                    setSelectedReservation(item);
-                    setSurfaceView("list");
-                  }}
-                  disabled={saving}
-                >
-                  詳細
-                </button>
-              </div>
-            </article>
-          ))}
-        </div>
-        {sortedPendingForStrip.length === 0 ? (
-          <p className={panelStyles.pendingTopStripEmpty}>現在、対応が必要な予約はありません。</p>
-        ) : null}
-      </div>
-
       <div className={panelStyles.schedulePanel}>
         <div className={panelStyles.scheduleHeader}>
           <h3 className={panelStyles.detailTitle}>予約スケジュール</h3>
-          <span className={adminStyles.smallMuted}>{calendarTitle || scheduleRange.label}</span>
+          <span className={adminStyles.smallMuted}>{scheduleRange.label}</span>
         </div>
         <div className={panelStyles.scheduleToolbar}>
-          <div className={panelStyles.segmented}>
-            <button
-              className={`${panelStyles.segmentButton} ${surfaceView === "calendar" ? panelStyles.segmentButtonActive : ""}`}
-              type="button"
-              onClick={() => setSurfaceView("calendar")}
-            >
-              カレンダー
-            </button>
-            <button
-              className={`${panelStyles.segmentButton} ${surfaceView === "list" ? panelStyles.segmentButtonActive : ""}`}
-              type="button"
-              onClick={() => setSurfaceView("list")}
-            >
-              リスト
-            </button>
-            <button
-              className={`${panelStyles.segmentButton} ${surfaceView === "timetable" ? panelStyles.segmentButtonActive : ""}`}
-              type="button"
-              onClick={() => setSurfaceView("timetable")}
-            >
-              時間表
-            </button>
-          </div>
-          <button className={adminStyles.chipButton} type="button" onClick={() => moveSchedule(-1)}>
+          <label className={styles.label}>
+            基準日
+            <input
+              className={styles.field}
+              type="date"
+              value={scheduleDate}
+              onChange={(e) => {
+                setScheduleDate(e.target.value);
+                setSelectedDate(e.target.value);
+              }}
+            />
+          </label>
+          <button className={adminStyles.chipButton} type="button" onClick={() => setScheduleDate(addDays(scheduleDate, -1))}>
             前へ
           </button>
-          <button className={adminStyles.chipButton} type="button" onClick={() => moveSchedule(1)}>
+          <button className={adminStyles.chipButton} type="button" onClick={() => setScheduleDate(addDays(scheduleDate, 1))}>
             次へ
           </button>
           <button
@@ -779,50 +459,72 @@ export default function AdminReservationsPanel({
               const today = todayIso();
               setScheduleDate(today);
               setSelectedDate(today);
-              const api = calendarRef.current?.getApi?.();
-              if (api) api.today();
             }}
           >
             今日へ戻る
           </button>
-          {surfaceView === "calendar" ? (
-            <div className={panelStyles.segmented}>
-              <button
-                className={`${panelStyles.segmentButton} ${scheduleView === "day" ? panelStyles.segmentButtonActive : ""}`}
-                type="button"
-                onClick={() => setScheduleView("day")}
-              >
-                日
-              </button>
-              <button
-                className={`${panelStyles.segmentButton} ${scheduleView === "week" ? panelStyles.segmentButtonActive : ""}`}
-                type="button"
-                onClick={() => setScheduleView("week")}
-              >
-                週
-              </button>
-              <button
-                className={`${panelStyles.segmentButton} ${scheduleView === "month" ? panelStyles.segmentButtonActive : ""}`}
-                type="button"
-                onClick={() => setScheduleView("month")}
-              >
-                月
-              </button>
-            </div>
-          ) : null}
-          <button
-            className={`${styles.button} ${panelStyles.primaryAddBtn}`}
-            type="button"
-            onClick={() => setOpenCreate(true)}
-          >
+          <div className={panelStyles.segmented}>
+            <button
+              className={`${panelStyles.segmentButton} ${scheduleView === "day" ? panelStyles.segmentButtonActive : ""}`}
+              type="button"
+              onClick={() => setScheduleView("day")}
+            >
+              日
+            </button>
+            <button
+              className={`${panelStyles.segmentButton} ${scheduleView === "week" ? panelStyles.segmentButtonActive : ""}`}
+              type="button"
+              onClick={() => setScheduleView("week")}
+            >
+              週
+            </button>
+            <button
+              className={`${panelStyles.segmentButton} ${scheduleView === "month" ? panelStyles.segmentButtonActive : ""}`}
+              type="button"
+              onClick={() => setScheduleView("month")}
+            >
+              月
+            </button>
+          </div>
+          <div className={panelStyles.segmented}>
+            <button
+              className={`${panelStyles.segmentButton} ${viewMode === "list" ? panelStyles.segmentButtonActive : ""}`}
+              type="button"
+              onClick={() => setViewMode("list")}
+            >
+              リスト
+            </button>
+            <button
+              className={`${panelStyles.segmentButton} ${viewMode === "timetable" ? panelStyles.segmentButtonActive : ""}`}
+              type="button"
+              onClick={() => setViewMode("timetable")}
+            >
+              時間表
+            </button>
+          </div>
+          <button className={styles.button} type="button" onClick={() => setOpenCreate(true)}>
             予約追加
           </button>
         </div>
-        <div className={panelStyles.statusLegend}>
-          <span className={`${panelStyles.legendItem} ${panelStyles.legendGood}`}>承認済み</span>
-          <span className={`${panelStyles.legendItem} ${panelStyles.legendWarn}`}>承認待ち/変更対応中</span>
-          <span className={`${panelStyles.legendItem} ${panelStyles.legendBad}`}>却下/キャンセル</span>
-          <span className={`${panelStyles.legendItem} ${panelStyles.legendNormal}`}>一般</span>
+        <div className={panelStyles.scheduleList}>
+          {scheduleItems.slice(0, 16).map((item) => (
+            <button
+              key={`schedule-${item.id}`}
+              type="button"
+              className={`${panelStyles.scheduleItem} ${item.status === "requested" ? panelStyles.scheduleItemPending : ""}`}
+              onClick={() => {
+                setSelectedDate(item.date || selectedDate);
+                setSelectedReservation(item);
+              }}
+            >
+              <strong>
+                {item.date} {item.time}
+              </strong>
+              <span>{item.studentNameKanji || "-"} / {lessonTypeLabel(item)}</span>
+              <span>状態: {statusLabel(item.status)}</span>
+            </button>
+          ))}
+          {scheduleItems.length === 0 ? <p className={adminStyles.smallMuted}>該当日程の予約はありません。</p> : null}
         </div>
       </div>
 
@@ -910,60 +612,11 @@ export default function AdminReservationsPanel({
 
       <div className={panelStyles.bodyGrid}>
         <section className={panelStyles.mainPanel}>
-          {surfaceView === "calendar" ? (
-            <div className={panelStyles.calendarSurface}>
-              <div className={panelStyles.calendarHeaderNote}>
-                <span>{calendarTitle || scheduleRange.label}</span>
-                <span className={adminStyles.smallMuted}>ドラッグで移動・リサイズで時間調整</span>
-              </div>
-              <div className={panelStyles.fullCalendarWrap}>
-                <FullCalendar
-                  key={`${scheduleView}-${scheduleDate}`}
-                  ref={calendarRef}
-                  plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-                  initialView={scheduleViewToCalendarView(scheduleView)}
-                  initialDate={scheduleDate}
-                  events={calendarEvents}
-                  editable
-                  eventDurationEditable
-                  eventResizableFromStart
-                  selectable={false}
-                  dayMaxEventRows={3}
-                  height="auto"
-                  slotMinTime="08:00:00"
-                  slotMaxTime="22:00:00"
-                  nowIndicator
-                  allDaySlot={false}
-                  locale="ja"
-                  headerToolbar={false}
-                  eventTimeFormat={{ hour: "2-digit", minute: "2-digit", hour12: false }}
-                  eventClick={(clickInfo) => {
-                    const target = clickInfo.event.extendedProps?.reservation || null;
-                    if (target) setSelectedReservation(target);
-                  }}
-                  eventDrop={handleEventMoveOrResize}
-                  eventResize={handleEventMoveOrResize}
-                  datesSet={() => {
-                    syncFromCalendar();
-                  }}
-                />
-              </div>
-              {(pendingCountByDate.get(scheduleDate) || 0) > 0 ? (
-                <p className={panelStyles.dayPendingSummary}>
-                  この日の承認待ち <strong>{pendingCountByDate.get(scheduleDate)}件</strong>
-                </p>
-              ) : null}
-            </div>
-          ) : surfaceView === "list" ? (
+          {viewMode === "list" ? (
             <>
               <div className={panelStyles.mobileList}>
                 {filteredReservations.map((item) => (
-                  <article
-                    key={`card-${item.id}`}
-                    className={`${panelStyles.mobileListCard} ${
-                      selectedReservation?.id === item.id ? panelStyles.mobileListCardActive : ""
-                    }`}
-                  >
+                  <article key={`card-${item.id}`} className={panelStyles.mobileListCard}>
                     <p className={panelStyles.mobileListHead}>
                       {item.time || "-"} / {item.studentNameKanji || "-"}
                     </p>
@@ -973,34 +626,6 @@ export default function AdminReservationsPanel({
                     </p>
                     <p className={adminStyles.smallMuted}>状態: {statusLabel(item.status)}</p>
                     <div className={adminStyles.inlineLinks}>
-                      {item.status === "requested" ? (
-                        <div className={panelStyles.inlineQuickActions}>
-                          <button
-                            className={panelStyles.inlineQuickApprove}
-                            type="button"
-                            onClick={() => updateReservation(item.id, { status: "confirmed" })}
-                            disabled={saving}
-                          >
-                            承認
-                          </button>
-                          <button
-                            className={panelStyles.inlineQuickSub}
-                            type="button"
-                            onClick={() => updateReservation(item.id, { status: "rejected" })}
-                            disabled={saving}
-                          >
-                            却下
-                          </button>
-                          <button
-                            className={panelStyles.inlineQuickSub}
-                            type="button"
-                            onClick={() => updateReservation(item.id, { status: "change_requested" })}
-                            disabled={saving}
-                          >
-                            変更依頼
-                          </button>
-                        </div>
-                      ) : null}
                       <button className={adminStyles.inlineLinkButton} type="button" onClick={() => setSelectedReservation(item)}>
                         詳細
                       </button>
@@ -1031,13 +656,7 @@ export default function AdminReservationsPanel({
                 </thead>
                 <tbody>
                   {filteredReservations.map((item) => (
-                    <tr
-                      key={item.id}
-                      onClick={() => setSelectedReservation(item)}
-                      className={`${panelStyles.rowClickable} ${
-                        selectedReservation?.id === item.id ? panelStyles.rowSelected : ""
-                      }`}
-                    >
+                    <tr key={item.id} onClick={() => setSelectedReservation(item)} className={panelStyles.rowClickable}>
                       <td>{item.time || "-"}</td>
                       <td>{item.studentNameKanji || "-"}</td>
                       <td>{item.studentNumber || "-"}</td>
@@ -1055,34 +674,6 @@ export default function AdminReservationsPanel({
                       <td>{item.memo ? "あり" : "-"}</td>
                       <td>
                         <div className={adminStyles.inlineLinks}>
-                          {item.status === "requested" ? (
-                            <div className={panelStyles.inlineQuickActions}>
-                              <button
-                                className={panelStyles.inlineQuickApprove}
-                                type="button"
-                                onClick={() => updateReservation(item.id, { status: "confirmed" })}
-                                disabled={saving}
-                              >
-                                承認
-                              </button>
-                              <button
-                                className={panelStyles.inlineQuickSub}
-                                type="button"
-                                onClick={() => updateReservation(item.id, { status: "rejected" })}
-                                disabled={saving}
-                              >
-                                却下
-                              </button>
-                              <button
-                                className={panelStyles.inlineQuickSub}
-                                type="button"
-                                onClick={() => updateReservation(item.id, { status: "change_requested" })}
-                                disabled={saving}
-                              >
-                                変更依頼
-                              </button>
-                            </div>
-                          ) : null}
                           <button className={adminStyles.inlineLinkButton} type="button" onClick={() => setSelectedReservation(item)}>
                             詳細
                           </button>
@@ -1108,7 +699,7 @@ export default function AdminReservationsPanel({
                 </table>
               </div>
             </>
-          ) : surfaceView === "timetable" ? (
+          ) : (
             <div className={panelStyles.timeline}>
               {timelineGroups.map(([time, items]) => (
                 <div key={time} className={panelStyles.timelineRow}>
@@ -1131,7 +722,7 @@ export default function AdminReservationsPanel({
               ))}
               {timelineGroups.length === 0 ? <p>該当予約がありません。</p> : null}
             </div>
-          ) : null}
+          )}
         </section>
 
         <aside className={panelStyles.detailPanel}>
@@ -1482,39 +1073,6 @@ export default function AdminReservationsPanel({
               </button>
               <button className={styles.button} type="button" onClick={() => setOpenCancel(false)}>
                 戻る
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
-
-      {overflowDate ? (
-        <div className={adminStyles.modalOverlay}>
-          <div className={adminStyles.modalCard}>
-            <h3 className={styles.sectionTitle}>{overflowDate} の予約一覧</h3>
-            <div className={panelStyles.dayList}>
-              {scheduleItems
-                .filter((item) => String(item.date || "") === overflowDate)
-                .map((item) => (
-                  <button
-                    key={`overflow-${item.id}`}
-                    type="button"
-                    className={`${panelStyles.calendarEvent} ${panelStyles.calendarEventWide} ${panelStyles[`calendarEvent${statusTone(item.status).charAt(0).toUpperCase() + statusTone(item.status).slice(1)}`]}`}
-                    onClick={() => {
-                      setSelectedReservation(item);
-                      setOverflowDate("");
-                    }}
-                  >
-                    <strong>{item.time || "--:--"} / {item.studentNameKanji || "-"} / {statusLabel(item.status)}</strong>
-                    <span className={panelStyles.calendarMeta}>
-                      {item.instructorName || "講師未定"} / {deliveryLabel(item.lessonDeliveryType)} / {lessonTypeLabel(item)}
-                    </span>
-                  </button>
-                ))}
-            </div>
-            <div className={adminStyles.compactActions}>
-              <button className={styles.button} type="button" onClick={() => setOverflowDate("")}>
-                閉じる
               </button>
             </div>
           </div>

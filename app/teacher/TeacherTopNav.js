@@ -21,11 +21,7 @@ export default function TeacherTopNav({ currentPath = "/teacher" }) {
   }, [currentPath]);
 
   async function handleLogout() {
-    await fetch("/api/auth/logout", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ role: "teacher" }),
-    });
+    await fetch("/api/auth/logout", { method: "POST" });
     router.push("/login");
     router.refresh();
   }

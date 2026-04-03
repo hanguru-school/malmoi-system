@@ -36,7 +36,23 @@ export async function POST(request) {
       });
     }
 
-    return NextResponse.json({ ok: true, mail, mailError });
+    if (mailError || !mail?.sent) {
+      let errorMessage =
+        "メールを送信できませんでした。しばらくしてから再度お試しの上、解決しない場合は教室までお問い合わせください。";
+      if (mailError) {
+        errorMessage =
+          "メール送信に失敗しました。しばらくしてから再度お試しの上、解決しない場合は教室までお問い合わせください。";
+      } else if (mail?.mode === "log") {
+        errorMessage =
+          "現在メールは送信されていません（ログモード）。管理者がサーバーログで再設定リンクを確認するか、SMTP設定を有効にしてください。";
+      } else if (mail?.mode === "disabled") {
+        errorMessage =
+          "現在メール送信が無効です。管理者にお問い合わせください。";
+      }
+      return NextResponse.json({ ok: false, error: errorMessage, mail, mailError }, { status: 503 });
+    }
+
+    return NextResponse.json({ ok: true, mail });
   } catch (error) {
     return NextResponse.json({ ok: false, error: "再設定メール送信中にエラーが発生しました。" }, { status: 500 });
   }

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { applySessionCookies, getMailBaseUrlFromRequest, getRequestMeta, isHttpsRequest } from "../../../../lib/auth/http";
+import { SESSION_COOKIE_NAME, getMailBaseUrlFromRequest, getRequestMeta, isHttpsRequest } from "../../../../lib/auth/http";
 import { consumeLoginToken } from "../../../../lib/auth/store";
 
 function safeNextPath(nextPath) {
@@ -31,11 +31,6 @@ export async function GET(request) {
   const nextPath = requestedNext || result.nextPath || "/student/register/consent";
   const destination = new URL(nextPath, baseUrl);
   const response = NextResponse.redirect(destination);
-  applySessionCookies(response, {
-    sessionToken: result.sessionToken,
-    role: result.user?.role,
-    secure: isHttpsRequest(request),
-    maxAge: Number(process.env.AUTH_SESSION_TTL_HOURS || 24 * 7) * 60 * 60,
-  });
+  response.cookies.set({ name: SESSION_COOKIE_NAME, value: result.sessionToken, httpOnly: true, sameSite: "lax", secure: isHttpsRequest(request), path: "/", maxAge: Number(process.env.AUTH_SESSION_TTL_HOURS || 24 * 7) * 60 * 60 });
   return response;
 }
