@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "check:db": "node scripts/check-db.mjs",
+    "migrate:store:shared": "bash scripts/migrate-auth-store-to-shared.sh",
     "deploy": "bash scripts/deploy-from-local.sh",
     "deploy:server": "bash scripts/deploy-server-only.sh"
   },

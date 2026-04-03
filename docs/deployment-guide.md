@@ -41,6 +41,13 @@
 - 기존 운영 데이터(학생/관리자/교사/학부모/예약/노트)는 배포로 덮어쓰지 않음
 - 데이터 생성/수정은 포털에 접속한 사용자 액션(API)으로만 발생
 
+### 운영 JSON 저장소 경로 (권장)
+
+- **단일 진실 소스**: `/srv/malmoi/shared/auth-store.json`
+- `systemd` 유닛 `malmoi-web`에 `AUTH_STORE_PATH=/srv/malmoi/shared/auth-store.json` 설정 (drop-in 예시: `deploy/systemd/malmoi-web.d-auth-store.conf.example`)
+- 앱 디렉터리 내부 `.data/auth-store.json`은 **개발용 기본값**이며, 운영에서는 **배포 후에도 데이터가 흔들리지 않도록 shared 경로만 사용**하는 것을 권장
+- 이전 절차·백업·검증: **`docs/storage-path-migration.md`**
+
 ---
 
 ## 4) 28 서버 반영 절차 (고정)
@@ -58,6 +65,7 @@
 4. 환경변수 확인
    - `APP_BASE_URL`, `APP_URL`, `BASE_URL`, `NEXTAUTH_URL`, `MAIL_LINK_BASE_URL` = `https://portal.hanguru.school`
    - `MAIL_SEND_MODE=smtp`, `SMTP_*`, `MAIL_FROM`
+   - 운영 저장소: `AUTH_STORE_PATH=/srv/malmoi/shared/auth-store.json` (systemd `Environment=` 권장, `.env.production.example` 참고)
 5. 서비스 재시작
    - `sudo systemctl restart malmoi-web`
    - `sudo systemctl restart nginx`

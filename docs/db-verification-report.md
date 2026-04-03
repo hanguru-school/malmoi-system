@@ -98,3 +98,7 @@ AUTH_STORE_PATH=/path/to/auth-store.json npm run check:db
 - **本番の `AUTH_STORE_PATH` が意図せず別パス**になっていると、管理画面の件数と「想定ディレクトリのファイル」が一致しないことがある → API の `pathRelativeToCwd` / `envOverride` を確認すること
 - **複数インスタンス**で同一 JSON を共有するとファイル競合のリスクがある（現設計は単一ライター前提）
 - サーバへの実 SSH デプロイは、鍵・`scripts/deploy.env`・ネットワークがローカル環境に依存するため、**このレポジトリ変更だけでは自動保証できない**
+
+## 関連ドキュメント
+
+- `docs/storage-path-migration.md` — 運用で `auth-store.json` を `/srv/malmoi/shared/auth-store.json` に固定する手順（systemd・バックアップ・検証）

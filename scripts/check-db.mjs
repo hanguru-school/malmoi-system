@@ -6,6 +6,9 @@
  * 使い方（プロジェクトルートで）:
  *   npm run check:db
  *   AUTH_STORE_PATH=/path/to/auth-store.json npm run check:db
+ *
+ * 本番推奨パス（systemd の AUTH_STORE_PATH と一致させる）:
+ *   AUTH_STORE_PATH=/srv/malmoi/shared/auth-store.json npm run check:db
  */
 
 import fs from "fs/promises";

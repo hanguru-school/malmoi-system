@@ -83,6 +83,26 @@ echo "[7/7] service status and logs"
 sudo -n systemctl status "$SERVICE_NAME" --no-pager | sed -n '1,20p'
 sudo -n journalctl -u "$SERVICE_NAME" -n 50 --no-pager | sed -n '1,80p'
 
+SHARED_STORE="${MALMOI_SHARED_AUTH_STORE:-/srv/malmoi/shared/auth-store.json}"
+echo "----------------------------------------------"
+echo "AUTH_STORE_PATH / shared store sanity (best-effort)"
+ENV_LINE="$(sudo -n systemctl show "$SERVICE_NAME" -p Environment --value 2>/dev/null || true)"
+if echo "$ENV_LINE" | tr ' ' '\n' | grep -q '^AUTH_STORE_PATH='; then
+  echo "OK: AUTH_STORE_PATH is present in systemd Environment for $SERVICE_NAME"
+  echo "$ENV_LINE" | tr ' ' '\n' | grep '^AUTH_STORE_PATH=' || true
+else
+  echo "WARN: AUTH_STORE_PATH not found in systemd Environment for $SERVICE_NAME"
+  echo "      Production should use fixed path (see docs/storage-path-migration.md):"
+  echo "      $SHARED_STORE"
+fi
+if [[ -f "$SHARED_STORE" ]]; then
+  SZ="$(stat -c%s "$SHARED_STORE" 2>/dev/null || wc -c <"$SHARED_STORE")"
+  echo "OK: $SHARED_STORE exists (${SZ} bytes)"
+else
+  echo "NOTE: $SHARED_STORE not found on disk (OK if using another AUTH_STORE_PATH)"
+fi
+echo "----------------------------------------------"
+
 echo "external health (best-effort): $EXTERNAL_HEALTH_URL"
 if curl -fsSI "$EXTERNAL_HEALTH_URL" >/tmp/malmoi-health-external.txt; then
   cat /tmp/malmoi-health-external.txt
