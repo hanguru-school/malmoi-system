@@ -1,0 +1,346 @@
+.root {
+  padding-bottom: 5.5rem;
+}
+
+.tabBar {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tab {
+  flex: 1;
+  min-width: 6.5rem;
+  padding: 0.65rem 0.5rem;
+  border: none;
+  background: transparent;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  white-space: nowrap;
+}
+
+.tabActive {
+  color: #1d4ed8;
+  border-bottom-color: #2563eb;
+}
+
+.wizardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.stepDots {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.stepDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #cbd5e1;
+}
+
+.stepDotActive {
+  background: #2563eb;
+  transform: scale(1.15);
+}
+
+.stepDotDone {
+  background: #22c55e;
+}
+
+.calendarHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.calendarWeekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  font-size: 0.7rem;
+  color: #64748b;
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.calendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.calendarBlank {
+  min-height: 2.25rem;
+}
+
+.calendarDay {
+  min-height: 2.25rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.calendarDayUnavailable {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.calendarDayAvailable {
+  border-color: #86efac;
+  background: #f0fdf4;
+}
+
+.calendarDayLimited {
+  border-color: #fde68a;
+  background: #fffbeb;
+}
+
+.calendarDaySelected {
+  border-color: #2563eb;
+  background: #eff6ff;
+  font-weight: 700;
+}
+
+.timeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(4.5rem, 1fr));
+  gap: 0.45rem;
+}
+
+.timeBtn {
+  padding: 0.55rem 0.35rem;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.timeBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.timeBtnSelected {
+  border-color: #2563eb;
+  background: #eff6ff;
+  font-weight: 700;
+}
+
+.optionRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.optionChip {
+  padding: 0.5rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.optionChipSelected {
+  border-color: #2563eb;
+  background: #eff6ff;
+  font-weight: 600;
+}
+
+.summaryCard {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.successCard {
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.bottomBar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  padding: 0.65rem 1rem calc(0.65rem + env(safe-area-inset-bottom));
+  background: rgba(255, 255, 255, 0.96);
+  border-top: 1px solid #e2e8f0;
+  box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.06);
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bottomBarInner {
+  width: min(720px, 100%);
+  margin: 0 auto;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.bottomBtn {
+  flex: 1;
+  max-width: 12rem;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: none;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.bottomBtnPrimary {
+  background: #2563eb;
+  color: #fff;
+}
+
+.bottomBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 1rem;
+}
+
+@media (min-width: 640px) {
+  .modalOverlay {
+    align-items: center;
+  }
+}
+
+.modalCard {
+  width: min(420px, 100%);
+  background: #fff;
+  border-radius: 16px 16px 0 0;
+  padding: 1.25rem;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.2);
+}
+
+@media (min-width: 640px) {
+  .modalCard {
+    border-radius: 16px;
+  }
+}
+
+.modalActions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.modalBtn {
+  flex: 1;
+  padding: 0.65rem;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.modalBtnPrimary {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+}
+
+.listCard {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.85rem;
+  margin-bottom: 0.65rem;
+  background: #fff;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.45rem;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.badgePending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.badgeConfirmed {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.badgeCancelled {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.badgeCompleted {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.badgeScheduled {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.hint {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-top: 0.35rem;
+}
+
+.rollbackHint {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin-top: 1rem;
+}
+
+.rollbackHint a {
+  color: #64748b;
+  text-decoration: underline;
+}
+
+.field {
+  width: 100%;
+  margin-top: 0.35rem;
+}

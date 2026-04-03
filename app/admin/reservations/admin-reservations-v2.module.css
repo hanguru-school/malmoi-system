@@ -1,0 +1,135 @@
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: flex-end;
+  margin-bottom: 1rem;
+}
+
+.toolbar label {
+  min-width: 8rem;
+  flex: 1;
+}
+
+.listWrap {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: auto;
+  max-height: min(60vh, 520px);
+  margin-bottom: 1rem;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 6.5rem 4.5rem 1fr 5.5rem 5rem;
+  gap: 0.35rem;
+  padding: 0.55rem 0.65rem;
+  align-items: center;
+  font-size: 0.82rem;
+  border-bottom: 1px solid #f1f5f9;
+  cursor: pointer;
+}
+
+.row:hover {
+  background: #f8fafc;
+}
+
+.rowActive {
+  background: #eff6ff;
+}
+
+@media (max-width: 720px) {
+  .row {
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
+  }
+}
+
+.th {
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: #64748b;
+  text-transform: none;
+  padding: 0.45rem 0.65rem;
+  border-bottom: 1px solid #e2e8f0;
+  display: grid;
+  grid-template-columns: 6.5rem 4.5rem 1fr 5.5rem 5rem;
+  gap: 0.35rem;
+}
+
+@media (max-width: 720px) {
+  .th {
+    display: none;
+  }
+}
+
+.safeZone {
+  margin-top: 1.5rem;
+  padding: 0.85rem;
+  border: 1px dashed #f97316;
+  border-radius: 12px;
+  background: #fff7ed;
+}
+
+.safeZoneTitle {
+  margin: 0 0 0.35rem;
+  font-size: 0.95rem;
+  color: #9a3412;
+}
+
+.slotRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid #ffedd5;
+  font-size: 0.85rem;
+}
+
+.hint {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin: 0.5rem 0 0;
+}
+
+.drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+}
+
+.drawerOpen {
+  pointer-events: auto;
+}
+
+.drawerBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.35);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.drawerOpen .drawerBackdrop {
+  opacity: 1;
+}
+
+.drawerPanel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: min(420px, 100%);
+  height: 100%;
+  background: #fff;
+  box-shadow: -8px 0 32px rgba(15, 23, 42, 0.12);
+  transform: translateX(100%);
+  transition: transform 0.2s;
+  overflow: auto;
+  padding: 1rem;
+}
+
+.drawerOpen .drawerPanel {
+  transform: translateX(0);
+}
