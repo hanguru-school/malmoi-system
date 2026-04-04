@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireRole } from "../../lib/auth/session";
 import {
   listAuditLogsForAdmin,
+  listHomeworksForAdmin,
   listLessonNotesForAdmin,
   listNoticesForAdmin,
   listMailLogsForAdmin,
@@ -81,19 +82,38 @@ function adminActionLabel(action, summary) {
 
 export default async function AdminPage() {
   await requireRole(["admin"]);
-  const [students, reservations, lessonNotes, notices, auditLogs, mailLogs] = await Promise.all([
-    listStudentsForAdmin({}, { page: 1, pageSize: 500 }),
-    listReservationsForAdmin({ page: 1, pageSize: 100 }),
-    listLessonNotesForAdmin({}),
-    listNoticesForAdmin(),
-    listAuditLogsForAdmin({ page: 1, pageSize: 12 }),
-    listMailLogsForAdmin({ page: 1, pageSize: 30 }),
-  ]);
-
   const today = todayInJst();
-  const todaysReservations = (reservations.items || [])
-    .filter((item) => String(item.date || "") === today)
+  const [students, reservations, lessonNotes, notices, auditLogs, mailLogs, resToday, homeworkTodayList] =
+    await Promise.all([
+      listStudentsForAdmin({}, { page: 1, pageSize: 500 }),
+      listReservationsForAdmin({ page: 1, pageSize: 100 }),
+      listLessonNotesForAdmin({}),
+      listNoticesForAdmin(),
+      listAuditLogsForAdmin({ page: 1, pageSize: 12 }),
+      listMailLogsForAdmin({ page: 1, pageSize: 30 }),
+      listReservationsForAdmin({ page: 1, pageSize: 800, fromDate: today, toDate: today }),
+      listHomeworksForAdmin({ fromDate: today, toDate: today }),
+    ]);
+
+  const todaysReservations = (resToday.items || [])
+    .filter((item) => String(item.date || "").slice(0, 10) === today)
     .sort((a, b) => `${a.time || ""}`.localeCompare(`${b.time || ""}`));
+  const hwLessonToday = (homeworkTodayList || []).filter(
+    (h) => String(h.lessonDate || "").slice(0, 10) === today
+  );
+  const hwTotalToday = hwLessonToday.length;
+  const hwDoneToday = hwLessonToday.filter((h) =>
+    ["reviewed", "completed"].includes(String(h.status || ""))
+  ).length;
+  const homeworkCompletionRate = hwTotalToday ? Math.round((hwDoneToday / hwTotalToday) * 100) : null;
+  const activeStudentIds = new Set();
+  todaysReservations.forEach((r) => {
+    if (r.studentId) activeStudentIds.add(r.studentId);
+  });
+  hwLessonToday.forEach((h) => {
+    if (h.studentId) activeStudentIds.add(h.studentId);
+  });
+  const activeStudentsToday = activeStudentIds.size;
   const todayTimes = todaysReservations.map((item) => String(item.time || "")).filter(Boolean).sort();
   const firstLesson = todayTimes[0] || "-";
   const lastLesson = todayTimes[todayTimes.length - 1] || "-";
@@ -141,6 +161,20 @@ export default async function AdminPage() {
             <p className={dashboardStyles.opsSummaryValue}>一覧</p>
             <Link className={dashboardStyles.opsSummaryLink} href="/admin/ops-today">
               抜け・提出待ちをまとめて見る
+            </Link>
+          </article>
+          <article className={dashboardStyles.opsSummaryCard}>
+            <p className={dashboardStyles.opsSummaryLabel}>本日の運営KPI</p>
+            <ul className={dashboardStyles.opsSummaryList}>
+              <li>本日レッスン枠: {todaysReservations.length} 件</li>
+              <li>
+                本日宿題 完了率:{" "}
+                {homeworkCompletionRate === null ? "—" : `${homeworkCompletionRate}%`}（{hwDoneToday}/{hwTotalToday || 0}）
+              </li>
+              <li>アクティブ学生（概算）: {activeStudentsToday} 名</li>
+            </ul>
+            <Link className={dashboardStyles.opsSummaryLink} href="/admin/homework">
+              宿題管理へ
             </Link>
           </article>
           <article className={dashboardStyles.opsSummaryCard}>

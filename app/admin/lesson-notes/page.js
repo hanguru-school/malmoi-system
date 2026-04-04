@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import styles from "../../login/login.module.css";
 import adminStyles from "../admin.module.css";
 import { requireRole } from "../../../lib/auth/session";
@@ -16,16 +17,18 @@ export default async function AdminLessonNotesPage({ searchParams }) {
           lessonUnitId基準でレッスンノートを作成し、対象学生を接続できます。
         </p>
         <AdminTopNav currentPath="/admin/lesson-notes" />
-        <AdminLessonNotesPanel
-          enableUnassignedTeacherFilter
-          enableBulkAssignUnassignedTeacher
-          initialStudentIdFilter={initialStudentIdFilter}
-          scopeNotice={
-            initialStudentIdFilter
-              ? `学生IDフィルター適用中: ${initialStudentIdFilter} (対象学生のノート中心表示)`
-              : ""
-          }
-        />
+        <Suspense fallback={<p className={styles.description}>読み込み中...</p>}>
+          <AdminLessonNotesPanel
+            enableUnassignedTeacherFilter
+            enableBulkAssignUnassignedTeacher
+            initialStudentIdFilter={initialStudentIdFilter}
+            scopeNotice={
+              initialStudentIdFilter
+                ? `学生IDフィルター適用中: ${initialStudentIdFilter} (対象学生のノート中心表示)`
+                : ""
+            }
+          />
+        </Suspense>
       </main>
     </div>
   );

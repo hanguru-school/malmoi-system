@@ -1,7 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
 import styles from "../../login/login.module.css";
+import {
+  HW_QUICK_PRESETS,
+  HW_PREFILL_FROM_NOTE_KEY,
+  getRecentQuickHomeworks,
+  pushRecentQuickHomework,
+} from "../../../lib/homework/quickHomework";
+import { completeOpsFlowStep, opsFlowDoneFallback } from "../../../lib/ops/opsFlowQueue";
 
 const HOMEWORK_TYPES = [
   { id: "vocabulary", label: "単語" },
@@ -54,7 +62,7 @@ export default function AdminHomeworkPanel({
   const [editingId, setEditingId] = useState("");
   const [filters, setFilters] = useState({
     query: "",
-    studentId: "",
+    studentId: String(initialStudentId || "").trim(),
     teacherUserId: "",
     status: "",
     type: "",
@@ -67,6 +75,8 @@ export default function AdminHomeworkPanel({
   const [bulkStatus, setBulkStatus] = useState("reviewed");
   const [templates, setTemplates] = useState([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
+  const [recentHwTick, setRecentHwTick] = useState(0);
+  const prefillFromNoteAppliedRef = useRef(false);
   const [form, setForm] = useState({
     studentId: initialStudentId || "",
     lessonDate: initialLessonDate || "",
@@ -83,6 +93,12 @@ export default function AdminHomeworkPanel({
 
   const apiBase = "/api/admin/homework";
   const isTeacherMode = mode === "teacher";
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const recentQuickHomeworks = useMemo(() => {
+    return getRecentQuickHomeworks();
+  }, [recentHwTick]);
 
   const filteredSummary = useMemo(() => {
     const notStarted = items.filter((item) => item.status === "not_started").length;
@@ -141,6 +157,37 @@ export default function AdminHomeworkPanel({
   }, []);
 
   useEffect(() => {
+    if (prefillFromNoteAppliedRef.current) return;
+    if (typeof window === "undefined") return;
+    try {
+      const raw = window.sessionStorage.getItem(HW_PREFILL_FROM_NOTE_KEY);
+      if (!raw) return;
+      const p = JSON.parse(raw);
+      if (!p || p.v !== 1) return;
+      if (Date.now() - (p.ts || 0) > 45 * 60 * 1000) {
+        window.sessionStorage.removeItem(HW_PREFILL_FROM_NOTE_KEY);
+        return;
+      }
+      const expectSid = String(initialStudentId || "").trim();
+      if (expectSid && p.studentId && p.studentId !== expectSid) return;
+      prefillFromNoteAppliedRef.current = true;
+      window.sessionStorage.removeItem(HW_PREFILL_FROM_NOTE_KEY);
+      setForm((prev) => ({
+        ...prev,
+        studentId: p.studentId || prev.studentId,
+        lessonUnitId: p.lessonUnitId || prev.lessonUnitId,
+        lessonDate: p.lessonDate || prev.lessonDate,
+        dueDate: p.dueDate || prev.dueDate,
+        title: p.title || prev.title,
+        description: p.description || prev.description,
+        type: p.type || prev.type,
+      }));
+    } catch {
+      // ignore
+    }
+  }, [initialStudentId, initialLessonUnitId, initialLessonDate]);
+
+  useEffect(() => {
     setSelectedIds((prev) => prev.filter((id) => items.some((item) => item.id === id)));
   }, [items]);
 
@@ -161,6 +208,12 @@ export default function AdminHomeworkPanel({
       });
       const data = await response.json();
       if (!response.ok || !data?.ok) throw new Error(data?.error || "宿題追加に失敗しました。");
+      pushRecentQuickHomework({
+        title: form.title,
+        description: form.description,
+        type: form.type,
+      });
+      setRecentHwTick((n) => n + 1);
       setForm((prev) => ({
         ...prev,
         reservationId: "",
@@ -169,11 +222,42 @@ export default function AdminHomeworkPanel({
         teacherMemo: "",
       }));
       await loadItems();
+      const searchStr = searchParams.toString() ? `?${searchParams.toString()}` : "";
+      const flow = completeOpsFlowStep(pathname, searchStr);
+      if (flow.done && flow.matched) {
+        window.location.assign(opsFlowDoneFallback(flow.role));
+        return;
+      }
+      if (flow.next) {
+        window.location.assign(flow.next);
+        return;
+      }
     } catch (err) {
       setError(err.message || "宿題追加中にエラーが発生しました。");
     } finally {
       setSaving(false);
     }
+  }
+
+  function applyQuickPreset(presetId) {
+    const p = HW_QUICK_PRESETS.find((item) => item.id === presetId);
+    if (!p) return;
+    setForm((prev) => ({
+      ...prev,
+      title: p.title,
+      description: p.description,
+      type: p.type,
+    }));
+  }
+
+  function applyRecentQuick(entry) {
+    if (!entry) return;
+    setForm((prev) => ({
+      ...prev,
+      title: entry.title,
+      description: entry.description,
+      type: entry.type || prev.type,
+    }));
   }
 
   function handleCopyFromPrevious() {
@@ -208,6 +292,18 @@ export default function AdminHomeworkPanel({
       if (!response.ok || !data?.ok) throw new Error(data?.error || "更新に失敗しました。");
       setEditingId("");
       await loadItems();
+      const st = String(patch?.status || "");
+      if (st === "reviewed" || st === "completed") {
+        const searchStr = searchParams.toString() ? `?${searchParams.toString()}` : "";
+        const flow = completeOpsFlowStep(pathname, searchStr);
+        if (flow.done && flow.matched) {
+          window.location.assign(opsFlowDoneFallback(flow.role));
+          return;
+        }
+        if (flow.next) {
+          window.location.assign(flow.next);
+        }
+      }
     } catch (err) {
       setError(err.message || "更新中にエラーが発生しました。");
     } finally {
@@ -435,8 +531,60 @@ export default function AdminHomeworkPanel({
         </div>
       </article>
 
-      <form onSubmit={handleCreate}>
+      <form id="admin-homework-create-form" onSubmit={handleCreate}>
         <h2 className={styles.sectionTitle}>宿題追加</h2>
+        {isTeacherMode ? (
+          <p className={styles.description}>
+            レッスンノート保存後にこの画面へ来た場合、宿題欄にノートの要約が引き継がれることがあります（sessionStorage、約45分有効）。
+          </p>
+        ) : null}
+        <div
+          style={{
+            marginBottom: "0.75rem",
+            padding: "0.65rem 0.75rem",
+            borderRadius: "12px",
+            border: "1px solid rgba(148, 163, 184, 0.45)",
+            background: "rgba(248, 250, 252, 0.95)",
+          }}
+        >
+          <p className={styles.description} style={{ marginTop: 0 }}>
+            クイック定型（タイトル・内容・種類を一括）
+          </p>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem", marginBottom: "0.5rem" }}>
+            {HW_QUICK_PRESETS.map((preset) => (
+              <button
+                key={preset.id}
+                className={styles.button}
+                type="button"
+                onClick={() => applyQuickPreset(preset.id)}
+                style={{ fontSize: "0.8rem", padding: "0.26rem 0.55rem" }}
+              >
+                {preset.title}
+              </button>
+            ))}
+          </div>
+          {recentQuickHomeworks.length > 0 ? (
+            <>
+              <p className={styles.description} style={{ margin: "0.35rem 0" }}>
+                直近に登録した宿題を再利用
+              </p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem" }}>
+                {recentQuickHomeworks.map((entry, idx) => (
+                  <button
+                    key={`${entry.title}-${idx}`}
+                    className={styles.button}
+                    type="button"
+                    onClick={() => applyRecentQuick(entry)}
+                    style={{ fontSize: "0.76rem", padding: "0.22rem 0.5rem", maxWidth: "100%" }}
+                    title={entry.description}
+                  >
+                    {entry.title.length > 36 ? `${entry.title.slice(0, 36)}…` : entry.title}
+                  </button>
+                ))}
+              </div>
+            </>
+          ) : null}
+        </div>
         <label className={styles.label}>
           学生
           <select
@@ -460,6 +608,15 @@ export default function AdminHomeworkPanel({
             type="date"
             value={form.lessonDate}
             onChange={(e) => setForm((prev) => ({ ...prev, lessonDate: e.target.value }))}
+          />
+        </label>
+        <label className={styles.label}>
+          提出期限（任意・ノート連携時は自動）
+          <input
+            className={styles.field}
+            type="date"
+            value={form.dueDate}
+            onChange={(e) => setForm((prev) => ({ ...prev, dueDate: e.target.value }))}
           />
         </label>
         <label className={styles.label}>
@@ -564,9 +721,24 @@ export default function AdminHomeworkPanel({
             <option value="0">非公開</option>
           </select>
         </label>
-        <button className={styles.button} type="submit" disabled={saving}>
-          {saving ? "保存中..." : "宿題追加"}
-        </button>
+        <div className={styles.reservationActions}>
+          <button className={styles.button} type="submit" disabled={saving}>
+            {saving ? "保存中..." : "宿題追加"}
+          </button>
+          {isTeacherMode ? (
+            <button
+              className={styles.button}
+              type="button"
+              disabled={saving || !form.studentId || !form.title?.trim() || !form.description?.trim()}
+              onClick={() => {
+                const el = document.getElementById("admin-homework-create-form");
+                if (el) el.requestSubmit();
+              }}
+            >
+              推奨内容で登録（1クリック）
+            </button>
+          ) : null}
+        </div>
       </form>
 
       <h2 className={styles.sectionTitle}>宿題一覧</h2>

@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import styles from "../../login/login.module.css";
 import adminStyles from "../admin.module.css";
 import { requireRole } from "../../../lib/auth/session";
@@ -18,12 +19,14 @@ export default async function AdminHomeworkPage({ searchParams }) {
           学生別の宿題を作成・公開し、提出状況と確認状況を一画面で管理できます。
         </p>
         <AdminTopNav currentPath="/admin/homework" />
-        <AdminHomeworkPanel
-          initialLessonUnitId={initialLessonUnitId}
-          initialStudentId={initialStudentId}
-          initialLessonDate={initialLessonDate}
-          mode="admin"
-        />
+        <Suspense fallback={<p className={styles.description}>読み込み中...</p>}>
+          <AdminHomeworkPanel
+            initialLessonUnitId={initialLessonUnitId}
+            initialStudentId={initialStudentId}
+            initialLessonDate={initialLessonDate}
+            mode="admin"
+          />
+        </Suspense>
       </main>
     </div>
   );

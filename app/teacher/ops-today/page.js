@@ -6,6 +6,7 @@ import {
   listReservationsForAdmin,
 } from "../../../lib/auth/store";
 import SubmittedHomeworkBulkBar from "../../components/ops/SubmittedHomeworkBulkBar";
+import OpsFlowQueueBootstrap from "../../components/ops/OpsFlowQueueBootstrap";
 import TeacherTopNav from "../TeacherTopNav";
 import { buildTeacherTodayBacklog, todayYmdJst } from "../../../lib/ops/todayBacklog";
 import t from "../teacher.module.css";
@@ -44,6 +45,7 @@ export default async function TeacherOpsTodayPage() {
         <h1 className={t.title}>本日の未処理</h1>
         <p className={t.subtitle}>今日締め切りの記録・確認をここから進めます。各行から処理画面へ移動できます。</p>
         <TeacherTopNav currentPath="/teacher/ops-today" />
+        <OpsFlowQueueBootstrap urls={queueUrls} role="teacher" />
 
         <div className={t.opsIntro}>
           <Link className={t.todayCardLink} href="/teacher">

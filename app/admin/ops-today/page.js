@@ -6,6 +6,7 @@ import {
   listReservationsForAdmin,
 } from "../../../lib/auth/store";
 import SubmittedHomeworkBulkBar from "../../components/ops/SubmittedHomeworkBulkBar";
+import OpsFlowQueueBootstrap from "../../components/ops/OpsFlowQueueBootstrap";
 import AdminTopNav from "../AdminTopNav";
 import { buildAdminTodayBacklog, todayYmdJst } from "../../../lib/ops/todayBacklog";
 import styles from "../../login/login.module.css";
@@ -34,6 +35,14 @@ export default async function AdminOpsTodayPage() {
 
   const bulkItems = backlog.submittedQueue.map((x) => ({ id: x.id, label: x.label }));
 
+  const queueUrls = [
+    ...backlog.missingNotes.map((r) => r.href),
+    ...backlog.missingHomework.map((r) => r.href),
+    ...backlog.submittedQueue.map((r) => r.href),
+    ...backlog.requested.map((r) => r.href),
+    ...backlog.changeReq.map((r) => r.href),
+  ];
+
   return (
     <div className={adminStyles.adminShell}>
       <main className={adminStyles.adminCard}>
@@ -42,6 +51,7 @@ export default async function AdminOpsTodayPage() {
           本日分の抜け・提出確認待ち・予約対応を一覧します。各行から該当画面へ移動できます。
         </p>
         <AdminTopNav currentPath="/admin/ops-today" />
+        <OpsFlowQueueBootstrap urls={queueUrls} role="admin" />
 
         <div className={adminStyles.opsTodayIntro}>
           <Link className={adminStyles.opsSummaryLink} href="/admin">

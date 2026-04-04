@@ -12,6 +12,7 @@ const EMPTY_FILTERS = {
   registrationStatus: "",
   consentStatus: "",
   linked: "",
+  riskSignal: "",
 };
 
 export default function AdminStudentsPanelV2({
@@ -155,6 +156,21 @@ export default function AdminStudentsPanelV2({
               <option value="">全体</option>
               <option value="linked">linked</option>
               <option value="unlinked">unlinked</option>
+            </select>
+          </label>
+
+          <label className={styles.label}>
+            学習シグナル
+            <select
+              className={styles.field}
+              value={filters.riskSignal}
+              onChange={(event) => setFilters((prev) => ({ ...prev, riskSignal: event.target.value }))}
+            >
+              <option value="">全体</option>
+              <option value="any">シグナルあり（いずれか）</option>
+              <option value="reservation_gap">予約が空き／履歴弱い</option>
+              <option value="homework_backlog">宿題未完了が多い</option>
+              <option value="note_stale">ノートが古い／なし</option>
             </select>
           </label>
         </div>

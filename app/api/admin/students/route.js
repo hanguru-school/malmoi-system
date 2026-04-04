@@ -17,6 +17,7 @@ export async function GET(request) {
     registrationStatus: searchParams.get("registrationStatus") || "",
     consentStatus: searchParams.get("consentStatus") || "",
     linked: searchParams.get("linked") || "",
+    riskSignal: searchParams.get("riskSignal") || "",
   };
   const page = Number(searchParams.get("page") || 1);
   const pageSize = Number(searchParams.get("pageSize") || 10);

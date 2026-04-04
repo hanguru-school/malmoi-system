@@ -2,7 +2,18 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import styles from "../../login/login.module.css";
+import {
+  TEACHER_QUICK_TEMPLATES,
+  TEACHER_POINT_SNIPPETS,
+  getRecentPhrases,
+  pushRecentPhrase,
+  buildTeacherHomeworkHref,
+  localTodayYmd,
+} from "../../../lib/lessonNotes/teacherQuickCompose";
+import { buildHomeworkPrefillFromNoteForm, HW_PREFILL_FROM_NOTE_KEY } from "../../../lib/homework/quickHomework";
+import { completeOpsFlowStep, opsFlowDoneFallback } from "../../../lib/ops/opsFlowQueue";
 
 const EMPTY_FORM = {
   id: "",
@@ -49,6 +60,8 @@ export default function AdminLessonNotesPanel({
   enableUnassignedTeacherFilter = false,
   enableBulkAssignUnassignedTeacher = false,
   initialStudentIdFilter = "",
+  initialLessonUnitId = "",
+  initialNoteDate = "",
 }) {
   const [notes, setNotes] = useState([]);
   const [teacherUsers, setTeacherUsers] = useState([]);
@@ -65,7 +78,21 @@ export default function AdminLessonNotesPanel({
   const [studentIdFilter, setStudentIdFilter] = useState(String(initialStudentIdFilter || "").trim());
   const [status, setStatus] = useState({ type: "", text: "" });
   const [bulkAssignResult, setBulkAssignResult] = useState(null);
+  const [postSaveHomeworkLink, setPostSaveHomeworkLink] = useState("");
+  const [recentPhraseTick, setRecentPhraseTick] = useState(0);
+  const [recentInsertTarget, setRecentInsertTarget] = useState("summary");
+  const [pointInsertTarget, setPointInsertTarget] = useState("summary");
+  const [openHomeworkAfterSave, setOpenHomeworkAfterSave] = useState(true);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const isEdit = Boolean(form.id);
+
+  const showQuickCompose = String(apiBasePath || "").includes("/teacher/");
+  const recentPhrases = useMemo(() => {
+    if (!showQuickCompose) return [];
+    return getRecentPhrases();
+  }, [showQuickCompose, recentPhraseTick]);
 
   const sortedNotes = useMemo(
     () => [...notes].sort((a, b) => String(b.date || b.updatedAt || "").localeCompare(String(a.date || a.updatedAt || ""))),
@@ -222,8 +249,64 @@ export default function AdminLessonNotesPanel({
     });
   }, [studentIdFilter, isEdit]);
 
+  useEffect(() => {
+    if (isEdit) return;
+    const lid = String(initialLessonUnitId || "").trim();
+    const nd = String(initialNoteDate || "").trim().slice(0, 10);
+    setForm((prev) => {
+      let next = { ...prev };
+      if (lid && !String(prev.lessonUnitId || "").trim()) {
+        next.lessonUnitId = lid;
+      }
+      if (!String(prev.date || "").trim()) {
+        if (nd) next.date = nd;
+        else if (showQuickCompose) next.date = localTodayYmd();
+      }
+      return next;
+    });
+  }, [initialLessonUnitId, initialNoteDate, isEdit, showQuickCompose]);
+
   function resetForm() {
-    setForm(EMPTY_FORM);
+    if (showQuickCompose) {
+      setForm({ ...EMPTY_FORM, date: localTodayYmd() });
+    } else {
+      setForm(EMPTY_FORM);
+    }
+  }
+
+  function applyQuickTemplate(templateId) {
+    const t = TEACHER_QUICK_TEMPLATES.find((x) => x.id === templateId);
+    if (!t) return;
+    const hasContent = [form.title, form.summary, form.content, form.homeworkSummary, form.nextLessonPlan].some((s) =>
+      String(s || "").trim()
+    );
+    if (hasContent && !window.confirm("入力内容を定型で上書きしますか？")) return;
+    setForm((prev) => ({ ...prev, ...t.patch }));
+  }
+
+  function appendRecentToField(field, phrase) {
+    const add = String(phrase || "").trim();
+    if (!add) return;
+    const key = field === "content" ? "content" : "summary";
+    setForm((prev) => {
+      const p = String(prev[key] || "");
+      const sep = p && !p.endsWith("\n") ? "\n" : "";
+      return { ...prev, [key]: p ? `${p}${sep}${add}` : add };
+    });
+  }
+
+  function appendPointSnippet(snippetId) {
+    const s = TEACHER_POINT_SNIPPETS.find((x) => x.id === snippetId);
+    if (!s) return;
+    const line =
+      pointInsertTarget === "nextLessonPlan" ? String(s.nextLine || "").trim() : String(s.summaryLine || "").trim();
+    if (!line) return;
+    const key = pointInsertTarget === "nextLessonPlan" ? "nextLessonPlan" : "summary";
+    setForm((prev) => {
+      const p = String(prev[key] || "");
+      const sep = p && !p.endsWith("\n") ? "\n" : "";
+      return { ...prev, [key]: p ? `${p}${sep}${line}` : line };
+    });
   }
 
   async function submitForm(event) {
@@ -251,7 +334,55 @@ export default function AdminLessonNotesPanel({
       const data = await response.json();
       if (!response.ok || !data?.ok) throw new Error(data?.error || "保存に失敗しました。");
       setStatus({ type: "ok", text: isEdit ? updateSuccessText : createSuccessText });
+      const isTeacherPath = String(apiBasePath || "").includes("/teacher/");
+      const shouldChainHomework = isTeacherPath && !isEdit;
+      const snapshot = shouldChainHomework
+        ? {
+            lessonUnitId: form.lessonUnitId,
+            studentIds: form.studentIds,
+            date: form.date,
+          }
+        : null;
+      const summaryLine = String(form.summary || "").trim();
+      if (shouldChainHomework && summaryLine) {
+        pushRecentPhrase(summaryLine);
+        setRecentPhraseTick((n) => n + 1);
+      }
+      const homeworkHref = snapshot ? buildTeacherHomeworkHref(snapshot) : "";
+      const shouldRedirectToHomework = Boolean(snapshot && openHomeworkAfterSave && !isEdit && homeworkHref);
+      const hwPrefillPayload = shouldChainHomework && snapshot ? buildHomeworkPrefillFromNoteForm(form) : null;
+      if (hwPrefillPayload?.studentId) {
+        try {
+          window.sessionStorage.setItem(HW_PREFILL_FROM_NOTE_KEY, JSON.stringify(hwPrefillPayload));
+        } catch {
+          // ignore
+        }
+      }
+
+      const searchStr = searchParams.toString() ? `?${searchParams.toString()}` : "";
+      const flow = completeOpsFlowStep(pathname, searchStr);
+
       resetForm();
+      if (shouldRedirectToHomework) {
+        setPostSaveHomeworkLink("");
+        router.push(homeworkHref);
+        return;
+      }
+      if (flow.done && flow.matched) {
+        setPostSaveHomeworkLink("");
+        router.push(opsFlowDoneFallback(flow.role));
+        return;
+      }
+      if (flow.next) {
+        setPostSaveHomeworkLink("");
+        router.push(flow.next);
+        return;
+      }
+      if (snapshot) {
+        setPostSaveHomeworkLink(homeworkHref);
+      } else {
+        setPostSaveHomeworkLink("");
+      }
       await load();
     } catch (error) {
       setStatus({ type: "error", text: error.message || "保存中にエラーが発生しました。" });
@@ -438,6 +569,145 @@ export default function AdminLessonNotesPanel({
         </>
       ) : null}
       <form onSubmit={submitForm}>
+        {showQuickCompose ? (
+          <div
+            style={{
+              marginBottom: "0.85rem",
+              padding: "0.65rem 0.75rem",
+              borderRadius: "12px",
+              border: "1px solid rgba(148, 163, 184, 0.45)",
+              background: "rgba(248, 250, 252, 0.95)",
+            }}
+          >
+            <p className={styles.description} style={{ marginTop: 0, marginBottom: "0.45rem" }}>
+              定型テンプレートと直近の文で、入力を短くできます。
+            </p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem", marginBottom: "0.45rem" }}>
+              {TEACHER_QUICK_TEMPLATES.map((tpl) => (
+                <button
+                  key={tpl.id}
+                  className={styles.button}
+                  type="button"
+                  onClick={() => applyQuickTemplate(tpl.id)}
+                  style={{ fontSize: "0.82rem", padding: "0.28rem 0.55rem" }}
+                >
+                  {tpl.label}
+                </button>
+              ))}
+            </div>
+            <p className={styles.description} style={{ margin: "0.35rem 0 0.25rem" }}>
+              学習ポイント（ワンタップ）
+            </p>
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "center",
+                gap: "0.35rem",
+                marginBottom: "0.35rem",
+              }}
+            >
+              <span className={styles.description} style={{ margin: 0 }}>
+                反映先
+              </span>
+              <button
+                className={styles.button}
+                type="button"
+                onClick={() => setPointInsertTarget("summary")}
+                style={{
+                  fontSize: "0.78rem",
+                  padding: "0.22rem 0.5rem",
+                  opacity: pointInsertTarget === "summary" ? 1 : 0.65,
+                }}
+              >
+                要約
+              </button>
+              <button
+                className={styles.button}
+                type="button"
+                onClick={() => setPointInsertTarget("nextLessonPlan")}
+                style={{
+                  fontSize: "0.78rem",
+                  padding: "0.22rem 0.5rem",
+                  opacity: pointInsertTarget === "nextLessonPlan" ? 1 : 0.65,
+                }}
+              >
+                次回計画
+              </button>
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem", marginBottom: "0.45rem" }}>
+              {TEACHER_POINT_SNIPPETS.map((sn) => (
+                <button
+                  key={sn.id}
+                  className={styles.button}
+                  type="button"
+                  onClick={() => appendPointSnippet(sn.id)}
+                  style={{ fontSize: "0.78rem", padding: "0.24rem 0.5rem" }}
+                >
+                  {sn.label}
+                </button>
+              ))}
+            </div>
+            {recentPhrases.length > 0 ? (
+              <>
+                <div
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    alignItems: "center",
+                    gap: "0.35rem",
+                    margin: "0.25rem 0 0.35rem",
+                  }}
+                >
+                  <span className={styles.description} style={{ margin: 0 }}>
+                    挿入先
+                  </span>
+                  <button
+                    className={styles.button}
+                    type="button"
+                    onClick={() => setRecentInsertTarget("summary")}
+                    style={{
+                      fontSize: "0.78rem",
+                      padding: "0.22rem 0.5rem",
+                      opacity: recentInsertTarget === "summary" ? 1 : 0.65,
+                    }}
+                  >
+                    要約
+                  </button>
+                  <button
+                    className={styles.button}
+                    type="button"
+                    onClick={() => setRecentInsertTarget("content")}
+                    style={{
+                      fontSize: "0.78rem",
+                      padding: "0.22rem 0.5rem",
+                      opacity: recentInsertTarget === "content" ? 1 : 0.65,
+                    }}
+                  >
+                    本文
+                  </button>
+                </div>
+                <p className={styles.description} style={{ margin: "0 0 0.35rem" }}>
+                  直近の文を挿入
+                </p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem" }}>
+                  {recentPhrases.map((phrase) => (
+                    <button
+                      key={phrase}
+                      className={styles.button}
+                      type="button"
+                      onClick={() => appendRecentToField(recentInsertTarget, phrase)}
+                      style={{ fontSize: "0.78rem", padding: "0.22rem 0.5rem", maxWidth: "100%" }}
+                      title={phrase}
+                    >
+                      {phrase.length > 42 ? `${phrase.slice(0, 42)}…` : phrase}
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : null}
+          </div>
+        ) : null}
         <label className={styles.label}>
           lessonUnitId
           <input
@@ -466,11 +736,21 @@ export default function AdminLessonNotesPanel({
         </label>
         <label className={styles.label}>
           要約
-          <input
-            className={styles.field}
-            value={form.summary}
-            onChange={(e) => setForm((prev) => ({ ...prev, summary: e.target.value }))}
-          />
+          {showQuickCompose ? (
+            <textarea
+              className={styles.field}
+              rows={3}
+              value={form.summary}
+              onChange={(e) => setForm((prev) => ({ ...prev, summary: e.target.value }))}
+              placeholder="本日の要点（短く）"
+            />
+          ) : (
+            <input
+              className={styles.field}
+              value={form.summary}
+              onChange={(e) => setForm((prev) => ({ ...prev, summary: e.target.value }))}
+            />
+          )}
         </label>
         <label className={styles.label}>
           本文
@@ -483,19 +763,39 @@ export default function AdminLessonNotesPanel({
         </label>
         <label className={styles.label}>
           宿題要約
-          <input
-            className={styles.field}
-            value={form.homeworkSummary}
-            onChange={(e) => setForm((prev) => ({ ...prev, homeworkSummary: e.target.value }))}
-          />
+          {showQuickCompose ? (
+            <textarea
+              className={styles.field}
+              rows={2}
+              value={form.homeworkSummary}
+              onChange={(e) => setForm((prev) => ({ ...prev, homeworkSummary: e.target.value }))}
+              placeholder="宿題の内容"
+            />
+          ) : (
+            <input
+              className={styles.field}
+              value={form.homeworkSummary}
+              onChange={(e) => setForm((prev) => ({ ...prev, homeworkSummary: e.target.value }))}
+            />
+          )}
         </label>
         <label className={styles.label}>
           次回計画
-          <input
-            className={styles.field}
-            value={form.nextLessonPlan}
-            onChange={(e) => setForm((prev) => ({ ...prev, nextLessonPlan: e.target.value }))}
-          />
+          {showQuickCompose ? (
+            <textarea
+              className={styles.field}
+              rows={2}
+              value={form.nextLessonPlan}
+              onChange={(e) => setForm((prev) => ({ ...prev, nextLessonPlan: e.target.value }))}
+              placeholder="次回の予定"
+            />
+          ) : (
+            <input
+              className={styles.field}
+              value={form.nextLessonPlan}
+              onChange={(e) => setForm((prev) => ({ ...prev, nextLessonPlan: e.target.value }))}
+            />
+          )}
         </label>
         <label className={styles.label}>
           対象学生ID (カンマ区切り, 任意)
@@ -514,12 +814,29 @@ export default function AdminLessonNotesPanel({
           />
           学生/保護者に公開
         </label>
+        {showQuickCompose && !isEdit ? (
+          <label className={styles.label}>
+            <input
+              type="checkbox"
+              checked={openHomeworkAfterSave}
+              onChange={(e) => setOpenHomeworkAfterSave(e.target.checked)}
+            />
+            保存後に宿題画面へ進む（推奨）
+          </label>
+        ) : null}
         <div className={styles.links}>
           <button className={styles.button} type="submit" disabled={saving}>
             {saving ? "保存中..." : isEdit ? "レッスンノート更新" : "レッスンノート作成"}
           </button>
           {isEdit ? (
-            <button className={styles.button} type="button" onClick={resetForm}>
+            <button
+              className={styles.button}
+              type="button"
+              onClick={() => {
+                resetForm();
+                setPostSaveHomeworkLink("");
+              }}
+            >
               新規作成に戻る
             </button>
           ) : null}
@@ -530,6 +847,31 @@ export default function AdminLessonNotesPanel({
         <p className={status.type === "error" ? `${styles.message} ${styles.messageError}` : styles.message}>
           {status.text}
         </p>
+      ) : null}
+
+      {postSaveHomeworkLink ? (
+        <div
+          className={styles.links}
+          style={{
+            marginTop: "0.5rem",
+            padding: "0.65rem 0.75rem",
+            borderRadius: "12px",
+            border: "1px solid rgba(59, 130, 246, 0.35)",
+            background: "rgba(239, 246, 255, 0.9)",
+            flexWrap: "wrap",
+            alignItems: "center",
+          }}
+        >
+          <span className={styles.description} style={{ margin: 0, width: "100%" }}>
+            保存しました。続けて宿題を登録できます。
+          </span>
+          <Link className={styles.button} href={postSaveHomeworkLink} style={{ textDecoration: "none" }}>
+            宿題画面へ進む
+          </Link>
+          <button className={styles.button} type="button" onClick={() => setPostSaveHomeworkLink("")}>
+            閉じる
+          </button>
+        </div>
       ) : null}
 
       <h2 className={styles.sectionTitle}>レッスンノート一覧</h2>
