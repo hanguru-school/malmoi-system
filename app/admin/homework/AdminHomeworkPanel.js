@@ -10,6 +10,12 @@ import {
   pushRecentQuickHomework,
 } from "../../../lib/homework/quickHomework";
 import { completeOpsFlowStep, opsFlowDoneFallback } from "../../../lib/ops/opsFlowQueue";
+import {
+  recordTeacherPresetUse,
+  recordTeacherRecentHwUse,
+  recordTeacherTemplateUse,
+  sortPresetIdsByUsage,
+} from "../../../lib/teacher/teacherUiUsage";
 
 const HOMEWORK_TYPES = [
   { id: "vocabulary", label: "単語" },
@@ -76,6 +82,7 @@ export default function AdminHomeworkPanel({
   const [templates, setTemplates] = useState([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
   const [recentHwTick, setRecentHwTick] = useState(0);
+  const [usageTick, setUsageTick] = useState(0);
   const prefillFromNoteAppliedRef = useRef(false);
   const [form, setForm] = useState({
     studentId: initialStudentId || "",
@@ -99,6 +106,12 @@ export default function AdminHomeworkPanel({
   const recentQuickHomeworks = useMemo(() => {
     return getRecentQuickHomeworks();
   }, [recentHwTick]);
+
+  const orderedQuickPresets = useMemo(() => {
+    const ids = sortPresetIdsByUsage(HW_QUICK_PRESETS);
+    const map = new Map(HW_QUICK_PRESETS.map((p) => [p.id, p]));
+    return ids.map((id) => map.get(id)).filter(Boolean);
+  }, [usageTick, recentHwTick]);
 
   const filteredSummary = useMemo(() => {
     const notStarted = items.filter((item) => item.status === "not_started").length;
@@ -191,6 +204,16 @@ export default function AdminHomeworkPanel({
     setSelectedIds((prev) => prev.filter((id) => items.some((item) => item.id === id)));
   }, [items]);
 
+  useEffect(() => {
+    if (!isTeacherMode || !items.length) return;
+    if (!items.every((item) => String(item.status) === "submitted")) return;
+    const ids = items.map((item) => item.id);
+    setSelectedIds((prev) => {
+      if (prev.length === ids.length && ids.every((id) => prev.includes(id))) return prev;
+      return ids;
+    });
+  }, [items, isTeacherMode]);
+
   async function handleSearch(event) {
     event.preventDefault();
     await loadItems();
@@ -240,6 +263,8 @@ export default function AdminHomeworkPanel({
   }
 
   function applyQuickPreset(presetId) {
+    recordTeacherPresetUse(presetId);
+    setUsageTick((n) => n + 1);
     const p = HW_QUICK_PRESETS.find((item) => item.id === presetId);
     if (!p) return;
     setForm((prev) => ({
@@ -252,6 +277,8 @@ export default function AdminHomeworkPanel({
 
   function applyRecentQuick(entry) {
     if (!entry) return;
+    recordTeacherRecentHwUse();
+    setUsageTick((n) => n + 1);
     setForm((prev) => ({
       ...prev,
       title: entry.title,
@@ -337,6 +364,8 @@ export default function AdminHomeworkPanel({
 
   function applyTemplate() {
     if (!selectedTemplateId) return;
+    recordTeacherTemplateUse(selectedTemplateId);
+    setUsageTick((n) => n + 1);
     const template = templates.find((item) => item.id === selectedTemplateId);
     if (!template) return;
     setForm((prev) => ({
@@ -551,7 +580,7 @@ export default function AdminHomeworkPanel({
             クイック定型（タイトル・内容・種類を一括）
           </p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem", marginBottom: "0.5rem" }}>
-            {HW_QUICK_PRESETS.map((preset) => (
+            {orderedQuickPresets.map((preset) => (
               <button
                 key={preset.id}
                 className={styles.button}
@@ -792,6 +821,16 @@ export default function AdminHomeworkPanel({
               </div>
             ) : (
               <div className={styles.reservationActions}>
+                {item.status === "submitted" ? (
+                  <button
+                    className={styles.button}
+                    type="button"
+                    disabled={saving}
+                    onClick={() => handlePatch(item.id, { status: "reviewed" })}
+                  >
+                    確認済みにする
+                  </button>
+                ) : null}
                 <button className={styles.button} type="button" onClick={() => setEditingId(item.id)}>
                   状態変更
                 </button>

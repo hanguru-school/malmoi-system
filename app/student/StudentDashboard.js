@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { studentReservationsPathFromBrowserPreference } from "../../lib/student/reservationUiPreference";
 import home from "./student-home.module.css";
 import StudentLessonTimeFlow from "./StudentLessonTimeFlow";
 import StudentReservationMiniCalendar from "./StudentReservationMiniCalendar";
@@ -53,6 +55,15 @@ function truncate(text, max) {
   return `${s.slice(0, max)}…`;
 }
 
+function daysFromTodayYmd(lessonDateYmd, todayYmd) {
+  if (!lessonDateYmd || !todayYmd) return null;
+  const a = new Date(`${String(lessonDateYmd).slice(0, 10)}T12:00:00`);
+  const b = new Date(`${String(todayYmd).slice(0, 10)}T12:00:00`);
+  const ms = a.getTime() - b.getTime();
+  if (Number.isNaN(ms)) return null;
+  return Math.round(ms / 86400000);
+}
+
 function computeFlowStep({ todayLessons, recentLessonNotes, homeworkItems }) {
   const list = homeworkItems || [];
   const pending = list.filter((h) => !homeworkIsDone(h.status));
@@ -77,7 +88,14 @@ export default function StudentDashboard({
   todayYmd = "",
   recentPayments = [],
   recentMinuteLogs = [],
+  reservationsHref: reservationsHrefProp = "/student/reservations",
 }) {
+  const [reservationsHref, setReservationsHref] = useState(reservationsHrefProp);
+
+  useEffect(() => {
+    setReservationsHref(studentReservationsPathFromBrowserPreference());
+  }, [reservationsHrefProp]);
+
   const student = session?.student || {};
   const minutes = student.lessonMinutes || {};
   const points = student.points || {};
@@ -87,6 +105,24 @@ export default function StudentDashboard({
   const pendingHomework = homeworkItems.filter((h) => !homeworkIsDone(h.status));
   const flowStep = computeFlowStep({ todayLessons, recentLessonNotes, homeworkItems });
   const firstToday = todayLessons[0] || null;
+
+  const nudgeScore =
+    (pendingHomework.length > 0 ? 1 : 0) +
+    (!nextReservation ? 1 : 0) +
+    (recentLessonNotes.length === 0 ? 1 : 0);
+  const showGuidanceNudge = nudgeScore >= 2;
+
+  const daysToNext = nextReservation?.date ? daysFromTodayYmd(nextReservation.date, todayYmd) : null;
+  const upcomingSoon = daysToNext !== null && daysToNext >= 0 && daysToNext <= 3;
+
+  /** 次の一手で1つだけ強調: 宿題 → 3日以内の予約 → 予約なし → ノート確認 */
+  const retentionFocus = (() => {
+    if (pendingHomework.length > 0) return "homework";
+    if (upcomingSoon && nextReservation) return "upcoming";
+    if (!nextReservation) return "reserve";
+    if (recentLessonNotes.length > 0) return "notes";
+    return "none";
+  })();
 
   const showLearningHub =
     firstToday ||
@@ -110,28 +146,83 @@ export default function StudentDashboard({
         </div>
       </header>
 
-      <section className={home.section} aria-label="いまの状態">
-        <div className={home.sectionHead}>
-          <h2 className={home.sectionTitle}>いまの状態</h2>
+      {showGuidanceNudge ? (
+        <aside className={home.retentionAutoNudge} aria-label="学習のヒント">
+          <p className={home.retentionAutoNudgeTitle}>学習を続けるヒント</p>
+          <ul className={home.retentionAutoNudgeList}>
+            {pendingHomework.length > 0 ? (
+              <li>
+                宿題が未完了です。{" "}
+                <Link className={home.retentionAutoNudgeLink} href="/student/homework">
+                  宿題へ
+                </Link>
+              </li>
+            ) : null}
+            {!nextReservation ? (
+              <li>
+                次の予約がまだありません。{" "}
+                <Link className={home.retentionAutoNudgeLink} href={reservationsHref}>
+                  予約する
+                </Link>
+              </li>
+            ) : null}
+            {recentLessonNotes.length === 0 ? (
+              <li>
+                最近のレッスンノートを確認しましょう。{" "}
+                <Link className={home.retentionAutoNudgeLink} href="/student/lesson-notes">
+                  ノートへ
+                </Link>
+              </li>
+            ) : null}
+          </ul>
+        </aside>
+      ) : null}
+
+      <nav className={home.retentionStrip} aria-label="次の一手">
+        <p className={home.retentionStripTitle}>次の一手</p>
+        <div className={home.retentionStripRow}>
+          <Link
+            className={home.retentionTile}
+            href={reservationsHref}
+            data-emphasis={
+              retentionFocus === "reserve" || retentionFocus === "upcoming" ? "high" : "low"
+            }
+          >
+            <span className={home.retentionTileEyebrow}>予約</span>
+            <span className={home.retentionTileText}>
+              {retentionFocus === "upcoming"
+                ? "次の予約を確認"
+                : retentionFocus === "reserve"
+                  ? "予約する"
+                  : "一覧・新規"}
+            </span>
+          </Link>
+          <Link
+            className={home.retentionTile}
+            href="/student/lesson-notes"
+            data-emphasis={retentionFocus === "notes" ? "high" : "low"}
+          >
+            <span className={home.retentionTileEyebrow}>ノート</span>
+            <span className={home.retentionTileText}>確認</span>
+          </Link>
+          <Link
+            className={home.retentionTile}
+            href="/student/homework"
+            data-emphasis={retentionFocus === "homework" ? "high" : "low"}
+          >
+            <span className={home.retentionTileEyebrow}>宿題</span>
+            <span className={home.retentionTileText}>
+              {pendingHomework.length > 0 ? `未完了 ${pendingHomework.length}` : "一覧"}
+            </span>
+          </Link>
         </div>
-        <div className={home.statusCard}>
-          <StudentLessonTimeFlow
-            variant="dashboard"
-            totalMinutes={minutes.totalMinutes ?? 0}
-            usedMinutes={minutes.usedMinutes ?? 0}
-            remainingMinutes={minutes.remainingMinutes ?? 0}
-            pointsBalance={points.balance ?? 0}
-            pointConvertedMinutes={student.pointConvertedMinutes ?? 0}
-            reservedMinutesOverride={reservedMinutesSum}
-          />
-        </div>
-      </section>
+      </nav>
 
       <section className={home.section} aria-label="次の予約">
         <div className={home.sectionHead}>
           <h2 className={home.sectionTitle}>次の予約</h2>
-          <Link className={home.sectionLink} href="/student/reservations">
-            すべて見る
+          <Link className={home.sectionLink} href={reservationsHref}>
+            予約一覧へ
           </Link>
         </div>
         {nextReservation ? (
@@ -162,19 +253,116 @@ export default function StudentDashboard({
                 <span className={home.nextMetaVal}>{nextReservation.instructorName || "未定"}</span>
               </li>
             </ul>
-            <Link className={home.nextCta} href="/student/reservations">
-              予約の詳細を見る
-            </Link>
+            <div className={home.nextActionRow}>
+              <Link className={home.nextCta} href={reservationsHref}>
+                詳細・変更・キャンセル
+              </Link>
+              <p className={home.nextActionHint}>
+                変更・キャンセルは予約画面の一覧から操作できます。
+              </p>
+            </div>
           </article>
         ) : (
           <div className={home.nextEmpty}>
             <p>次の予約はまだありません。</p>
-            <Link className={home.nextEmptyBtn} href="/student/reservations">
+            <Link className={home.nextEmptyBtn} href={reservationsHref}>
               予約する
             </Link>
           </div>
         )}
       </section>
+
+      <section className={home.section} aria-label="利用状況">
+        <div className={home.sectionHead}>
+          <h2 className={home.sectionTitle}>利用状況</h2>
+        </div>
+        <div className={home.statusCard}>
+          <StudentLessonTimeFlow
+            variant="dashboard"
+            totalMinutes={minutes.totalMinutes ?? 0}
+            usedMinutes={minutes.usedMinutes ?? 0}
+            remainingMinutes={minutes.remainingMinutes ?? 0}
+            pointsBalance={points.balance ?? 0}
+            pointConvertedMinutes={student.pointConvertedMinutes ?? 0}
+            reservedMinutesOverride={reservedMinutesSum}
+          />
+        </div>
+      </section>
+
+      <div className={home.primaryCtaBlock} aria-label="予約のメイン操作">
+        <Link className={home.primaryCtaButton} href={reservationsHref}>
+          予約する
+        </Link>
+        <p className={home.primaryCtaSub}>新規予約・一覧・変更はこちらから</p>
+      </div>
+
+      <section className={home.section} aria-label="メイン">
+        <div className={home.sectionHead}>
+          <h2 className={home.sectionTitle}>メイン</h2>
+        </div>
+        <div className={home.midGrid}>
+          <Link className={home.midTile} href={reservationsHref}>
+            <span className={home.midTileEyebrow}>予約</span>
+            <span className={home.midTileTitle}>予約一覧</span>
+          </Link>
+          <Link className={home.midTile} href="/student/lesson-notes">
+            <span className={home.midTileEyebrow}>学習</span>
+            <span className={home.midTileTitle}>レッスンノート</span>
+          </Link>
+          <Link className={home.midTile} href="/student/homework">
+            <span className={home.midTileEyebrow}>学習</span>
+            <span className={home.midTileTitle}>宿題</span>
+          </Link>
+        </div>
+      </section>
+
+      <section className={home.section} aria-label="お知らせ">
+        <div className={home.sectionHead}>
+          <h2 className={home.sectionTitle}>お知らせ</h2>
+          <Link className={home.sectionLink} href="/student/notices">
+            一覧
+          </Link>
+        </div>
+        <div className={home.noticeBoard}>
+          {notices.length > 0 ? (
+            <ul className={home.noticeBoardList}>
+              {notices.map((notice) => (
+                <li key={notice.id}>
+                  <article className={home.noticeCard}>
+                    <div className={home.noticeCardTop}>
+                      <p className={home.noticeCardTitle}>{notice.title}</p>
+                      {notice.isImportant ? <span className={home.noticeImportant}>重要</span> : null}
+                    </div>
+                    <p className={home.noticeCardDate}>
+                      {String(notice.publishedAt || notice.updatedAt || "").slice(0, 10) || "—"}
+                    </p>
+                    <Link className={home.noticeCardBtn} href={`/student/notices/${notice.id}`}>
+                      詳細を見る
+                    </Link>
+                  </article>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className={home.learnEmpty}>表示できるお知らせはありません。</p>
+          )}
+        </div>
+      </section>
+
+      <section className={home.section} aria-label="プロフィール">
+        <Link className={home.profileStrip} href="/student/profile">
+          <div className={home.profileStripText}>
+            <span className={home.profileStripLabel}>プロフィール</span>
+            <span className={home.profileStripSub}>個人情報・レッスン時間の確認</span>
+          </div>
+          <span className={home.profileStripChev} aria-hidden>
+            ›
+          </span>
+        </Link>
+      </section>
+
+      <div className={home.secondaryRegion} aria-label="詳細・記録">
+        <p className={home.secondaryRegionTitle}>詳細・記録</p>
 
       <section className={home.section} aria-label="今日の学習">
         <div className={home.sectionHead}>
@@ -205,7 +393,7 @@ export default function StudentDashboard({
                   {firstToday.time || "—"} 〜 · {firstToday.durationMinutes ?? "—"}分
                 </p>
                 <p className={home.todayBlockMeta}>講師 {firstToday.instructorName || "未定"}</p>
-                <Link className={home.todayBlockCta} href="/student/reservations">
+                <Link className={home.todayBlockCta} href={reservationsHref}>
                   詳細を見る
                 </Link>
               </article>
@@ -307,45 +495,12 @@ export default function StudentDashboard({
         )}
       </section>
 
-      <section className={home.section} aria-label="お知らせ">
-        <div className={home.sectionHead}>
-          <h2 className={home.sectionTitle}>お知らせ</h2>
-          <Link className={home.sectionLink} href="/student/notices">
-            一覧
-          </Link>
-        </div>
-        <div className={home.noticeBoard}>
-          {notices.length > 0 ? (
-            <ul className={home.noticeBoardList}>
-              {notices.map((notice) => (
-                <li key={notice.id}>
-                  <article className={home.noticeCard}>
-                    <div className={home.noticeCardTop}>
-                      <p className={home.noticeCardTitle}>{notice.title}</p>
-                      {notice.isImportant ? <span className={home.noticeImportant}>重要</span> : null}
-                    </div>
-                    <p className={home.noticeCardDate}>
-                      {String(notice.publishedAt || notice.updatedAt || "").slice(0, 10) || "—"}
-                    </p>
-                    <Link className={home.noticeCardBtn} href={`/student/notices/${notice.id}`}>
-                      詳細を見る
-                    </Link>
-                  </article>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className={home.learnEmpty}>表示できるお知らせはありません。</p>
-          )}
-        </div>
-      </section>
-
       <section className={home.section} aria-label="予定カレンダー">
         <div className={home.sectionHead}>
           <h2 className={home.sectionTitle}>予定の流れ</h2>
         </div>
         <div className={home.calendarShell}>
-          <StudentReservationMiniCalendar reservations={calendarReservations} />
+          <StudentReservationMiniCalendar reservations={calendarReservations} reservationsHref={reservationsHref} />
         </div>
       </section>
 
@@ -394,46 +549,24 @@ export default function StudentDashboard({
         </div>
       </section>
 
-      <section className={home.section} aria-label="ショートカット">
+      </div>
+
+      <section className={home.section} aria-label="その他のリンク">
         <h2 className={home.sectionTitle} style={{ marginBottom: "0.35rem" }}>
-          よく使うメニュー
+          その他
         </h2>
         <div className={home.quickGrid}>
-          <Link className={home.quickLink} href="/student/reservations">
-            <span className={home.quickIcon} aria-hidden>
-              📅
-            </span>
-            予約する
-          </Link>
           <Link className={home.quickLink} href="/student/payments">
             <span className={home.quickIcon} aria-hidden>
               💳
             </span>
             決済履歴
           </Link>
-          <Link className={home.quickLink} href="/student/profile">
+          <Link className={home.quickLink} href="/student/progress">
             <span className={home.quickIcon} aria-hidden>
-              ⏱
+              📈
             </span>
-            時間・プロフィール
-          </Link>
-          <Link className={home.quickLink} href="/student/lesson-notes">
-            <span className={home.quickIcon} aria-hidden>
-              📝
-            </span>
-            レッスンノート
-          </Link>
-          <Link className={home.quickLink} href="/student/notices">
-            <span className={home.quickIcon} aria-hidden>
-              📣
-            </span>
-            お知らせ
-          </Link>
-          <Link className={home.quickLink} href="/student/homework">
-            <span className={home.quickIcon} aria-hidden>
-              ✏️
-            </span>
-            宿題
+            学習状況
           </Link>
         </div>
       </section>

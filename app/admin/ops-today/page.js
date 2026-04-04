@@ -7,6 +7,7 @@ import {
 } from "../../../lib/auth/store";
 import SubmittedHomeworkBulkBar from "../../components/ops/SubmittedHomeworkBulkBar";
 import OpsFlowQueueBootstrap from "../../components/ops/OpsFlowQueueBootstrap";
+import OpsTodayProgressHeader from "../../components/ops/OpsTodayProgressHeader";
 import AdminTopNav from "../AdminTopNav";
 import { buildAdminTodayBacklog, todayYmdJst } from "../../../lib/ops/todayBacklog";
 import styles from "../../login/login.module.css";
@@ -43,6 +44,13 @@ export default async function AdminOpsTodayPage() {
     ...backlog.changeReq.map((r) => r.href),
   ];
 
+  const remainingTotal =
+    backlog.missingNotes.length +
+    backlog.missingHomework.length +
+    backlog.submittedQueue.length +
+    backlog.requested.length +
+    backlog.changeReq.length;
+
   return (
     <div className={adminStyles.adminShell}>
       <main className={adminStyles.adminCard}>
@@ -50,6 +58,7 @@ export default async function AdminOpsTodayPage() {
         <p className={styles.description}>
           本日分の抜け・提出確認待ち・予約対応を一覧します。各行から該当画面へ移動できます。
         </p>
+        <OpsTodayProgressHeader dateYmd={today} role="admin" remaining={remainingTotal} />
         <AdminTopNav currentPath="/admin/ops-today" />
         <OpsFlowQueueBootstrap urls={queueUrls} role="admin" />
 

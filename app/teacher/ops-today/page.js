@@ -7,6 +7,7 @@ import {
 } from "../../../lib/auth/store";
 import SubmittedHomeworkBulkBar from "../../components/ops/SubmittedHomeworkBulkBar";
 import OpsFlowQueueBootstrap from "../../components/ops/OpsFlowQueueBootstrap";
+import OpsTodayProgressHeader from "../../components/ops/OpsTodayProgressHeader";
 import TeacherTopNav from "../TeacherTopNav";
 import { buildTeacherTodayBacklog, todayYmdJst } from "../../../lib/ops/todayBacklog";
 import t from "../teacher.module.css";
@@ -39,11 +40,25 @@ export default async function TeacherOpsTodayPage() {
 
   const bulkItems = backlog.submittedQueue.map((x) => ({ id: x.id, label: x.label }));
 
+  const queueUrls = [
+    ...backlog.missingNotes.map((r) => r.href),
+    ...backlog.missingHomework.map((r) => r.href),
+    ...backlog.submittedQueue.map((r) => r.href),
+    ...backlog.reservationQueue.map((r) => r.href),
+  ];
+
+  const remainingTotal =
+    backlog.missingNotes.length +
+    backlog.missingHomework.length +
+    backlog.submittedQueue.length +
+    backlog.reservationQueue.length;
+
   return (
     <div className={t.shell}>
       <main className={t.main}>
         <h1 className={t.title}>本日の未処理</h1>
         <p className={t.subtitle}>今日締め切りの記録・確認をここから進めます。各行から処理画面へ移動できます。</p>
+        <OpsTodayProgressHeader dateYmd={today} role="teacher" remaining={remainingTotal} className={t.opsProgress} />
         <TeacherTopNav currentPath="/teacher/ops-today" />
         <OpsFlowQueueBootstrap urls={queueUrls} role="teacher" />
 
