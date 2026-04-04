@@ -106,21 +106,20 @@ export default function StudentDashboard({
   const flowStep = computeFlowStep({ todayLessons, recentLessonNotes, homeworkItems });
   const firstToday = todayLessons[0] || null;
 
-  const nudgeScore =
-    (pendingHomework.length > 0 ? 1 : 0) +
-    (!nextReservation ? 1 : 0) +
-    (recentLessonNotes.length === 0 ? 1 : 0);
-  const showGuidanceNudge = nudgeScore >= 2;
-
   const daysToNext = nextReservation?.date ? daysFromTodayYmd(nextReservation.date, todayYmd) : null;
   const upcomingSoon = daysToNext !== null && daysToNext >= 0 && daysToNext <= 3;
+  const reservationFar = daysToNext !== null && daysToNext > 14;
 
-  /** 次の一手で1つだけ強調: 宿題 → 3日以内の予約 → 予約なし → ノート確認 */
+  /**
+   * 次の一手（1つだけ high）:
+   * 未完了宿題 → 宿題 / 次レッスン3日以内 → 予約確認 / 最近ノートあり → ノート /
+   * 予約なし or 遠い予約のみ → 予約する
+   */
   const retentionFocus = (() => {
     if (pendingHomework.length > 0) return "homework";
-    if (upcomingSoon && nextReservation) return "upcoming";
-    if (!nextReservation) return "reserve";
+    if (nextReservation && upcomingSoon) return "upcoming";
     if (recentLessonNotes.length > 0) return "notes";
+    if (!nextReservation || reservationFar) return "reserve";
     return "none";
   })();
 
@@ -145,38 +144,6 @@ export default function StudentDashboard({
           <p className={home.heroMember}>会員番号 {student.studentNumber || "—"}</p>
         </div>
       </header>
-
-      {showGuidanceNudge ? (
-        <aside className={home.retentionAutoNudge} aria-label="学習のヒント">
-          <p className={home.retentionAutoNudgeTitle}>学習を続けるヒント</p>
-          <ul className={home.retentionAutoNudgeList}>
-            {pendingHomework.length > 0 ? (
-              <li>
-                宿題が未完了です。{" "}
-                <Link className={home.retentionAutoNudgeLink} href="/student/homework">
-                  宿題へ
-                </Link>
-              </li>
-            ) : null}
-            {!nextReservation ? (
-              <li>
-                次の予約がまだありません。{" "}
-                <Link className={home.retentionAutoNudgeLink} href={reservationsHref}>
-                  予約する
-                </Link>
-              </li>
-            ) : null}
-            {recentLessonNotes.length === 0 ? (
-              <li>
-                最近のレッスンノートを確認しましょう。{" "}
-                <Link className={home.retentionAutoNudgeLink} href="/student/lesson-notes">
-                  ノートへ
-                </Link>
-              </li>
-            ) : null}
-          </ul>
-        </aside>
-      ) : null}
 
       <nav className={home.retentionStrip} aria-label="次の一手">
         <p className={home.retentionStripTitle}>次の一手</p>
@@ -203,7 +170,9 @@ export default function StudentDashboard({
             data-emphasis={retentionFocus === "notes" ? "high" : "low"}
           >
             <span className={home.retentionTileEyebrow}>ノート</span>
-            <span className={home.retentionTileText}>確認</span>
+            <span className={home.retentionTileText}>
+              {retentionFocus === "notes" ? "ノートを確認" : "確認"}
+            </span>
           </Link>
           <Link
             className={home.retentionTile}

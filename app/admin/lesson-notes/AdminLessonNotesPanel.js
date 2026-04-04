@@ -314,6 +314,11 @@ export default function AdminLessonNotesPanel({
     setSaving(true);
     setStatus({ type: "", text: "" });
     try {
+      const safeTitle = String(form.title || "").trim() || "レッスンノート";
+      let safeDate = String(form.date || "").trim().slice(0, 10);
+      if (!safeDate && showQuickCompose) {
+        safeDate = localTodayYmd();
+      }
       const url = isEdit ? `${apiBasePath}/${form.id}` : apiBasePath;
       const method = isEdit ? "PATCH" : "POST";
       const response = await fetch(url, {
@@ -321,8 +326,8 @@ export default function AdminLessonNotesPanel({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           lessonUnitId: form.lessonUnitId,
-          date: form.date,
-          title: form.title,
+          date: safeDate || form.date,
+          title: safeTitle,
           summary: form.summary,
           content: form.content,
           homeworkSummary: form.homeworkSummary,
@@ -340,7 +345,7 @@ export default function AdminLessonNotesPanel({
         ? {
             lessonUnitId: form.lessonUnitId,
             studentIds: form.studentIds,
-            date: form.date,
+            date: safeDate || form.date,
           }
         : null;
       const summaryLine = String(form.summary || "").trim();
@@ -350,7 +355,8 @@ export default function AdminLessonNotesPanel({
       }
       const homeworkHref = snapshot ? buildTeacherHomeworkHref(snapshot) : "";
       const shouldRedirectToHomework = Boolean(snapshot && openHomeworkAfterSave && !isEdit && homeworkHref);
-      const hwPrefillPayload = shouldChainHomework && snapshot ? buildHomeworkPrefillFromNoteForm(form) : null;
+      const formForPrefill = { ...form, title: safeTitle, date: safeDate || form.date };
+      const hwPrefillPayload = shouldChainHomework && snapshot ? buildHomeworkPrefillFromNoteForm(formForPrefill) : null;
       if (hwPrefillPayload?.studentId) {
         try {
           window.sessionStorage.setItem(HW_PREFILL_FROM_NOTE_KEY, JSON.stringify(hwPrefillPayload));

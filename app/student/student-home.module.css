@@ -97,45 +97,6 @@
   gap: 0.45rem;
 }
 
-.retentionAutoNudge {
-  margin: 0.55rem 0 0.65rem;
-  padding: 0.6rem 0.65rem;
-  border-radius: 14px;
-  border: 1px dashed rgba(100, 116, 139, 0.5);
-  background: rgba(248, 250, 252, 0.98);
-}
-
-.retentionAutoNudgeTitle {
-  margin: 0 0 0.4rem;
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #64748b;
-}
-
-.retentionAutoNudgeList {
-  margin: 0;
-  padding-left: 1.1rem;
-  font-size: 0.86rem;
-  color: #334155;
-  line-height: 1.55;
-}
-
-.retentionAutoNudgeList li {
-  margin: 0.22rem 0;
-}
-
-.retentionAutoNudgeLink {
-  font-weight: 800;
-  color: #2563eb;
-  text-decoration: none;
-}
-
-.retentionAutoNudgeLink:hover {
-  text-decoration: underline;
-}
-
 .retentionTile {
   display: flex;
   flex-direction: column;

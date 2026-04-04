@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 /**
- * 本日の未処理ページ上部: 残件と完了の目安（クライアントでピーク残件を保持）
+ * 本日の未処理: 全体/完了/残り/完了率（クライアントでピーク残件を保持）
  */
 export default function OpsTodayProgressHeader({
   dateYmd = "",
@@ -18,9 +18,10 @@ export default function OpsTodayProgressHeader({
   }, [remaining]);
 
   const completed = useMemo(() => Math.max(0, peakRemaining - remaining), [peakRemaining, remaining]);
-  const totalForBar = Math.max(peakRemaining, remaining, 1);
-  const pct = peakRemaining > 0 ? Math.min(100, Math.round((completed / peakRemaining) * 100)) : remaining === 0 ? 100 : 0;
+  const pct =
+    peakRemaining > 0 ? Math.min(100, Math.round((completed / peakRemaining) * 100)) : remaining === 0 ? 100 : 0;
   const allDone = remaining === 0 && peakRemaining > 0;
+  const emptyDay = remaining === 0 && peakRemaining === 0;
 
   return (
     <div
@@ -34,18 +35,47 @@ export default function OpsTodayProgressHeader({
       }}
       aria-label="本日の進捗"
     >
-      <p style={{ margin: "0 0 0.35rem", fontSize: "0.72rem", fontWeight: 800, letterSpacing: "0.06em", color: "#64748b" }}>
-        本日のタスク進捗（{dateYmd}）
-      </p>
+      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0.5rem", marginBottom: "0.35rem" }}>
+        <p
+          style={{
+            margin: 0,
+            fontSize: "0.72rem",
+            fontWeight: 800,
+            letterSpacing: "0.06em",
+            color: "#64748b",
+          }}
+        >
+          本日の処理（{dateYmd}）
+        </p>
+        {allDone ? (
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              padding: "0.12rem 0.45rem",
+              borderRadius: "999px",
+              fontSize: "0.68rem",
+              fontWeight: 800,
+              background: "#22c55e",
+              color: "#fff",
+            }}
+          >
+            本日完了
+          </span>
+        ) : null}
+      </div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: "0.65rem", alignItems: "baseline" }}>
-        <span style={{ fontSize: "0.95rem", fontWeight: 800, color: "#0f172a" }}>
+        <span style={{ fontSize: "0.92rem", fontWeight: 800, color: "#0f172a" }}>
           全体 <strong style={{ color: "#1d4ed8" }}>{peakRemaining}</strong>
         </span>
-        <span style={{ fontSize: "0.95rem", fontWeight: 800, color: "#0f172a" }}>
+        <span style={{ fontSize: "0.92rem", fontWeight: 800, color: "#0f172a" }}>
           完了 <strong style={{ color: "#15803d" }}>{completed}</strong>
         </span>
-        <span style={{ fontSize: "0.95rem", fontWeight: 800, color: "#0f172a" }}>
+        <span style={{ fontSize: "0.92rem", fontWeight: 800, color: "#0f172a" }}>
           残り <strong style={{ color: remaining > 0 ? "#c2410c" : "#15803d" }}>{remaining}</strong>
+        </span>
+        <span style={{ fontSize: "0.92rem", fontWeight: 800, color: "#0f172a" }}>
+          完了率 <strong style={{ color: "#4338ca" }}>{emptyDay ? "—" : `${pct}%`}</strong>
         </span>
       </div>
       <div
@@ -71,7 +101,7 @@ export default function OpsTodayProgressHeader({
         <p style={{ margin: "0.45rem 0 0", fontSize: "0.88rem", fontWeight: 800, color: "#166534" }}>
           本日のタスクはすべて完了しました。
         </p>
-      ) : remaining === 0 && peakRemaining === 0 ? (
+      ) : emptyDay ? (
         <p style={{ margin: "0.45rem 0 0", fontSize: "0.86rem", color: "#64748b" }}>本日の未処理タスクはありません。</p>
       ) : null}
     </div>
