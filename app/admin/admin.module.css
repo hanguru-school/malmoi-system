@@ -83,7 +83,26 @@
   background: #f8fbff;
   padding: 0.48rem;
   display: grid;
-  gap: 0.4rem;
+  gap: 0.5rem;
+}
+
+.navDrawerGroup {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.navDrawerGroupLabel {
+  margin: 0.15rem 0 0;
+  padding: 0 0.2rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.navDrawerGroup:first-child .navDrawerGroupLabel {
+  margin-top: 0;
 }
 
 .navDrawerItem {
@@ -137,6 +156,110 @@
   color: #1e3a8a;
   border-color: #9db8e6;
   font-weight: 700;
+}
+
+/* 運営サマリー（ダッシュボード最上段） */
+.opsSummaryStrip {
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  margin: 0.75rem 0 1rem;
+}
+
+.opsSummaryCard {
+  border: 1px solid #c7d2fe;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+  padding: 0.65rem 0.75rem;
+}
+
+.opsSummaryLabel {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.opsSummaryValue {
+  margin: 0.35rem 0 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #1e40af;
+}
+
+.opsSummaryList {
+  margin: 0.35rem 0 0;
+  padding-left: 1rem;
+  font-size: 0.82rem;
+  color: #334155;
+  line-height: 1.45;
+}
+
+.opsSummaryLink {
+  display: inline-block;
+  margin-top: 0.45rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #2563eb;
+  text-decoration: none;
+}
+
+.opsSummaryLink:hover {
+  text-decoration: underline;
+}
+
+/* 本日の未処理（管理者） */
+.opsTodayIntro {
+  margin: 0.5rem 0 0.75rem;
+}
+
+.opsTodaySection {
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.opsTodaySectionTitle {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.opsTodayList {
+  margin: 0;
+  padding-left: 1.15rem;
+  font-size: 0.88rem;
+  color: #334155;
+  line-height: 1.5;
+}
+
+.opsTodayList li {
+  margin: 0.35rem 0;
+}
+
+.opsTodayList a {
+  font-weight: 700;
+  color: #2563eb;
+  text-decoration: none;
+}
+
+.opsTodayList a:hover {
+  text-decoration: underline;
+}
+
+.opsTodayEmpty {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #94a3b8;
+}
+
+.opsTodayFootnote {
+  margin-top: 1rem;
+  font-size: 0.82rem;
+  color: #64748b;
 }
 
 .dashboardGrid {

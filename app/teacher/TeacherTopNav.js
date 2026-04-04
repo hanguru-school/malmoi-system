@@ -4,13 +4,23 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../admin/admin.module.css";
 
+/** ia-teacher-minimal: 授業進行・記録中心 */
 const ITEMS = [
-  { href: "/teacher", label: "ホーム" },
-  { href: "/teacher/lessons", label: "本日のレッスン" },
-  { href: "/teacher/lesson-notes", label: "レッスンノート" },
-  { href: "/teacher/homework", label: "宿題" },
-  { href: "/teacher/students", label: "学生検索" },
+  { key: "home", href: "/teacher", label: "ホーム" },
+  { key: "today", href: "/teacher/today", label: "今日のレッスン" },
+  { key: "opsToday", href: "/teacher/ops-today", label: "本日の未処理" },
+  { key: "schedule", href: "/teacher/schedule", label: "予約一覧" },
+  { key: "notes", href: "/teacher/lesson-notes", label: "レッスンノート" },
+  { key: "students", href: "/teacher/students", label: "生徒メモ" },
+  { key: "notices", href: "/teacher/notices", label: "お知らせ" },
 ];
+
+function teacherNavActive(currentPath, href) {
+  const path = String(currentPath || "").trim();
+  const h = String(href || "").trim();
+  if (h.includes("#")) return false;
+  return path === h;
+}
 
 export default function TeacherTopNav({ currentPath = "/teacher" }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -34,7 +44,7 @@ export default function TeacherTopNav({ currentPath = "/teacher" }) {
           className={styles.navToggleButton}
           aria-expanded={menuOpen}
           aria-controls="teacher-mobile-menu"
-          aria-label={menuOpen ? "메뉴 닫기" : "메뉴 열기"}
+          aria-label={menuOpen ? "メニューを閉じる" : "メニューを開く"}
           onClick={() => setMenuOpen((prev) => !prev)}
         >
           {menuOpen ? "✕" : "☰"}
@@ -43,10 +53,10 @@ export default function TeacherTopNav({ currentPath = "/teacher" }) {
 
       <nav className={styles.navBar} aria-label="teacher menu">
         {ITEMS.map((item) => {
-          const active = currentPath === item.href;
+          const active = teacherNavActive(currentPath, item.href);
           return (
             <a
-              key={item.href}
+              key={item.key}
               href={item.href}
               className={active ? `${styles.navItem} ${styles.navItemActive}` : styles.navItem}
             >
@@ -59,10 +69,10 @@ export default function TeacherTopNav({ currentPath = "/teacher" }) {
       {menuOpen ? (
         <nav id="teacher-mobile-menu" className={styles.navDrawer} aria-label="teacher mobile menu">
           {ITEMS.map((item) => {
-            const active = currentPath === item.href;
+            const active = teacherNavActive(currentPath, item.href);
             return (
               <a
-                key={`mobile-${item.href}`}
+                key={`drawer-${item.key}`}
                 className={active ? `${styles.navDrawerItem} ${styles.navDrawerItemActive}` : styles.navDrawerItem}
                 href={item.href}
               >

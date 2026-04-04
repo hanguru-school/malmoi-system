@@ -82,11 +82,11 @@ function adminActionLabel(action, summary) {
 export default async function AdminPage() {
   await requireRole(["admin"]);
   const [students, reservations, lessonNotes, notices, auditLogs, mailLogs] = await Promise.all([
-    listStudentsForAdmin({}, { page: 1, pageSize: 10 }),
+    listStudentsForAdmin({}, { page: 1, pageSize: 500 }),
     listReservationsForAdmin({ page: 1, pageSize: 100 }),
     listLessonNotesForAdmin({}),
     listNoticesForAdmin(),
-    listAuditLogsForAdmin({ page: 1, pageSize: 8 }),
+    listAuditLogsForAdmin({ page: 1, pageSize: 12 }),
     listMailLogsForAdmin({ page: 1, pageSize: 30 }),
   ]);
 
@@ -115,6 +115,11 @@ export default async function AdminPage() {
   const recentReservations = (reservations.items || []).slice(0, 5);
   const recentNotes = (lessonNotes || []).slice(0, 5);
   const recentLogs = (auditLogs.items || []).slice(0, 5);
+  const opsAuditPreview = (auditLogs.items || []).slice(0, 4);
+  const publishedNotices = (notices || [])
+    .filter((n) => n.isActive !== false)
+    .sort((a, b) => String(b.publishedAt || b.updatedAt || "").localeCompare(String(a.publishedAt || a.updatedAt || "")))
+    .slice(0, 3);
   const recentMails = (mailLogs.items || []).slice(0, 5);
   const failedMails = (mailLogs.items || []).filter((item) => item.status === "failed").length;
   const retryMails = (mailLogs.items || []).filter((item) => item.status === "failed" || item.status === "retry_target").length;
@@ -129,6 +134,66 @@ export default async function AdminPage() {
         <AdminTopNav currentPath="/admin" showPageTitle pageTitle="管理ダッシュボード" />
         <p className={dashboardStyles.metaText}>今日の日付: {today}</p>
         <p className={dashboardStyles.metaText}>承認待ち予約を最優先で処理し、続いて本日の予定を確認してください。</p>
+
+        <section className={dashboardStyles.opsSummaryStrip} aria-label="運営サマリー">
+          <article className={dashboardStyles.opsSummaryCard}>
+            <p className={dashboardStyles.opsSummaryLabel}>本日の未処理</p>
+            <p className={dashboardStyles.opsSummaryValue}>一覧</p>
+            <Link className={dashboardStyles.opsSummaryLink} href="/admin/ops-today">
+              抜け・提出待ちをまとめて見る
+            </Link>
+          </article>
+          <article className={dashboardStyles.opsSummaryCard}>
+            <p className={dashboardStyles.opsSummaryLabel}>本日の予約</p>
+            <p className={dashboardStyles.opsSummaryValue}>{todaysReservations.length} 件</p>
+            <Link className={dashboardStyles.opsSummaryLink} href={`/admin/reservations?date=${today}`}>
+              予約一覧を開く
+            </Link>
+          </article>
+          <article className={dashboardStyles.opsSummaryCard}>
+            <p className={dashboardStyles.opsSummaryLabel}>登録進行中の学生</p>
+            <p className={dashboardStyles.opsSummaryValue}>{pendingStudents} 名</p>
+            <Link className={dashboardStyles.opsSummaryLink} href="/admin/students">
+              学生一覧を開く
+            </Link>
+          </article>
+          <article className={dashboardStyles.opsSummaryCard}>
+            <p className={dashboardStyles.opsSummaryLabel}>最近のお知らせ</p>
+            {publishedNotices.length === 0 ? (
+              <p className={dashboardStyles.metaText} style={{ marginTop: "0.35rem" }}>
+                公開中のお知らせはありません。
+              </p>
+            ) : (
+              <ul className={dashboardStyles.opsSummaryList}>
+                {publishedNotices.map((n) => (
+                  <li key={n.id}>{String(n.title || "").slice(0, 42) || "—"}</li>
+                ))}
+              </ul>
+            )}
+            <Link className={dashboardStyles.opsSummaryLink} href="/admin/notices">
+              お知らせ管理へ
+            </Link>
+          </article>
+          <article className={dashboardStyles.opsSummaryCard}>
+            <p className={dashboardStyles.opsSummaryLabel}>最近の監査ログ</p>
+            {opsAuditPreview.length === 0 ? (
+              <p className={dashboardStyles.metaText} style={{ marginTop: "0.35rem" }}>
+                ログがありません。
+              </p>
+            ) : (
+              <ul className={dashboardStyles.opsSummaryList}>
+                {opsAuditPreview.map((log) => (
+                  <li key={log.id}>
+                    {String(log.at || "").slice(0, 16)} {adminActionLabel(log.action, log.summary)}
+                  </li>
+                ))}
+              </ul>
+            )}
+            <Link className={dashboardStyles.opsSummaryLink} href="/admin#admin-recent-audit">
+              詳細ログへ
+            </Link>
+          </article>
+        </section>
 
         <section className={dashboardStyles.dashboardGrid}>
           <article className={dashboardStyles.dashboardCard}>
@@ -224,7 +289,7 @@ export default async function AdminPage() {
             </ul>
           </article>
 
-          <article className={dashboardStyles.dashboardCard}>
+          <article id="admin-recent-audit" className={dashboardStyles.dashboardCard}>
             <h2 className={dashboardStyles.dashboardTitle}>最近の管理操作ログ</h2>
             <ul className={dashboardStyles.tableLike}>
               {recentLogs.map((log) => (
