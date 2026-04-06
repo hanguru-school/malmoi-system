@@ -172,9 +172,11 @@ export default function AdminStudentsPanelV2({
               <option value="homework_backlog">宿題未完了が多い</option>
               <option value="note_stale">ノートが古い／なし</option>
               <option value="post_reg_idle">登録後の活動薄め</option>
-              <option value="minutes_depleted">残り時間0以下</option>
+              <option value="minutes_depleted">残り時間0以下（旧ID・互換）</option>
+              <option value="minutes_exhausted">残り時間0以下</option>
               <option value="minutes_low">残り時間少なめ(180分以下)</option>
-              <option value="minutes_short_next">次回予約で不足の恐れ</option>
+              <option value="minutes_short_next">次回予約で不足の恐れ（旧ID・互換）</option>
+              <option value="minutes_will_run_out">次回予約で不足の恐れ</option>
             </select>
           </label>
         </div>

@@ -296,6 +296,11 @@ export default function StudentDashboard({
               {lessonMinutesPreview.completionHintJa}
             </p>
           ) : null}
+          {lessonMinutesPreview?.projectedRemainingHintJa ? (
+            <p className={home.lessonMinutesPreviewHint} data-tone="info">
+              {lessonMinutesPreview.projectedRemainingHintJa}
+            </p>
+          ) : null}
         </div>
       </section>
 

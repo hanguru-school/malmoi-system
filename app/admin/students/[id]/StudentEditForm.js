@@ -16,6 +16,7 @@ import {
 import { jpPaymentStatus, jpStudentPaymentCategory } from "../../../../lib/payments/receipt-labels.js";
 import {
   buildLessonMinutesCompletionPreview,
+  lessonMinuteJournalTypeLabelJa,
   lessonMinuteLedgerKindLabelJa,
 } from "../../../../lib/adapters/lessonMinutesSummary.js";
 
@@ -134,6 +135,16 @@ export default function StudentEditForm({
   const [lessonMinutes, setLessonMinutes] = useState(student.lessonMinutes || null);
   const [lessonMinuteLogs, setLessonMinuteLogs] = useState(student.lessonMinuteLogs || []);
   const [lessonMinuteLedger, setLessonMinuteLedger] = useState(student.lessonMinuteLedger || []);
+  const [lessonMinuteJournalCharges, setLessonMinuteJournalCharges] = useState(
+    student.lessonMinuteJournalCharges || []
+  );
+  const [lessonMinuteJournalUsage, setLessonMinuteJournalUsage] = useState(student.lessonMinuteJournalUsage || []);
+  const [lessonMinuteJournalManual, setLessonMinuteJournalManual] = useState(
+    student.lessonMinuteJournalManual || []
+  );
+  const [lessonMinuteJournalSummary, setLessonMinuteJournalSummary] = useState(
+    student.lessonMinuteJournalSummary || null
+  );
   const [lessonMinutesCreditMinutes, setLessonMinutesCreditMinutes] = useState("0");
   const [lessonMinutesCreditPackageId, setLessonMinutesCreditPackageId] = useState("");
   const [lessonMinutesCreditType, setLessonMinutesCreditType] = useState("purchase");
@@ -319,6 +330,13 @@ export default function StudentEditForm({
   }, [initialReservations]);
 
   useEffect(() => {
+    setLessonMinuteJournalCharges(student.lessonMinuteJournalCharges || []);
+    setLessonMinuteJournalUsage(student.lessonMinuteJournalUsage || []);
+    setLessonMinuteJournalManual(student.lessonMinuteJournalManual || []);
+    setLessonMinuteJournalSummary(student.lessonMinuteJournalSummary || null);
+  }, [student.id]);
+
+  useEffect(() => {
     let active = true;
     async function loadNotificationLogs() {
       setNotificationLoading(true);
@@ -454,6 +472,10 @@ export default function StudentEditForm({
       setLessonMinutes(data.student?.lessonMinutes || lessonMinutes);
       setLessonMinuteLogs(data.student?.lessonMinuteLogs || lessonMinuteLogs);
       setLessonMinuteLedger(data.student?.lessonMinuteLedger || lessonMinuteLedger);
+      setLessonMinuteJournalCharges(data.student?.lessonMinuteJournalCharges || lessonMinuteJournalCharges);
+      setLessonMinuteJournalUsage(data.student?.lessonMinuteJournalUsage || lessonMinuteJournalUsage);
+      setLessonMinuteJournalManual(data.student?.lessonMinuteJournalManual || lessonMinuteJournalManual);
+      setLessonMinuteJournalSummary(data.student?.lessonMinuteJournalSummary ?? lessonMinuteJournalSummary);
       setLessonMinutesCreditMinutes("0");
       setLessonMinutesCreditPackageId("");
       setLessonMinutesCreditType("purchase");
@@ -1470,10 +1492,22 @@ export default function StudentEditForm({
               {adminLessonMinutesPreview.completionHintJa}
             </p>
           ) : null}
+          {adminLessonMinutesPreview.projectedRemainingHintJa ? (
+            <p className={styles.description} style={{ marginBottom: "0.65rem" }}>
+              {adminLessonMinutesPreview.projectedRemainingHintJa}
+            </p>
+          ) : null}
           <div className={styles.message}>
             <p>総保有時間: {lessonMinutes?.totalMinutes ?? "-"}分</p>
             <p>使用時間: {lessonMinutes?.usedMinutes ?? "-"}分</p>
             <p>残り時間: {lessonMinutes?.remainingMinutes ?? "-"}分</p>
+            {lessonMinuteJournalSummary ? (
+              <p className={adminStyles.smallMuted} style={{ marginTop: "0.5rem" }}>
+                原簿集計（参考）: 付与計 {lessonMinuteJournalSummary.chargeSum ?? 0} / 消費計{" "}
+                {lessonMinuteJournalSummary.usageSum ?? 0} / 手動計 {lessonMinuteJournalSummary.manualSum ?? 0} →
+                残り {lessonMinuteJournalSummary.remainingMinutes ?? 0}
+              </p>
+            ) : null}
           </div>
           <div className={detailStyles.formGrid}>
             <label className={styles.label}>
@@ -1543,6 +1577,104 @@ export default function StudentEditForm({
             </label>
           </div>
 
+          <h4 className={detailStyles.blockTitle}>公式時間原簿（レッスン分・種別別）</h4>
+          <p className={adminStyles.smallMuted}>
+            charge=付与・購入 / usage=受講完了時の消費 / manual_adjustment=手動・返却など。監査ログ・予約完了時の usage と対応します。
+          </p>
+
+          <h5 className={detailStyles.blockTitle}>最近の付与（charge）</h5>
+          <div className={detailStyles.stackList}>
+            {lessonMinuteJournalCharges.map((row) => (
+              <article key={row.id} className={detailStyles.itemCard}>
+                <p>
+                  <strong>日時:</strong> {formatDateTime(row.createdAt)}
+                </p>
+                <p>
+                  <strong>種別:</strong> {lessonMinuteJournalTypeLabelJa(row.type)} ({row.type || "-"})
+                </p>
+                <p>
+                  <strong>分:</strong> {row.minutes ?? 0}
+                </p>
+                {row.relatedReservationId ? (
+                  <p>
+                    <strong>予約ID:</strong> {row.relatedReservationId}
+                  </p>
+                ) : null}
+                <p>
+                  <strong>メモ:</strong> {row.memo || "-"}
+                </p>
+                <p>
+                  <strong>処理者:</strong> {row.createdByRole || "-"}
+                </p>
+              </article>
+            ))}
+            {lessonMinuteJournalCharges.length === 0 ? (
+              <p className={adminStyles.smallMuted}>付与原簿がありません。</p>
+            ) : null}
+          </div>
+
+          <h5 className={detailStyles.blockTitle}>最近の消費（usage）</h5>
+          <div className={detailStyles.stackList}>
+            {lessonMinuteJournalUsage.map((row) => (
+              <article key={row.id} className={detailStyles.itemCard}>
+                <p>
+                  <strong>日時:</strong> {formatDateTime(row.createdAt)}
+                </p>
+                <p>
+                  <strong>種別:</strong> {lessonMinuteJournalTypeLabelJa(row.type)} ({row.type || "-"})
+                </p>
+                <p>
+                  <strong>分:</strong> {row.minutes ?? 0}
+                </p>
+                {row.relatedReservationId ? (
+                  <p>
+                    <strong>予約ID:</strong> {row.relatedReservationId}
+                  </p>
+                ) : null}
+                <p>
+                  <strong>メモ:</strong> {row.memo || "-"}
+                </p>
+                <p>
+                  <strong>処理者:</strong> {row.createdByRole || "-"}
+                </p>
+              </article>
+            ))}
+            {lessonMinuteJournalUsage.length === 0 ? (
+              <p className={adminStyles.smallMuted}>消費原簿がありません。</p>
+            ) : null}
+          </div>
+
+          <h5 className={detailStyles.blockTitle}>最近の手動調整（manual_adjustment）</h5>
+          <div className={detailStyles.stackList}>
+            {lessonMinuteJournalManual.map((row) => (
+              <article key={row.id} className={detailStyles.itemCard}>
+                <p>
+                  <strong>日時:</strong> {formatDateTime(row.createdAt)}
+                </p>
+                <p>
+                  <strong>種別:</strong> {lessonMinuteJournalTypeLabelJa(row.type)} ({row.type || "-"})
+                </p>
+                <p>
+                  <strong>分（符号付き）:</strong> {row.minutes ?? 0}
+                </p>
+                {row.relatedReservationId ? (
+                  <p>
+                    <strong>予約ID:</strong> {row.relatedReservationId}
+                  </p>
+                ) : null}
+                <p>
+                  <strong>メモ:</strong> {row.memo || "-"}
+                </p>
+                <p>
+                  <strong>処理者:</strong> {row.createdByRole || "-"}
+                </p>
+              </article>
+            ))}
+            {lessonMinuteJournalManual.length === 0 ? (
+              <p className={adminStyles.smallMuted}>手動調整原簿がありません。</p>
+            ) : null}
+          </div>
+
           <h4 className={detailStyles.blockTitle}>授業時間履歴</h4>
           <div className={detailStyles.stackList}>
             {lessonMinuteLogs.map((log) => (
@@ -1560,9 +1692,9 @@ export default function StudentEditForm({
             {lessonMinuteLogs.length === 0 ? <p className={adminStyles.smallMuted}>時間履歴がありません。</p> : null}
           </div>
 
-          <h4 className={detailStyles.blockTitle}>内部原簿（種別別・読み取り）</h4>
+          <h4 className={detailStyles.blockTitle}>レガシー内部原簿（lessonMinuteLedger・互換）</h4>
           <p className={adminStyles.smallMuted}>
-            topup=付与 / usage=受講完了時の消費 / refund=返却 / manual=手動。監査ログと対応します。
+            topup=付与 / usage=受講完了時の消費 / refund=返却 / manual=手動。新方式は上記「公式時間原簿」を参照してください。
           </p>
           <div className={detailStyles.stackList}>
             {lessonMinuteLedger.map((row) => (

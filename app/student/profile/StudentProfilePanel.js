@@ -304,6 +304,11 @@ export default function StudentProfilePanel({ session, student, lessonMinutesPre
             {lessonMinutesPreview.completionHintJa}
           </p>
         ) : null}
+        {lessonMinutesPreview?.projectedRemainingHintJa ? (
+          <p className={styles.profileLessonMinutesHint} data-tone="info">
+            {lessonMinutesPreview.projectedRemainingHintJa}
+          </p>
+        ) : null}
       </section>
 
       <ProfilePhotoModal open={photoModalOpen} onClose={() => setPhotoModalOpen(false)} onSave={handleSavePhoto} saving={photoSaving} />
