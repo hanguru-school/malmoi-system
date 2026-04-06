@@ -89,6 +89,7 @@ export default function StudentDashboard({
   recentPayments = [],
   recentMinuteLogs = [],
   reservationsHref: reservationsHrefProp = "/student/reservations",
+  lessonMinutesPreview = null,
 }) {
   const [reservationsHref, setReservationsHref] = useState(reservationsHrefProp);
 
@@ -287,6 +288,14 @@ export default function StudentDashboard({
             pointConvertedMinutes={student.pointConvertedMinutes ?? 0}
             reservedMinutesOverride={reservedMinutesSum}
           />
+          {lessonMinutesPreview?.completionHintJa ? (
+            <p
+              className={home.lessonMinutesPreviewHint}
+              data-tone={lessonMinutesPreview.nextCompletionInsufficient ? "warn" : "info"}
+            >
+              {lessonMinutesPreview.completionHintJa}
+            </p>
+          ) : null}
         </div>
       </section>
 

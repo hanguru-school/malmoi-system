@@ -74,7 +74,7 @@ function buildProfilePayloadFromForm(form) {
   };
 }
 
-export default function StudentProfilePanel({ session, student }) {
+export default function StudentProfilePanel({ session, student, lessonMinutesPreview = null }) {
   const router = useRouter();
   const profile = student?.crmProfile || {};
   const [isEdit, setIsEdit] = useState(false);
@@ -296,6 +296,14 @@ export default function StudentProfilePanel({ session, student }) {
           pointsBalance={points.balance ?? 0}
           pointConvertedMinutes={student?.pointConvertedMinutes ?? 0}
         />
+        {lessonMinutesPreview?.completionHintJa ? (
+          <p
+            className={styles.profileLessonMinutesHint}
+            data-tone={lessonMinutesPreview.nextCompletionInsufficient ? "warn" : "info"}
+          >
+            {lessonMinutesPreview.completionHintJa}
+          </p>
+        ) : null}
       </section>
 
       <ProfilePhotoModal open={photoModalOpen} onClose={() => setPhotoModalOpen(false)} onSave={handleSavePhoto} saving={photoSaving} />

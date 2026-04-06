@@ -5,12 +5,19 @@ import Link from "next/link";
 import styles from "../../../login/login.module.css";
 import adminStyles from "../../admin.module.css";
 import detailStyles from "./student-detail.module.css";
+import RegistrationProgressPanel from "./RegistrationProgressPanel";
+import StudentRecentFlowSummary from "./StudentRecentFlowSummary";
+import StudentRiskStrip from "./StudentRiskStrip";
 import {
   EMERGENCY_RELATION_PRESETS,
   emergencyRelationToStore,
   parseEmergencyRelation,
 } from "../../../student/profile/profileFormUtils";
 import { jpPaymentStatus, jpStudentPaymentCategory } from "../../../../lib/payments/receipt-labels.js";
+import {
+  buildLessonMinutesCompletionPreview,
+  lessonMinuteLedgerKindLabelJa,
+} from "../../../../lib/adapters/lessonMinutesSummary.js";
 
 const TABS = [
   { id: "basic", label: "基本情報" },
@@ -85,6 +92,8 @@ export default function StudentEditForm({
   initialNotices = [],
   initialLearningStats = null,
   initialPaymentDetail = null,
+  registrationAuditHints = null,
+  initialRiskBadges = [],
 }) {
   const profile = student.crmProfile || {};
   const lessonMinutePackages = student.lessonMinutePackages || [];
@@ -124,6 +133,7 @@ export default function StudentEditForm({
   const [guardianMemo, setGuardianMemo] = useState(student.guardianMemo || "");
   const [lessonMinutes, setLessonMinutes] = useState(student.lessonMinutes || null);
   const [lessonMinuteLogs, setLessonMinuteLogs] = useState(student.lessonMinuteLogs || []);
+  const [lessonMinuteLedger, setLessonMinuteLedger] = useState(student.lessonMinuteLedger || []);
   const [lessonMinutesCreditMinutes, setLessonMinutesCreditMinutes] = useState("0");
   const [lessonMinutesCreditPackageId, setLessonMinutesCreditPackageId] = useState("");
   const [lessonMinutesCreditType, setLessonMinutesCreditType] = useState("purchase");
@@ -261,6 +271,21 @@ export default function StudentEditForm({
   const nextReservation = useMemo(
     () => (upcomingReservations.length > 0 ? upcomingReservations[0] : null),
     [upcomingReservations]
+  );
+  const nextConfirmedReservation = useMemo(
+    () =>
+      [...reservations]
+        .filter((r) => ["requested", "confirmed"].includes(String(r.status || "").trim()))
+        .sort(reservationSortAsc)[0] || null,
+    [reservations]
+  );
+  const adminLessonMinutesPreview = useMemo(
+    () =>
+      buildLessonMinutesCompletionPreview({
+        remainingMinutes: lessonMinutes?.remainingMinutes ?? 0,
+        nextReservation: nextConfirmedReservation,
+      }),
+    [lessonMinutes?.remainingMinutes, nextConfirmedReservation]
   );
   const latestLessonNote = useMemo(() => (lessonNotes.length > 0 ? lessonNotes[0] : null), [lessonNotes]);
   const activeParentCount = useMemo(
@@ -428,6 +453,7 @@ export default function StudentEditForm({
       }
       setLessonMinutes(data.student?.lessonMinutes || lessonMinutes);
       setLessonMinuteLogs(data.student?.lessonMinuteLogs || lessonMinuteLogs);
+      setLessonMinuteLedger(data.student?.lessonMinuteLedger || lessonMinuteLedger);
       setLessonMinutesCreditMinutes("0");
       setLessonMinutesCreditPackageId("");
       setLessonMinutesCreditType("purchase");
@@ -586,6 +612,7 @@ export default function StudentEditForm({
               <strong>保護者連携:</strong> {activeParentCount > 0 ? `${activeParentCount}件` : "なし"}
             </p>
           </div>
+          <StudentRiskStrip badges={initialRiskBadges} />
           <div className={detailStyles.quickActions}>
             <a className={adminStyles.actionButton} href={`/admin/reservations?studentId=${student.id}`}>
               予約を追加
@@ -632,6 +659,10 @@ export default function StudentEditForm({
           </button>
         ))}
       </div>
+
+      <StudentRecentFlowSummary studentId={student.id} apiRole="admin" />
+
+      <RegistrationProgressPanel student={student} auditHints={registrationAuditHints} />
 
       {activeTab === "basic" ? (
         <section className={detailStyles.sectionCard}>
@@ -1416,6 +1447,29 @@ export default function StudentEditForm({
           </div>
 
           <h4 className={detailStyles.blockTitle}>時間/ポイント運営</h4>
+          {Number(lessonMinutes?.remainingMinutes ?? 0) <= 0 ? (
+            <p className={`${styles.message} ${styles.messageError}`} style={{ marginBottom: "0.65rem" }}>
+              残り時間が0以下です。受講前に時間付与をご確認ください。
+            </p>
+          ) : null}
+          {Number(lessonMinutes?.remainingMinutes ?? 0) > 0 &&
+          Number(lessonMinutes?.remainingMinutes ?? 0) <= 180 ? (
+            <p className={`${styles.message}`} style={{ marginBottom: "0.65rem", borderColor: "#f6e2b3" }}>
+              残り時間が180分以下です。継続受講の案内を検討してください。
+            </p>
+          ) : null}
+          {adminLessonMinutesPreview.completionHintJa ? (
+            <p
+              className={
+                adminLessonMinutesPreview.nextCompletionInsufficient
+                  ? `${styles.message} ${styles.messageError}`
+                  : styles.description
+              }
+              style={{ marginBottom: "0.65rem" }}
+            >
+              {adminLessonMinutesPreview.completionHintJa}
+            </p>
+          ) : null}
           <div className={styles.message}>
             <p>総保有時間: {lessonMinutes?.totalMinutes ?? "-"}分</p>
             <p>使用時間: {lessonMinutes?.usedMinutes ?? "-"}分</p>
@@ -1504,6 +1558,41 @@ export default function StudentEditForm({
               </article>
             ))}
             {lessonMinuteLogs.length === 0 ? <p className={adminStyles.smallMuted}>時間履歴がありません。</p> : null}
+          </div>
+
+          <h4 className={detailStyles.blockTitle}>内部原簿（種別別・読み取り）</h4>
+          <p className={adminStyles.smallMuted}>
+            topup=付与 / usage=受講完了時の消費 / refund=返却 / manual=手動。監査ログと対応します。
+          </p>
+          <div className={detailStyles.stackList}>
+            {lessonMinuteLedger.map((row) => (
+              <article key={row.id} className={detailStyles.itemCard}>
+                <p>
+                  <strong>日時:</strong> {formatDateTime(row.at)}
+                </p>
+                <p>
+                  <strong>種別:</strong> {lessonMinuteLedgerKindLabelJa(row.kind)} ({row.kind || "-"})
+                </p>
+                <p>
+                  <strong>増減(残り基準):</strong> {row.minutesDelta > 0 ? "+" : ""}
+                  {row.minutesDelta ?? 0} 分
+                </p>
+                <p>
+                  <strong>処理後の残り:</strong> {row.balanceAfterRemaining ?? "-"} 分
+                </p>
+                {row.reservationId ? (
+                  <p>
+                    <strong>予約ID:</strong> {row.reservationId}
+                  </p>
+                ) : null}
+                <p>
+                  <strong>メモ:</strong> {row.reason || "-"}
+                </p>
+              </article>
+            ))}
+            {lessonMinuteLedger.length === 0 ? (
+              <p className={adminStyles.smallMuted}>原簿エントリがありません（保存データ読込後に表示されます）。</p>
+            ) : null}
           </div>
 
           <h4 className={detailStyles.blockTitle}>ペア履歴</h4>

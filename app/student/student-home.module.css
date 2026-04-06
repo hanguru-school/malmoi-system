@@ -99,6 +99,24 @@
   color: #334155;
 }
 
+.lessonMinutesPreviewHint {
+  margin: 0.55rem 0 0;
+  padding: 0.45rem 0.55rem;
+  border-radius: 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.45;
+  color: #334155;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  background: rgba(248, 250, 252, 0.95);
+}
+
+.lessonMinutesPreviewHint[data-tone="warn"] {
+  border-color: rgba(251, 191, 36, 0.65);
+  background: #fffbeb;
+  color: #92400e;
+}
+
 .retentionStripRow {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

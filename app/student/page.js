@@ -9,6 +9,8 @@ import {
   listReservationsForStudent,
 } from "../../lib/auth/store";
 import { sumReservedMinutesFromReservations } from "../../lib/student/reservationMinutesShared.js";
+import { buildLessonMinutesCompletionPreview } from "../../lib/adapters/lessonMinutesSummary.js";
+import { studentReservationsPathFromHomeQuery } from "../../lib/student/postRegistrationNav";
 import StudentDashboard from "./StudentDashboard";
 import StudentAreaLayout from "./StudentAreaLayout";
 
@@ -20,8 +22,10 @@ function jstTodayYmd() {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tokyo" }).format(new Date());
 }
 
-export default async function StudentHomePage() {
+export default async function StudentHomePage({ searchParams }) {
   const session = await requireRole(["student"]);
+  const sp = await searchParams;
+  const reservationsHref = studentReservationsPathFromHomeQuery(sp);
   if (!session.student) redirect("/student/register/start");
   if (session.student.registrationStatus !== "completed") {
     if (session.student.registrationStatus === "start_pending_profile") redirect("/student/register/profile");
@@ -52,6 +56,11 @@ export default async function StudentHomePage() {
       ["requested", "confirmed"].includes(String(item.status || ""))
   );
 
+  const lessonMinutesPreview = buildLessonMinutesCompletionPreview({
+    remainingMinutes: session.student?.lessonMinutes?.remainingMinutes,
+    nextReservation,
+  });
+
   return (
     <StudentAreaLayout title="ホーム" subtitle="">
       <StudentDashboard
@@ -66,6 +75,8 @@ export default async function StudentHomePage() {
         todayYmd={todayYmd}
         recentPayments={(recentPayments || []).slice(0, 3)}
         recentMinuteLogs={recentMinuteLogs || []}
+        reservationsHref={reservationsHref}
+        lessonMinutesPreview={lessonMinutesPreview}
       />
     </StudentAreaLayout>
   );

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireRole } from "../../lib/auth/session";
 import {
+  getAdminLessonMinuteRiskSummary,
   listAuditLogsForAdmin,
   listHomeworksForAdmin,
   listLessonNotesForAdmin,
@@ -83,7 +84,7 @@ function adminActionLabel(action, summary) {
 export default async function AdminPage() {
   await requireRole(["admin"]);
   const today = todayInJst();
-  const [students, reservations, lessonNotes, notices, auditLogs, mailLogs, resToday, homeworkTodayList] =
+  const [students, reservations, lessonNotes, notices, auditLogs, mailLogs, resToday, homeworkTodayList, minuteRisk] =
     await Promise.all([
       listStudentsForAdmin({}, { page: 1, pageSize: 500 }),
       listReservationsForAdmin({ page: 1, pageSize: 100 }),
@@ -93,6 +94,7 @@ export default async function AdminPage() {
       listMailLogsForAdmin({ page: 1, pageSize: 30 }),
       listReservationsForAdmin({ page: 1, pageSize: 800, fromDate: today, toDate: today }),
       listHomeworksForAdmin({ fromDate: today, toDate: today }),
+      getAdminLessonMinuteRiskSummary(),
     ]);
 
   const todaysReservations = (resToday.items || [])
@@ -189,6 +191,17 @@ export default async function AdminPage() {
             <p className={dashboardStyles.opsSummaryValue}>{pendingStudents} 名</p>
             <Link className={dashboardStyles.opsSummaryLink} href="/admin/students">
               学生一覧を開く
+            </Link>
+          </article>
+          <article className={dashboardStyles.opsSummaryCard}>
+            <p className={dashboardStyles.opsSummaryLabel}>レッスン時間（要注意）</p>
+            <ul className={dashboardStyles.opsSummaryList}>
+              <li>残り0以下: {minuteRisk?.depleted ?? 0} 名</li>
+              <li>残り180分以下: {minuteRisk?.low180 ?? 0} 名</li>
+              <li>次回予約で不足の恐れ: {minuteRisk?.nextReservationInsufficient ?? 0} 名</li>
+            </ul>
+            <Link className={dashboardStyles.opsSummaryLink} href="/admin/students/at-risk">
+              要フォロー学生を見る
             </Link>
           </article>
           <article className={dashboardStyles.opsSummaryCard}>
