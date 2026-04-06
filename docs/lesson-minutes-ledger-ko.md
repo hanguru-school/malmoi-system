@@ -106,3 +106,5 @@
 - `app/admin/students/[id]/StudentEditForm.js`, `app/admin/page.js`, `AdminStudentsPanelV2.js`
 
 運営 UI・学生履歴・警告・安全装置の詳細は **`docs/lesson-minutes-operations-ko.md`** を参照してください。
+
+クイック付与・画面トーン・警告の出し分け・月間サマリーは **`docs/lesson-minutes-ux-and-monthly-ko.md`** を参照してください。

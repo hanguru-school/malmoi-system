@@ -20,6 +20,8 @@ import {
   lessonMinuteLedgerKindLabelJa,
 } from "../../../../lib/adapters/lessonMinutesSummary.js";
 
+const LESSON_MINUTE_QUICK_ADD_MINUTES = [600, 300, 180];
+
 const TABS = [
   { id: "basic", label: "基本情報" },
   { id: "lesson-time", label: "レッスン時間" },
@@ -1567,6 +1569,25 @@ export default function StudentEditForm({
           <div className={detailStyles.lessonMinutesTools}>
             <article className={detailStyles.lessonMinutesToolCard}>
               <h4 className={detailStyles.blockTitle}>時間を追加</h4>
+              <p className={adminStyles.smallMuted} style={{ marginBottom: "0.5rem" }}>
+                よく使う分数はワンタップで入力できます。メモを書いてから「レッスン時間のみ反映」で確定してください。
+              </p>
+              <div className={detailStyles.lessonMinutePresetRow}>
+                <span className={adminStyles.smallMuted}>クイック:</span>
+                {LESSON_MINUTE_QUICK_ADD_MINUTES.map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    className={detailStyles.lessonMinutePresetBtn}
+                    onClick={() => {
+                      setLessonMinutesCreditPackageId("");
+                      setLessonMinutesCreditMinutes(String(m));
+                    }}
+                  >
+                    +{m}分
+                  </button>
+                ))}
+              </div>
               <div className={detailStyles.formGrid}>
                 <label className={styles.label}>
                   時間追加商品 (選択)

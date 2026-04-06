@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireRole } from "../../lib/auth/session";
 import {
   getAdminLessonMinuteRiskSummary,
+  getAdminLessonMinutesMonthSummary,
   listAuditLogsForAdmin,
   listHomeworksForAdmin,
   listLessonNotesForAdmin,
@@ -16,6 +17,12 @@ import AdminPendingApprovalPanel from "./AdminPendingApprovalPanel";
 
 function todayInJst() {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tokyo" }).format(new Date());
+}
+
+function formatYearMonthJa(ym) {
+  const [y, m] = String(ym || "").split("-");
+  if (!y || !m) return ym || "—";
+  return `${y}年${Number(m)}月`;
 }
 
 function reservationStatusLabel(status) {
@@ -84,18 +91,29 @@ function adminActionLabel(action, summary) {
 export default async function AdminPage() {
   await requireRole(["admin"]);
   const today = todayInJst();
-  const [students, reservations, lessonNotes, notices, auditLogs, mailLogs, resToday, homeworkTodayList, minuteRisk] =
-    await Promise.all([
-      listStudentsForAdmin({}, { page: 1, pageSize: 500 }),
-      listReservationsForAdmin({ page: 1, pageSize: 100 }),
-      listLessonNotesForAdmin({}),
-      listNoticesForAdmin(),
-      listAuditLogsForAdmin({ page: 1, pageSize: 12 }),
-      listMailLogsForAdmin({ page: 1, pageSize: 30 }),
-      listReservationsForAdmin({ page: 1, pageSize: 800, fromDate: today, toDate: today }),
-      listHomeworksForAdmin({ fromDate: today, toDate: today }),
-      getAdminLessonMinuteRiskSummary(),
-    ]);
+  const [
+    students,
+    reservations,
+    lessonNotes,
+    notices,
+    auditLogs,
+    mailLogs,
+    resToday,
+    homeworkTodayList,
+    minuteRisk,
+    lessonMinutesMonth,
+  ] = await Promise.all([
+    listStudentsForAdmin({}, { page: 1, pageSize: 500 }),
+    listReservationsForAdmin({ page: 1, pageSize: 100 }),
+    listLessonNotesForAdmin({}),
+    listNoticesForAdmin(),
+    listAuditLogsForAdmin({ page: 1, pageSize: 12 }),
+    listMailLogsForAdmin({ page: 1, pageSize: 30 }),
+    listReservationsForAdmin({ page: 1, pageSize: 800, fromDate: today, toDate: today }),
+    listHomeworksForAdmin({ fromDate: today, toDate: today }),
+    getAdminLessonMinuteRiskSummary(),
+    getAdminLessonMinutesMonthSummary(),
+  ]);
 
   const todaysReservations = (resToday.items || [])
     .filter((item) => String(item.date || "").slice(0, 10) === today)
@@ -208,6 +226,23 @@ export default async function AdminPage() {
             </ul>
             <Link className={dashboardStyles.opsSummaryLink} href="/admin/students/at-risk">
               要フォロー学生を見る
+            </Link>
+          </article>
+          <article className={dashboardStyles.opsSummaryCard}>
+            <p className={dashboardStyles.opsSummaryLabel}>今月のレッスン時間（原簿・JST）</p>
+            <p className={dashboardStyles.opsSummaryValue}>{formatYearMonthJa(lessonMinutesMonth?.yearMonth)}</p>
+            <ul className={dashboardStyles.opsSummaryList}>
+              <li>消費（usage 合計）: {lessonMinutesMonth?.monthUsageMinutes ?? 0} 分</li>
+              <li>付与（charge 合計）: {lessonMinutesMonth?.monthChargeMinutes ?? 0} 分</li>
+              <li>
+                手動調整: +{lessonMinutesMonth?.monthManualPositiveMinutes ?? 0} / −
+                {lessonMinutesMonth?.monthManualNegativeMinutes ?? 0} 分
+              </li>
+              <li>原簿に動きのあった学生: {lessonMinutesMonth?.activeStudentCount ?? 0} 名</li>
+              <li>現在 残り0以下: {lessonMinutesMonth?.depletedStudentCount ?? 0} 名</li>
+            </ul>
+            <Link className={dashboardStyles.opsSummaryLink} href="/admin/students">
+              学生一覧で確認
             </Link>
           </article>
           <article className={dashboardStyles.opsSummaryCard}>

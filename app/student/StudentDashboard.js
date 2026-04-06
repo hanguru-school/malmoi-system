@@ -314,7 +314,7 @@ export default function StudentDashboard({
             pointConvertedMinutes={student.pointConvertedMinutes ?? 0}
             reservedMinutesOverride={reservedMinutesSum}
           />
-          {lessonMinutesPreview?.completionHintJa ? (
+          {lessonMinutesAttention === "ok" && lessonMinutesPreview?.completionHintJa ? (
             <p
               className={home.lessonMinutesPreviewHint}
               data-tone={lessonMinutesPreview.nextCompletionInsufficient ? "warn" : "info"}
@@ -322,9 +322,18 @@ export default function StudentDashboard({
               {lessonMinutesPreview.completionHintJa}
             </p>
           ) : null}
-          {lessonMinutesPreview?.projectedRemainingHintJa ? (
+          {lessonMinutesAttention === "ok" && lessonMinutesPreview?.projectedRemainingHintJa ? (
             <p className={home.lessonMinutesPreviewHint} data-tone="info">
               {lessonMinutesPreview.projectedRemainingHintJa}
+            </p>
+          ) : null}
+          {lessonMinutesAttention !== "ok" ? (
+            <p className={home.lessonMinutesPreviewHint} data-tone="info">
+              時間の詳細は上のお知らせか
+              <Link href="/student/lesson-time" style={{ marginLeft: "0.25rem", fontWeight: 700 }}>
+                レッスン時間
+              </Link>
+              ページで確認できます。
             </p>
           ) : null}
         </div>

@@ -98,3 +98,5 @@
 - `app/api/student/lesson-minutes/route.js`, `app/api/admin/students/[id]/route.js`
 
 既存の原簿・計算の詳細は `docs/lesson-minutes-ledger-ko.md` を参照してください。
+
+**クイック追加・学生画面の読みやすさ・警告の出し分け・月間サマリー** は `docs/lesson-minutes-ux-and-monthly-ko.md` を参照してください。

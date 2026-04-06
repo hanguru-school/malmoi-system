@@ -12,19 +12,19 @@ function attentionMessage(key) {
   if (key === "exhausted") {
     return {
       tone: "danger",
-      text: "レッスン時間の残りがなくなっています。継続して受講される前に、教室へお問い合わせください。",
+      text: "いまレッスン時間の残りがありません。次のレッスンを受ける前に、教室へ一声おかけください。",
     };
   }
   if (key === "low") {
     return {
       tone: "warn",
-      text: "残り時間が180分以下です。そろそろ追加やプランのご相談が必要かもしれません。",
+      text: "残りが180分以下です。無理のないペースで、追加やプランについて相談してみてください。",
     };
   }
   if (key === "next_short") {
     return {
       tone: "warn",
-      text: "次のレッスンを終えたあと、時間が不足する見込みです。早めに教室へご相談ください。",
+      text: "次のレッスンを終えると、時間が足りなくなる見込みです。早めに教室へご相談ください。",
     };
   }
   return null;
@@ -44,19 +44,38 @@ export default async function StudentLessonTimePage() {
   const rem = usage.lessonMinutes.remainingMinutes;
   const prev = usage.completionPreview;
   const alert = attentionMessage(usage.minutesAttention);
+  const projected = prev?.projectedRemainingAfterNext;
 
   return (
-    <StudentAreaLayout title="レッスン時間" subtitle="受講に使った時間の目安です（会計書類ではありません）">
+    <StudentAreaLayout title="レッスン時間" subtitle="受講の記録を、やさしい一覧で">
       <div className={styles.root}>
+        <p className={styles.intro}>
+          ここでは、レッスンで使った時間や追加された時間の<strong>あとがき</strong>のような一覧です。領収書や請求書ではありません。数字で不安になったら、いつでも教室にご相談ください。
+        </p>
+
         <section className={styles.heroCard}>
-          <p className={styles.heroTitle}>いま残っているレッスン時間</p>
+          <p className={styles.heroTitle}>いま使える時間</p>
           <p className={styles.heroRemain}>
             {rem}
             <span className={styles.heroUnit}>分</span>
           </p>
-          {prev?.projectedRemainingHintJa ? <p className={styles.subLine}>{prev.projectedRemainingHintJa}</p> : null}
+          {typeof projected === "number" && prev?.nextReservationDeductMinutes ? (
+            <div className={styles.projectedBox}>
+              <p className={styles.projectedLabel}>次のレッスン後の目安</p>
+              <p className={styles.subLine}>
+                次の予約（約{prev.nextReservationDeductMinutes}分）が終わったあと、だいたい
+                <strong> {projected}分</strong> 残る見込みです（参考値）。
+              </p>
+            </div>
+          ) : (
+            <p className={styles.subLine} style={{ marginTop: "0.5rem" }}>
+              次の予約がまだない、または確定前のため、完了後の目安は表示していません。
+            </p>
+          )}
           {prev?.completionHintJa && usage.minutesAttention !== "exhausted" ? (
-            <p className={styles.subLine}>{prev.completionHintJa}</p>
+            <p className={styles.subLine} style={{ marginTop: "0.45rem" }}>
+              {prev.completionHintJa}
+            </p>
           ) : null}
         </section>
 
@@ -67,14 +86,14 @@ export default async function StudentLessonTimePage() {
         ) : null}
 
         <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>最近ついた時間</h2>
-          <p className={styles.sectionLead}>購入・付与などで増えた記録です。</p>
-          {usage.recentCharges.length === 0 ? (
-            <p className={styles.empty}>まだ表示できる記録がありません。</p>
+          <h2 className={styles.sectionTitle}>最近、レッスンで使った時間</h2>
+          <p className={styles.sectionLead}>受講が完了して記録された分です。</p>
+          {usage.recentUsage.length === 0 ? (
+            <p className={styles.empty}>まだここに表示できる記録はありません。</p>
           ) : (
             <ul className={styles.timeline}>
-              {usage.recentCharges.map((row) => (
-                <li key={row.id}>
+              {usage.recentUsage.map((row) => (
+                <li key={row.id} data-kind="usage">
                   <p className={styles.lineMain}>{row.lineJa}</p>
                   <p className={styles.lineSub}>{row.subJa}</p>
                 </li>
@@ -84,14 +103,14 @@ export default async function StudentLessonTimePage() {
         </section>
 
         <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>最近使った時間</h2>
-          <p className={styles.sectionLead}>レッスンを終えたあとに記録された分です。</p>
-          {usage.recentUsage.length === 0 ? (
-            <p className={styles.empty}>まだ表示できる記録がありません。</p>
+          <h2 className={styles.sectionTitle}>最近、増えた時間</h2>
+          <p className={styles.sectionLead}>購入や付与などでレッスン時間が増えたときの記録です。</p>
+          {usage.recentCharges.length === 0 ? (
+            <p className={styles.empty}>まだここに表示できる記録はありません。</p>
           ) : (
             <ul className={styles.timeline}>
-              {usage.recentUsage.map((row) => (
-                <li key={row.id}>
+              {usage.recentCharges.map((row) => (
+                <li key={row.id} data-kind="charge">
                   <p className={styles.lineMain}>{row.lineJa}</p>
                   <p className={styles.lineSub}>{row.subJa}</p>
                 </li>
@@ -100,8 +119,8 @@ export default async function StudentLessonTimePage() {
           )}
         </section>
 
-        <p className={styles.empty}>
-          ※ 表示は教室の記録に基づく目安です。最終的な残時間は教室の案内を優先してください。
+        <p className={styles.footnote}>
+          ※ 表示は教室の記録に基づく目安です。予約やキャンセルのタイミングで変わることがあります。
         </p>
         <Link className={styles.footerLink} href="/student">
           ホームに戻る
