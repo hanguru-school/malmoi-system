@@ -108,19 +108,42 @@ export default function StudentDashboard({
 
   const daysToNext = nextReservation?.date ? daysFromTodayYmd(nextReservation.date, todayYmd) : null;
   const upcomingSoon = daysToNext !== null && daysToNext >= 0 && daysToNext <= 3;
+  const lessonImminent = daysToNext !== null && daysToNext >= 0 && daysToNext <= 1;
   const reservationFar = daysToNext !== null && daysToNext > 14;
 
   /**
    * 次の一手（1つだけ high）:
-   * 未完了宿題 → 宿題 / 次レッスン3日以内 → 予約確認 / 最近ノートあり → ノート /
-   * 予約なし or 遠い予約のみ → 予約する
+   * 未完了宿題 → 宿題 / レッスン1日以内 → 予約・準備 / 3日以内 → 予約確認 /
+   * 最近ノートあり → ノート（復習） / 予約なし or 遠い予約 → 予約する
    */
   const retentionFocus = (() => {
     if (pendingHomework.length > 0) return "homework";
+    if (nextReservation && lessonImminent) return "imminent";
     if (nextReservation && upcomingSoon) return "upcoming";
     if (recentLessonNotes.length > 0) return "notes";
     if (!nextReservation || reservationFar) return "reserve";
     return "none";
+  })();
+
+  const retentionHint = (() => {
+    if (retentionFocus === "homework") {
+      return pendingHomework.length > 1
+        ? `未完了の宿題が${pendingHomework.length}件あります。まずは宿題一覧から進めましょう。`
+        : "未完了の宿題があります。宿題一覧から取り組みを進めましょう。";
+    }
+    if (retentionFocus === "imminent") {
+      if (daysToNext === 0) return "本日レッスン前に、時間・形式・講師を確認しましょう。";
+      if (daysToNext === 1) return "明日の予約に向けて、準備と予約内容を確認しましょう。";
+      return "近日のレッスンに向けて、予約内容を確認しましょう。";
+    }
+    if (retentionFocus === "upcoming") return "近い予約があります。日時と内容を一度確認しましょう。";
+    if (retentionFocus === "notes") return "最近のノートがあります。復習にノートを開いておきましょう。";
+    if (retentionFocus === "reserve") {
+      return !nextReservation
+        ? "次回の学習のために、新しい予約を取ってみましょう。"
+        : "次の予約まで間が空いています。継続のために予約を検討しましょう。";
+    }
+    return "";
   })();
 
   const showLearningHub =
@@ -147,21 +170,30 @@ export default function StudentDashboard({
 
       <nav className={home.retentionStrip} aria-label="次の一手">
         <p className={home.retentionStripTitle}>次の一手</p>
+        {retentionHint ? <p className={home.retentionStripHint}>{retentionHint}</p> : null}
         <div className={home.retentionStripRow}>
           <Link
             className={home.retentionTile}
             href={reservationsHref}
             data-emphasis={
-              retentionFocus === "reserve" || retentionFocus === "upcoming" ? "high" : "low"
+              retentionFocus === "reserve" ||
+              retentionFocus === "upcoming" ||
+              retentionFocus === "imminent"
+                ? "high"
+                : "low"
             }
           >
             <span className={home.retentionTileEyebrow}>予約</span>
             <span className={home.retentionTileText}>
-              {retentionFocus === "upcoming"
-                ? "次の予約を確認"
-                : retentionFocus === "reserve"
-                  ? "予約する"
-                  : "一覧・新規"}
+              {retentionFocus === "imminent"
+                ? daysToNext === 0
+                  ? "本日の予約を確認"
+                  : "直前の確認"
+                : retentionFocus === "upcoming"
+                  ? "次の予約を確認"
+                  : retentionFocus === "reserve"
+                    ? "予約する"
+                    : "一覧・新規"}
             </span>
           </Link>
           <Link
@@ -171,7 +203,7 @@ export default function StudentDashboard({
           >
             <span className={home.retentionTileEyebrow}>ノート</span>
             <span className={home.retentionTileText}>
-              {retentionFocus === "notes" ? "ノートを確認" : "確認"}
+              {retentionFocus === "notes" ? "復習・ノート確認" : "確認"}
             </span>
           </Link>
           <Link

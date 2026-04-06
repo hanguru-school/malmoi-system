@@ -171,6 +171,7 @@ export default function AdminStudentsPanelV2({
               <option value="reservation_gap">予約が空き／履歴弱い</option>
               <option value="homework_backlog">宿題未完了が多い</option>
               <option value="note_stale">ノートが古い／なし</option>
+              <option value="post_reg_idle">登録後の活動薄め</option>
             </select>
           </label>
         </div>

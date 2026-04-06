@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import styles from "../../login/login.module.css";
@@ -14,6 +14,12 @@ import {
 } from "../../../lib/lessonNotes/teacherQuickCompose";
 import { buildHomeworkPrefillFromNoteForm, HW_PREFILL_FROM_NOTE_KEY } from "../../../lib/homework/quickHomework";
 import { completeOpsFlowStep, opsFlowDoneFallback } from "../../../lib/ops/opsFlowQueue";
+import {
+  recordTeacherNoteQuickTemplateUse,
+  recordTeacherPointSnippetUse,
+  sortNoteQuickTemplateIdsByUsage,
+  sortPointSnippetIdsByUsage,
+} from "../../../lib/teacher/teacherUiUsage";
 
 const EMPTY_FORM = {
   id: "",
@@ -83,6 +89,7 @@ export default function AdminLessonNotesPanel({
   const [recentInsertTarget, setRecentInsertTarget] = useState("summary");
   const [pointInsertTarget, setPointInsertTarget] = useState("summary");
   const [openHomeworkAfterSave, setOpenHomeworkAfterSave] = useState(true);
+  const [usageSortTick, setUsageSortTick] = useState(0);
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -93,6 +100,22 @@ export default function AdminLessonNotesPanel({
     if (!showQuickCompose) return [];
     return getRecentPhrases();
   }, [showQuickCompose, recentPhraseTick]);
+
+  const orderedQuickTemplates = useMemo(() => {
+    if (!showQuickCompose) return TEACHER_QUICK_TEMPLATES;
+    const ids = sortNoteQuickTemplateIdsByUsage(TEACHER_QUICK_TEMPLATES);
+    const map = new Map(TEACHER_QUICK_TEMPLATES.map((t) => [t.id, t]));
+    return ids.map((id) => map.get(id)).filter(Boolean);
+  }, [showQuickCompose, usageSortTick]);
+
+  const orderedPointSnippets = useMemo(() => {
+    if (!showQuickCompose) return TEACHER_POINT_SNIPPETS;
+    const ids = sortPointSnippetIdsByUsage(TEACHER_POINT_SNIPPETS);
+    const map = new Map(TEACHER_POINT_SNIPPETS.map((t) => [t.id, t]));
+    return ids.map((id) => map.get(id)).filter(Boolean);
+  }, [showQuickCompose, usageSortTick]);
+
+  const bumpUsageSort = useCallback(() => setUsageSortTick((n) => n + 1), []);
 
   const sortedNotes = useMemo(
     () => [...notes].sort((a, b) => String(b.date || b.updatedAt || "").localeCompare(String(a.date || a.updatedAt || ""))),
@@ -281,6 +304,8 @@ export default function AdminLessonNotesPanel({
       String(s || "").trim()
     );
     if (hasContent && !window.confirm("入力内容を定型で上書きしますか？")) return;
+    recordTeacherNoteQuickTemplateUse(templateId);
+    bumpUsageSort();
     setForm((prev) => ({ ...prev, ...t.patch }));
   }
 
@@ -298,6 +323,8 @@ export default function AdminLessonNotesPanel({
   function appendPointSnippet(snippetId) {
     const s = TEACHER_POINT_SNIPPETS.find((x) => x.id === snippetId);
     if (!s) return;
+    recordTeacherPointSnippetUse(snippetId);
+    bumpUsageSort();
     const line =
       pointInsertTarget === "nextLessonPlan" ? String(s.nextLine || "").trim() : String(s.summaryLine || "").trim();
     if (!line) return;
@@ -589,7 +616,7 @@ export default function AdminLessonNotesPanel({
               定型テンプレートと直近の文で、入力を短くできます。
             </p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem", marginBottom: "0.45rem" }}>
-              {TEACHER_QUICK_TEMPLATES.map((tpl) => (
+              {orderedQuickTemplates.map((tpl) => (
                 <button
                   key={tpl.id}
                   className={styles.button}
@@ -642,7 +669,7 @@ export default function AdminLessonNotesPanel({
               </button>
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem", marginBottom: "0.45rem" }}>
-              {TEACHER_POINT_SNIPPETS.map((sn) => (
+              {orderedPointSnippets.map((sn) => (
                 <button
                   key={sn.id}
                   className={styles.button}

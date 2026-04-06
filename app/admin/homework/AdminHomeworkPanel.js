@@ -14,6 +14,7 @@ import {
   recordTeacherPresetUse,
   recordTeacherRecentHwUse,
   recordTeacherTemplateUse,
+  sortHomeworkTemplateRowsByUsage,
   sortPresetIdsByUsage,
 } from "../../../lib/teacher/teacherUiUsage";
 
@@ -112,6 +113,10 @@ export default function AdminHomeworkPanel({
     const map = new Map(HW_QUICK_PRESETS.map((p) => [p.id, p]));
     return ids.map((id) => map.get(id)).filter(Boolean);
   }, [usageTick, recentHwTick]);
+
+  const orderedHomeworkTemplates = useMemo(() => {
+    return sortHomeworkTemplateRowsByUsage(templates);
+  }, [templates, usageTick]);
 
   const filteredSummary = useMemo(() => {
     const notStarted = items.filter((item) => item.status === "not_started").length;
@@ -675,7 +680,7 @@ export default function AdminHomeworkPanel({
               onChange={(e) => setSelectedTemplateId(e.target.value)}
             >
               <option value="">選択してください</option>
-              {templates.map((template) => (
+              {orderedHomeworkTemplates.map((template) => (
                 <option key={template.id} value={template.id}>
                   {template.title}
                 </option>

@@ -91,6 +91,14 @@
   color: #64748b;
 }
 
+.retentionStripHint {
+  margin: 0 0 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.45;
+  color: #334155;
+}
+
 .retentionStripRow {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

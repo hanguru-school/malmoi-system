@@ -15,6 +15,7 @@ const NAV_GROUPS = [
     items: [
       { key: "opsToday", href: "/admin/ops-today", label: "本日の未処理" },
       { key: "students", href: "/admin/students", label: "学生管理" },
+      { key: "studentsAtRisk", href: "/admin/students/at-risk", label: "要フォロー学生" },
       { key: "reservations", href: "/admin/reservations", label: "予約管理" },
       { key: "registration", href: "/admin/students", label: "登録状況" },
       { key: "notices", href: "/admin/notices", label: "お知らせ" },
@@ -49,7 +50,13 @@ function isNavActive(currentPath, href) {
   if (href.includes("#")) return false;
   if (currentPath === href) return true;
   if (href === "/admin/payments" && currentPath.startsWith("/admin/payments")) return true;
-  if (href === "/admin/students" && currentPath.startsWith("/admin/students")) return true;
+  if (href === "/admin/students/at-risk" && currentPath.startsWith("/admin/students/at-risk")) return true;
+  if (
+    href === "/admin/students" &&
+    currentPath.startsWith("/admin/students") &&
+    !currentPath.startsWith("/admin/students/at-risk")
+  )
+    return true;
   if (href === "/admin/reservations" && currentPath.startsWith("/admin/reservations")) return true;
   if (href === "/admin/settings" && currentPath.startsWith("/admin/settings")) return true;
   if (href === "/admin/lesson-notes" && currentPath.startsWith("/admin/lesson-notes")) return true;
