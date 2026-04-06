@@ -1,19 +1,28 @@
 import styles from "../../../login/login.module.css";
+import { registrationStartUrlErrorMessage } from "../../../../lib/adapters/studentRegistration";
+import { useStudentRegistrationUiV2 } from "../../../../lib/ui/featureFlags";
+import StudentRegisterChromeV2 from "../StudentRegisterChromeV2";
 import StartRegistrationForm from "./StartRegistrationForm";
-
-function errorMessage(errorCode) {
-  const code = String(errorCode || "").trim();
-  if (code === "token_missing") return "認証リンクにトークン情報がありません。もう一度登録を開始してください。";
-  if (code === "token_not_found") return "認証リンクが無効です。もう一度登録を開始してください。";
-  if (code === "token_used") return "この認証リンクはすでに使用されています。もう一度登録を開始してください。";
-  if (code === "token_expired") return "認証リンクの有効期限が切れました。もう一度登録を開始してください。";
-  if (code) return "認証リンクを確認できませんでした。もう一度登録を開始してください。";
-  return "";
-}
+import StartRegistrationFormV2 from "./StartRegistrationFormV2";
 
 export default async function StudentRegisterStartPage({ searchParams }) {
   const params = await searchParams;
-  const initialErrorText = errorMessage(params?.error);
+  const initialErrorText = registrationStartUrlErrorMessage(params?.error);
+  const useV2 = useStudentRegistrationUiV2(params?.ui);
+
+  if (useV2) {
+    return (
+      <StudentRegisterChromeV2
+        step={1}
+        title="メールで登録を開始"
+        subtitle="お名前とメールを入力すると確認メールが届きます。届いたリンクから同意とプロフィール入力へ進みます。"
+        metaExtra="所要 約1分"
+      >
+        <StartRegistrationFormV2 initialErrorText={initialErrorText} />
+      </StudentRegisterChromeV2>
+    );
+  }
+
   return (
     <div className={styles.shell}>
       <main className={styles.card}>
@@ -26,6 +35,9 @@ export default async function StudentRegisterStartPage({ searchParams }) {
           確認メールをお送りします。
         </p>
         <StartRegistrationForm initialErrorText={initialErrorText} />
+        <p className={styles.stepNote} style={{ marginTop: "1rem", textAlign: "center" }}>
+          <a href="/student/register/start?ui=v2">新しい登録画面を試す</a>
+        </p>
       </main>
     </div>
   );

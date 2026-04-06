@@ -20,7 +20,7 @@ export default async function TeacherStudentsPage({ searchParams }) {
   return (
     <div className={styles.shell}>
       <main className={styles.card}>
-        <h1 className={styles.sectionTitle}>学生検索</h1>
+        <h1 className={styles.sectionTitle}>生徒メモ・検索</h1>
         <p className={styles.description}>学生を検索し、学習統計・ノート・宿題へすぐ移動できます。</p>
         <TeacherTopNav currentPath="/teacher/students" />
         <form method="GET">
@@ -37,6 +37,9 @@ export default async function TeacherStudentsPage({ searchParams }) {
               <p>{student.nameFurigana || "-"}</p>
               <p>{student.email || "-"}</p>
               <div className={styles.links}>
+                <Link className={styles.link} href={`/teacher/students/${encodeURIComponent(student.id)}`}>
+                  直近サマリー
+                </Link>
                 <Link className={styles.link} href={`/teacher/progress?studentId=${encodeURIComponent(student.id)}`}>
                   学習統計
                 </Link>

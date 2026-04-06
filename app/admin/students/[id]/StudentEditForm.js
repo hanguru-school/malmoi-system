@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import Link from "next/link";
 import styles from "../../../login/login.module.css";
 import adminStyles from "../../admin.module.css";
@@ -364,6 +364,29 @@ export default function StudentEditForm({
     setLessonMinuteJournalSummary(student.lessonMinuteJournalSummary || null);
   }, [student.id]);
 
+  const scrollToLessonMinutesQuick = useCallback(() => {
+    if (typeof window === "undefined") return;
+    window.setTimeout(() => {
+      document.getElementById("lesson-minutes-quick")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
+  }, []);
+
+  const openLessonTimeQuickCharge = useCallback(() => {
+    setActiveTab("lesson-time");
+    scrollToLessonMinutesQuick();
+  }, [scrollToLessonMinutesQuick]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const raw = (window.location.hash || "").replace(/^#/, "");
+    if (raw === "lesson-time" || raw === "add-lessons") {
+      setActiveTab("lesson-time");
+      window.setTimeout(() => {
+        document.getElementById("lesson-minutes-quick")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 120);
+    }
+  }, []);
+
   useEffect(() => {
     let active = true;
     async function loadNotificationLogs() {
@@ -439,6 +462,59 @@ export default function StudentEditForm({
     };
   }, [student.id, learningPeriod, initialLearningStats]);
 
+  async function submitLessonMinutesPatch(patchBody) {
+    const opId =
+      typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `lm-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    const response = await fetch(`/api/admin/students/${student.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...patchBody, lessonMinutesOperationId: opId }),
+    });
+    const data = await response.json();
+    if (!response.ok || !data?.ok) {
+      throw new Error(data?.error || "レッスン時間の更新に失敗しました。");
+    }
+    setLessonMinutes(data.student?.lessonMinutes || lessonMinutes);
+    setLessonMinuteLogs(data.student?.lessonMinuteLogs || lessonMinuteLogs);
+    setLessonMinuteLedger(data.student?.lessonMinuteLedger || lessonMinuteLedger);
+    setLessonMinuteJournalCharges(data.student?.lessonMinuteJournalCharges || lessonMinuteJournalCharges);
+    setLessonMinuteJournalUsage(data.student?.lessonMinuteJournalUsage || lessonMinuteJournalUsage);
+    setLessonMinuteJournalManual(data.student?.lessonMinuteJournalManual || lessonMinuteJournalManual);
+    setLessonMinuteJournalSummary(data.student?.lessonMinuteJournalSummary ?? lessonMinuteJournalSummary);
+  }
+
+  async function handleQuickChargeMinutes(minutes) {
+    const m = Math.max(0, Math.floor(Number(minutes || 0)));
+    if (m <= 0) return;
+    if (m >= 3000) {
+      const ok = typeof window !== "undefined" && window.confirm(
+        "入力された分数が大きいです。内容を再確認のうえ、続行しますか？"
+      );
+      if (!ok) return;
+    }
+    setLessonMinutesApplyLoading(true);
+    setStatus({ type: "", text: "" });
+    try {
+      await submitLessonMinutesPatch({
+        lessonMinutesCreditMinutes: m,
+        lessonMinutesCreditPackageId: "",
+        lessonMinutesCreditType: "purchase",
+        lessonMinutesCreditReason: `クイック付与 ${m}分`,
+      });
+      setLessonMinutesCreditMinutes("0");
+      setLessonMinutesCreditPackageId("");
+      setLessonMinutesCreditType("purchase");
+      setLessonMinutesCreditReason("");
+      setStatus({ type: "success", text: `${m}分を付与しました（原簿: charge）。` });
+    } catch (err) {
+      setStatus({ type: "error", text: err.message || "レッスン時間の更新に失敗しました。" });
+    } finally {
+      setLessonMinutesApplyLoading(false);
+    }
+  }
+
   async function handleLessonMinutesApply(event) {
     event.preventDefault();
     event.stopPropagation();
@@ -477,36 +553,16 @@ export default function StudentEditForm({
     setLessonMinutesApplyLoading(true);
     setStatus({ type: "", text: "" });
     try {
-      const opId =
-        typeof crypto !== "undefined" && crypto.randomUUID
-          ? crypto.randomUUID()
-          : `lm-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-      const response = await fetch(`/api/admin/students/${student.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          lessonMinutesCreditMinutes: credit,
-          lessonMinutesCreditPackageId,
-          lessonMinutesCreditType,
-          lessonMinutesCreditReason,
-          lessonMinutesDeductMinutes: deduct,
-          lessonMinutesDeductReason: String(lessonMinutesDeductMemo || "").trim(),
-          lessonMinutesAdjustMinutes: adjust,
-          lessonMinutesAdjustReason,
-          lessonMinutesOperationId: opId,
-        }),
+      await submitLessonMinutesPatch({
+        lessonMinutesCreditMinutes: credit,
+        lessonMinutesCreditPackageId,
+        lessonMinutesCreditType,
+        lessonMinutesCreditReason,
+        lessonMinutesDeductMinutes: deduct,
+        lessonMinutesDeductReason: String(lessonMinutesDeductMemo || "").trim(),
+        lessonMinutesAdjustMinutes: adjust,
+        lessonMinutesAdjustReason,
       });
-      const data = await response.json();
-      if (!response.ok || !data?.ok) {
-        throw new Error(data?.error || "レッスン時間の更新に失敗しました。");
-      }
-      setLessonMinutes(data.student?.lessonMinutes || lessonMinutes);
-      setLessonMinuteLogs(data.student?.lessonMinuteLogs || lessonMinuteLogs);
-      setLessonMinuteLedger(data.student?.lessonMinuteLedger || lessonMinuteLedger);
-      setLessonMinuteJournalCharges(data.student?.lessonMinuteJournalCharges || lessonMinuteJournalCharges);
-      setLessonMinuteJournalUsage(data.student?.lessonMinuteJournalUsage || lessonMinuteJournalUsage);
-      setLessonMinuteJournalManual(data.student?.lessonMinuteJournalManual || lessonMinuteJournalManual);
-      setLessonMinuteJournalSummary(data.student?.lessonMinuteJournalSummary ?? lessonMinuteJournalSummary);
       setLessonMinutesCreditMinutes("0");
       setLessonMinutesCreditPackageId("");
       setLessonMinutesCreditType("purchase");
@@ -742,10 +798,20 @@ export default function StudentEditForm({
                   {a.text}
                 </p>
               ))}
+              <div className={detailStyles.minutesHeroAlertActions}>
+                <button
+                  className={adminStyles.chipButton}
+                  type="button"
+                  onClick={openLessonTimeQuickCharge}
+                  disabled={lessonMinutesApplyLoading}
+                >
+                  時間をすぐ付与
+                </button>
+              </div>
             </div>
           ) : null}
           <div className={detailStyles.quickActions}>
-            <button className={adminStyles.chipButton} type="button" onClick={() => setActiveTab("lesson-time")}>
+            <button className={adminStyles.chipButton} type="button" onClick={openLessonTimeQuickCharge}>
               レッスン時間を編集
             </button>
             <a className={adminStyles.actionButton} href={`/admin/reservations?studentId=${student.id}`}>
@@ -1526,27 +1592,59 @@ export default function StudentEditForm({
             受講完了時の自動消費は予約の「完了」処理で行われます。ここでの減算は<strong>手動での調整</strong>です（残りを超える分は自動でキャップされます）。
           </p>
           {Number(lessonMinutes?.remainingMinutes ?? 0) <= 0 ? (
-            <p className={`${styles.message} ${styles.messageError}`} style={{ marginBottom: "0.65rem" }}>
-              残り時間が0以下です。受講前に時間付与をご確認ください。
-            </p>
+            <div className={detailStyles.minutesTabAlertRow}>
+              <p className={`${styles.message} ${styles.messageError}`} style={{ marginBottom: 0 }}>
+                残り時間が0以下です。受講前に時間付与をご確認ください。
+              </p>
+              <button
+                type="button"
+                className={adminStyles.chipButton}
+                onClick={scrollToLessonMinutesQuick}
+                disabled={lessonMinutesApplyLoading}
+              >
+                クイック付与へ
+              </button>
+            </div>
           ) : null}
           {Number(lessonMinutes?.remainingMinutes ?? 0) > 0 &&
           Number(lessonMinutes?.remainingMinutes ?? 0) <= 180 ? (
-            <p className={`${styles.message}`} style={{ marginBottom: "0.65rem", borderColor: "#f6e2b3" }}>
-              残り時間が180分以下です。継続受講の案内を検討してください。
-            </p>
+            <div className={detailStyles.minutesTabAlertRow}>
+              <p className={`${styles.message}`} style={{ marginBottom: 0, borderColor: "#f6e2b3" }}>
+                残り時間が180分以下です。継続受講の案内を検討してください。
+              </p>
+              <button
+                type="button"
+                className={adminStyles.chipButton}
+                onClick={scrollToLessonMinutesQuick}
+                disabled={lessonMinutesApplyLoading}
+              >
+                クイック付与へ
+              </button>
+            </div>
           ) : null}
           {adminLessonMinutesPreview.completionHintJa ? (
-            <p
-              className={
-                adminLessonMinutesPreview.nextCompletionInsufficient
-                  ? `${styles.message} ${styles.messageError}`
-                  : styles.description
-              }
-              style={{ marginBottom: "0.65rem" }}
-            >
-              {adminLessonMinutesPreview.completionHintJa}
-            </p>
+            <div className={detailStyles.minutesTabAlertRow}>
+              <p
+                className={
+                  adminLessonMinutesPreview.nextCompletionInsufficient
+                    ? `${styles.message} ${styles.messageError}`
+                    : styles.description
+                }
+                style={{ marginBottom: 0 }}
+              >
+                {adminLessonMinutesPreview.completionHintJa}
+              </p>
+              {adminLessonMinutesPreview.nextCompletionInsufficient ? (
+                <button
+                  type="button"
+                  className={adminStyles.chipButton}
+                  onClick={scrollToLessonMinutesQuick}
+                  disabled={lessonMinutesApplyLoading}
+                >
+                  時間を追加
+                </button>
+              ) : null}
+            </div>
           ) : null}
           {adminLessonMinutesPreview.projectedRemainingHintJa ? (
             <p className={styles.description} style={{ marginBottom: "0.65rem" }}>
@@ -1567,18 +1665,33 @@ export default function StudentEditForm({
           </div>
 
           <div className={detailStyles.lessonMinutesTools}>
-            <article className={detailStyles.lessonMinutesToolCard}>
+            <article className={detailStyles.lessonMinutesToolCard} id="lesson-minutes-quick">
               <h4 className={detailStyles.blockTitle}>時間を追加</h4>
               <p className={adminStyles.smallMuted} style={{ marginBottom: "0.5rem" }}>
-                よく使う分数はワンタップで入力できます。メモを書いてから「レッスン時間のみ反映」で確定してください。
+                定額は<strong>その場で付与</strong>（原簿 charge・メモ自動）。別金額は下のフォームへ入力し、「レッスン時間のみ反映」で確定してください。
               </p>
               <div className={detailStyles.lessonMinutePresetRow}>
-                <span className={adminStyles.smallMuted}>クイック:</span>
+                <span className={adminStyles.smallMuted}>即時付与:</span>
                 {LESSON_MINUTE_QUICK_ADD_MINUTES.map((m) => (
                   <button
                     key={m}
                     type="button"
                     className={detailStyles.lessonMinutePresetBtn}
+                    disabled={lessonMinutesApplyLoading}
+                    onClick={() => handleQuickChargeMinutes(m)}
+                  >
+                    {lessonMinutesApplyLoading ? "…" : `${m}分を付与`}
+                  </button>
+                ))}
+              </div>
+              <div className={detailStyles.lessonMinutePresetRow}>
+                <span className={adminStyles.smallMuted}>下の欄へ:</span>
+                {LESSON_MINUTE_QUICK_ADD_MINUTES.map((m) => (
+                  <button
+                    key={`fill-${m}`}
+                    type="button"
+                    className={detailStyles.lessonMinutePresetBtnSecondary}
+                    disabled={lessonMinutesApplyLoading}
                     onClick={() => {
                       setLessonMinutesCreditPackageId("");
                       setLessonMinutesCreditMinutes(String(m));

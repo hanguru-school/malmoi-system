@@ -79,6 +79,26 @@
   color: #92400e;
 }
 
+.minutesHeroAlertActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.15rem;
+}
+
+.minutesTabAlertRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem 0.75rem;
+  margin-bottom: 0.65rem;
+}
+
+.minutesTabAlertRow > p {
+  flex: 1 1 12rem;
+}
+
 .lessonMinutesTools {
   display: grid;
   gap: 0.75rem;
@@ -125,6 +145,31 @@
 
 .lessonMinutePresetBtn:active {
   transform: scale(0.98);
+}
+
+.lessonMinutePresetBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.lessonMinutePresetBtnSecondary {
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #475569;
+  font-size: 0.78rem;
+  font-weight: 650;
+  padding: 0.32rem 0.55rem;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.lessonMinutePresetBtnSecondary:hover {
+  background: #f1f5f9;
+}
+
+.lessonMinutePresetBtnSecondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .quickActions {

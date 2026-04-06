@@ -32,13 +32,12 @@ const NAV_GROUPS = [
     items: [{ key: "payments", href: "/admin/payments", label: "決済" }],
   },
   {
-    id: "audit",
-    label: "監査・システム",
+    id: "config",
+    label: "設定・監査",
     items: [
+      { key: "settings", href: "/admin/settings/classroom", label: "設定" },
       { key: "audit", href: "/admin#admin-recent-audit", label: "監査ログ（直近）" },
       { key: "dbcheck", href: "/admin/system/db-check", label: "保存診断" },
-      { key: "settings", href: "/admin/settings", label: "システム設定" },
-      { key: "admins", href: "/admin/admin-users", label: "管理者設定" },
     ],
   },
 ];
@@ -58,7 +57,7 @@ function isNavActive(currentPath, href) {
   )
     return true;
   if (href === "/admin/reservations" && currentPath.startsWith("/admin/reservations")) return true;
-  if (href === "/admin/settings" && currentPath.startsWith("/admin/settings")) return true;
+  if (href === "/admin/settings/classroom" && currentPath.startsWith("/admin/settings")) return true;
   if (href === "/admin/lesson-notes" && currentPath.startsWith("/admin/lesson-notes")) return true;
   if (href === "/admin/homework" && currentPath.startsWith("/admin/homework")) return true;
   if (href === "/admin/notices" && currentPath.startsWith("/admin/notices")) return true;

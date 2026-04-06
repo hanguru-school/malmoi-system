@@ -620,3 +620,34 @@
   }
 }
 
+.settingsHubNav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.5rem;
+  margin: 0.65rem 0 1rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.settingsHubLink {
+  font-size: 0.78rem;
+  font-weight: 650;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  text-decoration: none;
+  background: #f8fafc;
+}
+
+.settingsHubLink:hover {
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+.settingsHubLinkActive {
+  border-color: #93c5fd;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+

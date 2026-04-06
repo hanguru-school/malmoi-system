@@ -225,7 +225,7 @@ export default async function AdminPage() {
               <li>次回予約で不足の恐れ: {minuteRisk?.nextReservationInsufficient ?? 0} 名</li>
             </ul>
             <Link className={dashboardStyles.opsSummaryLink} href="/admin/students/at-risk">
-              要フォロー学生を見る
+              要フォロー学生を見る（詳細はレッスン時間タブへ）
             </Link>
           </article>
           <article className={dashboardStyles.opsSummaryCard}>

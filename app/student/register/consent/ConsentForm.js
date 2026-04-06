@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../../../login/login.module.css";
+import { registrationProfilePath } from "../../../../lib/student/registrationNavPaths";
 
-export default function ConsentForm() {
+export default function ConsentForm({ registrationUi }) {
   const router = useRouter();
   const [checkedPolicy, setCheckedPolicy] = useState(false);
   const [checkedEnrollment, setCheckedEnrollment] = useState(false);
@@ -25,7 +26,7 @@ export default function ConsentForm() {
       const response = await fetch("/api/student/consent", { method: "POST" });
       const data = await response.json();
       if (!response.ok || !data?.ok) throw new Error(data?.error || "同意処理に失敗しました。");
-      router.push("/student/register/profile");
+      router.push(registrationProfilePath(registrationUi));
       router.refresh();
     } catch (error) {
       setStatus({ type: "error", text: error.message || "処理中にエラーが発生しました。" });

@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import styles from "../login/login.module.css";
 import adminStyles from "./admin.module.css";
+import { fetchAdminStudentsList } from "../../lib/adapters/adminStudentsClient";
 
 const EMPTY_FILTERS = {
   q: "",
@@ -10,17 +11,6 @@ const EMPTY_FILTERS = {
   consentStatus: "",
   linked: "",
 };
-
-function buildQuery(filters, page, pageSize) {
-  const params = new URLSearchParams();
-  if (filters.q) params.set("q", filters.q);
-  if (filters.registrationStatus) params.set("registrationStatus", filters.registrationStatus);
-  if (filters.consentStatus) params.set("consentStatus", filters.consentStatus);
-  if (filters.linked) params.set("linked", filters.linked);
-  params.set("page", String(page));
-  params.set("pageSize", String(pageSize));
-  return params.toString();
-}
 
 export default function AdminStudentsPanel({ initialStudents, initialPagination }) {
   const [filters, setFilters] = useState(EMPTY_FILTERS);
@@ -67,12 +57,7 @@ export default function AdminStudentsPanel({ initialStudents, initialPagination 
     try {
       const page = resetToFirstPage ? 1 : nextPage;
       const pageSize = nextPageSize || pagination.pageSize;
-      const query = buildQuery(filters, page, pageSize);
-      const response = await fetch(`/api/admin/students${query ? `?${query}` : ""}`);
-      const data = await response.json();
-      if (!response.ok || !data?.ok) {
-        throw new Error(data?.error || "学生一覧の取得に失敗しました。");
-      }
+      const data = await fetchAdminStudentsList(filters, page, pageSize);
       setStudents(data.students || []);
       setPagination(data.pagination || pagination);
     } catch (err) {

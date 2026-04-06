@@ -91,6 +91,22 @@
   color: #92400e;
 }
 
+.alertGuide {
+  margin: 0.35rem 0 0;
+  padding: 0 0.15rem;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: #57534e;
+}
+
+.alertGuide[data-tone="danger"] {
+  color: #7f1d1d;
+}
+
+.alertGuide[data-tone="warn"] {
+  color: #78350f;
+}
+
 .section {
   border-radius: 16px;
   border: 1px solid #e8edf5;

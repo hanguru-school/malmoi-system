@@ -10,6 +10,7 @@ const ITEMS = [
   { key: "today", href: "/teacher/today", label: "今日のレッスン" },
   { key: "opsToday", href: "/teacher/ops-today", label: "本日の未処理" },
   { key: "schedule", href: "/teacher/schedule", label: "予約一覧" },
+  { key: "availability", href: "/teacher/availability", label: "担当可能時間" },
   { key: "notes", href: "/teacher/lesson-notes", label: "レッスンノート" },
   { key: "students", href: "/teacher/students", label: "生徒メモ" },
   { key: "notices", href: "/teacher/notices", label: "お知らせ" },

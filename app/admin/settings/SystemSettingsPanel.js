@@ -1,20 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import styles from "../../login/login.module.css";
 import adminStyles from "../admin.module.css";
 
-const TABS = [
+const ALL_TABS = [
   { id: "schoolBasic", label: "教室基本設定" },
+  { id: "classroomOperations", label: "営業時間・詳細" },
   { id: "reservation", label: "予約設定" },
-  { id: "lesson", label: "レッスン設定" },
+  { id: "lesson", label: "レッスン共通" },
+  { id: "lessonServiceCatalog", label: "レッスン・サービス" },
   { id: "homework", label: "宿題設定" },
   { id: "notifications", label: "通知設定" },
   { id: "mail", label: "メール設定" },
   { id: "security", label: "セキュリティ設定" },
   { id: "parent", label: "保護者設定" },
   { id: "pair", label: "ペア設定" },
+  { id: "teacherSchedulePolicy", label: "講師変更ポリシー" },
   { id: "systemInfo", label: "システム情報" },
   { id: "changeLogs", label: "設定変更ログ" },
 ];
@@ -25,14 +28,23 @@ function boolLabel(value) {
   return value ? "ON" : "OFF";
 }
 
+function newId() {
+  return `svc-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
 export default function SystemSettingsPanel({
   initialSettings,
   initialSystemInfo,
   initialLogs = [],
   initialLogPagination,
   adminRank = "ADMIN",
+  tabIds = null,
 }) {
-  const [activeTab, setActiveTab] = useState("schoolBasic");
+  const visibleTabs = useMemo(() => {
+    if (!tabIds || !Array.isArray(tabIds) || tabIds.length === 0) return ALL_TABS;
+    return ALL_TABS.filter((t) => tabIds.includes(t.id));
+  }, [tabIds]);
+  const [activeTab, setActiveTab] = useState(() => visibleTabs[0]?.id || "schoolBasic");
   const [settings, setSettings] = useState(initialSettings || {});
   const [systemInfo, setSystemInfo] = useState(initialSystemInfo || {});
   const [logs, setLogs] = useState(initialLogs || []);
@@ -45,6 +57,12 @@ export default function SystemSettingsPanel({
   const [testMailRecipientName, setTestMailRecipientName] = useState("");
   const [logSectionFilter, setLogSectionFilter] = useState("");
   const isSuperAdmin = String(adminRank || "").toUpperCase() === "SUPER_ADMIN";
+
+  useEffect(() => {
+    if (!visibleTabs.some((t) => t.id === activeTab)) {
+      setActiveTab(visibleTabs[0]?.id || "schoolBasic");
+    }
+  }, [visibleTabs, activeTab]);
 
   const canEditSection = (section) => !SUPER_ADMIN_ONLY_SECTIONS.has(section) || isSuperAdmin;
 
@@ -68,7 +86,10 @@ export default function SystemSettingsPanel({
       const data = await response.json();
       if (!response.ok || !data?.ok) throw new Error(data?.error || "設定保存に失敗しました。");
       setSettings((prev) => ({ ...prev, [section]: data.result.settings }));
-      setStatus({ type: "success", text: `${TABS.find((item) => item.id === section)?.label || section} を保存しました。` });
+      setStatus({
+        type: "success",
+        text: `${ALL_TABS.find((item) => item.id === section)?.label || section} を保存しました。`,
+      });
       await loadLogs(1, logSectionFilter);
       if (section === "reservation" || section === "lesson" || section === "mail") {
         await loadSystemInfo();
@@ -131,6 +152,9 @@ export default function SystemSettingsPanel({
   const security = settings.security || {};
   const parent = settings.parent || {};
   const pair = settings.pair || {};
+  const classroomOperations = settings.classroomOperations || {};
+  const lessonServiceCatalog = settings.lessonServiceCatalog || { services: [] };
+  const teacherSchedulePolicy = settings.teacherSchedulePolicy || {};
 
   const logRows = useMemo(
     () =>
@@ -144,7 +168,7 @@ export default function SystemSettingsPanel({
   return (
     <section className={adminStyles.sectionBlock}>
       <div className={adminStyles.compactActions}>
-        {TABS.map((tab) => (
+        {visibleTabs.map((tab) => (
           <button
             key={tab.id}
             type="button"
@@ -179,6 +203,110 @@ export default function SystemSettingsPanel({
           <div className={adminStyles.compactActions}>
             <button className={styles.button} type="button" disabled={savingSection === "schoolBasic"} onClick={() => saveSection("schoolBasic", schoolBasic)}>
               {savingSection === "schoolBasic" ? "保存中..." : "保存"}
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      {activeTab === "classroomOperations" ? (
+        <div className={adminStyles.groupBlock}>
+          <h3 className={adminStyles.groupTitle}>営業時間（詳細）</h3>
+          <p className={adminStyles.smallMuted}>
+            優先度: <strong>日付例外</strong> &gt; <strong>曜日別</strong> &gt; <strong>基本</strong>。基本値は教室基本の営業時間と同期して運用してください。
+          </p>
+          <div className={adminStyles.compactFormGrid}>
+            <label className={styles.label}>
+              基本・開店
+              <input
+                className={styles.field}
+                value={classroomOperations.defaultOpen || schoolBasic.businessHoursStart || ""}
+                onChange={(e) =>
+                  setSettings((prev) => ({
+                    ...prev,
+                    classroomOperations: { ...classroomOperations, defaultOpen: e.target.value },
+                  }))
+                }
+              />
+            </label>
+            <label className={styles.label}>
+              基本・閉店
+              <input
+                className={styles.field}
+                value={classroomOperations.defaultClose || schoolBasic.businessHoursEnd || ""}
+                onChange={(e) =>
+                  setSettings((prev) => ({
+                    ...prev,
+                    classroomOperations: { ...classroomOperations, defaultClose: e.target.value },
+                  }))
+                }
+              />
+            </label>
+          </div>
+          <label className={styles.label}>
+            基本・休憩（JSON 配列・例: start/end の配列）
+            <textarea
+              className={styles.field}
+              rows={3}
+              value={JSON.stringify(classroomOperations.defaultBreaks || [], null, 0)}
+              onChange={(e) => {
+                try {
+                  const parsed = JSON.parse(e.target.value || "[]");
+                  setSettings((prev) => ({
+                    ...prev,
+                    classroomOperations: { ...classroomOperations, defaultBreaks: Array.isArray(parsed) ? parsed : [] },
+                  }));
+                } catch {
+                  /* ignore */
+                }
+              }}
+            />
+          </label>
+          <label className={styles.label}>
+            曜日別 (JSON オブジェクト キー 0=日〜6=土)
+            <textarea
+              className={styles.field}
+              rows={4}
+              value={JSON.stringify(classroomOperations.weekdayHours || {}, null, 2)}
+              onChange={(e) => {
+                try {
+                  const parsed = JSON.parse(e.target.value || "{}");
+                  setSettings((prev) => ({
+                    ...prev,
+                    classroomOperations: { ...classroomOperations, weekdayHours: parsed && typeof parsed === "object" ? parsed : {} },
+                  }));
+                } catch {
+                  /* ignore */
+                }
+              }}
+            />
+          </label>
+          <label className={styles.label}>
+            日付例外 (JSON 配列: closed / short / special + date + open/close + breaks + note)
+            <textarea
+              className={styles.field}
+              rows={5}
+              value={JSON.stringify(classroomOperations.dateOverrides || [], null, 2)}
+              onChange={(e) => {
+                try {
+                  const parsed = JSON.parse(e.target.value || "[]");
+                  setSettings((prev) => ({
+                    ...prev,
+                    classroomOperations: { ...classroomOperations, dateOverrides: Array.isArray(parsed) ? parsed : [] },
+                  }));
+                } catch {
+                  /* ignore */
+                }
+              }}
+            />
+          </label>
+          <div className={adminStyles.compactActions}>
+            <button
+              className={styles.button}
+              type="button"
+              disabled={savingSection === "classroomOperations"}
+              onClick={() => saveSection("classroomOperations", classroomOperations)}
+            >
+              {savingSection === "classroomOperations" ? "保存中..." : "保存"}
             </button>
           </div>
         </div>
@@ -241,6 +369,222 @@ export default function SystemSettingsPanel({
         </div>
       ) : null}
 
+      {activeTab === "lessonServiceCatalog" ? (
+        <div className={adminStyles.groupBlock}>
+          <h3 className={adminStyles.groupTitle}>レッスン・サービス一覧</h3>
+          <p className={adminStyles.smallMuted}>
+            予約ポリシーとは別枠の「提供サービスマスタ」です。画像は data URL で保存されます（容量にご注意ください）。
+          </p>
+          <div className={adminStyles.compactActions}>
+            <button
+              className={adminStyles.chipButton}
+              type="button"
+              onClick={() => {
+                const next = [
+                  ...(lessonServiceCatalog.services || []),
+                  {
+                    id: newId(),
+                    name: "新規レッスン",
+                    description: "",
+                    imageDataUrl: "",
+                    allowPrivate: true,
+                    allowPair: true,
+                    allowGroup: false,
+                    maxStudents: 4,
+                    durationMinutes: 60,
+                    prepMinutes: 10,
+                    teacherUserIds: [],
+                    onlineOk: true,
+                    inPersonOk: true,
+                    studentSelectable: true,
+                  },
+                ];
+                setSettings((prev) => ({
+                  ...prev,
+                  lessonServiceCatalog: { ...(prev.lessonServiceCatalog || {}), services: next },
+                }));
+              }}
+            >
+              行を追加
+            </button>
+          </div>
+          {(lessonServiceCatalog.services || []).map((svc, idx) => (
+            <div key={svc.id || idx} className={adminStyles.groupBlock} style={{ border: "1px solid #e2e8f0", padding: "0.5rem" }}>
+              <div className={adminStyles.compactFormGrid}>
+                <label className={styles.label}>
+                  名称
+                  <input
+                    className={styles.field}
+                    value={svc.name || ""}
+                    onChange={(e) => {
+                      const next = [...(lessonServiceCatalog.services || [])];
+                      next[idx] = { ...svc, name: e.target.value };
+                      setSettings((prev) => ({
+                  ...prev,
+                  lessonServiceCatalog: { ...(prev.lessonServiceCatalog || {}), services: next },
+                }));
+                    }}
+                  />
+                </label>
+                <label className={styles.label}>
+                  時間(分)
+                  <input
+                    className={styles.field}
+                    type="number"
+                    value={svc.durationMinutes ?? 60}
+                    onChange={(e) => {
+                      const next = [...(lessonServiceCatalog.services || [])];
+                      next[idx] = { ...svc, durationMinutes: Number(e.target.value || 0) };
+                      setSettings((prev) => ({
+                  ...prev,
+                  lessonServiceCatalog: { ...(prev.lessonServiceCatalog || {}), services: next },
+                }));
+                    }}
+                  />
+                </label>
+                <label className={styles.label}>
+                  準備(分)
+                  <input
+                    className={styles.field}
+                    type="number"
+                    value={svc.prepMinutes ?? 0}
+                    onChange={(e) => {
+                      const next = [...(lessonServiceCatalog.services || [])];
+                      next[idx] = { ...svc, prepMinutes: Number(e.target.value || 0) };
+                      setSettings((prev) => ({
+                  ...prev,
+                  lessonServiceCatalog: { ...(prev.lessonServiceCatalog || {}), services: next },
+                }));
+                    }}
+                  />
+                </label>
+                <label className={styles.label}>
+                  最大人数
+                  <input
+                    className={styles.field}
+                    type="number"
+                    value={svc.maxStudents ?? 1}
+                    onChange={(e) => {
+                      const next = [...(lessonServiceCatalog.services || [])];
+                      next[idx] = { ...svc, maxStudents: Number(e.target.value || 1) };
+                      setSettings((prev) => ({
+                  ...prev,
+                  lessonServiceCatalog: { ...(prev.lessonServiceCatalog || {}), services: next },
+                }));
+                    }}
+                  />
+                </label>
+              </div>
+              <label className={styles.label}>
+                説明
+                <textarea
+                  className={styles.field}
+                  rows={2}
+                  value={svc.description || ""}
+                  onChange={(e) => {
+                    const next = [...(lessonServiceCatalog.services || [])];
+                    next[idx] = { ...svc, description: e.target.value };
+                    setSettings((prev) => ({
+                  ...prev,
+                  lessonServiceCatalog: { ...(prev.lessonServiceCatalog || {}), services: next },
+                }));
+                  }}
+                />
+              </label>
+              <label className={styles.label}>
+                画像 (data URL / 空で可)
+                <textarea
+                  className={styles.field}
+                  rows={2}
+                  value={svc.imageDataUrl || ""}
+                  onChange={(e) => {
+                    const next = [...(lessonServiceCatalog.services || [])];
+                    next[idx] = { ...svc, imageDataUrl: e.target.value };
+                    setSettings((prev) => ({
+                  ...prev,
+                  lessonServiceCatalog: { ...(prev.lessonServiceCatalog || {}), services: next },
+                }));
+                  }}
+                />
+              </label>
+              <div className={adminStyles.compactFormGrid}>
+                {[
+                  ["allowPrivate", "個人"],
+                  ["allowPair", "ペア"],
+                  ["allowGroup", "グループ"],
+                  ["onlineOk", "オンライン可"],
+                  ["inPersonOk", "対面可"],
+                  ["studentSelectable", "学生が選択可"],
+                ].map(([key, lab]) => (
+                  <label key={key} className={styles.label}>
+                    {lab}
+                    <select
+                      className={styles.field}
+                      value={svc[key] ? "1" : "0"}
+                      onChange={(e) => {
+                        const next = [...(lessonServiceCatalog.services || [])];
+                        next[idx] = { ...svc, [key]: e.target.value === "1" };
+                        setSettings((prev) => ({
+                  ...prev,
+                  lessonServiceCatalog: { ...(prev.lessonServiceCatalog || {}), services: next },
+                }));
+                      }}
+                    >
+                      <option value="1">ON</option>
+                      <option value="0">OFF</option>
+                    </select>
+                  </label>
+                ))}
+              </div>
+              <label className={styles.label}>
+                担当講師ユーザーID (カンマ区切り)
+                <input
+                  className={styles.field}
+                  value={(svc.teacherUserIds || []).join(",")}
+                  onChange={(e) => {
+                    const next = [...(lessonServiceCatalog.services || [])];
+                    next[idx] = {
+                      ...svc,
+                      teacherUserIds: String(e.target.value || "")
+                        .split(",")
+                        .map((s) => s.trim())
+                        .filter(Boolean),
+                    };
+                    setSettings((prev) => ({
+                  ...prev,
+                  lessonServiceCatalog: { ...(prev.lessonServiceCatalog || {}), services: next },
+                }));
+                  }}
+                />
+              </label>
+              <button
+                className={adminStyles.chipButton}
+                type="button"
+                onClick={() => {
+                  const next = (lessonServiceCatalog.services || []).filter((_, i) => i !== idx);
+                  setSettings((prev) => ({
+                  ...prev,
+                  lessonServiceCatalog: { ...(prev.lessonServiceCatalog || {}), services: next },
+                }));
+                }}
+              >
+                この行を削除
+              </button>
+            </div>
+          ))}
+          <div className={adminStyles.compactActions}>
+            <button
+              className={styles.button}
+              type="button"
+              disabled={savingSection === "lessonServiceCatalog"}
+              onClick={() => saveSection("lessonServiceCatalog", lessonServiceCatalog)}
+            >
+              {savingSection === "lessonServiceCatalog" ? "保存中..." : "保存"}
+            </button>
+          </div>
+        </div>
+      ) : null}
+
       {activeTab === "homework" ? (
         <div className={adminStyles.groupBlock}>
           <h3 className={adminStyles.groupTitle}>宿題設定</h3>
@@ -281,6 +625,175 @@ export default function SystemSettingsPanel({
               </label>
             ))}
           </div>
+          <h4 className={adminStyles.groupTitle} style={{ marginTop: "0.75rem" }}>通知ルール（追加）</h4>
+          <p className={adminStyles.smallMuted}>
+            変数例: {"{"}studentName{"}"}, {"{"}lessonDate{"}"}, {"{"}lessonTime{"}"}, {"{"}remainingMinutes{"}"} — テキストは自由編集。送信エンジンは段階的にルールへ接続できます。
+          </p>
+          <div className={adminStyles.compactActions}>
+            <button
+              className={adminStyles.chipButton}
+              type="button"
+              onClick={() => {
+                const rules = [...(notifications.rules || [])];
+                rules.push({
+                  id: newId(),
+                  audience: "student",
+                  channelEmail: true,
+                  channelPortal: true,
+                  subjectTemplate: "【教室】{lessonDate} {lessonTime} のご案内",
+                  bodyTemplate: "{studentName} 様\n\n{lessonDate} {lessonTime} のレッスンです。残り時間: {remainingMinutes} 分",
+                  trigger: "manual",
+                  leadMinutes: 0,
+                  lagMinutes: 0,
+                  active: true,
+                });
+                setSettings((prev) => ({ ...prev, notifications: { ...notifications, rules } }));
+              }}
+            >
+              ルールを追加
+            </button>
+          </div>
+          {(notifications.rules || []).map((rule, ridx) => (
+            <div key={rule.id || ridx} className={adminStyles.groupBlock} style={{ border: "1px solid #e2e8f0", padding: "0.5rem", marginTop: "0.35rem" }}>
+              <div className={adminStyles.compactFormGrid}>
+                <label className={styles.label}>
+                  対象
+                  <select
+                    className={styles.field}
+                    value={rule.audience || "student"}
+                    onChange={(e) => {
+                      const rules = [...(notifications.rules || [])];
+                      rules[ridx] = { ...rule, audience: e.target.value };
+                      setSettings((prev) => ({ ...prev, notifications: { ...notifications, rules } }));
+                    }}
+                  >
+                    <option value="student">学生</option>
+                    <option value="parent">保護者</option>
+                    <option value="teacher">講師</option>
+                    <option value="admin">管理者</option>
+                  </select>
+                </label>
+                <label className={styles.label}>
+                  トリガー
+                  <input
+                    className={styles.field}
+                    value={rule.trigger || ""}
+                    onChange={(e) => {
+                      const rules = [...(notifications.rules || [])];
+                      rules[ridx] = { ...rule, trigger: e.target.value };
+                      setSettings((prev) => ({ ...prev, notifications: { ...notifications, rules } }));
+                    }}
+                  />
+                </label>
+                <label className={styles.label}>
+                  先行(分)
+                  <input
+                    className={styles.field}
+                    type="number"
+                    value={rule.leadMinutes ?? 0}
+                    onChange={(e) => {
+                      const rules = [...(notifications.rules || [])];
+                      rules[ridx] = { ...rule, leadMinutes: Number(e.target.value || 0) };
+                      setSettings((prev) => ({ ...prev, notifications: { ...notifications, rules } }));
+                    }}
+                  />
+                </label>
+                <label className={styles.label}>
+                  遅延(分)
+                  <input
+                    className={styles.field}
+                    type="number"
+                    value={rule.lagMinutes ?? 0}
+                    onChange={(e) => {
+                      const rules = [...(notifications.rules || [])];
+                      rules[ridx] = { ...rule, lagMinutes: Number(e.target.value || 0) };
+                      setSettings((prev) => ({ ...prev, notifications: { ...notifications, rules } }));
+                    }}
+                  />
+                </label>
+                <label className={styles.label}>
+                  メール
+                  <select
+                    className={styles.field}
+                    value={rule.channelEmail ? "1" : "0"}
+                    onChange={(e) => {
+                      const rules = [...(notifications.rules || [])];
+                      rules[ridx] = { ...rule, channelEmail: e.target.value === "1" };
+                      setSettings((prev) => ({ ...prev, notifications: { ...notifications, rules } }));
+                    }}
+                  >
+                    <option value="1">ON</option>
+                    <option value="0">OFF</option>
+                  </select>
+                </label>
+                <label className={styles.label}>
+                  ポータル
+                  <select
+                    className={styles.field}
+                    value={rule.channelPortal ? "1" : "0"}
+                    onChange={(e) => {
+                      const rules = [...(notifications.rules || [])];
+                      rules[ridx] = { ...rule, channelPortal: e.target.value === "1" };
+                      setSettings((prev) => ({ ...prev, notifications: { ...notifications, rules } }));
+                    }}
+                  >
+                    <option value="1">ON</option>
+                    <option value="0">OFF</option>
+                  </select>
+                </label>
+                <label className={styles.label}>
+                  有効
+                  <select
+                    className={styles.field}
+                    value={rule.active ? "1" : "0"}
+                    onChange={(e) => {
+                      const rules = [...(notifications.rules || [])];
+                      rules[ridx] = { ...rule, active: e.target.value === "1" };
+                      setSettings((prev) => ({ ...prev, notifications: { ...notifications, rules } }));
+                    }}
+                  >
+                    <option value="1">ON</option>
+                    <option value="0">OFF</option>
+                  </select>
+                </label>
+              </div>
+              <label className={styles.label}>
+                件名テンプレート
+                <input
+                  className={styles.field}
+                  value={rule.subjectTemplate || ""}
+                  onChange={(e) => {
+                    const rules = [...(notifications.rules || [])];
+                    rules[ridx] = { ...rule, subjectTemplate: e.target.value };
+                    setSettings((prev) => ({ ...prev, notifications: { ...notifications, rules } }));
+                  }}
+                />
+              </label>
+              <label className={styles.label}>
+                本文テンプレート
+                <textarea
+                  className={styles.field}
+                  rows={3}
+                  value={rule.bodyTemplate || ""}
+                  onChange={(e) => {
+                    const rules = [...(notifications.rules || [])];
+                    rules[ridx] = { ...rule, bodyTemplate: e.target.value };
+                    setSettings((prev) => ({ ...prev, notifications: { ...notifications, rules } }));
+                  }}
+                />
+              </label>
+              <button
+                className={adminStyles.chipButton}
+                type="button"
+                onClick={() => {
+                  const rules = (notifications.rules || []).filter((_, i) => i !== ridx);
+                  setSettings((prev) => ({ ...prev, notifications: { ...notifications, rules } }));
+                }}
+              >
+                ルール削除
+              </button>
+            </div>
+          ))}
           <div className={adminStyles.compactActions}><button className={styles.button} type="button" disabled={savingSection === "notifications"} onClick={() => saveSection("notifications", notifications)}>{savingSection === "notifications" ? "保存中..." : "保存"}</button></div>
         </div>
       ) : null}
@@ -366,6 +879,102 @@ export default function SystemSettingsPanel({
         </div>
       ) : null}
 
+      {activeTab === "teacherSchedulePolicy" ? (
+        <div className={adminStyles.groupBlock}>
+          <h3 className={adminStyles.groupTitle}>講師スケジュール変更ポリシー</h3>
+          <p className={adminStyles.smallMuted}>
+            講師ポータルからの自己変更可否と、締切の目安を設定します（強制ロックは管理者が講師別プロファイルで設定）。
+          </p>
+          <div className={adminStyles.compactFormGrid}>
+            <label className={styles.label}>
+              何日前まで編集可（目安）
+              <input
+                className={styles.field}
+                type="number"
+                value={teacherSchedulePolicy.editableDaysBefore ?? 14}
+                onChange={(e) =>
+                  setSettings((prev) => ({
+                    ...prev,
+                    teacherSchedulePolicy: {
+                      ...teacherSchedulePolicy,
+                      editableDaysBefore: Number(e.target.value || 0),
+                    },
+                  }))
+                }
+              />
+            </label>
+            <label className={styles.label}>
+              レッスン何時間前からロック（目安）
+              <input
+                className={styles.field}
+                type="number"
+                value={teacherSchedulePolicy.lockHoursBeforeLesson ?? 24}
+                onChange={(e) =>
+                  setSettings((prev) => ({
+                    ...prev,
+                    teacherSchedulePolicy: {
+                      ...teacherSchedulePolicy,
+                      lockHoursBeforeLesson: Number(e.target.value || 0),
+                    },
+                  }))
+                }
+              />
+            </label>
+            <label className={styles.label}>
+              管理者のみ変更
+              <select
+                className={styles.field}
+                value={teacherSchedulePolicy.adminOnlyEdit ? "1" : "0"}
+                onChange={(e) =>
+                  setSettings((prev) => ({
+                    ...prev,
+                    teacherSchedulePolicy: {
+                      ...teacherSchedulePolicy,
+                      adminOnlyEdit: e.target.value === "1",
+                    },
+                  }))
+                }
+              >
+                <option value="0">OFF</option>
+                <option value="1">ON</option>
+              </select>
+            </label>
+          </div>
+          <label className={styles.label}>
+            強制ロック（JSON 配列・date/start/end/reason）
+            <textarea
+              className={styles.field}
+              rows={3}
+              value={JSON.stringify(teacherSchedulePolicy.forcedLocks || [], null, 2)}
+              onChange={(e) => {
+                try {
+                  const parsed = JSON.parse(e.target.value || "[]");
+                  setSettings((prev) => ({
+                    ...prev,
+                    teacherSchedulePolicy: {
+                      ...teacherSchedulePolicy,
+                      forcedLocks: Array.isArray(parsed) ? parsed : [],
+                    },
+                  }));
+                } catch {
+                  /* ignore */
+                }
+              }}
+            />
+          </label>
+          <div className={adminStyles.compactActions}>
+            <button
+              className={styles.button}
+              type="button"
+              disabled={savingSection === "teacherSchedulePolicy"}
+              onClick={() => saveSection("teacherSchedulePolicy", teacherSchedulePolicy)}
+            >
+              {savingSection === "teacherSchedulePolicy" ? "保存中..." : "保存"}
+            </button>
+          </div>
+        </div>
+      ) : null}
+
       {activeTab === "systemInfo" ? (
         <div className={adminStyles.groupBlock}>
           <h3 className={adminStyles.groupTitle}>システム情報</h3>
@@ -398,7 +1007,7 @@ export default function SystemSettingsPanel({
           <div className={adminStyles.compactActions}>
             <select className={styles.field} value={logSectionFilter} onChange={(e) => setLogSectionFilter(e.target.value)}>
               <option value="">全体</option>
-              {TABS.filter((tab) => !["systemInfo", "changeLogs"].includes(tab.id)).map((tab) => (
+              {ALL_TABS.filter((tab) => !["systemInfo", "changeLogs"].includes(tab.id)).map((tab) => (
                 <option key={tab.id} value={tab.id}>{tab.label}</option>
               ))}
             </select>

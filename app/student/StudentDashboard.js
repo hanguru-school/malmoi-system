@@ -129,6 +129,25 @@ export default function StudentDashboard({
     if (nextReservation && lessonImminent) return "imminent";
     if (nextReservation && upcomingSoon) return "upcoming";
     if (recentLessonNotes.length > 0) return "notes";
+    if (
+      nextReservation &&
+      daysToNext !== null &&
+      daysToNext > 3 &&
+      daysToNext <= 14 &&
+      pendingHomework.length === 0 &&
+      recentLessonNotes.length === 0
+    ) {
+      return "quiet_streak";
+    }
+    if (
+      homeworkItems.length > 0 &&
+      pendingHomework.length === 0 &&
+      nextReservation &&
+      daysToNext !== null &&
+      daysToNext > 3
+    ) {
+      return "hw_cleared";
+    }
     if (!nextReservation || reservationFar) return "reserve";
     return "none";
   })();
@@ -146,10 +165,19 @@ export default function StudentDashboard({
     }
     if (retentionFocus === "upcoming") return "近い予約があります。日時と内容を一度確認しましょう。";
     if (retentionFocus === "notes") return "最近のノートがあります。復習にノートを開いておきましょう。";
+    if (retentionFocus === "quiet_streak") {
+      return "ノートや宿題の記録がまだ少なめです。次のレッスンまでに予約を確認し、学習のつながりを作りましょう。";
+    }
+    if (retentionFocus === "hw_cleared") {
+      return "宿題は一区切りつきました。ノートを振り返るか、次の予約内容を確認しておきましょう。";
+    }
     if (retentionFocus === "reserve") {
       return !nextReservation
         ? "次回の学習のために、新しい予約を取ってみましょう。"
         : "次の予約まで間が空いています。継続のために予約を検討しましょう。";
+    }
+    if (retentionFocus === "none" && recentMinuteLogs.length === 0 && recentLessonNotes.length === 0) {
+      return "最近の受講記録がまだ少なめです。予約やノートで学習リズムをつくってみましょう。";
     }
     return "";
   })();
@@ -189,8 +217,13 @@ export default function StudentDashboard({
                 ? "残りレッスン時間が180分以下です。追加のご検討をおすすめします。"
                 : "次のレッスン後、時間が不足する見込みです。早めにご確認ください。"}
           </p>
+          <p className={home.minutesAttentionSub}>
+            {lessonMinutesAttention === "exhausted"
+              ? "履歴の確認は下のリンクから。時間の追加は教室での手続きとなります。"
+              : "内訳と目安はレッスン時間ページでまとめて確認できます。不安なときは教室へお声がけください。"}
+          </p>
           <Link className={home.minutesAttentionLink} href="/student/lesson-time">
-            詳しく見る
+            レッスン時間ページへ
           </Link>
         </aside>
       ) : null}
@@ -205,7 +238,8 @@ export default function StudentDashboard({
             data-emphasis={
               retentionFocus === "reserve" ||
               retentionFocus === "upcoming" ||
-              retentionFocus === "imminent"
+              retentionFocus === "imminent" ||
+              retentionFocus === "quiet_streak"
                 ? "high"
                 : "low"
             }
@@ -226,7 +260,7 @@ export default function StudentDashboard({
           <Link
             className={home.retentionTile}
             href="/student/lesson-notes"
-            data-emphasis={retentionFocus === "notes" ? "high" : "low"}
+            data-emphasis={retentionFocus === "notes" || retentionFocus === "hw_cleared" ? "high" : "low"}
           >
             <span className={home.retentionTileEyebrow}>ノート</span>
             <span className={home.retentionTileText}>

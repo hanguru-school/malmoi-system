@@ -1,7 +1,7 @@
 import adminStyles from "../admin.module.css";
 import { requireRole } from "../../../lib/auth/session";
 import { listReservationsForAdmin } from "../../../lib/auth/store";
-import { useReservationUiV2 } from "../../../lib/reservations/reservationUiFlags";
+import { useReservationUiV2 } from "../../../lib/ui/featureFlags";
 import AdminReservationsPanel from "./AdminReservationsPanel";
 import AdminReservationsPanelV2 from "./AdminReservationsPanelV2";
 import AdminTopNav from "../AdminTopNav";

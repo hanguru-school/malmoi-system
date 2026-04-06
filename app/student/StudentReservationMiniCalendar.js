@@ -35,7 +35,7 @@ function buildMonthGrid(year, monthIndex) {
   return cells;
 }
 
-export default function StudentReservationMiniCalendar({ reservations = [] }) {
+export default function StudentReservationMiniCalendar({ reservations = [], reservationsHref = "/student/reservations" }) {
   const [cursor, setCursor] = useState(() => {
     const n = new Date();
     return { y: n.getFullYear(), m: n.getMonth() };
@@ -146,7 +146,7 @@ export default function StudentReservationMiniCalendar({ reservations = [] }) {
             ))}
           </ul>
         )}
-        <Link className={styles.dashboardCalendarLink} href="/student/reservations">
+        <Link className={styles.dashboardCalendarLink} href={reservationsHref}>
           すべての予約を見る
         </Link>
       </div>

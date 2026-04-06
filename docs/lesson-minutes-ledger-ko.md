@@ -108,3 +108,5 @@
 運営 UI・学生履歴・警告・安全装置の詳細は **`docs/lesson-minutes-operations-ko.md`** を参照してください。
 
 クイック付与・画面トーン・警告の出し分け・月間サマリーは **`docs/lesson-minutes-ux-and-monthly-ko.md`** を参照してください。
+
+**即時付与・不足時の導線・月間カード意味・ホーム維持** の運用まとめは **`docs/lesson-minutes-fast-ops-ko.md`** を参照してください。

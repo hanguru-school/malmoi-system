@@ -81,8 +81,10 @@ export async function GET(request) {
   }
   const { searchParams } = new URL(request.url);
   const lessonUnitId = String(searchParams.get("lessonUnitId") || "").trim();
+  const studentId = String(searchParams.get("studentId") || "").trim();
   const notes = await listLessonNotesForAdmin({
     lessonUnitId,
+    studentId,
     teacherUserId: session.user.id,
   });
   return NextResponse.json({ ok: true, notes });

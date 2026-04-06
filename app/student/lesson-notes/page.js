@@ -18,17 +18,26 @@ export default async function StudentLessonNotesPage() {
   const notes = await listLessonNotesForStudent(session.user.id);
 
   return (
-    <StudentAreaLayout title="レッスンノート" subtitle="学習の流れ：ノート → 宿題 → 次のレッスン">
+    <StudentAreaLayout title="レッスンノート" subtitle="最新ノートへジャンプするか、下の一覧で全体を確認できます。">
       <div className={styles.lessonNotesPageActions}>
-        <Link className={styles.lessonNotesFlowBtn} href="/student/homework">
-          宿題へ移動
+        {notes[0] ? (
+          <Link className={styles.lessonNotesFlowBtn} href="#latest-lesson-note">
+            最新のノートへ
+          </Link>
+        ) : null}
+        <Link className={`${styles.lessonNotesFlowBtn} ${styles.lessonNotesFlowBtnSecondary}`} href="#all-lesson-notes">
+          一覧へ
+        </Link>
+        <Link className={`${styles.lessonNotesFlowBtn} ${styles.lessonNotesFlowBtnSecondary}`} href="/student/homework">
+          宿題へ
         </Link>
         <Link className={`${styles.lessonNotesFlowBtn} ${styles.lessonNotesFlowBtnSecondary}`} href="/student/reservations">
-          次のレッスンを確認
+          次のレッスン
         </Link>
       </div>
 
-      <section className={styles.noticeCardStack}>
+      <section id="all-lesson-notes" className={styles.noticeCardStack}>
+        {notes.length > 0 ? <div id="latest-lesson-note" style={{ scrollMarginTop: "5rem" }} /> : null}
         {notes.map((note) => (
           <article key={note.id} id={`note-${note.id}`} className={styles.noticeItemCard}>
             <div className={styles.noticeItemHead}>

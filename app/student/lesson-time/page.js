@@ -84,6 +84,11 @@ export default async function StudentLessonTimePage() {
             {alert.text}
           </p>
         ) : null}
+        {alert ? (
+          <p className={styles.alertGuide} data-tone={alert.tone}>
+            追加の手続きやご不明点は教室へお問い合わせください。このページでは記録の確認が中心です。
+          </p>
+        ) : null}
 
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>最近、レッスンで使った時間</h2>

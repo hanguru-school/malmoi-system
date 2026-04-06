@@ -4,6 +4,13 @@ import { useEffect, useMemo, useState } from "react";
 import styles from "../../login/login.module.css";
 import adminStyles from "../admin.module.css";
 import panelStyles from "./reservations-panel.module.css";
+import {
+  addDaysYmd,
+  addMonthsYmd,
+  computeReservationFetchRange,
+  reservationRowToCalendarEvent,
+  sortCalendarEventsByStart,
+} from "../../../lib/admin/reservationCalendarModel.js";
 
 function todayIso() {
   const now = new Date();
@@ -98,9 +105,9 @@ export default function AdminReservationsPanel({
   initialFocus = "",
   scopeNotice = "",
 }) {
-  const [selectedDate, setSelectedDate] = useState(initialFilters.fromDate || todayIso());
+  const [urlStudentId] = useState(() => String(initialFilters.studentId || "").trim());
+  const [calendarDate, setCalendarDate] = useState(initialFilters.fromDate || todayIso());
   const [scheduleView, setScheduleView] = useState("day");
-  const [scheduleDate, setScheduleDate] = useState(initialFilters.fromDate || todayIso());
   const [viewMode, setViewMode] = useState("list");
   const [statusFilter, setStatusFilter] = useState(initialFilters.status || "");
   const [teacherFilter, setTeacherFilter] = useState("");
@@ -208,7 +215,7 @@ export default function AdminReservationsPanel({
 
   const scheduleRange = useMemo(() => {
     if (scheduleView === "month") {
-      const base = parseIso(scheduleDate) || parseIso(todayIso());
+      const base = parseIso(calendarDate) || parseIso(todayIso());
       const month = base.getMonth();
       const year = base.getFullYear();
       return {
@@ -220,7 +227,7 @@ export default function AdminReservationsPanel({
       };
     }
     if (scheduleView === "week") {
-      const start = startOfWeekIso(scheduleDate);
+      const start = startOfWeekIso(calendarDate);
       const end = addDays(start, 6);
       return {
         label: `${start} - ${end}`,
@@ -228,10 +235,10 @@ export default function AdminReservationsPanel({
       };
     }
     return {
-      label: scheduleDate,
-      includes: (item) => String(item.date || "") === scheduleDate,
+      label: calendarDate,
+      includes: (item) => String(item.date || "") === calendarDate,
     };
-  }, [scheduleDate, scheduleView]);
+  }, [calendarDate, scheduleView]);
 
   const scheduleItems = useMemo(
     () =>
@@ -239,6 +246,11 @@ export default function AdminReservationsPanel({
         .filter((item) => scheduleRange.includes(item))
         .sort((a, b) => `${a.date || ""} ${a.time || ""}`.localeCompare(`${b.date || ""} ${b.time || ""}`)),
     [filteredReservations, scheduleRange]
+  );
+
+  const calendarEvents = useMemo(
+    () => sortCalendarEventsByStart(scheduleItems.map((row) => reservationRowToCalendarEvent(row))),
+    [scheduleItems]
   );
 
   const slotOptions = useMemo(
@@ -254,20 +266,22 @@ export default function AdminReservationsPanel({
     setLogsLoading(true);
     setError("");
     try {
+      const { fromDate, toDate } = computeReservationFetchRange(scheduleView, calendarDate);
       const reservationParams = new URLSearchParams();
-      reservationParams.set("fromDate", selectedDate);
-      reservationParams.set("toDate", selectedDate);
+      reservationParams.set("fromDate", fromDate);
+      reservationParams.set("toDate", toDate);
       reservationParams.set("page", "1");
-      reservationParams.set("pageSize", "300");
+      reservationParams.set("pageSize", "400");
+      if (urlStudentId) reservationParams.set("studentId", urlStudentId);
 
       const slotsParams = new URLSearchParams();
-      slotsParams.set("fromDate", selectedDate);
-      slotsParams.set("toDate", selectedDate);
+      slotsParams.set("fromDate", fromDate);
+      slotsParams.set("toDate", toDate);
 
       const logsParams = new URLSearchParams();
       logsParams.set("targetType", "reservation");
-      logsParams.set("fromDate", selectedDate);
-      logsParams.set("toDate", selectedDate);
+      logsParams.set("fromDate", fromDate);
+      logsParams.set("toDate", toDate);
       logsParams.set("page", "1");
       logsParams.set("pageSize", "40");
 
@@ -313,11 +327,7 @@ export default function AdminReservationsPanel({
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDate]);
-
-  useEffect(() => {
-    setScheduleDate(selectedDate);
-  }, [selectedDate]);
+  }, [calendarDate, scheduleView, urlStudentId]);
 
   useEffect(() => {
     if (!initialFocus) return;
@@ -431,7 +441,9 @@ export default function AdminReservationsPanel({
       <div className={panelStyles.schedulePanel}>
         <div className={panelStyles.scheduleHeader}>
           <h3 className={panelStyles.detailTitle}>予約スケジュール</h3>
-          <span className={adminStyles.smallMuted}>{scheduleRange.label}</span>
+          <span className={adminStyles.smallMuted}>
+            {scheduleRange.label} · 共通イベント {calendarEvents.length} 件
+          </span>
         </div>
         <div className={panelStyles.scheduleToolbar}>
           <label className={styles.label}>
@@ -439,17 +451,32 @@ export default function AdminReservationsPanel({
             <input
               className={styles.field}
               type="date"
-              value={scheduleDate}
-              onChange={(e) => {
-                setScheduleDate(e.target.value);
-                setSelectedDate(e.target.value);
-              }}
+              value={calendarDate}
+              onChange={(e) => setCalendarDate(e.target.value)}
             />
           </label>
-          <button className={adminStyles.chipButton} type="button" onClick={() => setScheduleDate(addDays(scheduleDate, -1))}>
+          <button
+            className={adminStyles.chipButton}
+            type="button"
+            onClick={() =>
+              setCalendarDate(
+                scheduleView === "month"
+                  ? addMonthsYmd(calendarDate, -1)
+                  : addDaysYmd(calendarDate, -1)
+              )
+            }
+          >
             前へ
           </button>
-          <button className={adminStyles.chipButton} type="button" onClick={() => setScheduleDate(addDays(scheduleDate, 1))}>
+          <button
+            className={adminStyles.chipButton}
+            type="button"
+            onClick={() =>
+              setCalendarDate(
+                scheduleView === "month" ? addMonthsYmd(calendarDate, 1) : addDaysYmd(calendarDate, 1)
+              )
+            }
+          >
             次へ
           </button>
           <button
@@ -457,8 +484,7 @@ export default function AdminReservationsPanel({
             type="button"
             onClick={() => {
               const today = todayIso();
-              setScheduleDate(today);
-              setSelectedDate(today);
+              setCalendarDate(today);
             }}
           >
             今日へ戻る
@@ -513,7 +539,7 @@ export default function AdminReservationsPanel({
               type="button"
               className={`${panelStyles.scheduleItem} ${item.status === "requested" ? panelStyles.scheduleItemPending : ""}`}
               onClick={() => {
-                setSelectedDate(item.date || selectedDate);
+                setCalendarDate(String(item.date || "").slice(0, 10) || calendarDate);
                 setSelectedReservation(item);
               }}
             >

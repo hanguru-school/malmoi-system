@@ -5,10 +5,13 @@ import {
   getStudentByIdForAdmin,
   getStudentLearningStatsForAdmin,
   getPaymentStudentDetailForAdmin,
+  listAuditLogsForAdmin,
   listLessonNotesForAdmin,
   listNoticesForAdmin,
   listReservationsForAdmin,
+  summarizeStudentRisksForAdmin,
 } from "../../../../lib/auth/store";
+import { pickRegistrationAuditHints } from "../../../../lib/adapters/registrationAuditHints";
 import AdminTopNav from "../../AdminTopNav";
 import adminStyles from "../../admin.module.css";
 import StudentEditForm from "./StudentEditForm";
@@ -34,6 +37,14 @@ export default async function AdminStudentDetailPage({ params }) {
   const notices = (await listNoticesForAdmin()).slice(0, 20);
   const initialLearningStats = await getStudentLearningStatsForAdmin(id, { period: "30" });
   const initialPaymentDetail = await getPaymentStudentDetailForAdmin(id);
+  const registrationAuditResult = await listAuditLogsForAdmin({
+    studentId: id,
+    page: 1,
+    pageSize: 120,
+  });
+  const registrationAuditHints = pickRegistrationAuditHints(registrationAuditResult.items || []);
+  const riskMap = await summarizeStudentRisksForAdmin([id]);
+  const initialRiskBadges = riskMap[id] || [];
 
   return (
     <div className={adminStyles.adminShell}>
@@ -48,6 +59,8 @@ export default async function AdminStudentDetailPage({ params }) {
           initialNotices={notices}
           initialLearningStats={initialLearningStats}
           initialPaymentDetail={initialPaymentDetail}
+          registrationAuditHints={registrationAuditHints}
+          initialRiskBadges={initialRiskBadges}
         />
       </main>
     </div>

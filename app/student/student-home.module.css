@@ -101,6 +101,19 @@
   color: #991b1b;
 }
 
+.minutesAttentionSub {
+  margin: 0;
+  font-size: 0.76rem;
+  font-weight: 550;
+  line-height: 1.45;
+  color: #78716c;
+}
+
+.minutesAttentionBanner[data-tone="danger"] .minutesAttentionSub {
+  color: #7f1d1d;
+  opacity: 0.92;
+}
+
 .minutesAttentionLink {
   align-self: flex-start;
   font-size: 0.8rem;

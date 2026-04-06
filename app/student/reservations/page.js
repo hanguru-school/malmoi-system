@@ -1,5 +1,5 @@
 import { requireRole } from "../../../lib/auth/session";
-import { useReservationUiV2 } from "../../../lib/reservations/reservationUiFlags";
+import { useReservationUiV2 } from "../../../lib/ui/featureFlags";
 import StudentAreaLayout from "../StudentAreaLayout";
 import StudentReservationsPanel from "./StudentReservationsPanel";
 import StudentReservationsPanelV2 from "./StudentReservationsPanelV2";

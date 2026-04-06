@@ -1,16 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../../../login/login.module.css";
+import {
+  shouldChainReservationV2,
+  studentMypageHrefAfterRegistration,
+  studentReservationHrefFromContext,
+} from "../../../../lib/student/postRegistrationNav";
+import { rememberReservationUiPreference } from "../../../../lib/student/reservationUiPreference";
 import {
   EMERGENCY_RELATION_PRESETS,
   emergencyRelationToStore,
   parseEmergencyRelation,
 } from "../../profile/profileFormUtils";
+import { buildStudentProfileSubmitPayload, postStudentProfileComplete } from "../../../../lib/adapters/studentRegistration";
 
-export default function ProfileForm({ student }) {
+export default function ProfileForm({ student, registrationUi }) {
   const router = useRouter();
+  const reservationHref = useMemo(() => studentReservationHrefFromContext(registrationUi), [registrationUi]);
+  const mypageHref = useMemo(() => studentMypageHrefAfterRegistration(registrationUi), [registrationUi]);
   const profile = student?.crmProfile || {};
 
   const [addressLine1, setAddressLine1] = useState(profile.addressLine1 || student?.address || "");
@@ -36,6 +46,7 @@ export default function ProfileForm({ student }) {
 
   const [status, setStatus] = useState({ type: "", text: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [finished, setFinished] = useState(false);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -43,38 +54,57 @@ export default function ProfileForm({ student }) {
     setStatus({ type: "", text: "" });
 
     try {
-      const response = await fetch("/api/student/profile", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nameKanji,
-          nameFurigana,
-          nameKorean,
-          addressLine1,
-          addressLine2,
-          postalCode,
-          birthDate,
-          phoneMobile,
-          phoneEmergency,
-          emergencyContactName,
-          emergencyContactNameFurigana,
-          emergencyContactRelation: emergencyRelationToStore(emergencyRelationPreset, emergencyRelationOther),
-          email,
-          notes,
-        }),
+      const payload = buildStudentProfileSubmitPayload({
+        nameKanji,
+        nameFurigana,
+        nameKorean,
+        addressLine1,
+        addressLine2,
+        postalCode,
+        birthDate,
+        phoneMobile,
+        phoneEmergency,
+        emergencyContactName,
+        emergencyContactNameFurigana,
+        emergencyContactRelation: emergencyRelationToStore(emergencyRelationPreset, emergencyRelationOther),
+        email,
+        notes,
       });
-      const data = await response.json();
-      if (!response.ok || !data?.ok) {
-        throw new Error(data?.error || "個人情報の保存に失敗しました。");
-      }
+      await postStudentProfileComplete(payload);
 
-      router.push("/student");
+      if (shouldChainReservationV2(registrationUi)) {
+        rememberReservationUiPreference("v2");
+      }
+      setFinished(true);
       router.refresh();
     } catch (error) {
       setStatus({ type: "error", text: error.message || "保存中にエラーが発生しました。" });
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  if (finished) {
+    return (
+      <div className={styles.message} style={{ background: "#f0fdf4", borderColor: "#86efac" }}>
+        <p className={styles.sectionTitle} style={{ marginTop: 0 }}>
+          登録が完了しました
+        </p>
+        <p className={styles.description}>次はレッスンを予約できます。マイページからもいつでも移動できます。</p>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.65rem", marginTop: "0.75rem" }}>
+          <Link className={styles.button} href={reservationHref} style={{ textAlign: "center", textDecoration: "none" }}>
+            予約へ進む
+          </Link>
+          <Link
+            className={styles.button}
+            href={mypageHref}
+            style={{ textAlign: "center", textDecoration: "none", background: "#e2e8f0", color: "#334155" }}
+          >
+            マイページへ
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (

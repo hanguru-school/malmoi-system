@@ -65,6 +65,10 @@ export default async function AdminStudentsAtRiskPage() {
                       <Link className={adminStyles.inlineLink} href={`/admin/students/${row.id}`}>
                         詳細
                       </Link>
+                      {" · "}
+                      <Link className={adminStyles.inlineLink} href={`/admin/students/${row.id}#lesson-time`}>
+                        時間付与
+                      </Link>
                     </td>
                   </tr>
                 ))}
