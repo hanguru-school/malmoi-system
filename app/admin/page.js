@@ -145,6 +145,8 @@ export default async function AdminPage() {
   const recentMails = (mailLogs.items || []).slice(0, 5);
   const failedMails = (mailLogs.items || []).filter((item) => item.status === "failed").length;
   const retryMails = (mailLogs.items || []).filter((item) => item.status === "failed" || item.status === "retry_target").length;
+  const lessonMinutesRiskAttention =
+    (minuteRisk?.depleted ?? 0) + (minuteRisk?.low180 ?? 0) + (minuteRisk?.nextReservationInsufficient ?? 0) > 0;
   const pendingApprovalItems = (reservations.items || [])
     .filter((item) => item.status === "requested")
     .sort((a, b) => `${a.date || ""} ${a.time || ""}`.localeCompare(`${b.date || ""} ${b.time || ""}`))
@@ -193,7 +195,11 @@ export default async function AdminPage() {
               学生一覧を開く
             </Link>
           </article>
-          <article className={dashboardStyles.opsSummaryCard}>
+          <article
+            className={`${dashboardStyles.opsSummaryCard}${
+              lessonMinutesRiskAttention ? ` ${dashboardStyles.opsSummaryCardAttention}` : ""
+            }`}
+          >
             <p className={dashboardStyles.opsSummaryLabel}>レッスン時間（要注意）</p>
             <ul className={dashboardStyles.opsSummaryList}>
               <li>残り0以下: {minuteRisk?.depleted ?? 0} 名</li>

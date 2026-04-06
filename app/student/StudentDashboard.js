@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { studentReservationsPathFromBrowserPreference } from "../../lib/student/reservationUiPreference";
 import home from "./student-home.module.css";
 import StudentLessonTimeFlow from "./StudentLessonTimeFlow";
@@ -100,6 +100,13 @@ export default function StudentDashboard({
   const student = session?.student || {};
   const minutes = student.lessonMinutes || {};
   const points = student.points || {};
+  const lessonMinutesAttention = useMemo(() => {
+    const rem = Number(minutes.remainingMinutes ?? 0);
+    if (rem <= 0) return "exhausted";
+    if (rem <= 180) return "low";
+    if (lessonMinutesPreview?.nextCompletionInsufficient) return "next_short";
+    return "ok";
+  }, [minutes.remainingMinutes, lessonMinutesPreview?.nextCompletionInsufficient]);
   const displayName = student.nameKanji || session?.user?.displayName || "ゲスト";
   const profileSrc = resolveProfileImageSrc(student);
 
@@ -168,6 +175,25 @@ export default function StudentDashboard({
           <p className={home.heroMember}>会員番号 {student.studentNumber || "—"}</p>
         </div>
       </header>
+
+      {lessonMinutesAttention !== "ok" ? (
+        <aside
+          className={home.minutesAttentionBanner}
+          data-tone={lessonMinutesAttention === "exhausted" ? "danger" : "warn"}
+          aria-label="レッスン時間のお知らせ"
+        >
+          <p className={home.minutesAttentionText}>
+            {lessonMinutesAttention === "exhausted"
+              ? "レッスン時間の残りがありません。継続受講前に教室へご相談ください。"
+              : lessonMinutesAttention === "low"
+                ? "残りレッスン時間が180分以下です。追加のご検討をおすすめします。"
+                : "次のレッスン後、時間が不足する見込みです。早めにご確認ください。"}
+          </p>
+          <Link className={home.minutesAttentionLink} href="/student/lesson-time">
+            詳しく見る
+          </Link>
+        </aside>
+      ) : null}
 
       <nav className={home.retentionStrip} aria-label="次の一手">
         <p className={home.retentionStripTitle}>次の一手</p>
@@ -327,6 +353,10 @@ export default function StudentDashboard({
           <Link className={home.midTile} href="/student/homework">
             <span className={home.midTileEyebrow}>学習</span>
             <span className={home.midTileTitle}>宿題</span>
+          </Link>
+          <Link className={home.midTile} href="/student/lesson-time">
+            <span className={home.midTileEyebrow}>時間</span>
+            <span className={home.midTileTitle}>レッスン時間</span>
           </Link>
         </div>
       </section>

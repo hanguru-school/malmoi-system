@@ -34,14 +34,19 @@ export async function PATCH(request, { params }) {
 
   const { id } = await params;
   const body = await request.json();
-  const student = await updateStudentByAdmin(id, body, {
-    userId: session.user.id,
-    role: session.user.role,
-  });
+  try {
+    const student = await updateStudentByAdmin(id, body, {
+      userId: session.user.id,
+      role: session.user.role,
+    });
 
-  if (!student) {
-    return NextResponse.json({ ok: false, error: "학생 정보를 찾을 수 없습니다." }, { status: 404 });
+    if (!student) {
+      return NextResponse.json({ ok: false, error: "학생 정보를 찾을 수 없습니다." }, { status: 404 });
+    }
+
+    return NextResponse.json({ ok: true, student });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "更新に失敗しました。";
+    return NextResponse.json({ ok: false, error: message }, { status: 400 });
   }
-
-  return NextResponse.json({ ok: true, student });
 }

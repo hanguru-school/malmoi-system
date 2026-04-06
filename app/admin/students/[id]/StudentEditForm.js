@@ -22,6 +22,7 @@ import {
 
 const TABS = [
   { id: "basic", label: "基本情報" },
+  { id: "lesson-time", label: "レッスン時間" },
   { id: "reservations", label: "予約" },
   { id: "notes", label: "レッスンノート" },
   { id: "learning-stats", label: "学習統計" },
@@ -151,6 +152,9 @@ export default function StudentEditForm({
   const [lessonMinutesCreditReason, setLessonMinutesCreditReason] = useState("");
   const [lessonMinutesAdjustMinutes, setLessonMinutesAdjustMinutes] = useState("0");
   const [lessonMinutesAdjustReason, setLessonMinutesAdjustReason] = useState("");
+  const [lessonMinutesDeductMinutes, setLessonMinutesDeductMinutes] = useState("0");
+  const [lessonMinutesDeductMemo, setLessonMinutesDeductMemo] = useState("");
+  const [lessonMinutesApplyLoading, setLessonMinutesApplyLoading] = useState(false);
   const [pairAction, setPairAction] = useState("none");
   const [pairStudentId, setPairStudentId] = useState("");
   const [pairInfo, setPairInfo] = useState(student.pairInfo || null);
@@ -298,6 +302,28 @@ export default function StudentEditForm({
       }),
     [lessonMinutes?.remainingMinutes, nextConfirmedReservation]
   );
+  const heroLessonMinuteAlerts = useMemo(() => {
+    const rem = Number(lessonMinutes?.remainingMinutes ?? 0);
+    const items = [];
+    if (rem <= 0) {
+      items.push({
+        tone: "danger",
+        text: "残りレッスン時間が0以下です。受講前に付与・調整をご確認ください。",
+      });
+    } else if (rem <= 180) {
+      items.push({
+        tone: "warn",
+        text: "残りレッスン時間が180分以下です。継続受講の案内を検討してください。",
+      });
+    }
+    if (adminLessonMinutesPreview.nextCompletionInsufficient) {
+      items.push({
+        tone: "warn",
+        text: "次回の確定・受付中の予約に対し、残り時間が不足する見込みです。",
+      });
+    }
+    return items;
+  }, [lessonMinutes?.remainingMinutes, adminLessonMinutesPreview.nextCompletionInsufficient]);
   const latestLessonNote = useMemo(() => (lessonNotes.length > 0 ? lessonNotes[0] : null), [lessonNotes]);
   const activeParentCount = useMemo(
     () => parentLinks.filter((item) => item.status === "active").length,
@@ -411,6 +437,90 @@ export default function StudentEditForm({
     };
   }, [student.id, learningPeriod, initialLearningStats]);
 
+  async function handleLessonMinutesApply(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    const credit = Number(lessonMinutesCreditMinutes || 0);
+    const deduct = Math.max(0, Math.floor(Number(lessonMinutesDeductMinutes || 0)));
+    const adjust = Number(lessonMinutesAdjustMinutes || 0);
+    if (credit <= 0 && deduct <= 0 && adjust === 0) {
+      setStatus({ type: "error", text: "追加・減算・手動調整のいずれかを入力してください。" });
+      return;
+    }
+    if (credit > 0 && !String(lessonMinutesCreditReason || "").trim()) {
+      setStatus({ type: "error", text: "時間追加には理由（メモ）の入力が必要です。" });
+      return;
+    }
+    if (deduct > 0 && !String(lessonMinutesDeductMemo || "").trim()) {
+      setStatus({ type: "error", text: "時間減算にはメモ（理由）の入力が必要です。" });
+      return;
+    }
+    if (adjust !== 0 && !String(lessonMinutesAdjustReason || "").trim()) {
+      setStatus({ type: "error", text: "手動調整には理由の入力が必要です。" });
+      return;
+    }
+    const rem = Number(lessonMinutes?.remainingMinutes ?? 0);
+    if (deduct > rem && rem >= 0) {
+      const ok = typeof window !== "undefined" && window.confirm(
+        "減算しようとしている分数が現在の残りを超えています。実際の減算は残り時間までに制限されます。このまま記録しますか？"
+      );
+      if (!ok) return;
+    }
+    if (credit >= 3000 || deduct >= 3000 || Math.abs(adjust) >= 3000) {
+      const ok2 = typeof window !== "undefined" && window.confirm(
+        "入力された分数が大きいです。内容を再確認のうえ、続行しますか？"
+      );
+      if (!ok2) return;
+    }
+    setLessonMinutesApplyLoading(true);
+    setStatus({ type: "", text: "" });
+    try {
+      const opId =
+        typeof crypto !== "undefined" && crypto.randomUUID
+          ? crypto.randomUUID()
+          : `lm-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      const response = await fetch(`/api/admin/students/${student.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          lessonMinutesCreditMinutes: credit,
+          lessonMinutesCreditPackageId,
+          lessonMinutesCreditType,
+          lessonMinutesCreditReason,
+          lessonMinutesDeductMinutes: deduct,
+          lessonMinutesDeductReason: String(lessonMinutesDeductMemo || "").trim(),
+          lessonMinutesAdjustMinutes: adjust,
+          lessonMinutesAdjustReason,
+          lessonMinutesOperationId: opId,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data?.ok) {
+        throw new Error(data?.error || "レッスン時間の更新に失敗しました。");
+      }
+      setLessonMinutes(data.student?.lessonMinutes || lessonMinutes);
+      setLessonMinuteLogs(data.student?.lessonMinuteLogs || lessonMinuteLogs);
+      setLessonMinuteLedger(data.student?.lessonMinuteLedger || lessonMinuteLedger);
+      setLessonMinuteJournalCharges(data.student?.lessonMinuteJournalCharges || lessonMinuteJournalCharges);
+      setLessonMinuteJournalUsage(data.student?.lessonMinuteJournalUsage || lessonMinuteJournalUsage);
+      setLessonMinuteJournalManual(data.student?.lessonMinuteJournalManual || lessonMinuteJournalManual);
+      setLessonMinuteJournalSummary(data.student?.lessonMinuteJournalSummary ?? lessonMinuteJournalSummary);
+      setLessonMinutesCreditMinutes("0");
+      setLessonMinutesCreditPackageId("");
+      setLessonMinutesCreditType("purchase");
+      setLessonMinutesCreditReason("");
+      setLessonMinutesDeductMinutes("0");
+      setLessonMinutesDeductMemo("");
+      setLessonMinutesAdjustMinutes("0");
+      setLessonMinutesAdjustReason("");
+      setStatus({ type: "success", text: "レッスン時間を更新しました。" });
+    } catch (err) {
+      setStatus({ type: "error", text: err.message || "レッスン時間の更新に失敗しました。" });
+    } finally {
+      setLessonMinutesApplyLoading(false);
+    }
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
     setIsSaving(true);
@@ -444,12 +554,6 @@ export default function StudentEditForm({
           isMinor,
           guardianRequired,
           guardianMemo,
-          lessonMinutesCreditMinutes: Number(lessonMinutesCreditMinutes || 0),
-          lessonMinutesCreditPackageId,
-          lessonMinutesCreditType,
-          lessonMinutesCreditReason,
-          lessonMinutesAdjustMinutes: Number(lessonMinutesAdjustMinutes || 0),
-          lessonMinutesAdjustReason,
           pairAction,
           pairStudentId,
           parentAction,
@@ -476,12 +580,6 @@ export default function StudentEditForm({
       setLessonMinuteJournalUsage(data.student?.lessonMinuteJournalUsage || lessonMinuteJournalUsage);
       setLessonMinuteJournalManual(data.student?.lessonMinuteJournalManual || lessonMinuteJournalManual);
       setLessonMinuteJournalSummary(data.student?.lessonMinuteJournalSummary ?? lessonMinuteJournalSummary);
-      setLessonMinutesCreditMinutes("0");
-      setLessonMinutesCreditPackageId("");
-      setLessonMinutesCreditType("purchase");
-      setLessonMinutesCreditReason("");
-      setLessonMinutesAdjustMinutes("0");
-      setLessonMinutesAdjustReason("");
       setPairAction("none");
       setPairStudentId("");
       setPairInfo(data.student?.pairInfo || null);
@@ -635,7 +733,19 @@ export default function StudentEditForm({
             </p>
           </div>
           <StudentRiskStrip badges={initialRiskBadges} />
+          {heroLessonMinuteAlerts.length > 0 ? (
+            <div className={detailStyles.minutesHeroAlertStack} aria-label="レッスン時間の注意">
+              {heroLessonMinuteAlerts.map((a, idx) => (
+                <p key={`${a.tone}-${idx}`} className={detailStyles.minutesHeroAlert} data-tone={a.tone}>
+                  {a.text}
+                </p>
+              ))}
+            </div>
+          ) : null}
           <div className={detailStyles.quickActions}>
+            <button className={adminStyles.chipButton} type="button" onClick={() => setActiveTab("lesson-time")}>
+              レッスン時間を編集
+            </button>
             <a className={adminStyles.actionButton} href={`/admin/reservations?studentId=${student.id}`}>
               予約を追加
             </a>
@@ -1407,68 +1517,12 @@ export default function StudentEditForm({
         </section>
       ) : null}
 
-      {activeTab === "notices" ? (
+      {activeTab === "lesson-time" ? (
         <section className={detailStyles.sectionCard}>
-          <h3 className={detailStyles.sectionTitle}>お知らせ履歴</h3>
-          <p className={adminStyles.smallMuted}>学生ポータル表示履歴 + 実際の通知メール送信履歴を確認します。</p>
-          <div className={detailStyles.stackList}>
-            {notices.map((notice) => (
-              <article key={notice.id} className={detailStyles.itemCard}>
-                <p><strong>タイトル:</strong> {notice.title || "-"}</p>
-                <p><strong>送信日:</strong> {formatDateTime(notice.publishedAt || notice.updatedAt)}</p>
-                <p><strong>種別:</strong> {notice.isImportant ? "教室からのお知らせ(重要)" : "教室からのお知らせ"}</p>
-                <p><strong>既読状況:</strong> 既読管理は次段階</p>
-              </article>
-            ))}
-            {notices.length === 0 ? <p className={adminStyles.smallMuted}>表示できるお知らせがありません。</p> : null}
-          </div>
-
-          <h4 className={detailStyles.blockTitle}>通知送信履歴 (配信記録)</h4>
-          {notificationLoading ? <p className={adminStyles.smallMuted}>通知履歴を読み込み中...</p> : null}
-          <div className={detailStyles.stackList}>
-            {notificationLogs.map((log) => (
-              <article key={log.id} className={detailStyles.itemCard}>
-                <p><strong>送信日:</strong> {formatDateTime(log.createdAt)}</p>
-                <p><strong>宛先:</strong> {log.toEmail || "-"}</p>
-                <p><strong>種別:</strong> {log.type || "-"}</p>
-                <p><strong>件名:</strong> {log.subject || "-"}</p>
-                <p><strong>状態:</strong> {log.status || "-"}</p>
-              </article>
-            ))}
-            {!notificationLoading && notificationLogs.length === 0 ? (
-              <p className={adminStyles.smallMuted}>通知送信履歴がありません。</p>
-            ) : null}
-          </div>
-        </section>
-      ) : null}
-
-      {activeTab === "memo" ? (
-        <section className={detailStyles.sectionCard}>
-          <h3 className={detailStyles.sectionTitle}>管理メモ</h3>
-          <div className={detailStyles.formGrid}>
-            <label className={styles.label}>
-              学生の性向
-              <input className={styles.field} value={adminStudentTendency} onChange={(e) => setAdminStudentTendency(e.target.value)} />
-            </label>
-            <label className={styles.label}>
-              授業時の注意事項
-              <input className={styles.field} value={adminLessonCautions} onChange={(e) => setAdminLessonCautions(e.target.value)} />
-            </label>
-            <label className={styles.label}>
-              反応スタイル
-              <input className={styles.field} value={adminResponseStyle} onChange={(e) => setAdminResponseStyle(e.target.value)} />
-            </label>
-            <label className={styles.label}>
-              学習特徴
-              <input className={styles.field} value={adminLearningTraits} onChange={(e) => setAdminLearningTraits(e.target.value)} />
-            </label>
-            <label className={styles.label}>
-              相談メモ
-              <input className={styles.field} value={adminCounselMemo} onChange={(e) => setAdminCounselMemo(e.target.value)} />
-            </label>
-          </div>
-
-          <h4 className={detailStyles.blockTitle}>時間/ポイント運営</h4>
+          <h3 className={detailStyles.sectionTitle}>レッスン時間の運営</h3>
+          <p className={adminStyles.smallMuted}>
+            受講完了時の自動消費は予約の「完了」処理で行われます。ここでの減算は<strong>手動での調整</strong>です（残りを超える分は自動でキャップされます）。
+          </p>
           {Number(lessonMinutes?.remainingMinutes ?? 0) <= 0 ? (
             <p className={`${styles.message} ${styles.messageError}`} style={{ marginBottom: "0.65rem" }}>
               残り時間が0以下です。受講前に時間付与をご確認ください。
@@ -1509,77 +1563,130 @@ export default function StudentEditForm({
               </p>
             ) : null}
           </div>
-          <div className={detailStyles.formGrid}>
-            <label className={styles.label}>
-              時間追加商品 (選択)
-              <select
-                className={styles.field}
-                value={lessonMinutesCreditPackageId}
-                onChange={(e) => {
-                  const packageId = e.target.value;
-                  setLessonMinutesCreditPackageId(packageId);
-                  const selected = activeLessonMinutePackages.find((pkg) => pkg.id === packageId);
-                  if (selected) setLessonMinutesCreditMinutes(String(selected.minutes));
-                }}
-              >
-                <option value="">直接入力を使用</option>
-                {activeLessonMinutePackages.map((pkg) => (
-                  <option key={pkg.id} value={pkg.id}>
-                    {pkg.name} ({pkg.minutes}分)
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className={styles.label}>
-              時間追加 (分, +)
-              <input
-                className={styles.field}
-                type="number"
-                min="0"
-                value={lessonMinutesCreditMinutes}
-                onChange={(e) => setLessonMinutesCreditMinutes(e.target.value)}
-              />
-            </label>
-            <label className={styles.label}>
-              時間追加タイプ
-              <select className={styles.field} value={lessonMinutesCreditType} onChange={(e) => setLessonMinutesCreditType(e.target.value)}>
-                <option value="purchase">purchase (購入時間)</option>
-                <option value="admin_grant">admin_grant (管理者付与)</option>
-                <option value="manual_adjustment">manual_adjustment (手動補正)</option>
-              </select>
-            </label>
-            <label className={styles.label}>
-              時間追加理由
-              <input
-                className={styles.field}
-                value={lessonMinutesCreditReason}
-                onChange={(e) => setLessonMinutesCreditReason(e.target.value)}
-                placeholder="例: 5月パッケージ購入"
-              />
-            </label>
-            <label className={styles.label}>
-              手動時間調整 (分, +/-)
-              <input
-                className={styles.field}
-                type="number"
-                value={lessonMinutesAdjustMinutes}
-                onChange={(e) => setLessonMinutesAdjustMinutes(e.target.value)}
-              />
-            </label>
-            <label className={styles.label}>
-              調整理由
-              <input
-                className={styles.field}
-                value={lessonMinutesAdjustReason}
-                onChange={(e) => setLessonMinutesAdjustReason(e.target.value)}
-                placeholder="例: 管理者手動補正"
-              />
-            </label>
+
+          <div className={detailStyles.lessonMinutesTools}>
+            <article className={detailStyles.lessonMinutesToolCard}>
+              <h4 className={detailStyles.blockTitle}>時間を追加</h4>
+              <div className={detailStyles.formGrid}>
+                <label className={styles.label}>
+                  時間追加商品 (選択)
+                  <select
+                    className={styles.field}
+                    value={lessonMinutesCreditPackageId}
+                    onChange={(e) => {
+                      const packageId = e.target.value;
+                      setLessonMinutesCreditPackageId(packageId);
+                      const selected = activeLessonMinutePackages.find((pkg) => pkg.id === packageId);
+                      if (selected) setLessonMinutesCreditMinutes(String(selected.minutes));
+                    }}
+                  >
+                    <option value="">直接入力を使用</option>
+                    {activeLessonMinutePackages.map((pkg) => (
+                      <option key={pkg.id} value={pkg.id}>
+                        {pkg.name} ({pkg.minutes}分)
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className={styles.label}>
+                  追加する分数（+）
+                  <input
+                    className={styles.field}
+                    type="number"
+                    min="0"
+                    value={lessonMinutesCreditMinutes}
+                    onChange={(e) => setLessonMinutesCreditMinutes(e.target.value)}
+                  />
+                </label>
+                <label className={styles.label}>
+                  種別
+                  <select className={styles.field} value={lessonMinutesCreditType} onChange={(e) => setLessonMinutesCreditType(e.target.value)}>
+                    <option value="purchase">purchase（購入）</option>
+                    <option value="admin_grant">admin_grant（管理者付与）</option>
+                    <option value="manual_adjustment">manual_adjustment（手動補正）</option>
+                  </select>
+                </label>
+                <label className={styles.label}>
+                  メモ（理由）※必須
+                  <input
+                    className={styles.field}
+                    value={lessonMinutesCreditReason}
+                    onChange={(e) => setLessonMinutesCreditReason(e.target.value)}
+                    placeholder="例: 5月パッケージ購入"
+                  />
+                </label>
+              </div>
+            </article>
+
+            <article className={detailStyles.lessonMinutesToolCard}>
+              <h4 className={detailStyles.blockTitle}>時間を減算（手動）</h4>
+              <p className={adminStyles.smallMuted}>予約完了とは別枠の調整用です。入力した分だけ残りから減じます（残り超過分はキャップ）。</p>
+              <div className={detailStyles.formGrid}>
+                <label className={styles.label}>
+                  減算する分数
+                  <input
+                    className={styles.field}
+                    type="number"
+                    min="0"
+                    value={lessonMinutesDeductMinutes}
+                    onChange={(e) => setLessonMinutesDeductMinutes(e.target.value)}
+                  />
+                </label>
+                <label className={styles.label}>
+                  メモ（理由）※必須
+                  <input
+                    className={styles.field}
+                    value={lessonMinutesDeductMemo}
+                    onChange={(e) => setLessonMinutesDeductMemo(e.target.value)}
+                    placeholder="例: 誤付与の訂正"
+                  />
+                </label>
+              </div>
+            </article>
+
+            <article className={detailStyles.lessonMinutesToolCard}>
+              <h4 className={detailStyles.blockTitle}>手動で増減（まとめて記録）</h4>
+              <p className={adminStyles.smallMuted}>正の数で加算、負の数で減算。細かな補正に使います。</p>
+              <div className={detailStyles.formGrid}>
+                <label className={styles.label}>
+                  調整分数（+/-）
+                  <input
+                    className={styles.field}
+                    type="number"
+                    value={lessonMinutesAdjustMinutes}
+                    onChange={(e) => setLessonMinutesAdjustMinutes(e.target.value)}
+                  />
+                </label>
+                <label className={styles.label}>
+                  理由※必須（0以外のとき）
+                  <input
+                    className={styles.field}
+                    value={lessonMinutesAdjustReason}
+                    onChange={(e) => setLessonMinutesAdjustReason(e.target.value)}
+                    placeholder="例: システム移行調整"
+                  />
+                </label>
+              </div>
+            </article>
+          </div>
+
+          <div className={detailStyles.lessonMinutesApplyRow}>
+            <button
+              type="button"
+              className={styles.button}
+              disabled={lessonMinutesApplyLoading}
+              onClick={handleLessonMinutesApply}
+            >
+              {lessonMinutesApplyLoading ? "反映中..." : "レッスン時間のみ反映"}
+            </button>
+            <p className={adminStyles.smallMuted}>
+              二重送信防止のため、操作ごとに内部IDが付与されます。同じ内容を繰り返す場合は再度ボタンを押してください。
+            </p>
           </div>
 
           <h4 className={detailStyles.blockTitle}>公式時間原簿（レッスン分・種別別）</h4>
           <p className={adminStyles.smallMuted}>
-            charge=付与・購入 / usage=受講完了時の消費 / manual_adjustment=手動・返却など。監査ログ・予約完了時の usage と対応します。
+            charge=付与・購入 / usage=受講完了時の消費 / manual_adjustment=手動・返却など。
           </p>
 
           <h5 className={detailStyles.blockTitle}>最近の付与（charge）</h5>
@@ -1675,7 +1782,7 @@ export default function StudentEditForm({
             ) : null}
           </div>
 
-          <h4 className={detailStyles.blockTitle}>授業時間履歴</h4>
+          <h4 className={detailStyles.blockTitle}>授業時間履歴（ログ）</h4>
           <div className={detailStyles.stackList}>
             {lessonMinuteLogs.map((log) => (
               <article key={log.id} className={detailStyles.itemCard}>
@@ -1694,7 +1801,7 @@ export default function StudentEditForm({
 
           <h4 className={detailStyles.blockTitle}>レガシー内部原簿（lessonMinuteLedger・互換）</h4>
           <p className={adminStyles.smallMuted}>
-            topup=付与 / usage=受講完了時の消費 / refund=返却 / manual=手動。新方式は上記「公式時間原簿」を参照してください。
+            topup=付与 / usage=受講完了時の消費 / refund=返却 / manual=手動。
           </p>
           <div className={detailStyles.stackList}>
             {lessonMinuteLedger.map((row) => (
@@ -1726,6 +1833,73 @@ export default function StudentEditForm({
               <p className={adminStyles.smallMuted}>原簿エントリがありません（保存データ読込後に表示されます）。</p>
             ) : null}
           </div>
+        </section>
+      ) : null}
+
+      {activeTab === "notices" ? (
+        <section className={detailStyles.sectionCard}>
+          <h3 className={detailStyles.sectionTitle}>お知らせ履歴</h3>
+          <p className={adminStyles.smallMuted}>学生ポータル表示履歴 + 実際の通知メール送信履歴を確認します。</p>
+          <div className={detailStyles.stackList}>
+            {notices.map((notice) => (
+              <article key={notice.id} className={detailStyles.itemCard}>
+                <p><strong>タイトル:</strong> {notice.title || "-"}</p>
+                <p><strong>送信日:</strong> {formatDateTime(notice.publishedAt || notice.updatedAt)}</p>
+                <p><strong>種別:</strong> {notice.isImportant ? "教室からのお知らせ(重要)" : "教室からのお知らせ"}</p>
+                <p><strong>既読状況:</strong> 既読管理は次段階</p>
+              </article>
+            ))}
+            {notices.length === 0 ? <p className={adminStyles.smallMuted}>表示できるお知らせがありません。</p> : null}
+          </div>
+
+          <h4 className={detailStyles.blockTitle}>通知送信履歴 (配信記録)</h4>
+          {notificationLoading ? <p className={adminStyles.smallMuted}>通知履歴を読み込み中...</p> : null}
+          <div className={detailStyles.stackList}>
+            {notificationLogs.map((log) => (
+              <article key={log.id} className={detailStyles.itemCard}>
+                <p><strong>送信日:</strong> {formatDateTime(log.createdAt)}</p>
+                <p><strong>宛先:</strong> {log.toEmail || "-"}</p>
+                <p><strong>種別:</strong> {log.type || "-"}</p>
+                <p><strong>件名:</strong> {log.subject || "-"}</p>
+                <p><strong>状態:</strong> {log.status || "-"}</p>
+              </article>
+            ))}
+            {!notificationLoading && notificationLogs.length === 0 ? (
+              <p className={adminStyles.smallMuted}>通知送信履歴がありません。</p>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
+
+      {activeTab === "memo" ? (
+        <section className={detailStyles.sectionCard}>
+          <h3 className={detailStyles.sectionTitle}>管理メモ</h3>
+          <div className={detailStyles.formGrid}>
+            <label className={styles.label}>
+              学生の性向
+              <input className={styles.field} value={adminStudentTendency} onChange={(e) => setAdminStudentTendency(e.target.value)} />
+            </label>
+            <label className={styles.label}>
+              授業時の注意事項
+              <input className={styles.field} value={adminLessonCautions} onChange={(e) => setAdminLessonCautions(e.target.value)} />
+            </label>
+            <label className={styles.label}>
+              反応スタイル
+              <input className={styles.field} value={adminResponseStyle} onChange={(e) => setAdminResponseStyle(e.target.value)} />
+            </label>
+            <label className={styles.label}>
+              学習特徴
+              <input className={styles.field} value={adminLearningTraits} onChange={(e) => setAdminLearningTraits(e.target.value)} />
+            </label>
+            <label className={styles.label}>
+              相談メモ
+              <input className={styles.field} value={adminCounselMemo} onChange={(e) => setAdminCounselMemo(e.target.value)} />
+            </label>
+          </div>
+
+          <p className={adminStyles.smallMuted}>
+            レッスン時間の<strong>付与・減算・履歴・原簿</strong>は「レッスン時間」タブから操作してください。時間の更新は「レッスン時間のみ反映」ボタンで行い、ページ下部の保存とは分離されています（二重送信防止）。
+          </p>
 
           <h4 className={detailStyles.blockTitle}>ペア履歴</h4>
           <div className={detailStyles.stackList}>

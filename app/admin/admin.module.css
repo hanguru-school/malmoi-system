@@ -173,6 +173,12 @@
   padding: 0.65rem 0.75rem;
 }
 
+.opsSummaryCardAttention {
+  border-color: #fdba74;
+  background: linear-gradient(180deg, #fff7ed 0%, #ffffff 55%);
+  box-shadow: 0 0 0 1px rgba(251, 146, 60, 0.12);
+}
+
 .opsSummaryLabel {
   margin: 0;
   font-size: 0.68rem;

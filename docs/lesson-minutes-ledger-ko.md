@@ -104,3 +104,5 @@
 - `lib/adapters/lessonMinutesSummary.js` — `summarizeLessonMinuteJournalEntries`, `buildLessonMinutesCompletionPreview`, `lessonMinuteJournalTypeLabelJa`
 - `app/student/page.js`, `StudentDashboard.js`, `app/student/profile/page.js`, `StudentProfilePanel.js`
 - `app/admin/students/[id]/StudentEditForm.js`, `app/admin/page.js`, `AdminStudentsPanelV2.js`
+
+運営 UI・学生履歴・警告・安全装置の詳細は **`docs/lesson-minutes-operations-ko.md`** を参照してください。
