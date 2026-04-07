@@ -431,7 +431,7 @@
   :global(body.student-ryoshu-modal-open) :global(#student-ryoshu-print-root) :global(*) {
     visibility: visible;
   }
-  :global(body.student-ryoshu-modal-open) #student-ryoshu-print-root {
+  :global(body.student-ryoshu-modal-open) :global(#student-ryoshu-print-root) {
     position: absolute;
     left: 0;
     top: 0;

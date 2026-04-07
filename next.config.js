@@ -5,7 +5,6 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  typedRoutes: false,
   // TypeScript 오류 무시
   typescript: {
     ignoreBuildErrors: true,
