@@ -7,45 +7,18 @@ import panelStyles from "./reservations-panel.module.css";
 import {
   addDaysYmd,
   addMonthsYmd,
+  buildMonthGridCells,
   computeReservationFetchRange,
+  formatYmd,
+  listDaysInclusive,
+  parseYmd,
   reservationRowToCalendarEvent,
   sortCalendarEventsByStart,
+  startOfWeekMondayIso,
 } from "../../../lib/admin/reservationCalendarModel.js";
 
 function todayIso() {
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, "0");
-  const d = String(now.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-}
-
-function parseIso(value) {
-  const [y, m, d] = String(value || "").split("-").map((token) => Number(token));
-  if (!y || !m || !d) return null;
-  return new Date(y, m - 1, d);
-}
-
-function formatIso(date) {
-  if (!(date instanceof Date) || Number.isNaN(date.getTime())) return "";
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-}
-
-function addDays(iso, amount) {
-  const base = parseIso(iso) || parseIso(todayIso());
-  base.setDate(base.getDate() + amount);
-  return formatIso(base);
-}
-
-function startOfWeekIso(iso) {
-  const base = parseIso(iso) || parseIso(todayIso());
-  const day = base.getDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  base.setDate(base.getDate() + diff);
-  return formatIso(base);
+  return formatYmd(new Date());
 }
 
 function statusLabel(status) {
@@ -191,6 +164,7 @@ export default function AdminReservationsPanel({
   const soonReservations = useMemo(
     () =>
       filteredReservations.filter((item) => {
+        if (String(item.date || "").slice(0, 10) !== todayIso()) return false;
         const minutes = toMinutes(item.date, item.time);
         if (minutes === null) return false;
         return minutes >= nowMinute && minutes <= nowMinute + 90;
@@ -215,28 +189,28 @@ export default function AdminReservationsPanel({
 
   const scheduleRange = useMemo(() => {
     if (scheduleView === "month") {
-      const base = parseIso(calendarDate) || parseIso(todayIso());
+      const base = parseYmd(calendarDate) || parseYmd(todayIso());
       const month = base.getMonth();
       const year = base.getFullYear();
       return {
         label: `${year}年${month + 1}月`,
         includes: (item) => {
-          const dt = parseIso(item.date);
+          const dt = parseYmd(item.date);
           return dt && dt.getMonth() === month && dt.getFullYear() === year;
         },
       };
     }
     if (scheduleView === "week") {
-      const start = startOfWeekIso(calendarDate);
-      const end = addDays(start, 6);
+      const start = startOfWeekMondayIso(calendarDate);
+      const end = addDaysYmd(start, 6);
       return {
-        label: `${start} - ${end}`,
+        label: `${start} – ${end}`,
         includes: (item) => String(item.date || "") >= start && String(item.date || "") <= end,
       };
     }
     return {
       label: calendarDate,
-      includes: (item) => String(item.date || "") === calendarDate,
+      includes: (item) => String(item.date || "").slice(0, 10) === String(calendarDate || "").slice(0, 10),
     };
   }, [calendarDate, scheduleView]);
 
@@ -251,6 +225,33 @@ export default function AdminReservationsPanel({
   const calendarEvents = useMemo(
     () => sortCalendarEventsByStart(scheduleItems.map((row) => reservationRowToCalendarEvent(row))),
     [scheduleItems]
+  );
+
+  const eventsByDate = useMemo(() => {
+    const map = new Map();
+    calendarEvents.forEach((ev) => {
+      const d = String(ev.date || "").slice(0, 10);
+      if (!d) return;
+      if (!map.has(d)) map.set(d, []);
+      map.get(d).push(ev);
+    });
+    return map;
+  }, [calendarEvents]);
+
+  const monthGridCells = useMemo(
+    () => (scheduleView === "month" ? buildMonthGridCells(calendarDate) : []),
+    [scheduleView, calendarDate]
+  );
+
+  const weekDayList = useMemo(() => {
+    if (scheduleView !== "week") return [];
+    const start = startOfWeekMondayIso(calendarDate);
+    return listDaysInclusive(start, addDaysYmd(start, 6));
+  }, [scheduleView, calendarDate]);
+
+  const todayReservationCount = useMemo(
+    () => filteredReservations.filter((item) => String(item.date || "").slice(0, 10) === todayIso()).length,
+    [filteredReservations]
   );
 
   const slotOptions = useMemo(
@@ -442,7 +443,7 @@ export default function AdminReservationsPanel({
         <div className={panelStyles.scheduleHeader}>
           <h3 className={panelStyles.detailTitle}>予約スケジュール</h3>
           <span className={adminStyles.smallMuted}>
-            {scheduleRange.label} · 共通イベント {calendarEvents.length} 件
+            {scheduleRange.label} · 共通イベント {calendarEvents.length} 件 · タイムゾーン Asia/Tokyo (JST)
           </span>
         </div>
         <div className={panelStyles.scheduleToolbar}>
@@ -462,7 +463,9 @@ export default function AdminReservationsPanel({
               setCalendarDate(
                 scheduleView === "month"
                   ? addMonthsYmd(calendarDate, -1)
-                  : addDaysYmd(calendarDate, -1)
+                  : scheduleView === "week"
+                    ? addDaysYmd(calendarDate, -7)
+                    : addDaysYmd(calendarDate, -1)
               )
             }
           >
@@ -473,7 +476,11 @@ export default function AdminReservationsPanel({
             type="button"
             onClick={() =>
               setCalendarDate(
-                scheduleView === "month" ? addMonthsYmd(calendarDate, 1) : addDaysYmd(calendarDate, 1)
+                scheduleView === "month"
+                  ? addMonthsYmd(calendarDate, 1)
+                  : scheduleView === "week"
+                    ? addDaysYmd(calendarDate, 7)
+                    : addDaysYmd(calendarDate, 1)
               )
             }
           >
@@ -526,6 +533,13 @@ export default function AdminReservationsPanel({
               onClick={() => setViewMode("timetable")}
             >
               時間表
+            </button>
+            <button
+              className={`${panelStyles.segmentButton} ${viewMode === "calendar" ? panelStyles.segmentButtonActive : ""}`}
+              type="button"
+              onClick={() => setViewMode("calendar")}
+            >
+              カレンダー
             </button>
           </div>
           <button className={styles.button} type="button" onClick={() => setOpenCreate(true)}>
@@ -604,7 +618,7 @@ export default function AdminReservationsPanel({
       <div className={panelStyles.summaryRow}>
         <article className={panelStyles.summaryCard}>
           <h3>今日の予約</h3>
-          <p>{filteredReservations.length}件</p>
+          <p>{todayReservationCount}件</p>
         </article>
         <article className={panelStyles.summaryCard}>
           <h3>まもなく開始</h3>
@@ -638,6 +652,108 @@ export default function AdminReservationsPanel({
 
       <div className={panelStyles.bodyGrid}>
         <section className={panelStyles.mainPanel}>
+          {viewMode === "calendar" ? (
+            <div className={panelStyles.calWrap}>
+              <p className={adminStyles.smallMuted}>
+                同じ予約データを月/週/日で表示しています。イベントを選ぶと右の詳細パネルが更新されます。
+              </p>
+              {scheduleView === "month" ? (
+                <div className={`${panelStyles.calGrid} ${panelStyles.monthGrid}`}>
+                  {["月", "火", "水", "木", "金", "土", "日"].map((w) => (
+                    <div key={w} className={panelStyles.monthWeekHead}>
+                      {w}
+                    </div>
+                  ))}
+                  {monthGridCells.map((cell) => {
+                    const dayEvents = eventsByDate.get(cell.ymd) || [];
+                    const isToday = cell.ymd === todayIso();
+                    return (
+                      <div
+                        key={cell.ymd}
+                        className={`${panelStyles.monthCell} ${cell.inMonth ? "" : panelStyles.monthCellMuted} ${
+                          isToday ? panelStyles.monthCellToday : ""
+                        }`}
+                      >
+                        <div className={panelStyles.monthCellDate}>{cell.ymd.slice(8, 10)}</div>
+                        {dayEvents.slice(0, 4).map((ev) => (
+                          <button
+                            key={ev.id}
+                            type="button"
+                            className={panelStyles.calEventBtn}
+                            onClick={() => {
+                              const row = reservations.find((r) => String(r.id) === String(ev.id));
+                              if (row) {
+                                setCalendarDate(String(row.date || "").slice(0, 10) || calendarDate);
+                                setSelectedReservation(row);
+                              }
+                            }}
+                          >
+                            {ev.time || String(ev.startAt || "").slice(11, 16)} {ev.studentName}
+                          </button>
+                        ))}
+                        {dayEvents.length > 4 ? (
+                          <span className={adminStyles.smallMuted}>+{dayEvents.length - 4}</span>
+                        ) : null}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : null}
+              {scheduleView === "week" ? (
+                <div className={`${panelStyles.calGrid} ${panelStyles.weekGrid}`}>
+                  {weekDayList.map((ymd) => {
+                    const dayEvents = sortCalendarEventsByStart(eventsByDate.get(ymd) || []);
+                    return (
+                      <div key={ymd} className={panelStyles.weekCol}>
+                        <div className={panelStyles.weekColHead}>{ymd}</div>
+                        {dayEvents.map((ev) => (
+                          <button
+                            key={ev.id}
+                            type="button"
+                            className={panelStyles.calEventBtn}
+                            onClick={() => {
+                              const row = reservations.find((r) => String(r.id) === String(ev.id));
+                              if (row) {
+                                setCalendarDate(String(row.date || "").slice(0, 10) || calendarDate);
+                                setSelectedReservation(row);
+                              }
+                            }}
+                          >
+                            <strong>{String(ev.startAt || "").slice(11, 16)}</strong> {ev.studentName}
+                            <span className={adminStyles.smallMuted}> / {ev.lessonName}</span>
+                          </button>
+                        ))}
+                        {dayEvents.length === 0 ? <p className={adminStyles.smallMuted}>—</p> : null}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : null}
+              {scheduleView === "day" ? (
+                <div className={panelStyles.dayCalList}>
+                  {sortCalendarEventsByStart(eventsByDate.get(String(calendarDate).slice(0, 10)) || []).map((ev) => (
+                    <button
+                      key={ev.id}
+                      type="button"
+                      className={panelStyles.dayCalRow}
+                      onClick={() => {
+                        const row = reservations.find((r) => String(r.id) === String(ev.id));
+                        if (row) setSelectedReservation(row);
+                      }}
+                    >
+                      <span className={panelStyles.dayCalTime}>{String(ev.startAt || "").slice(11, 16)}</span>
+                      <span>
+                        {ev.studentName} · {ev.teacherName} · {ev.lessonName} · {statusLabel(ev.status)}
+                      </span>
+                    </button>
+                  ))}
+                  {(eventsByDate.get(String(calendarDate).slice(0, 10)) || []).length === 0 ? (
+                    <p className={adminStyles.smallMuted}>この日の予約はありません。</p>
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
+          ) : null}
           {viewMode === "list" ? (
             <>
               <div className={panelStyles.mobileList}>

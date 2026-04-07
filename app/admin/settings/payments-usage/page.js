@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Link from "next/link";
 import styles from "../../../login/login.module.css";
 import { requireRole } from "../../../../lib/auth/session";
 import {
@@ -10,16 +11,16 @@ import SystemSettingsPanel from "../SystemSettingsPanel";
 import SettingsSubNav from "../SettingsSubNav";
 
 const SUB_ITEMS = [
-  { t: "booking", label: "予約受付・変更・表示・承認" },
-  { t: "parent", label: "保護者ポリシー" },
+  { t: "payment", label: "支払い方法・Web準備" },
+  { t: "lesson", label: "利用時間・共通レッスン" },
 ];
 
-export default async function ReservationPolicySettingsPage({ searchParams }) {
+export default async function PaymentsUsageSettingsPage({ searchParams }) {
   const session = await requireRole(["admin"]);
   const sp = await searchParams;
-  const t = String(sp?.t || "booking");
-  const tabMap = { booking: "reservation", parent: "parent" };
-  const initialActiveTab = tabMap[t] || "reservation";
+  const t = String(sp?.t || "payment");
+  const tabMap = { payment: "paymentMethodsPolicy", lesson: "lesson" };
+  const initialActiveTab = tabMap[t] || "paymentMethodsPolicy";
 
   const settings = await getSystemSettingsForAdmin();
   const systemInfo = await getSystemInfoSummaryForAdmin();
@@ -28,13 +29,14 @@ export default async function ReservationPolicySettingsPage({ searchParams }) {
   return (
     <>
       <h2 className={styles.sectionTitle} style={{ fontSize: "1.15rem", marginTop: 0 }}>
-        予約ポリシー
+        支払い・利用時間
       </h2>
       <p className={styles.description}>
-        予約モード・キャンセル・カレンダー表示・承認設定（レッスン商品マスタは「レッスン・サービス」）。
+        支払い手段の表示方針と、教室決済→利用時間登録のメモです。取引・ポイントの実データは{" "}
+        <Link href="/admin/payments">決済管理</Link> から操作してください。
       </p>
       <Suspense fallback={null}>
-        <SettingsSubNav basePath="/admin/settings/reservation-policy" items={SUB_ITEMS} />
+        <SettingsSubNav basePath="/admin/settings/payments-usage" items={SUB_ITEMS} />
       </Suspense>
       <SystemSettingsPanel
         initialSettings={settings}
@@ -42,7 +44,7 @@ export default async function ReservationPolicySettingsPage({ searchParams }) {
         initialLogs={logResult.items || []}
         initialLogPagination={logResult.pagination}
         adminRank={session.user.adminRank || "ADMIN"}
-        tabIds={["reservation", "parent"]}
+        tabIds={["paymentMethodsPolicy", "lesson"]}
         initialActiveTab={initialActiveTab}
       />
     </>

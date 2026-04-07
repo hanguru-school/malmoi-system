@@ -7,11 +7,12 @@ import adminStyles from "../admin.module.css";
 const LINKS = [
   { href: "/admin/settings/classroom", label: "教室運営" },
   { href: "/admin/settings/reservation-policy", label: "予約ポリシー" },
-  { href: "/admin/settings/teacher-schedule", label: "講師日程" },
-  { href: "/admin/settings/lesson-services", label: "レッスン/サービス" },
+  { href: "/admin/settings/teacher-schedule", label: "講師スケジュール" },
+  { href: "/admin/settings/lesson-services", label: "レッスン・サービス" },
+  { href: "/admin/settings/payments-usage", label: "支払い・利用時間" },
   { href: "/admin/settings/notifications", label: "通知" },
-  { href: "/admin/settings/accounts", label: "アカウント/権限" },
-  { href: "/admin/settings/system", label: "システム/ログ" },
+  { href: "/admin/settings/accounts", label: "アカウント・権限" },
+  { href: "/admin/settings/system", label: "システム・ログ" },
 ];
 
 export default function SettingsHubNav() {

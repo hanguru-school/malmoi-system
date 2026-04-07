@@ -18,7 +18,9 @@ export default async function NotificationsSettingsPage() {
       <h2 className={styles.sectionTitle} style={{ fontSize: "1.15rem", marginTop: 0 }}>
         通知
       </h2>
-      <p className={styles.description}>従来の ON/OFF に加え、通知ルールを追加できます。</p>
+      <p className={styles.description}>
+        ルール追加方式が主です（対象・チャネル・タイミング・テンプレ・変数）。レガシーON/OFFは互換用です。
+      </p>
       <SystemSettingsPanel
         initialSettings={settings}
         initialSystemInfo={systemInfo}

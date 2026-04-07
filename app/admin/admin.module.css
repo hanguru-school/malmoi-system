@@ -651,3 +651,32 @@
   color: #1d4ed8;
 }
 
+.settingsSubNav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.45rem;
+  margin: 0 0 0.85rem;
+}
+
+.settingsSubLink {
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 0.28rem 0.55rem;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  color: #64748b;
+  text-decoration: none;
+  background: #ffffff;
+}
+
+.settingsSubLink:hover {
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+.settingsSubLinkActive {
+  border-color: #a5b4fc;
+  background: #eef2ff;
+  color: #4338ca;
+}
+

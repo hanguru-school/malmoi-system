@@ -12,8 +12,8 @@ export default async function AdminSettingsLayout({ children }) {
       <main className={adminStyles.adminCard}>
         <h1 className={styles.sectionTitle}>設定</h1>
         <p className={styles.description}>
-          教室運営・予約・講師日程・通知・アカウントをまとめて管理します。決済設定は{" "}
-          <Link href="/admin/payments/settings">決済設定</Link> から開けます。
+          教室運営・予約・講師・レッスン・支払い方針・通知・アカウントを「設定」から一元管理します。取引の実務は{" "}
+          <Link href="/admin/payments">決済管理</Link> をご利用ください。
         </p>
         <SettingsAdminNav />
         <SettingsHubNav />

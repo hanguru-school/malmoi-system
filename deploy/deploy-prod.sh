@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 # MalMoi production deploy script (server-side)
 # Path: /home/malmoi_deploy/apps/malmoi/deploy/deploy-prod.sh
-# Flow: git pull -> npm install/ci -> build -> restart -> health checks
+#
+# Modes:
+#   MALMOI_USE_RELEASES=0 (default): git pull in APP_DIR → npm ci → build → restart (기존)
+#   MALMOI_USE_RELEASES=1: releases/<id> 에 아카이브 빌드 → current 심볼릭 교체 → 재시작
+#     ※ systemd WorkingDirectory 가 .../current 를 가리키도록 서버에서 한 번 맞춰야 합니다.
+# AUTH_STORE_PATH 및 /srv/malmoi/shared/* 는 이 스크립트에서 변경하지 않습니다.
 
 set -euo pipefail
 
@@ -9,6 +14,7 @@ APP_DIR="/home/malmoi_deploy/apps/malmoi"
 SERVICE_NAME="${MALMOI_SYSTEMD_SERVICE:-malmoi-web}"
 INTERNAL_HEALTH_URL="http://127.0.0.1:3000/login"
 EXTERNAL_HEALTH_URL="https://portal.hanguru.school/login"
+USE_RELEASES="${MALMOI_USE_RELEASES:-0}"
 
 if [[ ! -d "$APP_DIR" ]]; then
   echo "ERROR: app directory not found: $APP_DIR"
@@ -41,8 +47,108 @@ echo "=============================================="
 echo "MalMoi PROD deploy | $(date -Is)"
 echo "APP_DIR=$APP_DIR"
 echo "SERVICE=$SERVICE_NAME"
+echo "MALMOI_USE_RELEASES=$USE_RELEASES"
 echo "LOG=$LOG_FILE"
 echo "=============================================="
+
+release_deploy_failed_cleanup() {
+  local rel_path="$1"
+  echo "ERROR: release deploy failed — removing incomplete tree: $rel_path"
+  rm -rf "$rel_path"
+  echo "NOTE: 기존 current 심볼릭/디렉터리는 변경하지 않았습니다."
+}
+
+if [[ "$USE_RELEASES" == "1" ]]; then
+  echo "[release 1/8] git fetch"
+  git fetch origin main
+
+  echo "[release 2/8] git pull origin main (ff-only)"
+  git pull --ff-only origin main
+
+  REL_ID="$(date +%Y%m%d-%H%M%S)-$(git rev-parse --short HEAD)"
+  REL_PATH="${APP_DIR}/releases/${REL_ID}"
+  mkdir -p "${APP_DIR}/releases"
+
+  echo "[release 3/8] git archive → $REL_PATH"
+  mkdir -p "$REL_PATH"
+  if ! git archive HEAD | tar -x -C "$REL_PATH"; then
+    release_deploy_failed_cleanup "$REL_PATH"
+    exit 1
+  fi
+
+  cd "$REL_PATH"
+
+  if [[ ! -f package.json ]]; then
+    release_deploy_failed_cleanup "$REL_PATH"
+    echo "ERROR: archived tree missing package.json"
+    exit 1
+  fi
+
+  echo "[release 4/8] install dependencies"
+  if [[ -f package-lock.json ]]; then
+    npm ci --omit=dev
+  else
+    npm install --omit=dev
+  fi
+
+  echo "[release 5/8] build"
+  if ! npm run build; then
+    release_deploy_failed_cleanup "$REL_PATH"
+    exit 1
+  fi
+
+  echo "[release 6/8] switch current symlink (atomic)"
+  cd "$APP_DIR"
+  ln -sfn "$REL_PATH" "${APP_DIR}/current.new"
+  mv -Tf "${APP_DIR}/current.new" "${APP_DIR}/current"
+
+  echo "[release 7/8] restart service: $SERVICE_NAME"
+  if ! sudo -n systemctl restart "$SERVICE_NAME"; then
+    echo "ERROR: failed to restart $SERVICE_NAME"
+    exit 1
+  fi
+
+  sleep 2
+
+  echo "[release 8/8] internal health check: $INTERNAL_HEALTH_URL"
+  if ! curl -fsSI "$INTERNAL_HEALTH_URL" >/tmp/malmoi-health-internal.txt; then
+    echo "ERROR: internal health check failed after release switch"
+    exit 1
+  fi
+  cat /tmp/malmoi-health-internal.txt
+
+  echo "[release] service status (snippet)"
+  sudo -n systemctl status "$SERVICE_NAME" --no-pager | sed -n '1,20p' || true
+
+  SHARED_STORE="${MALMOI_SHARED_AUTH_STORE:-/srv/malmoi/shared/auth-store.json}"
+  echo "----------------------------------------------"
+  echo "AUTH_STORE_PATH / shared store sanity (best-effort, 경로 변경 없음)"
+  ENV_LINE="$(sudo -n systemctl show "$SERVICE_NAME" -p Environment --value 2>/dev/null || true)"
+  if echo "$ENV_LINE" | tr ' ' '\n' | grep -q '^AUTH_STORE_PATH='; then
+    echo "OK: AUTH_STORE_PATH is present in systemd Environment for $SERVICE_NAME"
+    echo "$ENV_LINE" | tr ' ' '\n' | grep '^AUTH_STORE_PATH=' || true
+  else
+    echo "WARN: AUTH_STORE_PATH not found in systemd Environment for $SERVICE_NAME"
+    echo "      Production should use fixed path: $SHARED_STORE"
+  fi
+  if [[ -f "$SHARED_STORE" ]]; then
+    SZ="$(stat -c%s "$SHARED_STORE" 2>/dev/null || wc -c <"$SHARED_STORE")"
+    echo "OK: $SHARED_STORE exists (${SZ} bytes)"
+  else
+    echo "NOTE: $SHARED_STORE not found on disk (OK if using another AUTH_STORE_PATH)"
+  fi
+  echo "----------------------------------------------"
+
+  echo "external health (best-effort): $EXTERNAL_HEALTH_URL"
+  if curl -fsSI "$EXTERNAL_HEALTH_URL" >/tmp/malmoi-health-external.txt; then
+    cat /tmp/malmoi-health-external.txt
+  else
+    echo "WARN: external health check failed (network/proxy/CDN issue possible)"
+  fi
+
+  echo "OK: release deploy finished successfully ($REL_ID)"
+  exit 0
+fi
 
 echo "[1/7] git fetch"
 git fetch origin main

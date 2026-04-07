@@ -11,6 +11,7 @@ const ALL_TABS = [
   { id: "reservation", label: "予約設定" },
   { id: "lesson", label: "レッスン共通" },
   { id: "lessonServiceCatalog", label: "レッスン・サービス" },
+  { id: "paymentMethodsPolicy", label: "支払い方法" },
   { id: "homework", label: "宿題設定" },
   { id: "notifications", label: "通知設定" },
   { id: "mail", label: "メール設定" },
@@ -39,12 +40,17 @@ export default function SystemSettingsPanel({
   initialLogPagination,
   adminRank = "ADMIN",
   tabIds = null,
+  initialActiveTab = "",
 }) {
   const visibleTabs = useMemo(() => {
     if (!tabIds || !Array.isArray(tabIds) || tabIds.length === 0) return ALL_TABS;
     return ALL_TABS.filter((t) => tabIds.includes(t.id));
   }, [tabIds]);
-  const [activeTab, setActiveTab] = useState(() => visibleTabs[0]?.id || "schoolBasic");
+  const [activeTab, setActiveTab] = useState(() => {
+    const first = visibleTabs[0]?.id || "schoolBasic";
+    if (initialActiveTab && visibleTabs.some((t) => t.id === initialActiveTab)) return initialActiveTab;
+    return first;
+  });
   const [settings, setSettings] = useState(initialSettings || {});
   const [systemInfo, setSystemInfo] = useState(initialSystemInfo || {});
   const [logs, setLogs] = useState(initialLogs || []);
@@ -63,6 +69,12 @@ export default function SystemSettingsPanel({
       setActiveTab(visibleTabs[0]?.id || "schoolBasic");
     }
   }, [visibleTabs, activeTab]);
+
+  useEffect(() => {
+    if (initialActiveTab && visibleTabs.some((t) => t.id === initialActiveTab)) {
+      setActiveTab(initialActiveTab);
+    }
+  }, [initialActiveTab, visibleTabs]);
 
   const canEditSection = (section) => !SUPER_ADMIN_ONLY_SECTIONS.has(section) || isSuperAdmin;
 
@@ -154,6 +166,7 @@ export default function SystemSettingsPanel({
   const pair = settings.pair || {};
   const classroomOperations = settings.classroomOperations || {};
   const lessonServiceCatalog = settings.lessonServiceCatalog || { services: [] };
+  const paymentMethodsPolicy = settings.paymentMethodsPolicy || { methods: [], webProvidersPrepared: {}, inClassFlowNote: "" };
   const teacherSchedulePolicy = settings.teacherSchedulePolicy || {};
 
   const logRows = useMemo(
@@ -340,6 +353,21 @@ export default function SystemSettingsPanel({
               </select>
             </label>
             <label className={styles.label}>キャンセル期限(時間前)<input className={styles.field} type="number" value={reservation.cancelCutoffHours ?? 3} onChange={(e) => setSettings((prev) => ({ ...prev, reservation: { ...reservation, cancelCutoffHours: Number(e.target.value || 0) } }))} /></label>
+            <label className={styles.label}>承認設定
+              <select className={styles.field} value={reservation.approvalMode || "admin"} onChange={(e) => setSettings((prev) => ({ ...prev, reservation: { ...reservation, approvalMode: e.target.value } }))}>
+                <option value="admin">管理者承認が必要</option>
+                <option value="auto">自動確定（運用注意）</option>
+              </select>
+            </label>
+            <label className={styles.label}>カレンダーにキャンセルを表示
+              <select className={styles.field} value={reservation.calendarDisplayShowCancelled ? "1" : "0"} onChange={(e) => setSettings((prev) => ({ ...prev, reservation: { ...reservation, calendarDisplayShowCancelled: e.target.value === "1" } }))}>
+                <option value="0">OFF</option>
+                <option value="1">ON</option>
+              </select>
+            </label>
+            <label className={styles.label}>変更申請の推奨締切（日前）
+              <input className={styles.field} type="number" min={0} max={60} value={reservation.studentChangeDeadlineDays ?? 3} onChange={(e) => setSettings((prev) => ({ ...prev, reservation: { ...reservation, studentChangeDeadlineDays: Number(e.target.value || 0) } }))} />
+            </label>
           </div>
           <div className={adminStyles.compactActions}><button className={styles.button} type="button" disabled={savingSection === "reservation"} onClick={() => saveSection("reservation", reservation)}>{savingSection === "reservation" ? "保存中..." : "保存"}</button></div>
         </div>
@@ -585,6 +613,185 @@ export default function SystemSettingsPanel({
         </div>
       ) : null}
 
+      {activeTab === "paymentMethodsPolicy" ? (
+        <div className={adminStyles.groupBlock}>
+          <h3 className={adminStyles.groupTitle}>支払い・決済方針</h3>
+          <p className={adminStyles.smallMuted}>
+            Web決済（Square / Stripe）はUI準備のみで、実接続は行いません。教室決済は管理者が利用時間と紐付けて登録する運用を想定しています。
+          </p>
+          <label className={styles.label}>教室決済フロー説明（内部メモ）
+            <textarea
+              className={styles.field}
+              rows={2}
+              value={paymentMethodsPolicy.inClassFlowNote || ""}
+              onChange={(e) =>
+                setSettings((prev) => ({
+                  ...prev,
+                  paymentMethodsPolicy: { ...paymentMethodsPolicy, inClassFlowNote: e.target.value },
+                }))
+              }
+            />
+          </label>
+          <h4 className={adminStyles.groupTitle} style={{ marginTop: "0.75rem" }}>
+            Web決済プロバイダ（接続準備フラグのみ）
+          </h4>
+          <div className={adminStyles.compactFormGrid}>
+            <label className={styles.label}>
+              Square 準備
+              <select
+                className={styles.field}
+                value={paymentMethodsPolicy.webProvidersPrepared?.square ? "1" : "0"}
+                onChange={(e) =>
+                  setSettings((prev) => ({
+                    ...prev,
+                    paymentMethodsPolicy: {
+                      ...paymentMethodsPolicy,
+                      webProvidersPrepared: {
+                        ...(paymentMethodsPolicy.webProvidersPrepared || {}),
+                        square: e.target.value === "1",
+                      },
+                    },
+                  }))
+                }
+              >
+                <option value="0">未準備</option>
+                <option value="1">準備メモON</option>
+              </select>
+            </label>
+            <label className={styles.label}>
+              Stripe 準備
+              <select
+                className={styles.field}
+                value={paymentMethodsPolicy.webProvidersPrepared?.stripe ? "1" : "0"}
+                onChange={(e) =>
+                  setSettings((prev) => ({
+                    ...prev,
+                    paymentMethodsPolicy: {
+                      ...paymentMethodsPolicy,
+                      webProvidersPrepared: {
+                        ...(paymentMethodsPolicy.webProvidersPrepared || {}),
+                        stripe: e.target.value === "1",
+                      },
+                    },
+                  }))
+                }
+              >
+                <option value="0">未準備</option>
+                <option value="1">準備メモON</option>
+              </select>
+            </label>
+          </div>
+          {(paymentMethodsPolicy.methods || []).map((m, idx) => (
+            <div key={m.id || idx} className={adminStyles.groupBlock} style={{ border: "1px solid #e2e8f0", padding: "0.5rem" }}>
+              <p className={adminStyles.groupTitle}>{m.labelJa || m.id}</p>
+              <div className={adminStyles.compactFormGrid}>
+                <label className={styles.label}>
+                  利用
+                  <select
+                    className={styles.field}
+                    value={m.enabled ? "1" : "0"}
+                    onChange={(e) => {
+                      const next = [...(paymentMethodsPolicy.methods || [])];
+                      next[idx] = { ...m, enabled: e.target.value === "1" };
+                      setSettings((prev) => ({
+                        ...prev,
+                        paymentMethodsPolicy: { ...paymentMethodsPolicy, methods: next },
+                      }));
+                    }}
+                  >
+                    <option value="1">ON</option>
+                    <option value="0">OFF</option>
+                  </select>
+                </label>
+                <label className={styles.label}>
+                  学生に表示
+                  <select
+                    className={styles.field}
+                    value={m.showToStudent ? "1" : "0"}
+                    onChange={(e) => {
+                      const next = [...(paymentMethodsPolicy.methods || [])];
+                      next[idx] = { ...m, showToStudent: e.target.value === "1" };
+                      setSettings((prev) => ({
+                        ...prev,
+                        paymentMethodsPolicy: { ...paymentMethodsPolicy, methods: next },
+                      }));
+                    }}
+                  >
+                    <option value="1">ON</option>
+                    <option value="0">OFF</option>
+                  </select>
+                </label>
+                <label className={styles.label}>
+                  管理者確認が必要
+                  <select
+                    className={styles.field}
+                    value={m.requiresAdminConfirm ? "1" : "0"}
+                    onChange={(e) => {
+                      const next = [...(paymentMethodsPolicy.methods || [])];
+                      next[idx] = { ...m, requiresAdminConfirm: e.target.value === "1" };
+                      setSettings((prev) => ({
+                        ...prev,
+                        paymentMethodsPolicy: { ...paymentMethodsPolicy, methods: next },
+                      }));
+                    }}
+                  >
+                    <option value="1">ON</option>
+                    <option value="0">OFF</option>
+                  </select>
+                </label>
+              </div>
+              {m.id === "web" ? (
+                <label className={styles.label}>
+                  Web決済プロバイダ（選択のみ・未接続）
+                  <select
+                    className={styles.field}
+                    value={m.webProvider || "none"}
+                    onChange={(e) => {
+                      const next = [...(paymentMethodsPolicy.methods || [])];
+                      next[idx] = { ...m, webProvider: e.target.value };
+                      setSettings((prev) => ({
+                        ...prev,
+                        paymentMethodsPolicy: { ...paymentMethodsPolicy, methods: next },
+                      }));
+                    }}
+                  >
+                    <option value="none">未選択</option>
+                    <option value="square">Square（未接続）</option>
+                    <option value="stripe">Stripe（未接続）</option>
+                  </select>
+                </label>
+              ) : null}
+              <label className={styles.label}>
+                説明文
+                <textarea
+                  className={styles.field}
+                  rows={2}
+                  value={m.description || ""}
+                  onChange={(e) => {
+                    const next = [...(paymentMethodsPolicy.methods || [])];
+                    next[idx] = { ...m, description: e.target.value };
+                    setSettings((prev) => ({
+                      ...prev,
+                      paymentMethodsPolicy: { ...paymentMethodsPolicy, methods: next },
+                    }));
+                  }}
+                />
+              </label>
+            </div>
+          ))}
+          <div className={adminStyles.compactActions}>
+            <button
+              className={styles.button}
+              type="button"
+              disabled={savingSection === "paymentMethodsPolicy"}
+              onClick={() => saveSection("paymentMethodsPolicy", paymentMethodsPolicy)}
+            >
+              {savingSection === "paymentMethodsPolicy" ? "保存中..." : "保存"}
+            </button>
+          </div>
+        </div>
+      ) : null}
+
       {activeTab === "homework" ? (
         <div className={adminStyles.groupBlock}>
           <h3 className={adminStyles.groupTitle}>宿題設定</h3>
@@ -592,10 +799,10 @@ export default function SystemSettingsPanel({
             <label className={styles.label}>宿題機能
               <select className={styles.field} value={homework.homeworkEnabled ? "1" : "0"} onChange={(e) => setSettings((prev) => ({ ...prev, homework: { ...homework, homeworkEnabled: e.target.value === "1" } }))}><option value="1">ON</option><option value="0">OFF</option></select>
             </label>
-            <label className={styles.label}>学生 상태 변경 허용
+            <label className={styles.label}>学生の状態更新を許可
               <select className={styles.field} value={homework.allowStudentStatusUpdate ? "1" : "0"} onChange={(e) => setSettings((prev) => ({ ...prev, homework: { ...homework, allowStudentStatusUpdate: e.target.value === "1" } }))}><option value="1">ON</option><option value="0">OFF</option></select>
             </label>
-            <label className={styles.label}>保護者 숙제 확인 허용
+            <label className={styles.label}>保護者の宿題閲覧を許可
               <select className={styles.field} value={homework.allowParentHomeworkView ? "1" : "0"} onChange={(e) => setSettings((prev) => ({ ...prev, homework: { ...homework, allowParentHomeworkView: e.target.value === "1" } }))}><option value="1">ON</option><option value="0">OFF</option></select>
             </label>
             <label className={styles.label}>宿題状態一覧(カンマ区切り)
@@ -610,7 +817,7 @@ export default function SystemSettingsPanel({
         <div className={adminStyles.groupBlock}>
           <h3 className={adminStyles.groupTitle}>通知設定</h3>
           <p className={adminStyles.smallMuted}>
-            通知の送信は<strong>メール</strong>を基本とします。LINE 等の外部チャット連携は行いません。お知らせ・予約・ノート・宿題の詳細はポータル内で確認してください。
+            通知の送信は<strong>メール</strong>を基本とします。下記のレガシーON/OFFは互換用です。運用では<strong>通知ルール（追加）</strong>を主にご利用ください。
           </p>
           <div className={adminStyles.compactFormGrid}>
             {[

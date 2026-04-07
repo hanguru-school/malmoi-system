@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Local (Cursor) → git push → SSH → server deploy/deploy-prod.sh
+# Local (Cursor) → git push origin main → SSH → server deploy/deploy-prod.sh
+# 운영 반영은 main 브랜치만 사용합니다. db-check-update 등 작업 브랜치는 CI 검수 후 main 병합 뒤 배포하세요.
 # Usage:
 #   bash scripts/deploy-from-local.sh [commit message]
 # Config: copy scripts/deploy.env.example → scripts/deploy.env

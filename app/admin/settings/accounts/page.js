@@ -13,7 +13,7 @@ export default async function AccountsSettingsPage() {
   return (
     <>
       <h2 className={styles.sectionTitle} style={{ fontSize: "1.15rem", marginTop: 0 }}>
-        アカウント / 権限
+        アカウント・権限
       </h2>
       <p className={styles.description}>管理者プロフィールの編集と、講師・保護者の招待リンク発行です。</p>
       <AdminAccountsSettingsClient

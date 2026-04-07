@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "ci": "npm ci && npm run build && node scripts/ci-verify.mjs",
     "check:db": "node scripts/check-db.mjs",
     "migrate:store:shared": "bash scripts/migrate-auth-store-to-shared.sh",
     "deploy": "bash scripts/deploy-from-local.sh",
