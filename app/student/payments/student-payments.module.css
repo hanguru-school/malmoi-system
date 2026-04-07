@@ -424,11 +424,11 @@
   }
 
   /* 領収書モーダル表示中のみ：領収書シートを印刷（ブラウザの「PDFに保存」にも対応） */
-  :global(body.student-ryoshu-modal-open) * {
+  :global(body.student-ryoshu-modal-open) :global(*) {
     visibility: hidden;
   }
-  :global(body.student-ryoshu-modal-open) #student-ryoshu-print-root,
-  :global(body.student-ryoshu-modal-open) #student-ryoshu-print-root * {
+  :global(body.student-ryoshu-modal-open) :global(#student-ryoshu-print-root),
+  :global(body.student-ryoshu-modal-open) :global(#student-ryoshu-print-root) :global(*) {
     visibility: visible;
   }
   :global(body.student-ryoshu-modal-open) #student-ryoshu-print-root {

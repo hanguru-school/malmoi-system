@@ -1,13 +1,13 @@
-# 자동 검수: db-check-update · main (PR·push)
-# 운영 배포는 deploy-main.yml 에서만 수행합니다.
+# 자동 검수: MalMoi 포털 기준 브랜치 (main-sync, db-check-update, main)
+# 운영 SSH 배포는 deploy-main.yml 의 main push 에서만 수행합니다.
 
 name: CI
 
 on:
   push:
-    branches: [main, db-check-update]
+    branches: [main, main-sync, db-check-update]
   pull_request:
-    branches: [main, db-check-update]
+    branches: [main, main-sync, db-check-update]
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}

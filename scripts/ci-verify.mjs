@@ -28,6 +28,7 @@ const requiredFiles = [
 ];
 
 const requiredDocs = [
+  "docs/branch-strategy-portal-ko.md",
   "docs/operations-auto-deploy-ko.md",
   "docs/settings-ia-ko.md",
   "docs/payment-structure-ko.md",
