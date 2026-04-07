@@ -392,9 +392,9 @@ export default function AdminReservationsApp({ initialReservations = [], initial
               </div>
             ))}
             {!loading && filtered.length === 0 ? (
-              <p className={styles.description} style={{ padding: "1rem" }}>
-                該当なし
-              </p>
+              <div className={v2.listEmptyState} role="status">
+                「該当する予約がありません」
+              </div>
             ) : null}
           </div>
         </div>
