@@ -1,0 +1,440 @@
+/* 決済履歴（学生）— 読みやすさ優先 */
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin-bottom: 1.1rem;
+}
+
+@media (min-width: 520px) {
+  .summaryGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.summaryCell {
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 0.75rem 0.85rem;
+  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+}
+
+.summaryLab {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.summaryVal {
+  margin: 0.25rem 0 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+.summaryUnit {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #475569;
+  margin-left: 0.15rem;
+}
+
+.summarySub {
+  margin: 0.2rem 0 0;
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.filterRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 0.85rem;
+}
+
+.filterChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  background: #ffffff;
+}
+
+.filterChipOn {
+  border-color: #93c5fd;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.historyCard {
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  background: #ffffff;
+}
+
+.historyMeta {
+  font-size: 0.78rem;
+  color: #64748b;
+  margin-bottom: 0.35rem;
+}
+
+.historyTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.historyRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  margin-top: 0.45rem;
+  font-size: 0.88rem;
+  color: #334155;
+}
+
+.historyStrong {
+  font-weight: 800;
+  color: #1e40af;
+}
+
+.noteLine {
+  margin-top: 0.45rem;
+  font-size: 0.86rem;
+  color: #475569;
+  line-height: 1.45;
+}
+
+.emptyBox {
+  border: 1px dashed #cbd5e1;
+  border-radius: 14px;
+  padding: 1.25rem 1rem;
+  text-align: center;
+  color: #64748b;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  background: #f8fafc;
+}
+
+.actions {
+  margin-top: 0.65rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  font-size: 0.88rem;
+}
+
+.actionLink {
+  font-weight: 700;
+  color: var(--student-accent, #2563eb);
+  text-decoration: none;
+}
+
+.actionLink:hover {
+  text-decoration: underline;
+}
+
+.actionMuted {
+  color: #64748b;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* —— 決済詳細（シンプルカード） —— */
+.detailShell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.detailCard {
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  font-size: 0.92rem;
+}
+
+.detailLab {
+  color: #64748b;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.detailVal {
+  font-weight: 700;
+  color: #0f172a;
+  text-align: right;
+}
+
+.detailEm {
+  font-size: 1.15rem;
+  color: #1d4ed8;
+}
+
+.detailHint {
+  margin: 0;
+  font-size: 0.78rem;
+  color: #94a3b8;
+  line-height: 1.45;
+}
+
+.detailBack {
+  margin: 0;
+  font-size: 0.88rem;
+}
+
+.detailBack a {
+  font-weight: 600;
+  color: var(--student-accent, #2563eb);
+  text-decoration: none;
+}
+
+.detailBack a:hover {
+  text-decoration: underline;
+}
+
+.ryoshuOpenBtn {
+  width: 100%;
+  padding: 0.65rem 1rem;
+  border-radius: 12px;
+  border: 1px solid #93c5fd;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 800;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.ryoshuOpenBtn:hover {
+  background: #dbeafe;
+}
+
+/* —— 領収書モーダル —— */
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+}
+
+@media (min-width: 480px) {
+  .modalBackdrop {
+    align-items: center;
+    padding: 1rem;
+  }
+}
+
+.modalPanel {
+  width: 100%;
+  max-width: 420px;
+  max-height: min(92vh, 640px);
+  overflow: auto;
+  background: #ffffff;
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 -8px 32px rgba(15, 23, 42, 0.12);
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 480px) {
+  .modalPanel {
+    border-radius: 16px;
+  }
+}
+
+.modalHead {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0.5rem 0.5rem 0.5rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.modalHeadSpacer {
+  flex: 1;
+}
+
+.modalClose {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 10px;
+  background: #f1f5f9;
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+  color: #475569;
+}
+
+.modalClose:hover {
+  background: #e2e8f0;
+}
+
+.ryoshuSheet {
+  padding: 1rem 1.1rem 1.25rem;
+}
+
+.ryoshuDocTitle {
+  margin: 0 0 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+  text-align: center;
+  letter-spacing: 0.12em;
+  color: #0f172a;
+}
+
+.ryoshuDl {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ryoshuDlRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.9rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.ryoshuDlRow dt {
+  margin: 0;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.ryoshuDlRow dd {
+  margin: 0;
+  font-weight: 700;
+  color: #0f172a;
+  text-align: right;
+}
+
+.ryoshuAmount {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #1d4ed8;
+}
+
+.ryoshuMono {
+  font-size: 0.75rem;
+  font-weight: 600;
+  word-break: break-all;
+}
+
+.ryoshuIssuer {
+  margin: 1rem 0 0;
+  font-size: 0.78rem;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.ryoshuFine {
+  margin: 0.65rem 0 0;
+  font-size: 0.72rem;
+  color: #94a3b8;
+  line-height: 1.45;
+}
+
+.modalActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  padding: 0.65rem 1rem 0.85rem;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.modalBtnPrimary {
+  flex: 1;
+  min-width: 96px;
+  padding: 0.55rem 0.65rem;
+  border-radius: 10px;
+  border: 1px solid #1d4ed8;
+  background: #1d4ed8;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+
+.modalBtnPrimary:hover {
+  background: #1e40af;
+}
+
+.modalBtnSecondary {
+  flex: 1;
+  min-width: 96px;
+  padding: 0.55rem 0.65rem;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+
+.modalPdfHint {
+  margin: 0;
+  padding: 0 1rem 0.85rem;
+  font-size: 0.72rem;
+  color: #64748b;
+  background: #f8fafc;
+}
+
+@media print {
+  .printHidden {
+    display: none !important;
+  }
+
+  /* 領収書モーダル表示中のみ：領収書シートを印刷（ブラウザの「PDFに保存」にも対応） */
+  :global(body.student-ryoshu-modal-open) :global(*) {
+    visibility: hidden;
+  }
+  :global(body.student-ryoshu-modal-open) :global(#student-ryoshu-print-root),
+  :global(body.student-ryoshu-modal-open) :global(#student-ryoshu-print-root) :global(*) {
+    visibility: visible;
+  }
+  :global(body.student-ryoshu-modal-open) :global(#student-ryoshu-print-root) {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}

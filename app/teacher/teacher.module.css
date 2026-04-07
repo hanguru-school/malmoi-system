@@ -1,0 +1,379 @@
+/* 先生エリア — 授業進行向け・シンプル・モバイル優先 */
+
+.shell {
+  min-height: 100vh;
+  padding: 0.85rem;
+  background: var(--korean-bg, #f1f5f9);
+}
+
+.main {
+  width: min(920px, 100%);
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1rem 1rem 1.35rem;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+}
+
+.title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  margin: 0.35rem 0 0;
+  font-size: 0.9rem;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+.dateForm {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.65rem;
+}
+
+.dateLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #475569;
+}
+
+.dateInput {
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 0.45rem 0.55rem;
+  font-size: 0.95rem;
+  min-height: 42px;
+}
+
+.btn {
+  border: 1px solid #2563eb;
+  background: #2563eb;
+  color: #fff;
+  font-weight: 700;
+  border-radius: 10px;
+  padding: 0.5rem 1rem;
+  min-height: 42px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.btnSecondary {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+  color: #334155;
+}
+
+.lessonList {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.lessonCard {
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 0.85rem 0.95rem;
+  background: #fafbfc;
+}
+
+.lessonCardHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.lessonDate {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #64748b;
+  letter-spacing: 0.06em;
+}
+
+.lessonTime {
+  margin: 0.15rem 0 0;
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.22rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  background: #e0f2fe;
+  color: #075985;
+}
+
+.lessonMeta {
+  margin: 0.55rem 0 0;
+  font-size: 0.88rem;
+  color: #334155;
+  line-height: 1.5;
+}
+
+.lessonMeta p {
+  margin: 0.15rem 0;
+}
+
+.actions {
+  margin-top: 0.65rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.btnNote {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid #4f46e5;
+  background: #eef2ff;
+  color: #3730a3 !important;
+  font-weight: 800;
+  font-size: 0.86rem;
+  text-decoration: none;
+}
+
+.btnSub {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #334155 !important;
+  font-weight: 700;
+  font-size: 0.84rem;
+  text-decoration: none;
+}
+
+.empty {
+  margin: 0.75rem 0 0;
+  padding: 1rem;
+  border-radius: 12px;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.noticeList {
+  margin-top: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.noticeCard {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.75rem 0.85rem;
+  background: #fff;
+}
+
+.noticeCard a {
+  font-weight: 800;
+  color: #1d4ed8;
+  text-decoration: none;
+}
+
+.noticeCard a:hover {
+  text-decoration: underline;
+}
+
+.noticeDate {
+  margin: 0.25rem 0 0;
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+/* 先生ホーム — 今日やること */
+.todayPriority {
+  margin-top: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.todayPriorityTitle {
+  margin: 0 0 0.55rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.todayGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  gap: 0.55rem;
+}
+
+.todayCard {
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  padding: 0.55rem 0.6rem;
+  background: linear-gradient(180deg, #eff6ff 0%, #ffffff 100%);
+}
+
+.todayCardLab {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #64748b;
+  line-height: 1.3;
+}
+
+.todayCardKpi {
+  margin: 0.2rem 0 0;
+  font-size: 1.45rem;
+  font-weight: 900;
+  color: #1d4ed8;
+  line-height: 1.1;
+}
+
+.todayCardLink {
+  display: inline-block;
+  margin-top: 0.4rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #2563eb;
+  text-decoration: none;
+}
+
+.todayCardLink:hover {
+  text-decoration: underline;
+}
+
+.todayNoticeBlock {
+  margin-top: 0.75rem;
+  padding: 0.6rem 0.65rem;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.todayNoticeTitle {
+  margin: 0 0 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.todayNoticeList {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.84rem;
+  color: #334155;
+  line-height: 1.45;
+}
+
+.todayNoticeList li {
+  margin: 0.25rem 0;
+}
+
+.todayNoticeList a {
+  font-weight: 700;
+  color: #1d4ed8;
+  text-decoration: none;
+}
+
+.todayNoticeList a:hover {
+  text-decoration: underline;
+}
+
+.todayNoticeDate {
+  margin-left: 0.35rem;
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.todayNoticeEmpty {
+  margin: 0;
+  font-size: 0.86rem;
+  color: #64748b;
+}
+
+.quickMenuGrid {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+}
+
+/* 本日の未処理 */
+.opsIntro {
+  margin: 0.75rem 0 1rem;
+}
+
+.opsSection {
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.opsSectionTitle {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.opsList {
+  margin: 0;
+  padding-left: 1.15rem;
+  font-size: 0.88rem;
+  color: #334155;
+  line-height: 1.5;
+}
+
+.opsList li {
+  margin: 0.35rem 0;
+}
+
+.opsList a {
+  font-weight: 700;
+  color: #2563eb;
+  text-decoration: none;
+}
+
+.opsList a:hover {
+  text-decoration: underline;
+}
+
+.opsEmpty {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #94a3b8;
+}
+
+.opsFootnote {
+  margin-top: 1rem;
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+.opsProgress {
+  margin-top: 0.35rem;
+}

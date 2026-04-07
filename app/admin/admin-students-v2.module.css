@@ -1,0 +1,88 @@
+.toolbar {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  margin-bottom: 1rem;
+}
+
+.toolbarGrid {
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.summary {
+  font-size: 0.9rem;
+  color: #475569;
+  margin: 0 0 0.5rem;
+}
+
+.pager {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.tableCard {
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  background: #fff;
+}
+
+.rollback {
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.rollback a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.riskCell {
+  max-width: 220px;
+  vertical-align: top;
+}
+
+.riskBadgeRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.28rem;
+}
+
+.riskBadge {
+  display: inline-block;
+  padding: 0.12rem 0.38rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.riskBadge[data-tone="danger"] {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.riskBadge[data-tone="warn"] {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.riskBadge[data-tone="info"] {
+  background: #e0e7ff;
+  color: #3730a3;
+}

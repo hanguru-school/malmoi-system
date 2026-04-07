@@ -1,0 +1,81 @@
+/* 印刷・画面共通：保存済み決済の表示のみ */
+.shell {
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 1.25rem 1.35rem;
+  background: var(--korean-bg, #f3f6fb);
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans JP", sans-serif;
+  color: #0f172a;
+}
+
+.paper {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  padding: 1.1rem 1.15rem;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.title {
+  margin: 0 0 0.35rem;
+  text-align: center;
+  font-size: 1.28rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.sub {
+  margin: 0 0 0.85rem;
+  text-align: center;
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.42rem 0;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.88rem;
+}
+
+.rowLabel {
+  color: #64748b;
+  font-weight: 600;
+  min-width: 42%;
+}
+
+.rowVal {
+  font-weight: 700;
+  text-align: right;
+  flex: 1;
+}
+
+.note {
+  margin: 0.85rem 0 0;
+  font-size: 0.78rem;
+  color: #94a3b8;
+  line-height: 1.45;
+}
+
+.ryoshuAmount {
+  font-size: 1.45rem;
+  font-weight: 800;
+  text-align: center;
+  margin: 0.5rem 0 0.5rem;
+  color: #1e3a8a;
+}
+
+.issuer {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed #cbd5e1;
+  font-size: 0.82rem;
+  color: #475569;
+  text-align: center;
+  line-height: 1.5;
+}

@@ -1,0 +1,12 @@
+# Drop-in for: /etc/systemd/system/malmoi-web.service.d/10-auth-store.conf
+#
+#   sudo mkdir -p /etc/systemd/system/malmoi-web.service.d
+#   sudo cp deploy/systemd/malmoi-web.d-auth-store.conf.example \
+#     /etc/systemd/system/malmoi-web.service.d/10-auth-store.conf
+#   sudo systemctl daemon-reload
+#   sudo systemctl restart malmoi-web
+#
+# See: docs/storage-path-migration.md
+
+[Service]
+Environment=AUTH_STORE_PATH=/srv/malmoi/shared/auth-store.json

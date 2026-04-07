@@ -1,0 +1,36 @@
+# 자동 검수: MalMoi 포털 기준 브랜치 (main-sync, db-check-update, main)
+# 운영 SSH 배포는 deploy-main.yml 의 main push 에서만 수행합니다.
+
+name: CI
+
+on:
+  push:
+    branches: [main, main-sync, db-check-update]
+  pull_request:
+    branches: [main, main-sync, db-check-update]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: CI verify (docs, env examples, smoke)
+        run: node scripts/ci-verify.mjs

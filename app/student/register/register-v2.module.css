@@ -1,0 +1,124 @@
+.shell {
+  min-height: 100vh;
+  padding: 1rem 1rem 2rem;
+  background: linear-gradient(165deg, #f0f4ff 0%, #f8fafc 45%, #ffffff 100%);
+}
+
+.card {
+  width: min(520px, 100%);
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 1.35rem 1.25rem 1.5rem;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+  border: 1px solid #e2e8f0;
+}
+
+.stepRail {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.stepSeg {
+  flex: 1;
+  height: 4px;
+  border-radius: 999px;
+  background: #e2e8f0;
+}
+
+.stepSegActive {
+  background: linear-gradient(90deg, #2563eb, #4f46e5);
+}
+
+.stepSegDone {
+  background: #22c55e;
+}
+
+.brand {
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #64748b;
+  margin: 0 0 0.25rem;
+}
+
+.title {
+  margin: 0 0 0.35rem;
+  font-size: 1.35rem;
+  line-height: 1.3;
+  color: #0f172a;
+}
+
+.sub {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  color: #475569;
+  line-height: 1.55;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.pill {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+.consentCard {
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.65rem;
+  background: #f8fafc;
+}
+
+.consentCard label {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+  cursor: pointer;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: #1e293b;
+}
+
+.consentCard input {
+  margin-top: 0.2rem;
+}
+
+.sentHero {
+  text-align: center;
+  padding: 0.5rem 0 0.25rem;
+}
+
+.sentIcon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 0.75rem;
+  border-radius: 16px;
+  background: #eff6ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+}
+
+.footerLinks {
+  margin-top: 1.25rem;
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+.footerLinks a {
+  color: #64748b;
+  text-decoration: underline;
+}
