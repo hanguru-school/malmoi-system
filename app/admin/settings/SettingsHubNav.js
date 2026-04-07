@@ -15,12 +15,18 @@ const LINKS = [
   { href: "/admin/settings/system", label: "システム・ログ" },
 ];
 
+function isSettingsHubLinkActive(pathname, href) {
+  if (pathname === href) return true;
+  if (href === "/admin/settings/accounts" && pathname.startsWith("/admin/admin-users")) return true;
+  return false;
+}
+
 export default function SettingsHubNav() {
   const pathname = usePathname() || "";
   return (
     <nav className={adminStyles.settingsHubNav} aria-label="設定セクション">
       {LINKS.map((item) => {
-        const active = pathname === item.href;
+        const active = isSettingsHubLinkActive(pathname, item.href);
         return (
           <Link
             key={item.href}
