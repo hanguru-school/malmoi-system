@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import styles from "./admin.module.css";
 
 /**
- * 運用頻度: 上ほど日次。監査・保存診断・管理者設定は下。
+ * 運用頻度: 上ほど日次。監査・保存診断・アカウント設定は下。
  * 同一 href の項目は key で区別（登録状況は学生一覧の入口として明示）。
  */
 const NAV_GROUPS = [
@@ -36,6 +36,7 @@ const NAV_GROUPS = [
     label: "設定・監査",
     items: [
       { key: "settings", href: "/admin/settings/classroom", label: "設定" },
+      { key: "adminUsers", href: "/admin/admin-users", label: "アカウント・権限" },
       { key: "audit", href: "/admin#admin-recent-audit", label: "監査ログ（直近）" },
       { key: "dbcheck", href: "/admin/system/db-check", label: "保存診断" },
     ],
@@ -57,7 +58,11 @@ function isNavActive(currentPath, href) {
   )
     return true;
   if (href === "/admin/reservations" && currentPath.startsWith("/admin/reservations")) return true;
-  if (href === "/admin/settings/classroom" && currentPath.startsWith("/admin/settings")) return true;
+  if (
+    href === "/admin/settings/classroom" &&
+    (currentPath.startsWith("/admin/settings") || currentPath.startsWith("/admin/admin-users"))
+  )
+    return true;
   if (href === "/admin/lesson-notes" && currentPath.startsWith("/admin/lesson-notes")) return true;
   if (href === "/admin/homework" && currentPath.startsWith("/admin/homework")) return true;
   if (href === "/admin/notices" && currentPath.startsWith("/admin/notices")) return true;
