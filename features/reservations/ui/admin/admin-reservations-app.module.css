@@ -74,6 +74,16 @@
   margin-bottom: 1rem;
 }
 
+.listEmptyState {
+  padding: 1rem 0.85rem;
+  text-align: center;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #64748b;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
 .row {
   display: grid;
   grid-template-columns: 5.5rem 4rem minmax(4rem, 1fr) 3.25rem 4.25rem 3.5rem;

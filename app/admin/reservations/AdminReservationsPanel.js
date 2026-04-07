@@ -72,6 +72,22 @@ function noteExistsByUnit(notes, unitId) {
   return notes.some((note) => String(note.lessonUnitId || "") === String(unitId));
 }
 
+/** 一覧・時間表の空状態（レイアウトは維持し本文のみ表示） */
+const EMPTY_RESERVATION_LABEL = "該当する予約がありません";
+
+const DEFAULT_TIMELINE_TIMES = [
+  "09:00",
+  "10:00",
+  "11:00",
+  "12:00",
+  "13:00",
+  "14:00",
+  "15:00",
+  "16:00",
+  "17:00",
+  "18:00",
+];
+
 export default function AdminReservationsPanel({
   initialReservations,
   initialFilters = {},
@@ -186,6 +202,18 @@ export default function AdminReservationsPanel({
     });
     return [...map.entries()].sort((a, b) => String(a[0]).localeCompare(String(b[0])));
   }, [filteredReservations]);
+
+  /** 予約ゼロでも時間軸行を表示（枠スロット優先→既定時刻） */
+  const displayTimelineGroups = useMemo(() => {
+    if (timelineGroups.length > 0) return timelineGroups;
+    const fromSlots = [
+      ...new Set((slots || []).map((s) => String(s.time || "").trim().slice(0, 5)).filter(Boolean)),
+    ].sort();
+    if (fromSlots.length > 0) {
+      return fromSlots.map((t) => [t, []]);
+    }
+    return DEFAULT_TIMELINE_TIMES.map((t) => [t, []]);
+  }, [timelineGroups, slots]);
 
   const scheduleRange = useMemo(() => {
     if (scheduleView === "month") {
@@ -564,7 +592,11 @@ export default function AdminReservationsPanel({
               <span>状態: {statusLabel(item.status)}</span>
             </button>
           ))}
-          {scheduleItems.length === 0 ? <p className={adminStyles.smallMuted}>該当日程の予約はありません。</p> : null}
+          {scheduleItems.length === 0 ? (
+            <div className={panelStyles.scheduleStripEmpty} role="status">
+              <span className={panelStyles.emptyStateQuote}>「{EMPTY_RESERVATION_LABEL}」</span>
+            </div>
+          ) : null}
         </div>
       </div>
 
@@ -616,22 +648,36 @@ export default function AdminReservationsPanel({
       </div>
 
       <div className={panelStyles.summaryRow}>
-        <article className={panelStyles.summaryCard}>
+        <article
+          className={`${panelStyles.summaryCard} ${todayReservationCount === 0 ? panelStyles.summaryCardZero : ""}`}
+        >
           <h3>今日の予約</h3>
           <p>{todayReservationCount}件</p>
         </article>
-        <article className={panelStyles.summaryCard}>
+        <article
+          className={`${panelStyles.summaryCard} ${soonReservations.length === 0 ? panelStyles.summaryCardZero : ""}`}
+        >
           <h3>まもなく開始</h3>
           <p>{soonReservations.length}件</p>
         </article>
-        <article className={panelStyles.summaryCard}>
+        <article
+          className={`${panelStyles.summaryCard} ${pendingReservations.length === 0 ? panelStyles.summaryCardZero : ""}`}
+        >
           <h3>状態確認必要</h3>
           <p>{pendingReservations.length}件</p>
           <button className={adminStyles.inlineLinkButton} type="button" onClick={() => setStatusFilter("requested")}>
             未対応のみ表示
           </button>
         </article>
-        <article className={panelStyles.summaryCard}>
+        <article
+          className={`${panelStyles.summaryCard} ${
+            filteredReservations.filter(
+              (item) => item.status === "completed" && !noteExistsByUnit(notes, item.lessonUnitId)
+            ).length === 0
+              ? panelStyles.summaryCardZero
+              : ""
+          }`}
+        >
           <h3>ノート未作成(完了)</h3>
           <p>
             {
@@ -723,7 +769,11 @@ export default function AdminReservationsPanel({
                             <span className={adminStyles.smallMuted}> / {ev.lessonName}</span>
                           </button>
                         ))}
-                        {dayEvents.length === 0 ? <p className={adminStyles.smallMuted}>—</p> : null}
+                        {dayEvents.length === 0 ? (
+                          <div className={panelStyles.weekColEmpty} role="status">
+                            「{EMPTY_RESERVATION_LABEL}」
+                          </div>
+                        ) : null}
                       </div>
                     );
                   })}
@@ -748,7 +798,9 @@ export default function AdminReservationsPanel({
                     </button>
                   ))}
                   {(eventsByDate.get(String(calendarDate).slice(0, 10)) || []).length === 0 ? (
-                    <p className={adminStyles.smallMuted}>この日の予約はありません。</p>
+                    <div className={panelStyles.dayCalEmpty} role="status">
+                      「{EMPTY_RESERVATION_LABEL}」
+                    </div>
                   ) : null}
                 </div>
               ) : null}
@@ -780,7 +832,11 @@ export default function AdminReservationsPanel({
                     </div>
                   </article>
                 ))}
-                {filteredReservations.length === 0 ? <p>該当予約がありません。</p> : null}
+                {filteredReservations.length === 0 ? (
+                  <div className={panelStyles.listEmptyPane} role="status">
+                    「{EMPTY_RESERVATION_LABEL}」
+                  </div>
+                ) : null}
               </div>
               <div className={`${adminStyles.tableWrap} ${panelStyles.desktopTableWrap}`}>
                 <table className={adminStyles.table}>
@@ -834,7 +890,9 @@ export default function AdminReservationsPanel({
                   ))}
                   {filteredReservations.length === 0 ? (
                     <tr>
-                      <td colSpan={8}>該当予約がありません。</td>
+                      <td colSpan={8} className={panelStyles.tableEmptyCell}>
+                        <span className={panelStyles.emptyStateQuote}>「{EMPTY_RESERVATION_LABEL}」</span>
+                      </td>
                     </tr>
                   ) : null}
                 </tbody>
@@ -843,26 +901,31 @@ export default function AdminReservationsPanel({
             </>
           ) : (
             <div className={panelStyles.timeline}>
-              {timelineGroups.map(([time, items]) => (
+              {displayTimelineGroups.map(([time, items]) => (
                 <div key={time} className={panelStyles.timelineRow}>
                   <div className={panelStyles.timelineTime}>{time}</div>
                   <div className={panelStyles.timelineBlocks}>
-                    {items.map((item) => (
-                      <button
-                        key={item.id}
-                        type="button"
-                        className={panelStyles.timelineBlock}
-                        onClick={() => setSelectedReservation(item)}
-                      >
-                        <strong>{item.studentNameKanji || "-"}</strong>
-                        <span>{deliveryLabel(item.lessonDeliveryType)} / {lessonTypeLabel(item)}</span>
-                        <span>{statusLabel(item.status)} / {item.instructorName || "-"}</span>
-                      </button>
-                    ))}
+                    {items.length > 0 ? (
+                      items.map((item) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          className={panelStyles.timelineBlock}
+                          onClick={() => setSelectedReservation(item)}
+                        >
+                          <strong>{item.studentNameKanji || "-"}</strong>
+                          <span>{deliveryLabel(item.lessonDeliveryType)} / {lessonTypeLabel(item)}</span>
+                          <span>{statusLabel(item.status)} / {item.instructorName || "-"}</span>
+                        </button>
+                      ))
+                    ) : (
+                      <div className={panelStyles.timelineSlotEmpty} role="status">
+                        「{EMPTY_RESERVATION_LABEL}」
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
-              {timelineGroups.length === 0 ? <p>該当予約がありません。</p> : null}
             </div>
           )}
         </section>
