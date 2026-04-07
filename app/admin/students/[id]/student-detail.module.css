@@ -1,0 +1,529 @@
+.pageCard {
+  width: min(1180px, 100%);
+}
+
+.formRoot {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.headerGrid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: 2fr 1fr;
+}
+
+.heroCard,
+.summaryCard,
+.sectionCard {
+  border: 1px solid #dfe7f3;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 0.8rem;
+}
+
+.heroHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.7rem;
+}
+
+.studentName {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1.4rem;
+}
+
+.studentSub {
+  margin: 0.25rem 0 0;
+  color: #64748b;
+}
+
+.heroMetaGrid {
+  margin-top: 0.6rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.35rem 0.6rem;
+  color: #334155;
+}
+
+.heroMetaGrid p {
+  margin: 0;
+}
+
+.minutesHeroAlertStack {
+  margin-top: 0.55rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.minutesHeroAlert {
+  margin: 0;
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  line-height: 1.35;
+}
+
+.minutesHeroAlert[data-tone="danger"] {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+.minutesHeroAlert[data-tone="warn"] {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+}
+
+.minutesHeroAlertActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.15rem;
+}
+
+.minutesTabAlertRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem 0.75rem;
+  margin-bottom: 0.65rem;
+}
+
+.minutesTabAlertRow > p {
+  flex: 1 1 12rem;
+}
+
+.lessonMinutesTools {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0.75rem 0;
+}
+
+.lessonMinutesToolCard {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.65rem 0.75rem;
+  background: #f8fafc;
+}
+
+.lessonMinutesApplyRow {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+  margin: 0.5rem 0 1rem;
+}
+
+.lessonMinutePresetRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.5rem;
+  margin: 0 0 0.65rem;
+}
+
+.lessonMinutePresetBtn {
+  border: 1px solid #c7d2fe;
+  background: #eef2ff;
+  color: #3730a3;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.38rem 0.65rem;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.lessonMinutePresetBtn:hover {
+  background: #e0e7ff;
+}
+
+.lessonMinutePresetBtn:active {
+  transform: scale(0.98);
+}
+
+.lessonMinutePresetBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.lessonMinutePresetBtnSecondary {
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #475569;
+  font-size: 0.78rem;
+  font-weight: 650;
+  padding: 0.32rem 0.55rem;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.lessonMinutePresetBtnSecondary:hover {
+  background: #f1f5f9;
+}
+
+.lessonMinutePresetBtnSecondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.quickActions {
+  margin-top: 0.7rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.summaryTitle {
+  margin: 0;
+  color: #1e293b;
+  font-size: 1rem;
+}
+
+.summaryList {
+  margin: 0.55rem 0 0;
+  padding-left: 1rem;
+  color: #334155;
+}
+
+.summaryList li {
+  margin: 0.26rem 0;
+}
+
+.regProgressPanel {
+  border: 1px solid #c7d2fe;
+  border-radius: 12px;
+  background: #f8fafc;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.regProgressTitle {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  color: #1e293b;
+}
+
+.regProgressList {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.regProgressItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+  color: #334155;
+}
+
+.regProgressAudit {
+  display: block;
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 400;
+  margin-top: 0.15rem;
+}
+
+.regProgressDone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.75rem;
+  padding: 0.1rem 0.35rem;
+  border-radius: 6px;
+  background: #dcfce7;
+  color: #166534;
+  font-weight: 700;
+  font-size: 0.72rem;
+}
+
+.regProgressPending {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.75rem;
+  padding: 0.1rem 0.35rem;
+  border-radius: 6px;
+  background: #f1f5f9;
+  color: #64748b;
+  font-weight: 700;
+  font-size: 0.72rem;
+}
+
+.tabRow {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  padding-bottom: 0.1rem;
+}
+
+.tabButton {
+  border: 1px solid #d4deec;
+  border-radius: 999px;
+  background: #f8fbff;
+  color: #334155;
+  min-height: 34px;
+  padding: 0.35rem 0.72rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tabButtonActive {
+  border-color: #9db8e6;
+  background: #e8f0ff;
+  color: #1e3a8a;
+  font-weight: 700;
+}
+
+.sectionTitle {
+  margin: 0 0 0.55rem;
+  color: #1e293b;
+  font-size: 1.05rem;
+}
+
+.blockTitle {
+  margin: 0.9rem 0 0.45rem;
+  color: #334155;
+  font-size: 0.95rem;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.34rem 0.6rem;
+  color: #334155;
+}
+
+.infoGrid p {
+  margin: 0;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem 0.8rem;
+}
+
+.inlineActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.stackList {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.itemCard {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+  padding: 0.58rem 0.65rem;
+}
+
+.itemCard p {
+  margin: 0.16rem 0;
+  color: #334155;
+}
+
+.bottomBar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 960px) {
+  .headerGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 直近学習フロー要約（読み取り専用） */
+.flowSummaryCard {
+  border: 1px solid #c7d2fe;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+  padding: 0.85rem 0.95rem;
+  margin-bottom: 0.75rem;
+}
+
+.flowSummaryTitle {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+  color: #1e293b;
+}
+
+.flowSummaryGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.65rem;
+}
+
+.flowSummaryLabel {
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.flowSummaryList {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: #334155;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.flowSummaryList li {
+  margin: 0.35rem 0;
+}
+
+.flowSummaryBody {
+  margin: 0;
+  color: #334155;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
+.flowSummaryActions {
+  margin-top: 0.85rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.flowSummaryActionsTitle {
+  margin: 0 0 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.flowSummaryActionsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.flowSummaryActionBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem 0.65rem;
+  border-radius: 10px;
+  border: 1px solid rgba(37, 99, 235, 0.35);
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+  line-height: 1.25;
+}
+
+.flowSummaryActionBtn:hover {
+  background: #dbeafe;
+  border-color: rgba(37, 99, 235, 0.55);
+}
+
+.riskStrip {
+  margin-bottom: 0.75rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 10px;
+  border: 1px solid #fde68a;
+  background: #fffbeb;
+}
+
+.riskStripTitle {
+  margin: 0 0 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #92400e;
+  text-transform: uppercase;
+}
+
+.riskStripRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.riskBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.22rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #334155;
+}
+
+.riskBadge[data-tone="danger"] {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.riskBadge[data-tone="warn"] {
+  border-color: #fde68a;
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.riskBadge[data-tone="info"] {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+  color: #1e40af;
+}
+
+@media (max-width: 720px) {
+  .flowSummaryGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .heroMetaGrid,
+  .infoGrid,
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.paymentSummaryStrip {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.65rem;
+  margin: 0.65rem 0 0.85rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+  font-size: 0.88rem;
+}
+
+.paymentSummaryStrip > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.paymentSummaryStrip strong {
+  color: #0f172a;
+  font-size: 0.95rem;
+}

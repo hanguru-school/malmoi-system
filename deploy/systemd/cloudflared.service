@@ -1,0 +1,14 @@
+[Unit]
+Description=Cloudflare Tunnel for MalMoi
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=notify
+ExecStart=/usr/bin/cloudflared --no-autoupdate --config /etc/cloudflared/config.yml tunnel run malmoi
+Restart=always
+RestartSec=5s
+TimeoutStartSec=30
+
+[Install]
+WantedBy=multi-user.target

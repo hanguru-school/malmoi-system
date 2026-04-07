@@ -1,0 +1,23 @@
+[Unit]
+Description=MalMoi Next.js Production Web
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=malmoi_deploy
+Group=malmoi_deploy
+WorkingDirectory=/home/malmoi_deploy/apps/malmoi
+Environment=NODE_ENV=production
+Environment=PORT=3000
+ExecStartPre=/usr/bin/test -f /home/malmoi_deploy/apps/malmoi/package.json
+ExecStart=/usr/bin/npm run start -- --hostname 127.0.0.1 --port 3000
+Restart=always
+RestartSec=5
+TimeoutStartSec=60
+KillSignal=SIGINT
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
