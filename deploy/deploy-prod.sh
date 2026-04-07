@@ -84,11 +84,11 @@ if [[ "$USE_RELEASES" == "1" ]]; then
     exit 1
   fi
 
-  echo "[release 4/8] install dependencies"
+  echo "[release 4/8] install dependencies (include dev for build)"
   if [[ -f package-lock.json ]]; then
-    npm ci --omit=dev
+    npm ci --include=dev
   else
-    npm install --omit=dev
+    npm install --include=dev
   fi
 
   echo "[release 5/8] build"
@@ -156,11 +156,11 @@ git fetch origin main
 echo "[2/7] git pull origin main (ff-only)"
 git pull --ff-only origin main
 
-echo "[3/7] install dependencies"
+echo "[3/7] install dependencies (include dev for build)"
 if [[ -f package-lock.json ]]; then
-  npm ci --omit=dev
+  npm ci --include=dev
 else
-  npm install --omit=dev
+  npm install --include=dev
 fi
 
 echo "[4/7] build"
