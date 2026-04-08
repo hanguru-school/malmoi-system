@@ -10,6 +10,7 @@
 - 개발/스테이징 루틴: `docs/dev-and-staging-workflow.md`
 - 운영 대응 매뉴얼: `docs/operations-runbook.md`
 - **Git 기반 서버 배포**: `docs/DEPLOY_GIT.md`（`npm run deploy` / Cursor Task）
+- **Actions에서 버튼 배포**: `docs/deploy-one-click-ko.md`（`.github/workflows/deploy-production.yml`）
 
 ## Git 배포 (요약)
 

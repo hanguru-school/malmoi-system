@@ -1,0 +1,110 @@
+# 운영 서버 수동 배포 (workflow_dispatch, OpenSSH 키 파일 방식)
+# - PR 검증: production-deploy.yml (별도)
+# - main push 자동 배포: deploy-main.yml (별도)
+
+name: Deploy production (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "배포할 Git 브랜치 (origin 기준)"
+        required: true
+        default: "main"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-production-manual
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+
+    env:
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+      DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+      DEPLOY_APP_DIR: ${{ secrets.DEPLOY_APP_DIR }}
+      GIT_REF: ${{ github.event.inputs.branch }}
+
+    steps:
+      - name: Repository checkout
+        uses: actions/checkout@v4
+
+      - name: Write SSH private key to file
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+      - name: Register known_hosts (ssh-keyscan)
+        run: |
+          set -euo pipefail
+          ssh-keyscan -p "${DEPLOY_PORT}" -H "${DEPLOY_HOST}" >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: SSH connectivity test
+        run: |
+          set -euo pipefail
+          ssh -i ~/.ssh/deploy_key -p "${DEPLOY_PORT}" \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile=~/.ssh/known_hosts \
+            -o BatchMode=yes \
+            "${DEPLOY_USER}@${DEPLOY_HOST}" "echo SSH_OK"
+
+      - name: Server — git fetch / checkout / pull
+        run: |
+          set -euo pipefail
+          ssh -i ~/.ssh/deploy_key -p "${DEPLOY_PORT}" \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile=~/.ssh/known_hosts \
+            -o BatchMode=yes \
+            "${DEPLOY_USER}@${DEPLOY_HOST}" \
+            "set -euo pipefail; cd \"${DEPLOY_APP_DIR}\"; git fetch origin; git checkout \"${GIT_REF}\"; git pull origin \"${GIT_REF}\""
+
+      - name: Server — bash deploy/deploy-prod.sh
+        run: |
+          set -euo pipefail
+          ssh -i ~/.ssh/deploy_key -p "${DEPLOY_PORT}" \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile=~/.ssh/known_hosts \
+            -o BatchMode=yes \
+            "${DEPLOY_USER}@${DEPLOY_HOST}" \
+            "set -euo pipefail; cd \"${DEPLOY_APP_DIR}\"; bash deploy/deploy-prod.sh"
+
+      - name: Server — systemctl status malmoi-web
+        run: |
+          set -euo pipefail
+          ssh -i ~/.ssh/deploy_key -p "${DEPLOY_PORT}" \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile=~/.ssh/known_hosts \
+            -o BatchMode=yes \
+            "${DEPLOY_USER}@${DEPLOY_HOST}" \
+            "set -euo pipefail; systemctl status malmoi-web --no-pager"
+
+      - name: Server — curl health (127.0.0.1:3000)
+        run: |
+          set -euo pipefail
+          ssh -i ~/.ssh/deploy_key -p "${DEPLOY_PORT}" \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile=~/.ssh/known_hosts \
+            -o BatchMode=yes \
+            "${DEPLOY_USER}@${DEPLOY_HOST}" \
+            "set -euo pipefail; curl -fsSI --max-time 25 http://127.0.0.1:3000/ | head -n 30"
+
+      - name: Server — curl health (https://portal.hanguru.school/)
+        run: |
+          set -euo pipefail
+          ssh -i ~/.ssh/deploy_key -p "${DEPLOY_PORT}" \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile=~/.ssh/known_hosts \
+            -o BatchMode=yes \
+            "${DEPLOY_USER}@${DEPLOY_HOST}" \
+            "set -euo pipefail; curl -fsSI --max-time 30 https://portal.hanguru.school/ | head -n 30"

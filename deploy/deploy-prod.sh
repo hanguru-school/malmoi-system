@@ -10,7 +10,9 @@
 
 set -euo pipefail
 
-APP_DIR="/home/malmoi_deploy/apps/malmoi"
+# 任意: GitHub Actions 手動デプロイ等から上書き（既定は従来どおり main / 固定パス）
+APP_DIR="${DEPLOY_APP_DIR:-/home/malmoi_deploy/apps/malmoi}"
+GIT_REF="${DEPLOY_GIT_REF:-main}"
 SERVICE_NAME="${MALMOI_SYSTEMD_SERVICE:-malmoi-web}"
 INTERNAL_HEALTH_URL="http://127.0.0.1:3000/login"
 EXTERNAL_HEALTH_URL="https://portal.hanguru.school/login"
@@ -46,6 +48,7 @@ exec > >(tee -a "$LOG_FILE") 2>&1
 echo "=============================================="
 echo "MalMoi PROD deploy | $(date -Is)"
 echo "APP_DIR=$APP_DIR"
+echo "GIT_REF=$GIT_REF"
 echo "SERVICE=$SERVICE_NAME"
 echo "MALMOI_USE_RELEASES=$USE_RELEASES"
 echo "LOG=$LOG_FILE"
@@ -59,11 +62,12 @@ release_deploy_failed_cleanup() {
 }
 
 if [[ "$USE_RELEASES" == "1" ]]; then
-  echo "[release 1/8] git fetch"
-  git fetch origin main
+  echo "[release 1/8] git fetch origin $GIT_REF"
+  git fetch origin "$GIT_REF"
 
-  echo "[release 2/8] git pull origin main (ff-only)"
-  git pull --ff-only origin main
+  echo "[release 2/8] git checkout tracking branch $GIT_REF (ff-only)"
+  git checkout -B "$GIT_REF" "origin/$GIT_REF"
+  git pull --ff-only origin "$GIT_REF"
 
   REL_ID="$(date +%Y%m%d-%H%M%S)-$(git rev-parse --short HEAD)"
   REL_PATH="${APP_DIR}/releases/${REL_ID}"
@@ -150,11 +154,12 @@ if [[ "$USE_RELEASES" == "1" ]]; then
   exit 0
 fi
 
-echo "[1/7] git fetch"
-git fetch origin main
+echo "[1/7] git fetch origin $GIT_REF"
+git fetch origin "$GIT_REF"
 
-echo "[2/7] git pull origin main (ff-only)"
-git pull --ff-only origin main
+echo "[2/7] git checkout tracking branch $GIT_REF (ff-only)"
+git checkout -B "$GIT_REF" "origin/$GIT_REF"
+git pull --ff-only origin "$GIT_REF"
 
 echo "[3/7] install dependencies (include dev for build)"
 if [[ -f package-lock.json ]]; then

@@ -4,7 +4,9 @@
 
 export {
   fetchStudentReservations,
+  fetchStudentLessonTypes,
   fetchStudentReservationSlots,
+  fetchStudentReservationCandidates,
   patchStudentReservation,
   postStudentReservation,
   postStudentReservationCancel,

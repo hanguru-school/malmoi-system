@@ -14,7 +14,7 @@ export default async function StudentReservationsPage({ searchParams }) {
       title="予約"
       subtitle={
         useV2
-          ? "日付と時間を選んで予約し、一覧から変更・キャンセルできます。"
+          ? "残り時間を確認しながら、レッスン→日付→時間の順で簡単に予約できます。ポイントは利用明細でご確認ください。"
           : "段階ごとに選択しながら予約を作成し、自分の予約を確認・変更できます。"
       }
     >
