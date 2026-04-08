@@ -44,6 +44,7 @@ export default function StudentAreaLayout({ title, subtitle = "", children }) {
         {menuOpen ? (
           <nav className={styles.menuPanel}>
             <Link className={styles.menuItem} href="/student">ホーム</Link>
+            <Link className={styles.menuItem} href="/student/learning">学習ハブ</Link>
             <Link className={styles.menuItem} href={reservationsMenuHref}>
               予約（予約する・一覧）
             </Link>

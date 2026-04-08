@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { studentReservationsPathFromBrowserPreference } from "../../lib/student/reservationUiPreference";
 import home from "./student-home.module.css";
-import StudentLessonTimeFlow from "./StudentLessonTimeFlow";
+import StudentMyPageTimeSummary from "./StudentMyPageTimeSummary";
 import StudentReservationMiniCalendar from "./StudentReservationMiniCalendar";
 import {
   studentReservationStatusLabel,
@@ -99,7 +99,6 @@ export default function StudentDashboard({
 
   const student = session?.student || {};
   const minutes = student.lessonMinutes || {};
-  const points = student.points || {};
   const lessonMinutesAttention = useMemo(() => {
     const rem = Number(minutes.remainingMinutes ?? 0);
     if (rem <= 0) return "exhausted";
@@ -334,19 +333,20 @@ export default function StudentDashboard({
         )}
       </section>
 
-      <section className={home.section} aria-label="利用状況">
+      <section className={home.section} aria-label="時間の概要">
         <div className={home.sectionHead}>
-          <h2 className={home.sectionTitle}>利用状況</h2>
+          <h2 className={home.sectionTitle}>時間の概要</h2>
+          <Link className={home.sectionLink} href="/student/lesson-time">
+            詳細
+          </Link>
         </div>
         <div className={home.statusCard}>
-          <StudentLessonTimeFlow
-            variant="dashboard"
-            totalMinutes={minutes.totalMinutes ?? 0}
-            usedMinutes={minutes.usedMinutes ?? 0}
+          <StudentMyPageTimeSummary
             remainingMinutes={minutes.remainingMinutes ?? 0}
-            pointsBalance={points.balance ?? 0}
-            pointConvertedMinutes={student.pointConvertedMinutes ?? 0}
-            reservedMinutesOverride={reservedMinutesSum}
+            reservedMinutesSum={reservedMinutesSum}
+            nextReservation={nextReservation}
+            nextReservationDeductMinutes={lessonMinutesPreview?.nextReservationDeductMinutes ?? 0}
+            projectedRemainingAfterNext={lessonMinutesPreview?.projectedRemainingAfterNext ?? null}
           />
           {lessonMinutesAttention === "ok" && lessonMinutesPreview?.completionHintJa ? (
             <p
@@ -389,9 +389,9 @@ export default function StudentDashboard({
             <span className={home.midTileEyebrow}>予約</span>
             <span className={home.midTileTitle}>予約一覧</span>
           </Link>
-          <Link className={home.midTile} href="/student/lesson-notes">
+          <Link className={home.midTile} href="/student/learning">
             <span className={home.midTileEyebrow}>学習</span>
-            <span className={home.midTileTitle}>レッスンノート</span>
+            <span className={home.midTileTitle}>学習ハブ</span>
           </Link>
           <Link className={home.midTile} href="/student/homework">
             <span className={home.midTileEyebrow}>学習</span>
@@ -597,14 +597,14 @@ export default function StudentDashboard({
           <h2 className={home.sectionTitle}>最近の記録</h2>
         </div>
         <div className={home.activityCard}>
-          <p className={home.activityBlockTitle}>お支払い・ポイント</p>
+          <p className={home.activityBlockTitle}>お支払い（最近）</p>
           {recentPayments.length > 0 ? (
             <ul className={home.activityList}>
               {recentPayments.map((t) => (
                 <li key={t.id} className={home.activityRow}>
                   <span className={home.activityWhen}>{formatWhen(t.paidAt)}</span>
                   <Link className={home.activityMain} href={`/student/payments/${t.id}`}>
-                    {jpStudentPaymentCategory(t)} · 税込 {t.amountTaxInclusive} 円 · +{t.finalPoints ?? 0} pt
+                    {jpStudentPaymentCategory(t)} · 税込 {t.amountTaxInclusive} 円
                   </Link>
                 </li>
               ))}
@@ -614,6 +614,8 @@ export default function StudentDashboard({
           )}
           <p className={home.bottomMore} style={{ marginTop: "0.65rem" }}>
             <Link href="/student/payments">決済履歴を見る</Link>
+            {" · "}
+            <Link href="/student/lesson-time">ポイント内訳</Link>
           </p>
         </div>
 

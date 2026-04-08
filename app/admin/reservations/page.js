@@ -1,6 +1,8 @@
+import { Suspense } from "react";
 import adminStyles from "../admin.module.css";
 import { requireRole } from "../../../lib/auth/session";
 import { listReservationsForAdmin } from "../../../lib/auth/store";
+import { computeReservationFetchRange } from "../../../lib/admin/reservationCalendarModel.js";
 import { useReservationUiV2 } from "../../../lib/ui/featureFlags";
 import AdminReservationsPanel from "./AdminReservationsPanel";
 import AdminReservationsPanelV2 from "./AdminReservationsPanelV2";
@@ -15,15 +17,37 @@ export default async function AdminReservationsPage({ searchParams }) {
   const useV2 = useReservationUiV2(query?.ui);
   const defaultDay = new Date().toISOString().slice(0, 10);
   const day = selectedDate || defaultDay;
-  const initialFilters = {
-    q: "",
-    status: selectedStatus,
-    lessonMode: "",
-    studentId: String(query?.studentId || "").trim(),
-    fromDate: day,
-    toDate: day,
-  };
-  const result = await listReservationsForAdmin({ ...initialFilters, page: 1, pageSize: useV2 ? 500 : 300 });
+  const weekRange = computeReservationFetchRange("week", day);
+
+  const initialFilters = useV2
+    ? {
+        q: "",
+        status: selectedStatus,
+        lessonMode: "",
+        studentId: String(query?.studentId || "").trim(),
+        anchorDate: day,
+        fromDate: weekRange.fromDate,
+        toDate: weekRange.toDate,
+      }
+    : {
+        q: "",
+        status: selectedStatus,
+        lessonMode: "",
+        studentId: String(query?.studentId || "").trim(),
+        fromDate: day,
+        toDate: day,
+      };
+
+  const result = await listReservationsForAdmin({
+    q: initialFilters.q,
+    status: initialFilters.status,
+    lessonMode: initialFilters.lessonMode,
+    studentId: initialFilters.studentId,
+    fromDate: initialFilters.fromDate,
+    toDate: initialFilters.toDate,
+    page: 1,
+    pageSize: useV2 ? 500 : 300,
+  });
 
   return (
     <div className={adminStyles.adminShell}>
@@ -31,20 +55,22 @@ export default async function AdminReservationsPage({ searchParams }) {
         <AdminTopNav currentPath="/admin/reservations" showPageTitle pageTitle="予約運用" />
         <p className={adminStyles.metaText}>
           {useV2
-            ? "日付範囲とフィルターで一覧を確認し、行を選んで詳細操作します。複雑な操作は従来画面へ切り替えてください。"
+            ? "上段で基準日と表示形式を整え、すぐ下のカレンダー／一覧で予約を確認します。行や枠を選ぶと右（または下）の詳細から操作できます。"
             : "予約スケジュールを先に確認し、承認待ちを優先的に処理してください。"}
         </p>
 
         {useV2 ? (
-          <AdminReservationsPanelV2
-            initialReservations={result.items}
-            initialFilters={initialFilters}
-            scopeNotice={
-              initialFilters.studentId
-                ? `学生IDフィルター適用中: ${initialFilters.studentId} (対象学生の予約中心表示)`
-                : ""
-            }
-          />
+          <Suspense fallback={<p className={adminStyles.metaText}>読み込み中...</p>}>
+            <AdminReservationsPanelV2
+              initialReservations={result.items}
+              initialFilters={initialFilters}
+              scopeNotice={
+                initialFilters.studentId
+                  ? `学生IDフィルター適用中: ${initialFilters.studentId}（取得範囲内の当該学生予約）`
+                  : ""
+              }
+            />
+          </Suspense>
         ) : (
           <AdminReservationsPanel
             initialReservations={result.items}

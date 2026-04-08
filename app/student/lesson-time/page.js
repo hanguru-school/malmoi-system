@@ -2,7 +2,9 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireRole } from "../../../lib/auth/session";
 import { getStudentLessonMinutesUsageForPortal } from "../../../lib/auth/store";
+import { POINTS_POLICY_SUMMARY_JA } from "../../../lib/operational/pointsPolicy.js";
 import StudentAreaLayout from "../StudentAreaLayout";
+import StudentLessonTimeFlow from "../StudentLessonTimeFlow";
 import styles from "./lesson-time.module.css";
 
 export const dynamic = "force-dynamic";
@@ -41,40 +43,39 @@ export default async function StudentLessonTimePage() {
   const usage = await getStudentLessonMinutesUsageForPortal(session.user.id);
   if (!usage) redirect("/student");
 
-  const rem = usage.lessonMinutes.remainingMinutes;
   const prev = usage.completionPreview;
   const alert = attentionMessage(usage.minutesAttention);
-  const projected = prev?.projectedRemainingAfterNext;
+  const stu = session.student || {};
+  const ptsBal = usage.points?.balance ?? stu.points?.balance ?? 0;
+  const purchasedPts = usage.points?.totalFromCompletedPayments ?? null;
 
   return (
-    <StudentAreaLayout title="レッスン時間" subtitle="受講の記録を、やさしい一覧で">
+    <StudentAreaLayout title="レッスン時間・利用状況" subtitle="時間とポイントの内訳">
       <div className={styles.root}>
         <p className={styles.intro}>
-          ここでは、レッスンで使った時間や追加された時間の<strong>あとがき</strong>のような一覧です。領収書や請求書ではありません。数字で不安になったら、いつでも教室にご相談ください。
+          レッスンで使った時間・付与された時間・ポイントの<strong>記録の見える化</strong>です。領収書や請求書ではありません。
+          {POINTS_POLICY_SUMMARY_JA}
         </p>
 
-        <section className={styles.heroCard}>
-          <p className={styles.heroTitle}>いま使える時間</p>
-          <p className={styles.heroRemain}>
-            {rem}
-            <span className={styles.heroUnit}>分</span>
-          </p>
-          {typeof projected === "number" && prev?.nextReservationDeductMinutes ? (
-            <div className={styles.projectedBox}>
-              <p className={styles.projectedLabel}>次のレッスン後の目安</p>
-              <p className={styles.subLine}>
-                次の予約（約{prev.nextReservationDeductMinutes}分）が終わったあと、だいたい
-                <strong> {projected}分</strong> 残る見込みです（参考値）。
-              </p>
-            </div>
-          ) : (
-            <p className={styles.subLine} style={{ marginTop: "0.5rem" }}>
-              次の予約がまだない、または確定前のため、完了後の目安は表示していません。
-            </p>
-          )}
+        <section className={styles.flowShell} aria-label="時間とポイントの概要">
+          <StudentLessonTimeFlow
+            variant="profile"
+            totalMinutes={usage.lessonMinutes.totalMinutes ?? 0}
+            usedMinutes={usage.lessonMinutes.usedMinutes ?? 0}
+            remainingMinutes={usage.lessonMinutes.remainingMinutes ?? 0}
+            pointsBalance={ptsBal}
+            pointConvertedMinutes={stu.pointConvertedMinutes ?? 0}
+            reservedMinutesOverride={usage.reservedMinutesSum}
+            purchasedPointsTotal={purchasedPts}
+          />
           {prev?.completionHintJa && usage.minutesAttention !== "exhausted" ? (
-            <p className={styles.subLine} style={{ marginTop: "0.45rem" }}>
+            <p className={styles.previewHint} data-tone="info">
               {prev.completionHintJa}
+            </p>
+          ) : null}
+          {prev?.projectedRemainingHintJa ? (
+            <p className={styles.previewHint} data-tone="info">
+              {prev.projectedRemainingHintJa}
             </p>
           ) : null}
         </section>
