@@ -10,6 +10,7 @@ const LINKS = [
   { href: "/admin/settings/teacher-schedule", label: "講師スケジュール" },
   { href: "/admin/settings/lesson-services", label: "レッスン・サービス" },
   { href: "/admin/settings/payments-usage", label: "支払い・利用時間" },
+  { href: "/admin/settings/points-time", label: "時間・ポイント" },
   { href: "/admin/settings/notifications", label: "通知" },
   { href: "/admin/settings/accounts", label: "アカウント・権限" },
   { href: "/admin/settings/system", label: "システム・ログ" },

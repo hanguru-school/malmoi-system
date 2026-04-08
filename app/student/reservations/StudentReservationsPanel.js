@@ -1,12 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { addDaysYmd } from "../../../lib/admin/reservationCalendarModel.js";
+import { explainUnavailableReason } from "../../../lib/reservations/engine/reasonCodes.js";
 import styles from "../../login/login.module.css";
-
-function slotLabel(slot) {
-  const teacher = slot.instructorName ? ` / 担当 ${slot.instructorName}` : "";
-  return `${slot.date} ${slot.time} / ${slot.durationMinutes}分${teacher}`;
-}
 
 function statusMeta(status, attendanceStatus) {
   if (status === "requested") return { label: "予約申請中", tone: "pending" };
@@ -23,13 +20,6 @@ function statusMeta(status, attendanceStatus) {
 
 function lessonDeliveryLabel(type) {
   return type === "online" ? "オンラインレッスン" : "対面レッスン";
-}
-
-function toMinutes(time) {
-  const [hh, mm] = String(time || "00:00")
-    .split(":")
-    .map((v) => Number(v || 0));
-  return hh * 60 + mm;
 }
 
 function formatDateKey(date) {
@@ -58,6 +48,15 @@ function addDays(date, days) {
   return startOfDay(next);
 }
 
+function startOfMonthYmd(calendarMonth) {
+  return formatDateKey(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), 1));
+}
+
+function endOfMonthYmd(calendarMonth) {
+  const d = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 0);
+  return formatDateKey(d);
+}
+
 function blockedText(code) {
   if (code === "cutoff_passed") return "締切時間を過ぎたため、直接処理できません。";
   if (code === "status_not_changeable") return "現在の状態では変更できません。";
@@ -66,21 +65,30 @@ function blockedText(code) {
   return "";
 }
 
+function formatPt(n) {
+  return `${Math.max(0, Number(n || 0)).toLocaleString("ja-JP")}pt`;
+}
+
 export default function StudentReservationsPanel() {
   const INSTRUCTOR_NO_PREFERENCE = "__no_preference__";
   const [reservations, setReservations] = useState([]);
-  const [slots, setSlots] = useState([]);
+  const [lessonTypes, setLessonTypes] = useState([]);
+  const [candidates, setCandidates] = useState([]);
+  const [studentSnapshot, setStudentSnapshot] = useState(null);
   const [instructorAssignmentMode, setInstructorAssignmentMode] = useState("auto");
   const [loading, setLoading] = useState(true);
+  const [candidatesLoading, setCandidatesLoading] = useState(false);
   const [error, setError] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
+  const [selectedLessonId, setSelectedLessonId] = useState("");
   const [form, setForm] = useState({
     slotId: "",
     lessonDeliveryType: "in_person",
     memo: "",
   });
   const [rescheduleSlotByReservation, setRescheduleSlotByReservation] = useState({});
+  const [rescheduleOptions, setRescheduleOptions] = useState({});
   const [saving, setSaving] = useState(false);
   const [selectedTeacherId, setSelectedTeacherId] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
@@ -91,40 +99,33 @@ export default function StudentReservationsPanel() {
 
   const today = useMemo(() => startOfDay(new Date()), []);
   const maxDate = useMemo(() => addDays(today, 365), [today]);
-  const bookableSlots = useMemo(() => slots.filter((slot) => slot.isBookable), [slots]);
+  const selectedLesson = useMemo(
+    () => lessonTypes.find((l) => l.id === selectedLessonId) || null,
+    [lessonTypes, selectedLessonId]
+  );
+
+  const canStudentSelectInstructor =
+    instructorAssignmentMode === "student_select" || instructorAssignmentMode === "hybrid";
   const teacherOptions = useMemo(() => {
-    const map = new Map();
-    slots.forEach((slot) => {
-      if (!slot.instructorUserId) return;
-      map.set(slot.instructorUserId, {
-        id: slot.instructorUserId,
-        name: slot.instructorName || "未設定",
-      });
-    });
-    return [...map.values()].sort((a, b) => a.name.localeCompare(b.name));
-  }, [slots]);
-  const canStudentSelectInstructor = instructorAssignmentMode === "student_select" || instructorAssignmentMode === "hybrid";
-  const filteredByCourse = slots;
-  const filteredByTeacher = useMemo(() => {
-    if (!canStudentSelectInstructor) return filteredByCourse;
-    if (teacherOptions.length === 0) return filteredByCourse;
-    if (!selectedTeacherId || selectedTeacherId === INSTRUCTOR_NO_PREFERENCE) return filteredByCourse;
-    return filteredByCourse.filter((slot) => slot.instructorUserId === selectedTeacherId);
-  }, [INSTRUCTOR_NO_PREFERENCE, canStudentSelectInstructor, filteredByCourse, selectedTeacherId, teacherOptions.length]);
+    const ids = selectedLesson?.teacherUserIds || [];
+    if (!ids.length) return [];
+    return ids.map((id) => ({ id, name: id }));
+  }, [selectedLesson]);
 
   const dateStatsMap = useMemo(() => {
     const map = new Map();
-    filteredByTeacher.forEach((slot) => {
-      if (!slot.date) return;
-      const dateObj = parseDateKey(slot.date);
+    candidates.forEach((c) => {
+      const dk = String(c.date || "").slice(0, 10);
+      if (!dk) return;
+      const dateObj = parseDateKey(dk);
       if (dateObj < today || dateObj > maxDate) return;
-      const prev = map.get(slot.date) || { hasAny: false, hasBookable: false };
+      const prev = map.get(dk) || { hasAny: false, hasBookable: false };
       prev.hasAny = true;
-      prev.hasBookable = prev.hasBookable || Boolean(slot.isBookable);
-      map.set(slot.date, prev);
+      prev.hasBookable = prev.hasBookable || Boolean(c.bookingOk);
+      map.set(dk, prev);
     });
     return map;
-  }, [filteredByTeacher, today, maxDate]);
+  }, [candidates, today, maxDate]);
 
   const availableDateKeys = useMemo(() => [...dateStatsMap.keys()].sort(), [dateStatsMap]);
   const firstBookableDate = useMemo(
@@ -132,32 +133,33 @@ export default function StudentReservationsPanel() {
     [availableDateKeys, dateStatsMap]
   );
 
-  const slotsForDate = useMemo(() => {
+  const candidatesForDate = useMemo(() => {
     if (!selectedDate) return [];
-    return filteredByTeacher
-      .filter((slot) => slot.date === selectedDate)
-      .sort((a, b) => toMinutes(a.time) - toMinutes(b.time));
-  }, [filteredByTeacher, selectedDate]);
-  const selectedSlot = useMemo(
-    () => slotsForDate.find((slot) => slot.id === form.slotId) || null,
-    [slotsForDate, form.slotId]
+    return candidates
+      .filter((c) => String(c.date || "").slice(0, 10) === selectedDate)
+      .sort((a, b) => String(a.startTime).localeCompare(String(b.startTime)));
+  }, [candidates, selectedDate]);
+
+  const selectedCandidate = useMemo(
+    () => candidatesForDate.find((c) => c.slotId === form.slotId) || null,
+    [candidatesForDate, form.slotId]
   );
-  const instructorGuideText = useMemo(() => {
-    if (!canStudentSelectInstructor) return "講師は教室で調整のうえご案内します。";
-    return "講師を指定しない場合は、教室で調整のうえご案内します。";
-  }, [canStudentSelectInstructor]);
+
   const currentStep = useMemo(() => {
-    if (!selectedDate) return 1;
-    if (!form.slotId) return 2;
-    if (!form.lessonDeliveryType) return 3;
-    return 4;
-  }, [form.lessonDeliveryType, form.slotId, selectedDate]);
+    if (!selectedLessonId) return 1;
+    if (!selectedDate) return 2;
+    if (!form.slotId) return 3;
+    if (!form.lessonDeliveryType) return 4;
+    return 5;
+  }, [form.lessonDeliveryType, form.slotId, selectedDate, selectedLessonId]);
+
   const progressSteps = useMemo(
     () => [
-      { id: 1, title: "日付" },
-      { id: 2, title: "時間" },
-      { id: 3, title: "レッスン形式" },
-      { id: 4, title: "確認" },
+      { id: 1, title: "レッスン" },
+      { id: 2, title: "日付" },
+      { id: 3, title: "時間" },
+      { id: 4, title: "形式" },
+      { id: 5, title: "確認" },
     ],
     []
   );
@@ -191,29 +193,67 @@ export default function StudentReservationsPanel() {
     return cells;
   }, [calendarMonth, dateStatsMap, maxDate, selectedDate, today]);
 
-  async function loadReservations() {
+  const loadReservations = useCallback(async () => {
     const params = new URLSearchParams();
     if (statusFilter) params.set("status", statusFilter);
     const response = await fetch(`/api/student/reservations?${params.toString()}`);
     const data = await response.json();
     if (!response.ok || !data?.ok) throw new Error(data?.error || "予約の取得に失敗しました。");
     setReservations(data.reservations || []);
-  }
+  }, [statusFilter]);
 
-  async function loadSlots() {
-    const response = await fetch(`/api/student/reservation-slots`);
-    const data = await response.json();
-    if (!response.ok || !data?.ok) throw new Error(data?.error || "予約可能時間の取得に失敗しました。");
-    setSlots(data.slots || []);
-    setInstructorAssignmentMode(data?.reservationPolicy?.instructorAssignmentMode || "auto");
-  }
+  const loadBootstrap = useCallback(async () => {
+    const [slotRes, ltRes] = await Promise.all([
+      fetch("/api/student/reservation-slots", { cache: "no-store" }),
+      fetch("/api/student/lesson-types", { cache: "no-store" }),
+    ]);
+    const slotData = await slotRes.json();
+    const ltData = await ltRes.json();
+    if (slotRes.ok && slotData?.ok) {
+      setInstructorAssignmentMode(slotData?.reservationPolicy?.instructorAssignmentMode || "auto");
+    }
+    if (ltRes.ok && ltData?.ok) {
+      setLessonTypes(ltData.lessonTypes || []);
+    }
+  }, []);
+
+  const loadCandidates = useCallback(async () => {
+    if (!selectedLessonId) {
+      setCandidates([]);
+      setStudentSnapshot(null);
+      return;
+    }
+    setCandidatesLoading(true);
+    try {
+      const fromDate = startOfMonthYmd(calendarMonth);
+      const toDate = endOfMonthYmd(calendarMonth);
+      const sp = new URLSearchParams();
+      sp.set("lessonTypeId", selectedLessonId);
+      sp.set("fromDate", fromDate);
+      sp.set("toDate", toDate);
+      sp.set("lessonMode", form.lessonDeliveryType || "in_person");
+      if (selectedTeacherId && selectedTeacherId !== INSTRUCTOR_NO_PREFERENCE) {
+        sp.set("teacherId", selectedTeacherId);
+      }
+      const response = await fetch(`/api/student/reservation-candidates?${sp.toString()}`, { cache: "no-store" });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data?.error || "候補の取得に失敗しました。");
+      setCandidates(data.candidates || []);
+      setStudentSnapshot(data.studentSnapshot || null);
+    } catch (e) {
+      setError(e.message || "候補の取得に失敗しました。");
+      setCandidates([]);
+      setStudentSnapshot(null);
+    } finally {
+      setCandidatesLoading(false);
+    }
+  }, [calendarMonth, form.lessonDeliveryType, selectedLessonId, selectedTeacherId, INSTRUCTOR_NO_PREFERENCE]);
 
   async function loadAll() {
     setLoading(true);
     setError("");
-
     try {
-      await Promise.all([loadReservations(), loadSlots()]);
+      await Promise.all([loadReservations(), loadBootstrap()]);
     } catch (err) {
       setError(err.message || "予約取得中にエラーが発生しました。");
     } finally {
@@ -223,9 +263,12 @@ export default function StudentReservationsPanel() {
 
   useEffect(() => {
     loadAll();
-    // statusFilter change should reload list and slots.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statusFilter]);
+
+  useEffect(() => {
+    loadCandidates();
+  }, [loadCandidates]);
 
   useEffect(() => {
     if (!canStudentSelectInstructor) {
@@ -239,9 +282,6 @@ export default function StudentReservationsPanel() {
     if (selectedTeacherId !== INSTRUCTOR_NO_PREFERENCE && teacherOptions.length > 0) {
       const exists = teacherOptions.some((teacher) => teacher.id === selectedTeacherId);
       if (!exists) setSelectedTeacherId(INSTRUCTOR_NO_PREFERENCE);
-    }
-    if (teacherOptions.length === 0 && selectedTeacherId && selectedTeacherId !== INSTRUCTOR_NO_PREFERENCE) {
-      setSelectedTeacherId("");
     }
   }, [INSTRUCTOR_NO_PREFERENCE, canStudentSelectInstructor, selectedTeacherId, teacherOptions]);
 
@@ -266,10 +306,10 @@ export default function StudentReservationsPanel() {
 
   useEffect(() => {
     if (!form.slotId) {
-      const firstBookable = slotsForDate.find((slot) => slot.isBookable);
-      if (firstBookable) setForm((prev) => ({ ...prev, slotId: firstBookable.id }));
+      const firstOk = candidatesForDate.find((c) => c.bookingOk);
+      if (firstOk) setForm((prev) => ({ ...prev, slotId: firstOk.slotId }));
     }
-  }, [slotsForDate, form.slotId]);
+  }, [candidatesForDate, form.slotId]);
 
   async function handleCreate(event) {
     event.preventDefault();
@@ -277,24 +317,58 @@ export default function StudentReservationsPanel() {
     setError("");
 
     try {
-      const selectedSlot = slotsForDate.find((slot) => slot.id === form.slotId);
-      if (!selectedSlot || !selectedSlot.isBookable) {
-        throw new Error("予約可能な時間を選択してください。");
+      const pick = candidatesForDate.find((c) => c.slotId === form.slotId);
+      if (!pick || !pick.bookingOk) {
+        throw new Error("予約可能な候補を選択してください。");
       }
       const response = await fetch("/api/student/reservations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          slotId: form.slotId,
+          lessonServiceId: selectedLessonId,
+          lessonDeliveryType: form.lessonDeliveryType,
+          memo: form.memo,
+        }),
       });
       const data = await response.json();
       if (!response.ok || !data?.ok) throw new Error(data?.error || "予約作成に失敗しました。");
 
       setForm((prev) => ({ ...prev, memo: "" }));
       await loadAll();
+      await loadCandidates();
     } catch (err) {
       setError(err.message || "予約作成中にエラーが発生しました。");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function ensureRescheduleOptions(reservation) {
+    const rid = reservation.id;
+    if (rescheduleOptions[rid]?.length) return;
+    const lid =
+      reservation.lessonServiceId ||
+      lessonTypes.find((l) => l.durationMinutes === reservation.durationMinutes)?.id ||
+      "";
+    if (!lid) {
+      setRescheduleOptions((prev) => ({ ...prev, [rid]: [] }));
+      return;
+    }
+    const fromDate = formatDateKey(today);
+    const toDate = addDaysYmd(fromDate, 21);
+    const sp = new URLSearchParams();
+    sp.set("lessonTypeId", lid);
+    sp.set("fromDate", fromDate);
+    sp.set("toDate", toDate);
+    sp.set("lessonMode", reservation.lessonDeliveryType || "in_person");
+    try {
+      const response = await fetch(`/api/student/reservation-candidates?${sp.toString()}`, { cache: "no-store" });
+      const data = await response.json();
+      const opts = (data.candidates || []).filter((c) => c.bookingOk && c.slotId !== reservation.slotId);
+      setRescheduleOptions((prev) => ({ ...prev, [rid]: opts }));
+    } catch {
+      setRescheduleOptions((prev) => ({ ...prev, [rid]: [] }));
     }
   }
 
@@ -312,6 +386,7 @@ export default function StudentReservationsPanel() {
       const data = await response.json();
       if (!response.ok || !data?.ok) throw new Error(data?.error || "予約変更に失敗しました。");
       await loadAll();
+      await loadCandidates();
     } catch (err) {
       setError(err.message || "予約変更中にエラーが発生しました。");
     }
@@ -324,15 +399,19 @@ export default function StudentReservationsPanel() {
       const data = await response.json();
       if (!response.ok || !data?.ok) throw new Error(data?.error || "予約キャンセルに失敗しました。");
       await loadAll();
+      await loadCandidates();
     } catch (err) {
       setError(err.message || "予約キャンセル中にエラーが発生しました。");
     }
   }
 
+  const remMin = studentSnapshot?.remainingMinutes ?? null;
+  const remPt = studentSnapshot?.currentPoints ?? null;
+
   return (
     <>
       <form onSubmit={handleCreate}>
-        <h2 className={styles.sectionTitle}>予約作成 (段階選択)</h2>
+        <h2 className={styles.sectionTitle}>予約作成（候補ベース）</h2>
         <div className={styles.stepGuide}>
           {progressSteps.map((step) => (
             <span
@@ -345,14 +424,59 @@ export default function StudentReservationsPanel() {
             </span>
           ))}
         </div>
-        <div className={styles.selectionSummary}>
-          <p>選択中の日付: {selectedDate || "未選択"}</p>
-          <p>選択中の時間: {selectedSlot?.time || "未選択"}</p>
-          <p>授業タイプ: {form.lessonDeliveryType ? lessonDeliveryLabel(form.lessonDeliveryType) : "未選択"}</p>
-          <p>{instructorGuideText}</p>
-        </div>
+        {(remMin != null || remPt != null) && (
+          <div className={styles.selectionSummary}>
+            <p>
+              参考: 残り時間 {remMin != null ? `${remMin}分` : "—"} / 保有ポイント {remPt != null ? formatPt(remPt) : "—"}
+            </p>
+          </div>
+        )}
+
         <label className={styles.label}>
-          1. 日付選択
+          1. レッスン
+          <div className={styles.optionGrid}>
+            {lessonTypes.length === 0 ? <p className={styles.description}>利用可能なレッスンがありません。</p> : null}
+            {lessonTypes.map((lt) => {
+              const selected = selectedLessonId === lt.id;
+              return (
+                <button
+                  key={lt.id}
+                  type="button"
+                  className={`${styles.optionButton} ${selected ? styles.optionButtonSelected : ""}`}
+                  onClick={() => {
+                    setSelectedLessonId(lt.id);
+                    setForm((prev) => ({ ...prev, slotId: "" }));
+                    setSelectedDate("");
+                  }}
+                >
+                  {lt.displayName}（{lt.durationMinutes}分 / {formatPt(lt.pointCost)}）
+                </button>
+              );
+            })}
+          </div>
+        </label>
+
+        {canStudentSelectInstructor && teacherOptions.length > 0 ? (
+          <label className={styles.label}>
+            講師（任意）
+            <select
+              className={styles.field}
+              value={selectedTeacherId}
+              onChange={(e) => setSelectedTeacherId(e.target.value)}
+            >
+              <option value={INSTRUCTOR_NO_PREFERENCE}>指定なし</option>
+              {teacherOptions.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : null}
+
+        <label className={styles.label}>
+          2. 日付選択
+          {!selectedLessonId ? <p className={styles.stepNote}>先にレッスンを選択してください。</p> : null}
           <div className={styles.calendarHeader}>
             <button
               className={styles.optionButton}
@@ -412,36 +536,59 @@ export default function StudentReservationsPanel() {
               );
             })}
           </div>
-          {!selectedDate ? <p className={styles.description}>日付を選択してください。</p> : null}
+          {candidatesLoading ? <p className={styles.description}>候補を読み込み中…</p> : null}
         </label>
+
         <label className={styles.label}>
-          2. 時間選択
-          {selectedDate ? null : <p className={styles.stepNote}>先に日付を選択してください。</p>}
+          3. 時間候補
+          {!selectedDate ? <p className={styles.stepNote}>日付を選択してください。</p> : null}
           <div className={styles.timeGrid}>
-            {slotsForDate.map((slot) => (
-              <button
-                key={slot.id}
-                className={`${styles.timeBlock} ${
-                  !slot.isBookable
-                    ? styles.timeBlockUnavailable
-                    : form.slotId === slot.id
-                      ? styles.timeBlockSelected
-                      : styles.timeBlockAvailable
-                }`}
-                type="button"
-                disabled={!slot.isBookable}
-                onClick={() => setForm((prev) => ({ ...prev, slotId: slot.id }))}
-                title={slotLabel(slot)}
-              >
-                {slot.time}
-              </button>
-            ))}
-            {slotsForDate.length === 0 ? <p>選択可能な時間がありません。</p> : null}
+            {candidatesForDate.map((c) => {
+              const ok = Boolean(c.bookingOk);
+              return (
+                <div key={c.slotId} className={styles.candidateWrap}>
+                  <button
+                    className={`${styles.timeBlock} ${
+                      !ok ? styles.timeBlockUnavailable : form.slotId === c.slotId ? styles.timeBlockSelected : styles.timeBlockAvailable
+                    }`}
+                    type="button"
+                    disabled={!ok}
+                    onClick={() => setForm((prev) => ({ ...prev, slotId: c.slotId }))}
+                  >
+                    <div>
+                      [{c.startTime} – {c.endTime}]
+                    </div>
+                    <div className={styles.candidateSub}>{c.teacherName || "講師"}</div>
+                    <div className={styles.candidateSub}>
+                      {c.durationMinutes || selectedLesson?.durationMinutes}分 {formatPt(c.pointCost)}
+                    </div>
+                    {ok && (c.remainingMinutesAfterBooking != null || c.remainingPointsAfterBooking != null) ? (
+                      <div className={styles.candidateRemain}>
+                        残り {c.remainingMinutesAfterBooking != null ? `${c.remainingMinutesAfterBooking}分` : "—"}
+                        {c.remainingPointsAfterBooking != null ? `（${formatPt(c.remainingPointsAfterBooking)}）` : ""}
+                      </div>
+                    ) : null}
+                  </button>
+                  {!ok ? (
+                    <div className={styles.reasonBadgeRow}>
+                      {(c.reasonCodes || []).slice(0, 4).map((code) => (
+                        <span key={code} className={styles.reasonBadge}>
+                          {explainUnavailableReason(code)}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              );
+            })}
+            {selectedDate && candidatesForDate.length === 0 && !candidatesLoading ? (
+              <p>この日の候補がありません。</p>
+            ) : null}
           </div>
-          <p className={styles.description}>緑: 予約可能 / 灰: 予約不可 / 青: 選択中</p>
         </label>
+
         <label className={styles.label}>
-          3. レッスン形式
+          4. レッスン形式
           <div className={styles.optionGrid}>
             {[
               { id: "in_person", label: "対面レッスン" },
@@ -461,6 +608,7 @@ export default function StudentReservationsPanel() {
             })}
           </div>
         </label>
+
         <label className={styles.label}>
           伝えたいこと
           <input
@@ -470,10 +618,14 @@ export default function StudentReservationsPanel() {
             placeholder="レッスン前に伝えておきたい内容があれば入力してください。"
           />
         </label>
-        <button className={styles.button} type="submit" disabled={saving || bookableSlots.length === 0}>
-          {saving ? "作成中..." : "4. 予約作成"}
+        <button
+          className={styles.button}
+          type="submit"
+          disabled={saving || !selectedCandidate?.bookingOk || !selectedLessonId}
+        >
+          {saving ? "作成中..." : "5. 予約作成"}
         </button>
-        {bookableSlots.length === 0 ? <p>現在予約可能なスロットがありません。</p> : null}
+        {!selectedLessonId ? <p>レッスンを選択してください。</p> : null}
       </form>
 
       <h2 className={styles.sectionTitle}>自分の予約</h2>
@@ -508,13 +660,14 @@ export default function StudentReservationsPanel() {
                 ? styles.reservationStatusConfirmed
                 : status.tone === "completed"
                   ? styles.reservationStatusCompleted
-                : status.tone === "cancelled"
-                  ? styles.reservationStatusCancelled
-                  : status.tone === "attended"
-                    ? styles.reservationStatusAttended
-                    : status.tone === "absent"
-                      ? styles.reservationStatusAbsent
-                      : styles.reservationStatusScheduled;
+                  : status.tone === "cancelled"
+                    ? styles.reservationStatusCancelled
+                    : status.tone === "attended"
+                      ? styles.reservationStatusAttended
+                      : status.tone === "absent"
+                        ? styles.reservationStatusAbsent
+                        : styles.reservationStatusScheduled;
+          const ro = rescheduleOptions[item.id] || null;
           return (
             <article key={item.id} className={styles.reservationCard}>
               <div className={styles.reservationCardHead}>
@@ -535,18 +688,17 @@ export default function StudentReservationsPanel() {
                     <select
                       className={styles.field}
                       value={rescheduleSlotByReservation[item.id] || ""}
+                      onFocus={() => ensureRescheduleOptions(item)}
                       onChange={(e) =>
                         setRescheduleSlotByReservation((prev) => ({ ...prev, [item.id]: e.target.value }))
                       }
                     >
-                      <option value="">変更するスロットを選択</option>
-                      {bookableSlots
-                        .filter((slot) => slot.id !== item.slotId)
-                        .map((slot) => (
-                          <option key={slot.id} value={slot.id}>
-                            {slotLabel(slot)}
-                          </option>
-                        ))}
+                      <option value="">変更する候補を選択</option>
+                      {(ro || []).map((c) => (
+                        <option key={c.slotId} value={c.slotId}>
+                          {c.date} {c.startTime}〜 {c.teacherName || ""} / {formatPt(c.pointCost)}
+                        </option>
+                      ))}
                     </select>
                     <button className={styles.button} type="button" onClick={() => handleReschedule(item.id)}>
                       予約変更

@@ -1,0 +1,349 @@
+/* 管理ダッシュボード最上段：週間スケジュール */
+
+.wrap {
+  margin: 0 0 1.25rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.65rem;
+  margin-bottom: 0.75rem;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.sub {
+  margin: 0.2rem 0 0;
+  font-size: 0.78rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #475569;
+}
+
+.dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+}
+
+.dotConfirmed {
+  background: #16a34a;
+}
+.dotRequested {
+  background: #f59e0b;
+}
+.dotAttention {
+  background: #ea580c;
+}
+.dotCancelled {
+  background: #94a3b8;
+}
+.dotOther {
+  background: #6366f1;
+}
+
+.weekScroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 0.25rem;
+}
+
+.weekGrid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(104px, 1fr));
+  gap: 0.45rem;
+  min-width: min(100%, 900px);
+}
+
+@media (max-width: 720px) {
+  .weekGrid {
+    grid-template-columns: repeat(7, minmax(88px, 1fr));
+    min-width: 620px;
+  }
+}
+
+.dayCol {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.dayColToday {
+  border-color: #93c5fd;
+  box-shadow: 0 0 0 1px #bfdbfe;
+}
+
+.dayHead {
+  padding: 0.35rem 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #334155;
+  background: #f1f5f9;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: center;
+}
+
+.dayBody {
+  flex: 1;
+  padding: 0.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  overflow-y: auto;
+  max-height: 200px;
+}
+
+.eventBtn {
+  width: 100%;
+  text-align: left;
+  border: none;
+  border-radius: 8px;
+  padding: 0.35rem 0.4rem;
+  font-size: 0.68rem;
+  line-height: 1.35;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  border-left: 3px solid #cbd5e1;
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.eventBtn:active {
+  transform: scale(0.98);
+}
+
+.eventBtn:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 1px;
+}
+
+.evConfirmed {
+  border-left-color: #16a34a;
+  background: #f0fdf4;
+}
+.evRequested {
+  border-left-color: #f59e0b;
+  background: #fffbeb;
+}
+.evAttention {
+  border-left-color: #ea580c;
+  background: #fff7ed;
+}
+.evCancelled {
+  border-left-color: #94a3b8;
+  background: #f1f5f9;
+  opacity: 0.85;
+}
+
+.evOther {
+  border-left-color: #6366f1;
+  background: #eef2ff;
+}
+
+.evTime {
+  font-weight: 800;
+  display: block;
+  color: #0f172a;
+}
+
+.evStudent {
+  font-weight: 700;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.evMeta {
+  font-size: 0.62rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.dayEmpty {
+  font-size: 0.65rem;
+  color: #94a3b8;
+  text-align: center;
+  padding: 0.5rem 0.25rem;
+  font-weight: 600;
+}
+
+/* 詳細モーダル */
+.modalRoot {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+}
+
+@media (min-width: 720px) {
+  .modalRoot {
+    align-items: center;
+    padding: 1rem;
+  }
+}
+
+.modalBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.modalCard {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  max-height: min(88vh, 640px);
+  overflow: auto;
+  background: #fff;
+  border-radius: 18px 18px 0 0;
+  box-shadow: 0 -8px 40px rgba(15, 23, 42, 0.15);
+  padding: 1rem 1.05rem 1.15rem;
+}
+
+@media (min-width: 720px) {
+  .modalCard {
+    border-radius: 18px;
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.18);
+  }
+}
+
+.modalTitle {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.modalStatus {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  margin-bottom: 0.65rem;
+}
+
+.modalDl {
+  margin: 0;
+  display: grid;
+  gap: 0.45rem;
+  font-size: 0.84rem;
+}
+
+.modalDl dt {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.modalDl dd {
+  margin: 0.1rem 0 0;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.modalActions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.rowActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.btn {
+  flex: 1;
+  min-width: 6rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  font-weight: 800;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.btnPrimary {
+  border-color: #2563eb;
+  background: #2563eb;
+  color: #fff;
+}
+
+.btnDanger {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.linkBtn {
+  display: block;
+  text-align: center;
+  padding: 0.5rem;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  font-weight: 800;
+  font-size: 0.82rem;
+  color: #1d4ed8;
+  text-decoration: none;
+}
+
+.closeBtn {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: 999px;
+  background: #f1f5f9;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  font-weight: 700;
+  color: #475569;
+}

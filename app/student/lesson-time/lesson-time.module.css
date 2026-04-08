@@ -17,6 +17,25 @@
   color: #334155;
 }
 
+.flowShell {
+  border-radius: 18px;
+  border: 1px solid #e2e8f0;
+  padding: 0.85rem 0.75rem 0.95rem;
+  background: #ffffff;
+  box-shadow: 0 8px 28px rgba(15, 23, 42, 0.06);
+}
+
+.previewHint {
+  margin: 0.55rem 0 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #475569;
+}
+
+.previewHint[data-tone="warn"] {
+  color: #92400e;
+}
+
 .heroCard {
   border-radius: 18px;
   border: 1px solid #e2e8f0;

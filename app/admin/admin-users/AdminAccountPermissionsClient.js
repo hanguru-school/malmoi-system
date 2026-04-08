@@ -187,6 +187,8 @@ export default function AdminAccountPermissionsClient({ initialAdmins = [], init
 }
 
 function AdminUserPanel({ admin, isSuper, saving, onSave }) {
+  const [superBusy, setSuperBusy] = useState("");
+  const [superMsg, setSuperMsg] = useState({ type: "", text: "" });
   const [displayName, setDisplayName] = useState(admin.displayName || "");
   const [email, setEmail] = useState(admin.email || "");
   const [phone, setPhone] = useState(admin.phone || "");
@@ -246,6 +248,46 @@ function AdminUserPanel({ admin, isSuper, saving, onSave }) {
   }
 
   const rankLabel = rank === "SUPER_ADMIN" ? "スーパー管理者" : "管理者";
+
+  async function sendAdminPasswordResetMail() {
+    setSuperBusy("mail");
+    setSuperMsg({ type: "", text: "" });
+    try {
+      const res = await fetch(`/api/admin/admin-users/${admin.id}/password-reset-mail`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok || !data?.ok) throw new Error(data?.error || "送信に失敗しました。");
+      setSuperMsg({ type: "ok", text: "パスワード再設定メールを送信しました。メール内のリンクは一度しか使えません。" });
+    } catch (e) {
+      setSuperMsg({ type: "error", text: e.message || "送信に失敗しました。" });
+    } finally {
+      setSuperBusy("");
+    }
+  }
+
+  async function issueTemporaryAdminPassword() {
+    if (
+      !window.confirm(
+        "仮パスワードを発行すると、この管理者の既存ログインセッションはすべて無効になります。続行しますか？"
+      )
+    ) {
+      return;
+    }
+    setSuperBusy("temp");
+    setSuperMsg({ type: "", text: "" });
+    try {
+      const res = await fetch(`/api/admin/admin-users/${admin.id}/temporary-password`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok || !data?.ok) throw new Error(data?.error || "発行に失敗しました。");
+      setSuperMsg({
+        type: "ok",
+        text: `仮パスワードを発行しました（次回ログイン時に変更が必須です）。表示はこの一度だけです: ${data.temporaryPassword}`,
+      });
+    } catch (e) {
+      setSuperMsg({ type: "error", text: e.message || "発行に失敗しました。" });
+    } finally {
+      setSuperBusy("");
+    }
+  }
 
   return (
     <div className={adminStyles.accountPermissionsLayout}>
@@ -323,12 +365,45 @@ function AdminUserPanel({ admin, isSuper, saving, onSave }) {
             </div>
           </div>
           {!isSuper ? <p className={adminStyles.fieldHint}>権限レベルの変更はスーパー管理者のみ行えます。</p> : null}
-          <div className={adminStyles.passwordActionRow}>
-            <button type="button" className={adminStyles.settingsButtonMuted} disabled>
-              パスワードを再設定
-            </button>
-            <span className={adminStyles.passwordActionNote}>この画面からのパスワード再設定は準備中です。お急ぎの場合は別途ご連絡ください。</span>
-          </div>
+          {isSuper ? (
+            <div className={adminStyles.superPasswordTools}>
+              <p className={adminStyles.settingsSectionLead} style={{ marginTop: "0.5rem" }}>
+                スーパー管理者向け：対象アカウントのパスワードが分からない・ログイン不能な場合の対応です。
+              </p>
+              <div className={adminStyles.compactActions}>
+                <button
+                  type="button"
+                  className={styles.button}
+                  disabled={superBusy !== ""}
+                  onClick={sendAdminPasswordResetMail}
+                >
+                  {superBusy === "mail" ? "送信中..." : "パスワード再設定メール送信"}
+                </button>
+                <button
+                  type="button"
+                  className={adminStyles.settingsButtonSecondary}
+                  disabled={superBusy !== ""}
+                  onClick={issueTemporaryAdminPassword}
+                >
+                  {superBusy === "temp" ? "発行中..." : "仮パスワード発行（次回ログイン時に変更必須）"}
+                </button>
+              </div>
+              {superMsg.text ? (
+                <p
+                  className={
+                    superMsg.type === "error" ? `${styles.message} ${styles.messageError}` : styles.message
+                  }
+                  style={{ marginTop: "0.5rem" }}
+                >
+                  {superMsg.text}
+                </p>
+              ) : null}
+            </div>
+          ) : (
+            <p className={adminStyles.passwordActionNote}>
+              パスワードを忘れた場合は、ログイン画面の「パスワードをお忘れですか？」から再設定メールを請求できます。
+            </p>
+          )}
           <p className={adminStyles.accountCaution}>
             権限や利用状態を変更したあと、必ず保存ボタンで確定してください。誤った設定は予約や請求の操作に影響することがあります。
           </p>

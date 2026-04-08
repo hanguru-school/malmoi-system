@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { pointsForMinutes } from "../../../lib/operational/pointsPolicy.js";
 import styles from "../../login/login.module.css";
 import adminStyles from "../admin.module.css";
 
@@ -368,6 +369,33 @@ export default function SystemSettingsPanel({
             <label className={styles.label}>変更申請の推奨締切（日前）
               <input className={styles.field} type="number" min={0} max={60} value={reservation.studentChangeDeadlineDays ?? 3} onChange={(e) => setSettings((prev) => ({ ...prev, reservation: { ...reservation, studentChangeDeadlineDays: Number(e.target.value || 0) } }))} />
             </label>
+            <label className={styles.label}>スロット自動生成に教室詳細営業を反映
+              <select className={styles.field} value={reservation.useClassroomHoursForSlotGeneration !== false ? "1" : "0"} onChange={(e) => setSettings((prev) => ({ ...prev, reservation: { ...reservation, useClassroomHoursForSlotGeneration: e.target.value === "1" } }))}>
+                <option value="1">ON</option>
+                <option value="0">OFF</option>
+              </select>
+            </label>
+            <label className={styles.label}>最低準備時間（分・開始前）
+              <input className={styles.field} type="number" min={0} value={reservation.minBookingLeadMinutes ?? 0} onChange={(e) => setSettings((prev) => ({ ...prev, reservation: { ...reservation, minBookingLeadMinutes: Number(e.target.value || 0) } }))} />
+            </label>
+            <label className={styles.label}>管理者は当日枠を優先評価（推奨ON）
+              <select className={styles.field} value={reservation.adminOverrideSameDay !== false ? "1" : "0"} onChange={(e) => setSettings((prev) => ({ ...prev, reservation: { ...reservation, adminOverrideSameDay: e.target.value === "1" } }))}>
+                <option value="1">ON</option>
+                <option value="0">OFF</option>
+              </select>
+            </label>
+            <label className={styles.label}>学生UIに消費pt目安を出す
+              <select className={styles.field} value={reservation.studentUiShowExpectedPoints ? "1" : "0"} onChange={(e) => setSettings((prev) => ({ ...prev, reservation: { ...reservation, studentUiShowExpectedPoints: e.target.value === "1" } }))}>
+                <option value="0">OFF</option>
+                <option value="1">ON</option>
+              </select>
+            </label>
+            <label className={styles.label}>学生UIに予約後残高を出す
+              <select className={styles.field} value={reservation.studentUiShowBalanceAfterBooking ? "1" : "0"} onChange={(e) => setSettings((prev) => ({ ...prev, reservation: { ...reservation, studentUiShowBalanceAfterBooking: e.target.value === "1" } }))}>
+                <option value="0">OFF</option>
+                <option value="1">ON</option>
+              </select>
+            </label>
           </div>
           <div className={adminStyles.compactActions}><button className={styles.button} type="button" disabled={savingSection === "reservation"} onClick={() => saveSection("reservation", reservation)}>{savingSection === "reservation" ? "保存中..." : "保存"}</button></div>
         </div>
@@ -413,6 +441,7 @@ export default function SystemSettingsPanel({
                   {
                     id: newId(),
                     name: "新規レッスン",
+                    displayNameJa: "",
                     description: "",
                     imageDataUrl: "",
                     allowPrivate: true,
@@ -421,10 +450,20 @@ export default function SystemSettingsPanel({
                     maxStudents: 4,
                     durationMinutes: 60,
                     prepMinutes: 10,
+                    prepBeforeMinutes: 10,
+                    prepAfterMinutes: 0,
+                    consumePoints: "",
+                    lessonFormat: "both",
                     teacherUserIds: [],
                     onlineOk: true,
                     inPersonOk: true,
                     studentSelectable: true,
+                    enabled: true,
+                    sortOrder: 0,
+                    adminOnlyBooking: false,
+                    allowReschedule: true,
+                    allowCancel: true,
+                    cancelPolicyType: "",
                   },
                 ];
                 setSettings((prev) => ({
@@ -455,6 +494,21 @@ export default function SystemSettingsPanel({
                   />
                 </label>
                 <label className={styles.label}>
+                  表示名
+                  <input
+                    className={styles.field}
+                    value={svc.displayNameJa || ""}
+                    onChange={(e) => {
+                      const next = [...(lessonServiceCatalog.services || [])];
+                      next[idx] = { ...svc, displayNameJa: e.target.value };
+                      setSettings((prev) => ({
+                  ...prev,
+                  lessonServiceCatalog: { ...(prev.lessonServiceCatalog || {}), services: next },
+                }));
+                    }}
+                  />
+                </label>
+                <label className={styles.label}>
                   時間(分)
                   <input
                     className={styles.field}
@@ -471,20 +525,106 @@ export default function SystemSettingsPanel({
                   />
                 </label>
                 <label className={styles.label}>
-                  準備(分)
+                  消費ポイント（空欄で自動: 分×60）
                   <input
                     className={styles.field}
                     type="number"
-                    value={svc.prepMinutes ?? 0}
+                    value={svc.consumePoints != null && svc.consumePoints !== "" ? svc.consumePoints : ""}
+                    placeholder={String(pointsForMinutes(svc.durationMinutes ?? 60))}
                     onChange={(e) => {
                       const next = [...(lessonServiceCatalog.services || [])];
-                      next[idx] = { ...svc, prepMinutes: Number(e.target.value || 0) };
+                      const v = e.target.value;
+                      next[idx] = { ...svc, consumePoints: v === "" ? "" : Number(v || 0) };
                       setSettings((prev) => ({
                   ...prev,
                   lessonServiceCatalog: { ...(prev.lessonServiceCatalog || {}), services: next },
                 }));
                     }}
                   />
+                </label>
+                <label className={styles.label}>
+                  準備(前/後 分)
+                  <div style={{ display: "flex", gap: "0.35rem" }}>
+                    <input
+                      className={styles.field}
+                      type="number"
+                      title="前"
+                      value={svc.prepBeforeMinutes ?? svc.prepMinutes ?? 0}
+                      onChange={(e) => {
+                        const next = [...(lessonServiceCatalog.services || [])];
+                        const pb = Number(e.target.value || 0);
+                        const pa = Number(svc.prepAfterMinutes ?? 0);
+                        next[idx] = { ...svc, prepBeforeMinutes: pb, prepAfterMinutes: pa, prepMinutes: pb + pa };
+                        setSettings((prev) => ({
+                  ...prev,
+                  lessonServiceCatalog: { ...(prev.lessonServiceCatalog || {}), services: next },
+                }));
+                      }}
+                    />
+                    <input
+                      className={styles.field}
+                      type="number"
+                      title="後"
+                      value={svc.prepAfterMinutes ?? 0}
+                      onChange={(e) => {
+                        const next = [...(lessonServiceCatalog.services || [])];
+                        const pa = Number(e.target.value || 0);
+                        const pb = Number(svc.prepBeforeMinutes ?? svc.prepMinutes ?? 0);
+                        next[idx] = { ...svc, prepBeforeMinutes: pb, prepAfterMinutes: pa, prepMinutes: pb + pa };
+                        setSettings((prev) => ({
+                  ...prev,
+                  lessonServiceCatalog: { ...(prev.lessonServiceCatalog || {}), services: next },
+                }));
+                      }}
+                    />
+                  </div>
+                </label>
+                <label className={styles.label}>
+                  表示順
+                  <input
+                    className={styles.field}
+                    type="number"
+                    value={svc.sortOrder ?? 0}
+                    onChange={(e) => {
+                      const next = [...(lessonServiceCatalog.services || [])];
+                      next[idx] = { ...svc, sortOrder: Number(e.target.value || 0) };
+                      setSettings((prev) => ({
+                  ...prev,
+                  lessonServiceCatalog: { ...(prev.lessonServiceCatalog || {}), services: next },
+                }));
+                    }}
+                  />
+                </label>
+                <label className={styles.label}>
+                  形式
+                  <select
+                    className={styles.field}
+                    value={svc.lessonFormat || "both"}
+                    onChange={(e) => {
+                      const next = [...(lessonServiceCatalog.services || [])];
+                      const f = e.target.value;
+                      const patch = { lessonFormat: f };
+                      if (f === "in_person") {
+                        patch.inPersonOk = true;
+                        patch.onlineOk = false;
+                      } else if (f === "online") {
+                        patch.inPersonOk = false;
+                        patch.onlineOk = true;
+                      } else {
+                        patch.inPersonOk = true;
+                        patch.onlineOk = true;
+                      }
+                      next[idx] = { ...svc, ...patch };
+                      setSettings((prev) => ({
+                  ...prev,
+                  lessonServiceCatalog: { ...(prev.lessonServiceCatalog || {}), services: next },
+                }));
+                    }}
+                  >
+                    <option value="both">両方</option>
+                    <option value="in_person">対面</option>
+                    <option value="online">オンライン</option>
+                  </select>
                 </label>
                 <label className={styles.label}>
                   最大人数
@@ -519,6 +659,14 @@ export default function SystemSettingsPanel({
                   }}
                 />
               </label>
+              <p className={adminStyles.smallMuted}>
+                プレビュー: {svc.durationMinutes ?? 60}分 /{" "}
+                {svc.consumePoints != null && svc.consumePoints !== ""
+                  ? `${svc.consumePoints}pt`
+                  : `${pointsForMinutes(svc.durationMinutes ?? 60)}pt（自動）`}{" "}
+                / 対面{svc.inPersonOk !== false ? "可" : "不可"} · オンライン{svc.onlineOk !== false ? "可" : "不可"}
+                {svc.enabled === false ? " · 無効" : ""}
+              </p>
               <label className={styles.label}>
                 画像 (data URL / 空で可)
                 <textarea
@@ -537,6 +685,10 @@ export default function SystemSettingsPanel({
               </label>
               <div className={adminStyles.compactFormGrid}>
                 {[
+                  ["enabled", "有効"],
+                  ["adminOnlyBooking", "管理者のみ予約可"],
+                  ["allowReschedule", "変更可能"],
+                  ["allowCancel", "キャンセル可能"],
                   ["allowPrivate", "個人"],
                   ["allowPair", "ペア"],
                   ["allowGroup", "グループ"],
@@ -548,7 +700,15 @@ export default function SystemSettingsPanel({
                     {lab}
                     <select
                       className={styles.field}
-                      value={svc[key] ? "1" : "0"}
+                      value={
+                        key === "enabled"
+                          ? svc.enabled !== false
+                            ? "1"
+                            : "0"
+                          : svc[key]
+                            ? "1"
+                            : "0"
+                      }
                       onChange={(e) => {
                         const next = [...(lessonServiceCatalog.services || [])];
                         next[idx] = { ...svc, [key]: e.target.value === "1" };
@@ -564,6 +724,21 @@ export default function SystemSettingsPanel({
                   </label>
                 ))}
               </div>
+              <label className={styles.label}>
+                キャンセル規定タイプ（内部キー・任意）
+                <input
+                  className={styles.field}
+                  value={svc.cancelPolicyType || ""}
+                  onChange={(e) => {
+                    const next = [...(lessonServiceCatalog.services || [])];
+                    next[idx] = { ...svc, cancelPolicyType: e.target.value };
+                    setSettings((prev) => ({
+                  ...prev,
+                  lessonServiceCatalog: { ...(prev.lessonServiceCatalog || {}), services: next },
+                }));
+                  }}
+                />
+              </label>
               <label className={styles.label}>
                 担当講師ユーザーID (カンマ区切り)
                 <input

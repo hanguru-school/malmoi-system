@@ -1051,6 +1051,12 @@
   max-width: 36rem;
 }
 
+.superPasswordTools {
+  margin-top: 0.65rem;
+  padding-top: 0.55rem;
+  border-top: 1px dashed #e2e8f0;
+}
+
 .accountCaution {
   margin: 0.65rem 0 0;
   font-size: 0.78rem;

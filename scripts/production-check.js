@@ -9,7 +9,7 @@ const fs = require("fs");
 const path = require("path");
 
 // 운영 서버 도메인
-const PRODUCTION_DOMAIN = "app.hanguru.school";
+const PRODUCTION_DOMAIN = "portal.hanguru.school";
 
 // 환경 변수 파일 경로
 const envFiles = [".env.local", ".env.production", ".env"];
@@ -137,37 +137,21 @@ function checkEnvironment() {
     console.log("   ❌ .github/workflows 디렉토리가 없습니다");
   }
 
-  // 5. 컴포넌트 확인
-  console.log("\n5. 컴포넌트 확인:");
-  const productionOnlyPath = "src/components/ProductionOnly.tsx";
-  const environmentWarningPath = "src/app/environment-warning/page.tsx";
+  // 5. app 라우터 구조 확인
+  console.log("\n5. app 라우터 구조 확인:");
+  const loginPagePath = "app/login/page.js";
+  const middlewarePath = "middleware.js";
 
-  if (fs.existsSync(productionOnlyPath)) {
-    console.log("   ✅ ProductionOnly 컴포넌트가 존재함");
+  if (fs.existsSync(loginPagePath)) {
+    console.log(`   ✅ 로그인 페이지가 존재함: ${loginPagePath}`);
   } else {
-    console.log("   ❌ ProductionOnly 컴포넌트가 없습니다");
+    console.log(`   ❌ 로그인 페이지가 없습니다: ${loginPagePath}`);
   }
-
-  if (fs.existsSync(environmentWarningPath)) {
-    console.log("   ✅ 환경 경고 페이지가 존재함");
-  } else {
-    console.log("   ❌ 환경 경고 페이지가 없습니다");
-  }
-
-  // 6. 미들웨어 확인
-  console.log("\n6. 미들웨어 확인:");
-  const middlewarePath = "src/middleware.ts";
 
   if (fs.existsSync(middlewarePath)) {
-    const middlewareContent = fs.readFileSync(middlewarePath, "utf8");
-
-    if (middlewareContent.includes("app.hanguru.school")) {
-      console.log("   ✅ 운영 서버 도메인 체크가 미들웨어에 포함됨");
-    } else {
-      console.log("   ⚠️  운영 서버 도메인 체크가 미들웨어에 없습니다");
-    }
+    console.log(`   ✅ 루트 미들웨어가 존재함: ${middlewarePath}`);
   } else {
-    console.log("   ❌ middleware.ts 파일이 없습니다");
+    console.log("   ℹ️  루트 미들웨어 없음 (현재 구조에서 정상)");
   }
 
   console.log("\n📋 체크 완료!");
@@ -175,7 +159,7 @@ function checkEnvironment() {
   console.log("   - .env.local 파일에 운영 서버 환경 변수 설정");
   console.log("   - Vercel에서 Preview 배포 비활성화");
   console.log("   - GitHub에서 main 브랜치 보호 설정");
-  console.log("   - https://app.hanguru.school 에서 테스트");
+  console.log("   - https://portal.hanguru.school 에서 테스트");
 }
 
 // 스크립트 실행

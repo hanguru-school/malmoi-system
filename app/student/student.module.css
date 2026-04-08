@@ -1197,6 +1197,20 @@
   margin-top: 0.65rem;
 }
 
+.timeFlowPointsRowTriple {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.65rem;
+}
+
+.timeFlowPolicyNote {
+  margin: 0.5rem 0 0;
+  font-size: 0.72rem;
+  line-height: 1.55;
+  color: #94a3b8;
+}
+
 .timeFlowPointCard {
   border-radius: 12px;
   padding: 0.65rem 0.7rem;
@@ -1268,6 +1282,10 @@
   }
 
   .timeFlowPointsRow {
+    grid-template-columns: 1fr;
+  }
+
+  .timeFlowPointsRowTriple {
     grid-template-columns: 1fr;
   }
 

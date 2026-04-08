@@ -11,9 +11,11 @@ import {
   listReservationsForAdmin,
   listStudentsForAdmin,
 } from "../../lib/auth/store";
+import { computeReservationFetchRange } from "../../lib/admin/reservationCalendarModel.js";
 import AdminTopNav from "./AdminTopNav";
 import dashboardStyles from "./admin.module.css";
 import AdminPendingApprovalPanel from "./AdminPendingApprovalPanel";
+import AdminDashboardSchedule from "./AdminDashboardSchedule";
 
 function todayInJst() {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tokyo" }).format(new Date());
@@ -91,6 +93,7 @@ function adminActionLabel(action, summary) {
 export default async function AdminPage() {
   await requireRole(["admin"]);
   const today = todayInJst();
+  const weekRange = computeReservationFetchRange("week", today);
   const [
     students,
     reservations,
@@ -99,6 +102,7 @@ export default async function AdminPage() {
     auditLogs,
     mailLogs,
     resToday,
+    resWeek,
     homeworkTodayList,
     minuteRisk,
     lessonMinutesMonth,
@@ -110,6 +114,12 @@ export default async function AdminPage() {
     listAuditLogsForAdmin({ page: 1, pageSize: 12 }),
     listMailLogsForAdmin({ page: 1, pageSize: 30 }),
     listReservationsForAdmin({ page: 1, pageSize: 800, fromDate: today, toDate: today }),
+    listReservationsForAdmin({
+      page: 1,
+      pageSize: 500,
+      fromDate: weekRange.fromDate,
+      toDate: weekRange.toDate,
+    }),
     listHomeworksForAdmin({ fromDate: today, toDate: today }),
     getAdminLessonMinuteRiskSummary(),
     getAdminLessonMinutesMonthSummary(),
@@ -175,7 +185,9 @@ export default async function AdminPage() {
       <main className={dashboardStyles.adminCard}>
         <AdminTopNav currentPath="/admin" showPageTitle pageTitle="管理ダッシュボード" />
         <p className={dashboardStyles.metaText}>今日の日付: {today}</p>
-        <p className={dashboardStyles.metaText}>承認待ち予約を最優先で処理し、続いて本日の予定を確認してください。</p>
+        <p className={dashboardStyles.metaText}>まず週間スケジュールで授業枠を確認し、承認待ちは KPI または予約運用で処理してください。</p>
+
+        <AdminDashboardSchedule todayYmd={today} reservations={resWeek.items || []} />
 
         <section className={dashboardStyles.opsSummaryStrip} aria-label="運営サマリー">
           <article className={dashboardStyles.opsSummaryCard}>

@@ -26,7 +26,7 @@ export default async function AdminLoginPage() {
             { href: "/login/teacher", label: "先生ログイン" },
           ]}
           extraLinks={[
-            { href: "/password-reset/request", label: "パスワードをお忘れの方" },
+            { href: "/login/admin/password-reset", label: "パスワードをお忘れですか？" },
           ]}
         />
       </main>

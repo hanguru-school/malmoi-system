@@ -1174,3 +1174,95 @@
 .noticeCardBtn:hover {
   border-color: #94a3b8;
 }
+
+/* —— マイページ：時間のみサマリー —— */
+.mypageTimeSummary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.mypageTimeDetailGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+}
+
+@media (min-width: 480px) {
+  .mypageTimeDetailGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.mypageTimeDetailCard {
+  border-radius: 14px;
+  padding: 0.65rem 0.7rem;
+  background: #f8fafc;
+  border: 1px solid #e8eef5;
+  min-height: 4.5rem;
+}
+
+.mypageTimeDetailLabel {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.mypageTimeDetailMain {
+  margin: 0.35rem 0 0;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #1e293b;
+  line-height: 1.35;
+}
+
+.mypageTimeDetailSub {
+  margin: 0.2rem 0 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.mypageTimeDetailNum {
+  font-size: 1.35rem;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  color: #0f172a;
+}
+
+.mypageTimeDetailUnit {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #64748b;
+  margin-left: 0.12rem;
+}
+
+.mypageTimeDetailMuted {
+  margin: 0.35rem 0 0;
+  font-size: 0.82rem;
+  color: #94a3b8;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.mypageTimeSummaryFoot {
+  margin: 0.35rem 0 0;
+  font-size: 0.74rem;
+  line-height: 1.5;
+  color: #94a3b8;
+}
+
+.mypageTimeSummaryFoot a {
+  color: var(--student-accent, #2563eb);
+  font-weight: 700;
+  text-decoration: none;
+  margin: 0 0.15rem;
+}
+
+.mypageTimeSummaryFoot a:hover {
+  text-decoration: underline;
+}

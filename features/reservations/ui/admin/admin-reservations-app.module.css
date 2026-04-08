@@ -4,6 +4,150 @@
   gap: 0.5rem;
 }
 
+.scheduleCard {
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #f8fafc;
+  padding: 0.75rem 0.85rem 0.65rem;
+  margin-bottom: 0.5rem;
+}
+
+.scheduleHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem 1rem;
+  margin-bottom: 0.65rem;
+}
+
+.scheduleTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.controlRow1 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.5rem 0.65rem;
+  margin-bottom: 0.5rem;
+}
+
+.controlRow2 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin-bottom: 0.55rem;
+}
+
+.filterRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.5rem 0.65rem;
+  padding-top: 0.45rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.compactLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #64748b;
+  min-width: 6.5rem;
+}
+
+.compactField {
+  min-height: 2.35rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  font-size: 0.88rem;
+}
+
+.navCluster {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.toolBtn {
+  min-height: 2.35rem;
+  padding: 0 0.65rem;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.toolBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.primaryAction {
+  min-height: 2.35rem;
+  padding: 0 1rem;
+  border-radius: 10px;
+  border: 1px solid #2563eb;
+  background: #2563eb;
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.86rem;
+  cursor: pointer;
+}
+
+.row1Spacer {
+  flex: 1;
+  min-width: 0.5rem;
+}
+
+.filterGrow {
+  flex: 1 1 12rem;
+  min-width: min(100%, 12rem);
+}
+
+.mainGridTight {
+  display: grid;
+  gap: 0.75rem;
+  align-items: start;
+  margin-top: 0.25rem;
+}
+
+@media (min-width: 960px) {
+  .mainGridTight {
+    grid-template-columns: 1fr min(380px, 36vw);
+  }
+}
+
+.rowHighlight {
+  background: #eff6ff !important;
+}
+
+@media (max-width: 720px) {
+  .row1Spacer {
+    display: none;
+  }
+
+  .primaryAction {
+    width: 100%;
+    order: 10;
+  }
+
+  .controlRow1 .navCluster {
+    flex: 1 1 100%;
+  }
+}
+
 .toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -32,6 +176,8 @@
     grid-template-columns: 1fr min(380px, 36vw);
   }
 }
+
+/* .mainGridTight replaces .mainGrid for schedule-first layout */
 
 .listCol {
   min-width: 0;
