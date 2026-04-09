@@ -15,9 +15,9 @@
 ## Git 배포 (요약)
 
 1. 원격 `origin` 이 `main` 을 가리키도록 설정
-2. 서버 `/home/malmoi_deploy/apps/malmoi` 에 clone 후 `chmod +x deploy/deploy-prod.sh`
+2. 서버 **`/srv/malmoi/apps/malmoi-integrated/current`** 에 clone 후 `chmod +x deploy/deploy-prod.sh`
 3. 로컬에 `scripts/deploy.env` 생성 (`scripts/deploy.env.example` 참고)
-4. 배포: `npm run deploy` 또는 Cursor 작업 **MalMoi: Push main + deploy (SSH)**
+4. 배포: `npm run deploy` / `npm run deploy:server` / `bash deploy-now.sh` 또는 Cursor 작업 **MalMoi: Push main + deploy (SSH)**
 
 자세한 절차·sudo 설정은 `docs/DEPLOY_GIT.md` 를 참고하세요.
 

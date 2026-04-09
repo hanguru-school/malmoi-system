@@ -11,7 +11,8 @@
     "check:db": "node scripts/check-db.mjs",
     "migrate:store:shared": "bash scripts/migrate-auth-store-to-shared.sh",
     "deploy": "bash scripts/deploy-from-local.sh",
-    "deploy:server": "bash scripts/deploy-server-only.sh"
+    "deploy:server": "bash scripts/deploy-server-only.sh",
+    "deploy:now": "bash deploy-now.sh"
   },
   "dependencies": {
     "@fullcalendar/daygrid": "^6.1.20",

@@ -9,8 +9,8 @@
 
 ## 서버 측 배포 스크립트
 
-- 경로 예: `/home/malmoi_deploy/apps/malmoi/deploy/deploy-prod.sh`
-- **기본 모드** (`MALMOI_USE_RELEASES` 미설정 또는 `0`): 저장소 디렉터리에서 `git pull --ff-only` 후 `npm ci`·`npm run build`·`systemctl restart`.
+- 경로 예: `/srv/malmoi/apps/malmoi-integrated/current/deploy/deploy-prod.sh`
+- **기본 모드** (`MALMOI_USE_RELEASES` 미설정 또는 `0`): **`/srv/malmoi/apps/malmoi-integrated/current`** 에서 `git fetch`·`reset --hard origin/main`·**`rm -rf .next`** 후 `npm ci`·`npm run build`·`systemctl restart`.
 - **릴리스 모드** (`MALMOI_USE_RELEASES=1`): `releases/<타임スタンプ>-<커밋>` 에 `git archive` 로 트리를 풀고 빌드한 뒤, **`current` 심볼릭 링크만 원자적으로 교체**합니다. 빌드 실패 시 새 디렉터리만 삭제하고 **기존 `current` 는 유지**합니다.
 - 릴리스 모드 사용 시 **systemd `WorkingDirectory`** 가 앱의 `current` 를 가리키도록 서버에서 한 번 맞춰야 합니다.
 

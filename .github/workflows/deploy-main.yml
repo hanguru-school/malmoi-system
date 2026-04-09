@@ -24,6 +24,6 @@ jobs:
           script_stop: true
           script: |
             set -euo pipefail
-            REMOTE_SCRIPT="${MALMOI_REMOTE_DEPLOY_SCRIPT:-/home/malmoi_deploy/apps/malmoi/deploy/deploy-prod.sh}"
+            REMOTE_SCRIPT="${MALMOI_REMOTE_DEPLOY_SCRIPT:-/srv/malmoi/apps/malmoi-integrated/current/deploy/deploy-prod.sh}"
             echo "Running: bash $REMOTE_SCRIPT"
             bash "$REMOTE_SCRIPT"

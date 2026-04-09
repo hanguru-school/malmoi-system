@@ -1,22 +1,29 @@
 #!/usr/bin/env bash
 # MalMoi production deploy script (server-side)
-# Path: /home/malmoi_deploy/apps/malmoi/deploy/deploy-prod.sh
+# 반드시 앱 루트(또는 릴리스 루트)에서 실행: bash deploy/deploy-prod.sh
 #
-# Modes:
-#   MALMOI_USE_RELEASES=0 (default): git pull in APP_DIR → npm ci → build → restart (기존)
-#   MALMOI_USE_RELEASES=1: releases/<id> 에 아카이브 빌드 → current 심볼릭 교체 → 재시작
-#     ※ systemd WorkingDirectory 가 .../current 를 가리키도록 서버에서 한 번 맞춰야 합니다.
-# AUTH_STORE_PATH 및 /srv/malmoi/shared/* 는 이 스크립트에서 변경하지 않습니다.
+# 정답 경로(기본):
+#   MALMOI_USE_RELEASES=0: Git 작업·빌드·실행 모두 /srv/malmoi/apps/malmoi-integrated/current
+#   MALMOI_USE_RELEASES=1: Git·releases/ 는 /srv/malmoi/apps/malmoi-integrated, 실행은 .../current 심볼릭
+#
+# DEPLOY_APP_DIR 로 위 기본을 덮어쓸 수 있습니다. AUTH_STORE_PATH 및 /srv/malmoi/shared/* 는 변경하지 않습니다.
 
 set -euo pipefail
 
-# 任意: GitHub Actions 手動デプロイ等から上書き（既定は従来どおり main / 固定パス）
-APP_DIR="${DEPLOY_APP_DIR:-/home/malmoi_deploy/apps/malmoi}"
+MALMOI_INTEGRATED_ROOT="${MALMOI_INTEGRATED_ROOT:-/srv/malmoi/apps/malmoi-integrated}"
+USE_RELEASES="${MALMOI_USE_RELEASES:-0}"
+if [[ -n "${DEPLOY_APP_DIR:-}" ]]; then
+  APP_DIR="$DEPLOY_APP_DIR"
+elif [[ "$USE_RELEASES" == "1" ]]; then
+  APP_DIR="$MALMOI_INTEGRATED_ROOT"
+else
+  APP_DIR="${MALMOI_INTEGRATED_ROOT}/current"
+fi
+
 GIT_REF="${DEPLOY_GIT_REF:-main}"
 SERVICE_NAME="${MALMOI_SYSTEMD_SERVICE:-malmoi-web}"
 INTERNAL_HEALTH_URL="http://127.0.0.1:3000/login"
 EXTERNAL_HEALTH_URL="https://portal.hanguru.school/login"
-USE_RELEASES="${MALMOI_USE_RELEASES:-0}"
 
 if [[ ! -d "$APP_DIR" ]]; then
   echo "ERROR: app directory not found: $APP_DIR"
@@ -65,9 +72,9 @@ if [[ "$USE_RELEASES" == "1" ]]; then
   echo "[release 1/8] git fetch origin $GIT_REF"
   git fetch origin "$GIT_REF"
 
-  echo "[release 2/8] git checkout tracking branch $GIT_REF (ff-only)"
+  echo "[release 2/8] git checkout + reset to origin/$GIT_REF"
   git checkout -B "$GIT_REF" "origin/$GIT_REF"
-  git pull --ff-only origin "$GIT_REF"
+  git reset --hard "origin/$GIT_REF"
 
   REL_ID="$(date +%Y%m%d-%H%M%S)-$(git rev-parse --short HEAD)"
   REL_PATH="${APP_DIR}/releases/${REL_ID}"
@@ -88,7 +95,8 @@ if [[ "$USE_RELEASES" == "1" ]]; then
     exit 1
   fi
 
-  echo "[release 4/8] install dependencies (include dev for build)"
+  echo "[release 4/8] clean Next cache + install dependencies (include dev for build)"
+  rm -rf .next
   if [[ -f package-lock.json ]]; then
     npm ci --include=dev
   else
@@ -157,11 +165,12 @@ fi
 echo "[1/7] git fetch origin $GIT_REF"
 git fetch origin "$GIT_REF"
 
-echo "[2/7] git checkout tracking branch $GIT_REF (ff-only)"
+echo "[2/7] git checkout + hard reset to origin/$GIT_REF (main = GitHub 유일 원본)"
 git checkout -B "$GIT_REF" "origin/$GIT_REF"
-git pull --ff-only origin "$GIT_REF"
+git reset --hard "origin/$GIT_REF"
 
-echo "[3/7] install dependencies (include dev for build)"
+echo "[3/7] remove .next cache + install dependencies (include dev for build)"
+rm -rf .next
 if [[ -f package-lock.json ]]; then
   npm ci --include=dev
 else

@@ -7,6 +7,7 @@
 - 개발/스테이징 운영 루틴: `docs/dev-and-staging-workflow.md`
 - 운영 대응 매뉴얼: `docs/operations-runbook.md`
 - **Git 기반 자동 배포 (권장)**: `docs/DEPLOY_GIT.md`
+- **운영 경로 한눈 정리 (`/srv/.../current`)**: `docs/deploy-path-srv-ko.md`
 - 운영 배포 실행 순서: `docs/deploy-workflow.md`
 - 배포 가이드(레거시 rsync 등): `docs/deployment-guide.md`
 - 시스템 아키텍처: `docs/system-architecture.md`

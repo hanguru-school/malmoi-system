@@ -9,7 +9,7 @@ set -euo pipefail
 # - Restart only systemd services
 
 SERVER="${MALMOI_SERVER:-malmoi_deploy@192.168.1.41}"
-REMOTE_DIR="${MALMOI_REMOTE_DIR:-/home/malmoi_deploy/apps/malmoi}"
+REMOTE_DIR="${MALMOI_REMOTE_DIR:-/srv/malmoi/apps/malmoi-integrated/current}"
 
 echo "[1/4] Sync source code to server (excluding runtime data)"
 rsync -avz --delete \
