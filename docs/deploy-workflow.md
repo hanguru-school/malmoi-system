@@ -9,7 +9,7 @@
 2. `git add -A`
 3. `git commit -m "작업 내용"`
 4. `git push origin main`
-5. SSH 접속 후 서버에서 `deploy/deploy-prod.sh` 실행
+5. SSH 로 서버에서 `deploy/deploy-prod.sh` 실행 (경로는 `/srv/malmoi/apps/malmoi-integrated/current`)
 
 위 과정을 한 번에 실행:
 
@@ -25,17 +25,18 @@ npm run deploy
 
 경로:
 
-- `/home/malmoi_deploy/apps/malmoi/deploy/deploy-prod.sh`
+- `/srv/malmoi/apps/malmoi-integrated/current/deploy/deploy-prod.sh`
 
 동작:
 
-1. 작업 경로 검증 (`/home/malmoi_deploy/apps/malmoi`)
-2. `git pull --ff-only origin main`
-3. `npm ci --omit=dev` (lock 없으면 `npm install --omit=dev`)
-4. `npm run build`
-5. 빌드 성공 시에만 `sudo systemctl restart malmoi-web`
-6. 내부 헬스체크 `curl -I http://127.0.0.1:3000/login`
-7. 상태/로그 출력 (`systemctl status`, `journalctl`)
+1. 작업 경로 검증 (`DEPLOY_APP_DIR`, 기본 `.../current`)
+2. `git fetch` + `checkout` + **`git reset --hard origin/<ref>`**
+3. **`rm -rf .next`**
+4. `npm ci --include=dev` (lock 없으면 `npm install --include=dev`)
+5. `npm run build`
+6. 빌드 성공 시에만 `sudo systemctl restart malmoi-web`
+7. 내부 헬스체크 `curl -I http://127.0.0.1:3000/login`
+8. 상태/로그 출력 (`systemctl status`, `journalctl`)
 
 ## 3) 실패 시 확인 방법
 
@@ -45,7 +46,7 @@ npm run deploy
 - 서버 로그 확인:
 
 ```bash
-cd /home/malmoi_deploy/apps/malmoi
+cd /srv/malmoi/apps/malmoi-integrated/current
 ls -lt deploy/logs | head
 ```
 

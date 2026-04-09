@@ -11,7 +11,7 @@ Actions 표시 이름: **Deploy production (manual)**
 
 ## 브랜치는 무엇을 고르나요
 
-- **branch** 입력: 서버에서 `git checkout`·`git pull` 할 **origin 브랜치 이름**입니다.  
+- **branch** 입력: 서버 `deploy-prod.sh` 에 전달되는 **`DEPLOY_GIT_REF`**(기본과 동일하게 `main` 권장).  
 - 운영 기본값은 **`main`** 입니다.
 
 ## 성공·실패는 어디서 보나요
@@ -26,7 +26,7 @@ Actions 표시 이름: **Deploy production (manual)**
 | `DEPLOY_HOST` | SSH 호스트 |
 | `DEPLOY_USER` | SSH 사용자 |
 | `DEPLOY_PORT` | SSH 포트 (예: `22`) |
-| `DEPLOY_APP_DIR` | 서버 앱 루트 (예: `/home/malmoi_deploy/apps/malmoi`) |
+| `DEPLOY_APP_DIR` | 서버 앱 루트 — **`/srv/malmoi/apps/malmoi-integrated/current`** |
 | `DEPLOY_SSH_KEY` | 배포용 개인키 (PEM 전체) |
 
 `environment: production` 을 쓰므로, 환경별 Secrets가 있으면 그쪽 값이 우선될 수 있습니다.
@@ -37,10 +37,9 @@ Actions 표시 이름: **Deploy production (manual)**
 2. SSH 키 파일 생성·권한(`600`)  
 3. `known_hosts` 등록  
 4. SSH 접속 테스트  
-5. 서버: `cd` → `git fetch` → `git checkout` → `git pull`  
-6. 서버: `bash deploy/deploy-prod.sh`  
-7. 서버: `systemctl status malmoi-web`  
-8. 서버: `curl` 로컬·공개 URL 헬스 확인  
+5. 서버: `cd "$DEPLOY_APP_DIR"` → `bash deploy/deploy-prod.sh` (`fetch`·`reset --hard`·`.next` 삭제·`build`·`restart` 일괄)  
+6. 서버: `systemctl status malmoi-web`  
+7. 서버: `curl` 로컬·공개 URL 헬스 확인  
 
 ## main 머지 시 자동 배포로 바꾸려면
 

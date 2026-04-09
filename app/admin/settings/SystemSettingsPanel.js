@@ -5,10 +5,10 @@ import { useEffect, useMemo, useState } from "react";
 import { pointsForMinutes } from "../../../lib/operational/pointsPolicy.js";
 import styles from "../../login/login.module.css";
 import adminStyles from "../admin.module.css";
+import ReservationPolicyVisual from "./reservation/ReservationPolicyVisual.js";
 
 const ALL_TABS = [
   { id: "schoolBasic", label: "教室基本設定" },
-  { id: "classroomOperations", label: "営業時間・詳細" },
   { id: "reservation", label: "予約設定" },
   { id: "lesson", label: "レッスン共通" },
   { id: "lessonServiceCatalog", label: "レッスン・サービス" },
@@ -25,6 +25,9 @@ const ALL_TABS = [
 ];
 
 const SUPER_ADMIN_ONLY_SECTIONS = new Set(["mail", "security"]);
+
+/** 設定ログのフィルタ用（タブ自体は /admin/settings/classroom で編集） */
+const LOG_SECTION_EXTRA = [{ id: "classroomOperations", label: "営業時間・詳細" }];
 
 function boolLabel(value) {
   return value ? "ON" : "OFF";
@@ -165,7 +168,6 @@ export default function SystemSettingsPanel({
   const security = settings.security || {};
   const parent = settings.parent || {};
   const pair = settings.pair || {};
-  const classroomOperations = settings.classroomOperations || {};
   const lessonServiceCatalog = settings.lessonServiceCatalog || { services: [] };
   const paymentMethodsPolicy = settings.paymentMethodsPolicy || { methods: [], webProvidersPrepared: {}, inClassFlowNote: "" };
   const teacherSchedulePolicy = settings.teacherSchedulePolicy || {};
@@ -222,182 +224,20 @@ export default function SystemSettingsPanel({
         </div>
       ) : null}
 
-      {activeTab === "classroomOperations" ? (
-        <div className={adminStyles.groupBlock}>
-          <h3 className={adminStyles.groupTitle}>営業時間（詳細）</h3>
-          <p className={adminStyles.smallMuted}>
-            優先度: <strong>日付例外</strong> &gt; <strong>曜日別</strong> &gt; <strong>基本</strong>。基本値は教室基本の営業時間と同期して運用してください。
-          </p>
-          <div className={adminStyles.compactFormGrid}>
-            <label className={styles.label}>
-              基本・開店
-              <input
-                className={styles.field}
-                value={classroomOperations.defaultOpen || schoolBasic.businessHoursStart || ""}
-                onChange={(e) =>
-                  setSettings((prev) => ({
-                    ...prev,
-                    classroomOperations: { ...classroomOperations, defaultOpen: e.target.value },
-                  }))
-                }
-              />
-            </label>
-            <label className={styles.label}>
-              基本・閉店
-              <input
-                className={styles.field}
-                value={classroomOperations.defaultClose || schoolBasic.businessHoursEnd || ""}
-                onChange={(e) =>
-                  setSettings((prev) => ({
-                    ...prev,
-                    classroomOperations: { ...classroomOperations, defaultClose: e.target.value },
-                  }))
-                }
-              />
-            </label>
-          </div>
-          <label className={styles.label}>
-            基本・休憩（JSON 配列・例: start/end の配列）
-            <textarea
-              className={styles.field}
-              rows={3}
-              value={JSON.stringify(classroomOperations.defaultBreaks || [], null, 0)}
-              onChange={(e) => {
-                try {
-                  const parsed = JSON.parse(e.target.value || "[]");
-                  setSettings((prev) => ({
-                    ...prev,
-                    classroomOperations: { ...classroomOperations, defaultBreaks: Array.isArray(parsed) ? parsed : [] },
-                  }));
-                } catch {
-                  /* ignore */
-                }
-              }}
-            />
-          </label>
-          <label className={styles.label}>
-            曜日別 (JSON オブジェクト キー 0=日〜6=土)
-            <textarea
-              className={styles.field}
-              rows={4}
-              value={JSON.stringify(classroomOperations.weekdayHours || {}, null, 2)}
-              onChange={(e) => {
-                try {
-                  const parsed = JSON.parse(e.target.value || "{}");
-                  setSettings((prev) => ({
-                    ...prev,
-                    classroomOperations: { ...classroomOperations, weekdayHours: parsed && typeof parsed === "object" ? parsed : {} },
-                  }));
-                } catch {
-                  /* ignore */
-                }
-              }}
-            />
-          </label>
-          <label className={styles.label}>
-            日付例外 (JSON 配列: closed / short / special + date + open/close + breaks + note)
-            <textarea
-              className={styles.field}
-              rows={5}
-              value={JSON.stringify(classroomOperations.dateOverrides || [], null, 2)}
-              onChange={(e) => {
-                try {
-                  const parsed = JSON.parse(e.target.value || "[]");
-                  setSettings((prev) => ({
-                    ...prev,
-                    classroomOperations: { ...classroomOperations, dateOverrides: Array.isArray(parsed) ? parsed : [] },
-                  }));
-                } catch {
-                  /* ignore */
-                }
-              }}
-            />
-          </label>
-          <div className={adminStyles.compactActions}>
-            <button
-              className={styles.button}
-              type="button"
-              disabled={savingSection === "classroomOperations"}
-              onClick={() => saveSection("classroomOperations", classroomOperations)}
-            >
-              {savingSection === "classroomOperations" ? "保存中..." : "保存"}
-            </button>
-          </div>
-        </div>
-      ) : null}
-
       {activeTab === "reservation" ? (
         <div className={adminStyles.groupBlock}>
-          <h3 className={adminStyles.groupTitle}>予約設定</h3>
-          <div className={adminStyles.compactFormGrid}>
-            <label className={styles.label}>予約方式
-              <select className={styles.field} value={reservation.reservationMode || "time_unit"} onChange={(e) => setSettings((prev) => ({ ...prev, reservation: { ...reservation, reservationMode: e.target.value } }))}>
-                <option value="time_unit">時間単位</option>
-                <option value="course_unit">コース単位</option>
-              </select>
-            </label>
-            <label className={styles.label}>時間生成モード
-              <select className={styles.field} value={reservation.timeGenerationMode || "direct_input"} onChange={(e) => setSettings((prev) => ({ ...prev, reservation: { ...reservation, timeGenerationMode: e.target.value } }))}>
-                <option value="all_times">all_times</option>
-                <option value="course_auto">course_auto</option>
-                <option value="direct_input">direct_input</option>
-              </select>
-            </label>
-            <label className={styles.label}>営業時間開始<input className={styles.field} value={reservation.operatingStartTime || ""} onChange={(e) => setSettings((prev) => ({ ...prev, reservation: { ...reservation, operatingStartTime: e.target.value } }))} /></label>
-            <label className={styles.label}>営業時間終了<input className={styles.field} value={reservation.operatingEndTime || ""} onChange={(e) => setSettings((prev) => ({ ...prev, reservation: { ...reservation, operatingEndTime: e.target.value } }))} /></label>
-            <label className={styles.label}>予約準備時間(分)<input className={styles.field} type="number" value={reservation.prepMinutes ?? 10} onChange={(e) => setSettings((prev) => ({ ...prev, reservation: { ...reservation, prepMinutes: Number(e.target.value || 0) } }))} /></label>
-            <label className={styles.label}>最大予約期間(日)<input className={styles.field} type="number" value={reservation.maxBookableDays ?? 30} onChange={(e) => setSettings((prev) => ({ ...prev, reservation: { ...reservation, maxBookableDays: Number(e.target.value || 30) } }))} /></label>
-            <label className={styles.label}>当日予約許可
-              <select className={styles.field} value={reservation.allowSameDayBooking ? "1" : "0"} onChange={(e) => setSettings((prev) => ({ ...prev, reservation: { ...reservation, allowSameDayBooking: e.target.value === "1" } }))}>
-                <option value="1">ON</option>
-                <option value="0">OFF</option>
-              </select>
-            </label>
-            <label className={styles.label}>キャンセル期限(時間前)<input className={styles.field} type="number" value={reservation.cancelCutoffHours ?? 3} onChange={(e) => setSettings((prev) => ({ ...prev, reservation: { ...reservation, cancelCutoffHours: Number(e.target.value || 0) } }))} /></label>
-            <label className={styles.label}>承認設定
-              <select className={styles.field} value={reservation.approvalMode || "admin"} onChange={(e) => setSettings((prev) => ({ ...prev, reservation: { ...reservation, approvalMode: e.target.value } }))}>
-                <option value="admin">管理者承認が必要</option>
-                <option value="auto">自動確定（運用注意）</option>
-              </select>
-            </label>
-            <label className={styles.label}>カレンダーにキャンセルを表示
-              <select className={styles.field} value={reservation.calendarDisplayShowCancelled ? "1" : "0"} onChange={(e) => setSettings((prev) => ({ ...prev, reservation: { ...reservation, calendarDisplayShowCancelled: e.target.value === "1" } }))}>
-                <option value="0">OFF</option>
-                <option value="1">ON</option>
-              </select>
-            </label>
-            <label className={styles.label}>変更申請の推奨締切（日前）
-              <input className={styles.field} type="number" min={0} max={60} value={reservation.studentChangeDeadlineDays ?? 3} onChange={(e) => setSettings((prev) => ({ ...prev, reservation: { ...reservation, studentChangeDeadlineDays: Number(e.target.value || 0) } }))} />
-            </label>
-            <label className={styles.label}>スロット自動生成に教室詳細営業を反映
-              <select className={styles.field} value={reservation.useClassroomHoursForSlotGeneration !== false ? "1" : "0"} onChange={(e) => setSettings((prev) => ({ ...prev, reservation: { ...reservation, useClassroomHoursForSlotGeneration: e.target.value === "1" } }))}>
-                <option value="1">ON</option>
-                <option value="0">OFF</option>
-              </select>
-            </label>
-            <label className={styles.label}>最低準備時間（分・開始前）
-              <input className={styles.field} type="number" min={0} value={reservation.minBookingLeadMinutes ?? 0} onChange={(e) => setSettings((prev) => ({ ...prev, reservation: { ...reservation, minBookingLeadMinutes: Number(e.target.value || 0) } }))} />
-            </label>
-            <label className={styles.label}>管理者は当日枠を優先評価（推奨ON）
-              <select className={styles.field} value={reservation.adminOverrideSameDay !== false ? "1" : "0"} onChange={(e) => setSettings((prev) => ({ ...prev, reservation: { ...reservation, adminOverrideSameDay: e.target.value === "1" } }))}>
-                <option value="1">ON</option>
-                <option value="0">OFF</option>
-              </select>
-            </label>
-            <label className={styles.label}>学生UIに消費pt目安を出す
-              <select className={styles.field} value={reservation.studentUiShowExpectedPoints ? "1" : "0"} onChange={(e) => setSettings((prev) => ({ ...prev, reservation: { ...reservation, studentUiShowExpectedPoints: e.target.value === "1" } }))}>
-                <option value="0">OFF</option>
-                <option value="1">ON</option>
-              </select>
-            </label>
-            <label className={styles.label}>学生UIに予約後残高を出す
-              <select className={styles.field} value={reservation.studentUiShowBalanceAfterBooking ? "1" : "0"} onChange={(e) => setSettings((prev) => ({ ...prev, reservation: { ...reservation, studentUiShowBalanceAfterBooking: e.target.value === "1" } }))}>
-                <option value="0">OFF</option>
-                <option value="1">ON</option>
-              </select>
-            </label>
-          </div>
-          <div className={adminStyles.compactActions}><button className={styles.button} type="button" disabled={savingSection === "reservation"} onClick={() => saveSection("reservation", reservation)}>{savingSection === "reservation" ? "保存中..." : "保存"}</button></div>
+          <h3 className={adminStyles.groupTitle}>予約設定（カードUI）</h3>
+          <ReservationPolicyVisual
+            reservation={reservation}
+            setReservation={(patch) =>
+              setSettings((prev) => ({
+                ...prev,
+                reservation: { ...(prev.reservation || {}), ...patch },
+              }))
+            }
+            saving={savingSection === "reservation"}
+            onSave={() => saveSection("reservation", reservation)}
+          />
         </div>
       ) : null}
 
@@ -1389,7 +1229,9 @@ export default function SystemSettingsPanel({
           <div className={adminStyles.compactActions}>
             <select className={styles.field} value={logSectionFilter} onChange={(e) => setLogSectionFilter(e.target.value)}>
               <option value="">全体</option>
-              {ALL_TABS.filter((tab) => !["systemInfo", "changeLogs"].includes(tab.id)).map((tab) => (
+              {ALL_TABS.filter((tab) => !["systemInfo", "changeLogs"].includes(tab.id))
+                .concat(LOG_SECTION_EXTRA)
+                .map((tab) => (
                 <option key={tab.id} value={tab.id}>{tab.label}</option>
               ))}
             </select>

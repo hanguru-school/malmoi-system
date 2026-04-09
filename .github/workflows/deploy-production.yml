@@ -1,4 +1,5 @@
 # 운영 서버 수동 배포 (workflow_dispatch, OpenSSH 키 파일 방식)
+# DEPLOY_APP_DIR Secret: /srv/malmoi/apps/malmoi-integrated/current (deploy-prod.sh 가 fetch/reset/.next 제거/build/restart)
 # - PR 검증: production-deploy.yml (별도)
 # - main push 자동 배포: deploy-main.yml (별도)
 
@@ -59,7 +60,7 @@ jobs:
             -o BatchMode=yes \
             "${DEPLOY_USER}@${DEPLOY_HOST}" "echo SSH_OK"
 
-      - name: Server — git fetch / checkout / pull
+      - name: Server — deploy (git fetch/reset, .next clean, build, restart)
         run: |
           set -euo pipefail
           ssh -i ~/.ssh/deploy_key -p "${DEPLOY_PORT}" \
@@ -67,17 +68,7 @@ jobs:
             -o UserKnownHostsFile=~/.ssh/known_hosts \
             -o BatchMode=yes \
             "${DEPLOY_USER}@${DEPLOY_HOST}" \
-            "set -euo pipefail; cd \"${DEPLOY_APP_DIR}\"; git fetch origin; git checkout \"${GIT_REF}\"; git pull origin \"${GIT_REF}\""
-
-      - name: Server — bash deploy/deploy-prod.sh
-        run: |
-          set -euo pipefail
-          ssh -i ~/.ssh/deploy_key -p "${DEPLOY_PORT}" \
-            -o StrictHostKeyChecking=yes \
-            -o UserKnownHostsFile=~/.ssh/known_hosts \
-            -o BatchMode=yes \
-            "${DEPLOY_USER}@${DEPLOY_HOST}" \
-            "set -euo pipefail; cd \"${DEPLOY_APP_DIR}\"; bash deploy/deploy-prod.sh"
+            "set -euo pipefail; cd \"${DEPLOY_APP_DIR}\"; export DEPLOY_GIT_REF=\"${GIT_REF}\"; bash deploy/deploy-prod.sh"
 
       - name: Server — systemctl status malmoi-web
         run: |

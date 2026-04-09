@@ -26,6 +26,7 @@ import StudentReservationCalendar from "./StudentReservationCalendar";
 import StudentTimeCandidateList from "./StudentTimeCandidateList";
 import StudentReservationConfirmCard from "./StudentReservationConfirmCard";
 import StudentReservationDetailModal from "./StudentReservationDetailModal";
+import ClassroomWeekHoursPortalStrip from "../shared/ClassroomWeekHoursPortalStrip";
 import { lessonDeliveryLabel, statusMeta } from "../../../../lib/adapters/studentReservationView";
 
 const STEPS = ["レッスン", "日付", "時間", "確認", "完了"];
@@ -211,6 +212,12 @@ export default function StudentReservationsApp() {
       .sort((a, b) => String(a.startTime).localeCompare(String(b.startTime)));
   }, [monthPayload, selectedDate]);
 
+  const candidateDiagnostics = useMemo(() => {
+    const summary = monthPayload?.summary || monthPayload?.diagnostics?.studentSummary || null;
+    const adminSummary = monthPayload?.diagnostics?.adminSummary || null;
+    return { summary, adminSummary };
+  }, [monthPayload]);
+
   useEffect(() => {
     if (selectedDate && selectedCandidate && selectedCandidate.date !== selectedDate) {
       setSelectedCandidate(null);
@@ -352,6 +359,8 @@ export default function StudentReservationsApp() {
             loading={loading}
           />
 
+          <ClassroomWeekHoursPortalStrip />
+
           {step < 5 ? (
             <div className={flow.pcLayout}>
               <div>
@@ -423,6 +432,29 @@ export default function StudentReservationsApp() {
                 {step === 2 ? (
                   <section>
                     <p className={flow.hint}>予約する日付を選んでください。グレー表示の日は選べません。</p>
+                    {candidateDiagnostics.summary &&
+                    candidateDiagnostics.summary.total > 0 &&
+                    candidateDiagnostics.summary.bookingOk === 0 ? (
+                      <div className={flow.impactBox} style={{ marginBottom: "0.8rem" }}>
+                        <div className={flow.impactTitle}>현재 조건에서는 예약 가능한 시간이 없습니다</div>
+                        <div className={flow.impactLine}>
+                          후보 {candidateDiagnostics.summary.total}개 중 예약 가능 0개
+                        </div>
+                        <div className={flow.hint} style={{ marginTop: "0.35rem" }}>
+                          주요 사유:
+                          {(candidateDiagnostics.summary.topReasonCodes || [])
+                            .slice(0, 3)
+                            .map((x) => `${x.code}(${x.count})`)
+                            .join(", ") || " 정보 없음"}
+                        </div>
+                        {candidateDiagnostics.adminSummary ? (
+                          <div className={flow.hint} style={{ marginTop: "0.25rem" }}>
+                            관리자 기준 비교: 예약 가능 {candidateDiagnostics.adminSummary.bookingOk || 0} /{" "}
+                            {candidateDiagnostics.adminSummary.total || 0}
+                          </div>
+                        ) : null}
+                      </div>
+                    ) : null}
                     <StudentReservationCalendar
                       calendarMonth={calendarMonth}
                       today={today}

@@ -7,10 +7,10 @@ Wants=network-online.target
 Type=simple
 User=malmoi_deploy
 Group=malmoi_deploy
-WorkingDirectory=/home/malmoi_deploy/apps/malmoi
+WorkingDirectory=/srv/malmoi/apps/malmoi-integrated/current
 Environment=NODE_ENV=production
 Environment=PORT=3000
-ExecStartPre=/usr/bin/test -f /home/malmoi_deploy/apps/malmoi/package.json
+ExecStartPre=/usr/bin/test -f /srv/malmoi/apps/malmoi-integrated/current/package.json
 ExecStart=/usr/bin/npm run start -- --hostname 127.0.0.1 --port 3000
 Restart=always
 RestartSec=5

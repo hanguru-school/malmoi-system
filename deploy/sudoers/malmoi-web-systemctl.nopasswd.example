@@ -1,0 +1,19 @@
+# MalMoi 배포 사용자(malmoi_deploy 등)가 비대화형 SSH에서 systemctl/journalctl 을 쓰기 위한 예시.
+# 실제 반영(서버에서 root):
+#   sudo cp deploy/sudoers/malmoi-web-systemctl.nopasswd.example /etc/sudoers.d/malmoi-web-systemctl
+#   sudo chmod 0440 /etc/sudoers.d/malmoi-web-systemctl
+#   sudo chown root:root /etc/sudoers.d/malmoi-web-systemctl
+#   sudo visudo -cf /etc/sudoers.d/malmoi-web-systemctl
+#
+# 아래 malmoi_deploy 를 실제 배포 계정으로 바꾸세요. malmoi-web 은 유닛 이름과 맞춥니다.
+
+Cmnd_Alias MALMOI_WEB_SYSTEMD = \
+  /usr/bin/systemctl restart malmoi-web, \
+  /usr/bin/systemctl is-active malmoi-web, \
+  /usr/bin/systemctl status malmoi-web, \
+  /usr/bin/systemctl show malmoi-web
+
+# journalctl 인자는 배포 스크립트의 `journalctl -u malmoi-web -n 50` 등과 호환되도록 와일드카드 사용
+Cmnd_Alias MALMOI_WEB_JOURNAL = /usr/bin/journalctl -u malmoi-web*
+
+malmoi_deploy ALL=(ALL) NOPASSWD: MALMOI_WEB_SYSTEMD, MALMOI_WEB_JOURNAL

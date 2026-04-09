@@ -3,7 +3,7 @@
 # Run on the server as a user that can read the legacy file and write to /srv/malmoi/shared.
 #
 # Usage:
-#   APP_DIR=/home/malmoi_deploy/apps/malmoi bash scripts/migrate-auth-store-to-shared.sh
+#   APP_DIR=/srv/malmoi/apps/malmoi-integrated/current bash scripts/migrate-auth-store-to-shared.sh
 #   bash scripts/migrate-auth-store-to-shared.sh /other/path/auth-store.json
 #
 # If destination exists, abort unless FORCE=1 (both source and dest are backed up first).
@@ -11,7 +11,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-APP_DIR="${APP_DIR:-/home/malmoi_deploy/apps/malmoi}"
+APP_DIR="${APP_DIR:-/srv/malmoi/apps/malmoi-integrated/current}"
 LEGACY="${1:-$APP_DIR/.data/auth-store.json}"
 SHARED="/srv/malmoi/shared/auth-store.json"
 BACKUP_ROOT="/srv/malmoi/shared/backups"
