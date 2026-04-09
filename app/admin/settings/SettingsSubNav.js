@@ -9,7 +9,10 @@ import adminStyles from "../admin.module.css";
  */
 export default function SettingsSubNav({ basePath, items }) {
   const sp = useSearchParams();
-  const current = String(sp?.get("t") || "").trim() || (items[0]?.t ?? "");
+  const current =
+    String(sp?.get("t") || "")
+      .trim()
+      .toLowerCase() || (items[0]?.t ?? "");
 
   return (
     <nav className={adminStyles.settingsSubNav} aria-label="設定サブセクション">

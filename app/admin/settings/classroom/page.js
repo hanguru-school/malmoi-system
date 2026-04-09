@@ -8,6 +8,7 @@ import {
 } from "../../../../lib/auth/store";
 import SystemSettingsPanel from "../SystemSettingsPanel";
 import SettingsSubNav from "../SettingsSubNav";
+import ClassroomHoursSettingsClient from "./ClassroomHoursSettingsClient";
 
 const SUB_ITEMS = [
   { t: "basic", label: "基本情報" },
@@ -19,7 +20,9 @@ const SUB_ITEMS = [
 export default async function ClassroomSettingsPage({ searchParams }) {
   const session = await requireRole(["admin"]);
   const sp = await searchParams;
-  const t = String(sp?.t || "basic");
+  const t = String(sp?.t || "basic")
+    .trim()
+    .toLowerCase() || "basic";
   const tabMap = {
     basic: "schoolBasic",
     hours: "classroomOperations",
@@ -41,16 +44,25 @@ export default async function ClassroomSettingsPage({ searchParams }) {
       <Suspense fallback={null}>
         <SettingsSubNav basePath="/admin/settings/classroom" items={SUB_ITEMS} />
       </Suspense>
-      <SystemSettingsPanel
-        key={t}
-        initialSettings={settings}
-        initialSystemInfo={systemInfo}
-        initialLogs={logResult.items || []}
-        initialLogPagination={logResult.pagination}
-        adminRank={session.user.adminRank || "ADMIN"}
-        tabIds={["schoolBasic", "classroomOperations", "pair", "homework"]}
-        initialActiveTab={initialActiveTab}
-      />
+      {t === "hours" ? (
+        <ClassroomHoursSettingsClient
+          key="classroom-hours-visual"
+          initialClassroomOperations={settings.classroomOperations || {}}
+          initialSchoolBasic={settings.schoolBasic || {}}
+          adminRank={session.user.adminRank || "ADMIN"}
+        />
+      ) : (
+        <SystemSettingsPanel
+          key={t}
+          initialSettings={settings}
+          initialSystemInfo={systemInfo}
+          initialLogs={logResult.items || []}
+          initialLogPagination={logResult.pagination}
+          adminRank={session.user.adminRank || "ADMIN"}
+          tabIds={["schoolBasic", "classroomOperations", "pair", "homework"]}
+          initialActiveTab={initialActiveTab}
+        />
+      )}
     </>
   );
 }
