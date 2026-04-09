@@ -1,0 +1,223 @@
+.root {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 960px) {
+  .root {
+    grid-template-columns: 280px 1fr;
+    align-items: start;
+  }
+}
+
+.teacherList {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.teacherBtn {
+  width: 100%;
+  text-align: left;
+  padding: 0.75rem 0.9rem;
+  border: none;
+  border-bottom: 1px solid #f1f5f9;
+  background: #fff;
+  cursor: pointer;
+}
+
+.teacherBtn:hover {
+  background: #f8fafc;
+}
+
+.teacherBtnActive {
+  background: #eff6ff;
+  border-left: 3px solid #2563eb;
+}
+
+.teacherName {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #0f172a;
+}
+
+.teacherMail {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.main {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem;
+  background: #fff;
+}
+
+.subTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 0.75rem;
+}
+
+.subTab {
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.subTabOn {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+}
+
+.hint {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin: 0 0 0.75rem;
+  line-height: 1.45;
+}
+
+.dayCard {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.75rem 0.9rem;
+  margin-bottom: 0.55rem;
+}
+
+.dayHead {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.45rem;
+}
+
+.dayLab {
+  font-weight: 800;
+  width: 1.75rem;
+}
+
+.toggle {
+  width: 44px;
+  height: 24px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  background: #cbd5e1;
+  position: relative;
+}
+
+.toggleOn {
+  background: #16a34a;
+}
+
+.knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.15s ease;
+}
+
+.toggleOn .knob {
+  transform: translateX(20px);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.select {
+  padding: 0.35rem 0.45rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  font-size: 0.88rem;
+}
+
+.copyBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.65rem;
+}
+
+.copyBtn {
+  font-size: 0.78rem;
+  padding: 0.35rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  cursor: pointer;
+}
+
+.calWrap {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.65rem;
+}
+
+.month {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.4rem;
+}
+
+.mTitle {
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  margin: 0 0 0.25rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.dow {
+  font-size: 0.6rem;
+  text-align: center;
+  color: #94a3b8;
+}
+
+.cell {
+  aspect-ratio: 1;
+  max-height: 26px;
+  border: none;
+  border-radius: 5px;
+  font-size: 0.65rem;
+  cursor: pointer;
+  padding: 0;
+  background: #f8fafc;
+}
+
+.cellOff {
+  background: #fecaca;
+  color: #7f1d1d;
+  font-weight: 700;
+}
+
+.cellMuted {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.list {
+  margin-top: 0.75rem;
+  font-size: 0.82rem;
+  color: #334155;
+}

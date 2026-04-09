@@ -42,6 +42,7 @@ export default async function ClassroomSettingsPage({ searchParams }) {
         <SettingsSubNav basePath="/admin/settings/classroom" items={SUB_ITEMS} />
       </Suspense>
       <SystemSettingsPanel
+        key={t}
         initialSettings={settings}
         initialSystemInfo={systemInfo}
         initialLogs={logResult.items || []}

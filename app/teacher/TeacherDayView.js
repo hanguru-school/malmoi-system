@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { listReservationsForAdmin } from "../../lib/auth/store";
+import ClassroomWeekHoursPortalStrip from "../../features/reservations/ui/shared/ClassroomWeekHoursPortalStrip";
 import TeacherTopNav from "./TeacherTopNav";
 import t from "./teacher.module.css";
 
@@ -33,6 +34,7 @@ export default async function TeacherDayView({
         <h1 className={t.title}>{pageTitle}</h1>
         <p className={t.subtitle}>{pageSubtitle}</p>
         <TeacherTopNav currentPath={currentPath} />
+        <ClassroomWeekHoursPortalStrip />
         <form className={t.dateForm} method="GET">
           <label className={t.dateLabel}>
             日付
