@@ -1,0 +1,389 @@
+/* SimplyBook-inspired: cards, soft shadow, mobile-first */
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  max-width: 1200px;
+}
+
+.hero {
+  background: linear-gradient(145deg, #ffffff 0%, #f4f7fb 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.1rem 1.25rem;
+  box-shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+}
+
+.heroTitle {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.heroHint {
+  margin: 0 0 1rem;
+  font-size: 0.8rem;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+.row2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+@media (max-width: 520px) {
+  .row2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.fieldLabel {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 0.35rem;
+}
+
+.select {
+  width: 100%;
+  padding: 0.5rem 0.65rem;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  font-size: 0.9rem;
+  background: #fff;
+  color: #0f172a;
+}
+
+.subTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.subTab {
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  font-size: 0.85rem;
+  cursor: pointer;
+  color: #334155;
+}
+
+.subTabActive {
+  background: linear-gradient(135deg, #0d9488 0%, #2563eb 100%);
+  color: #fff;
+  border-color: transparent;
+}
+
+.cardGrid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .cardGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .cardGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.dayCard {
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.04);
+}
+
+.dayHead {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.dayLabel {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #0f172a;
+  min-width: 2rem;
+}
+
+.toggle {
+  position: relative;
+  width: 44px;
+  height: 26px;
+  border-radius: 999px;
+  border: none;
+  background: #cbd5e1;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.2s;
+}
+
+.toggleOn {
+  background: linear-gradient(135deg, #14b8a6 0%, #3b82f6 100%);
+}
+
+.toggleKnob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s;
+}
+
+.toggleOn .toggleKnob {
+  transform: translateX(18px);
+}
+
+.timeRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.breakBlock {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.breakTitle {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #94a3b8;
+  margin: 0 0 0.4rem;
+}
+
+.breakRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.35rem;
+}
+
+.btnGhost {
+  padding: 0.35rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  font-size: 0.8rem;
+  cursor: pointer;
+  color: #334155;
+}
+
+.btnGhost:hover {
+  background: #f1f5f9;
+}
+
+.btnPrimary {
+  padding: 0.55rem 1.2rem;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #0d9488 0%, #2563eb 100%);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.btnPrimary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btnDanger {
+  padding: 0.25rem 0.45rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.yearNav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.yearTitle {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #0f172a;
+}
+
+.monthsGrid {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 700px) {
+  .monthsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1100px) {
+  .monthsGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.monthBlock {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.65rem;
+  background: #fff;
+}
+
+.monthName {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #475569;
+  margin-bottom: 0.35rem;
+}
+
+.calGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+
+.calDow {
+  font-size: 0.65rem;
+  text-align: center;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.calCell {
+  aspect-ratio: 1;
+  min-height: 28px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.72rem;
+  cursor: pointer;
+  padding: 0;
+  color: #0f172a;
+}
+
+.calCellMuted {
+  border: none;
+  background: transparent;
+  cursor: default;
+}
+
+.calCellClosed {
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+.calCellShort {
+  background: #fef9c3;
+  border-color: #fde047;
+}
+
+.calCellSpecial {
+  background: #dbeafe;
+  border-color: #93c5fd;
+}
+
+.calCellSelected {
+  outline: 2px solid #2563eb;
+  outline-offset: 1px;
+}
+
+.panelBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  justify-content: flex-end;
+  align-items: stretch;
+  background: rgba(15, 23, 42, 0.35);
+}
+
+.panelCard {
+  width: min(100%, 400px);
+  background: #fff;
+  padding: 1.25rem;
+  overflow-y: auto;
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.12);
+}
+
+.panelTitle {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+}
+
+.readOnlyBanner {
+  font-size: 0.8rem;
+  color: #64748b;
+  padding: 0.5rem 0.75rem;
+  background: #f1f5f9;
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+}
+
+.summaryStrip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.summaryPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  font-size: 0.78rem;
+  color: #0f172a;
+}
+
+.summaryPillOff {
+  background: #fef2f2;
+  border-color: #fecaca;
+  opacity: 0.85;
+}
+
+.summaryWd {
+  font-weight: 700;
+  color: #475569;
+}

@@ -5,13 +5,10 @@ import { useEffect, useMemo, useState } from "react";
 import { pointsForMinutes } from "../../../lib/operational/pointsPolicy.js";
 import styles from "../../login/login.module.css";
 import adminStyles from "../admin.module.css";
-import ClassroomOperationsVisual from "./classroom/ClassroomOperationsVisual.js";
 import ReservationPolicyVisual from "./reservation/ReservationPolicyVisual.js";
-import { getDayRule } from "../../../lib/reservations/scheduleVisualShared.js";
 
 const ALL_TABS = [
   { id: "schoolBasic", label: "教室基本設定" },
-  { id: "classroomOperations", label: "営業時間・詳細" },
   { id: "reservation", label: "予約設定" },
   { id: "lesson", label: "レッスン共通" },
   { id: "lessonServiceCatalog", label: "レッスン・サービス" },
@@ -28,6 +25,9 @@ const ALL_TABS = [
 ];
 
 const SUPER_ADMIN_ONLY_SECTIONS = new Set(["mail", "security"]);
+
+/** 設定ログのフィルタ用（タブ自体は /admin/settings/classroom で編集） */
+const LOG_SECTION_EXTRA = [{ id: "classroomOperations", label: "営業時間・詳細" }];
 
 function boolLabel(value) {
   return value ? "ON" : "OFF";
@@ -168,7 +168,6 @@ export default function SystemSettingsPanel({
   const security = settings.security || {};
   const parent = settings.parent || {};
   const pair = settings.pair || {};
-  const classroomOperations = settings.classroomOperations || {};
   const lessonServiceCatalog = settings.lessonServiceCatalog || { services: [] };
   const paymentMethodsPolicy = settings.paymentMethodsPolicy || { methods: [], webProvidersPrepared: {}, inClassFlowNote: "" };
   const teacherSchedulePolicy = settings.teacherSchedulePolicy || {};
@@ -222,34 +221,6 @@ export default function SystemSettingsPanel({
               {savingSection === "schoolBasic" ? "保存中..." : "保存"}
             </button>
           </div>
-        </div>
-      ) : null}
-
-      {activeTab === "classroomOperations" ? (
-        <div className={adminStyles.groupBlock}>
-          <h3 className={adminStyles.groupTitle}>営業時間（ビジュアル設定）</h3>
-          <ClassroomOperationsVisual
-            value={classroomOperations}
-            schoolBasic={schoolBasic}
-            saving={savingSection === "classroomOperations"}
-            onChange={(next) =>
-              setSettings((prev) => ({
-                ...prev,
-                classroomOperations: typeof next === "object" && next ? next : prev.classroomOperations,
-              }))
-            }
-            onSave={() => {
-              const fo = schoolBasic.businessHoursStart || "10:00";
-              const fc = schoolBasic.businessHoursEnd || "19:00";
-              const mon = getDayRule(classroomOperations.weekdayHours || {}, 1, classroomOperations.defaultOpen || fo, classroomOperations.defaultClose || fc);
-              const payload = {
-                ...classroomOperations,
-                defaultOpen: mon.closed ? classroomOperations.defaultOpen || fo : mon.open,
-                defaultClose: mon.closed ? classroomOperations.defaultClose || fc : mon.close,
-              };
-              saveSection("classroomOperations", payload);
-            }}
-          />
         </div>
       ) : null}
 
@@ -1258,7 +1229,9 @@ export default function SystemSettingsPanel({
           <div className={adminStyles.compactActions}>
             <select className={styles.field} value={logSectionFilter} onChange={(e) => setLogSectionFilter(e.target.value)}>
               <option value="">全体</option>
-              {ALL_TABS.filter((tab) => !["systemInfo", "changeLogs"].includes(tab.id)).map((tab) => (
+              {ALL_TABS.filter((tab) => !["systemInfo", "changeLogs"].includes(tab.id))
+                .concat(LOG_SECTION_EXTRA)
+                .map((tab) => (
                 <option key={tab.id} value={tab.id}>{tab.label}</option>
               ))}
             </select>

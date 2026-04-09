@@ -1,68 +1,31 @@
 import { Suspense } from "react";
 import styles from "../../../login/login.module.css";
 import { requireRole } from "../../../../lib/auth/session";
-import {
-  getSystemInfoSummaryForAdmin,
-  getSystemSettingsForAdmin,
-  listSystemSettingLogsForAdmin,
-} from "../../../../lib/auth/store";
-import SystemSettingsPanel from "../SystemSettingsPanel";
+import { getSystemSettingsForAdmin } from "../../../../lib/auth/store";
 import SettingsSubNav from "../SettingsSubNav";
-import ClassroomHoursSettingsClient from "./ClassroomHoursSettingsClient";
+import ClassroomHoursVisualPanel from "./ClassroomHoursVisualPanel";
+import { CLASSROOM_HUB_SUBNAV } from "../classroomHubNav";
 
-const SUB_ITEMS = [
-  { t: "basic", label: "基本情報" },
-  { t: "hours", label: "基本営業・曜日別・日別例外" },
-  { t: "pair", label: "ペア設定" },
-  { t: "homework", label: "宿題" },
-];
-
-export default async function ClassroomSettingsPage({ searchParams }) {
+export default async function ClassroomSettingsPage() {
   const session = await requireRole(["admin"]);
-  const sp = await searchParams;
-  const t = String(sp?.t || "basic")
-    .trim()
-    .toLowerCase() || "basic";
-  const tabMap = {
-    basic: "schoolBasic",
-    hours: "classroomOperations",
-    pair: "pair",
-    homework: "homework",
-  };
-  const initialActiveTab = tabMap[t] || "schoolBasic";
-
   const settings = await getSystemSettingsForAdmin();
-  const systemInfo = await getSystemInfoSummaryForAdmin();
-  const logResult = await listSystemSettingLogsForAdmin({ page: 1, pageSize: 20 });
 
   return (
     <>
       <h2 className={styles.sectionTitle} style={{ fontSize: "1.15rem", marginTop: 0 }}>
-        教室運営
+        教室運営 — 営業時間
       </h2>
-      <p className={styles.description}>基本情報・営業時間（優先順位: 日別 &gt; 曜日 &gt; 基本）・ペア・宿題です。</p>
+      <p className={styles.description}>
+        曜日・休憩・特別日はすべてクリック操作です（JSON 入力なし）。基本情報・ペア・宿題は下のリンクから。
+      </p>
       <Suspense fallback={null}>
-        <SettingsSubNav basePath="/admin/settings/classroom" items={SUB_ITEMS} />
+        <SettingsSubNav items={CLASSROOM_HUB_SUBNAV} />
       </Suspense>
-      {t === "hours" ? (
-        <ClassroomHoursSettingsClient
-          key="classroom-hours-visual"
-          initialClassroomOperations={settings.classroomOperations || {}}
-          initialSchoolBasic={settings.schoolBasic || {}}
-          adminRank={session.user.adminRank || "ADMIN"}
-        />
-      ) : (
-        <SystemSettingsPanel
-          key={t}
-          initialSettings={settings}
-          initialSystemInfo={systemInfo}
-          initialLogs={logResult.items || []}
-          initialLogPagination={logResult.pagination}
-          adminRank={session.user.adminRank || "ADMIN"}
-          tabIds={["schoolBasic", "classroomOperations", "pair", "homework"]}
-          initialActiveTab={initialActiveTab}
-        />
-      )}
+      <ClassroomHoursVisualPanel
+        initialClassroomOperations={settings.classroomOperations || {}}
+        initialSchoolBasic={settings.schoolBasic || {}}
+        adminRank={session.user.adminRank || "ADMIN"}
+      />
     </>
   );
 }
