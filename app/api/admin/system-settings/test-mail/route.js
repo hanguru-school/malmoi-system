@@ -18,7 +18,7 @@ export async function POST(request) {
       toEmail,
       noticeTitle: "システム設定テストメール",
       noticeSummary: "SMTP接続とメールテンプレート設定の確認メールです。",
-      noticeUrl: String(body?.portalUrl || "").trim() || "https://portal.hanguru.school",
+      noticeUrl: String(body?.portalUrl || "").trim() || "https://portal.hanguru.blog",
       recipientName: String(body?.recipientName || "").trim() || session.user.displayName || session.user.email,
       recipientRole: "admin",
     });

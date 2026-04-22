@@ -31,4 +31,4 @@ echo "🚀 운영 환경에 배포 중..."
 npx vercel --prod --token=$VERCEL_TOKEN
 
 echo "✅ 배포 완료!"
-echo "🌐 운영 URL: https://app.hanguru.school" 
+echo "🌐 운영 URL: https://portal.hanguru.blog" 

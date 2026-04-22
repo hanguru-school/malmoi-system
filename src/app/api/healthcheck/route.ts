@@ -30,7 +30,7 @@ export async function GET() {
       },
       infrastructure: {
         platform: "Vercel",
-        domain: "https://app.hanguru.school",
+        domain: "https://portal.hanguru.blog",
         database: "AWS RDS PostgreSQL 17.4",
         authentication: "AWS Cognito",
         region: process.env.AWS_REGION || "ap-northeast-1",

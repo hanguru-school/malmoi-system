@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
   images: {
     domains: [
       "malmoi-system-files.s3.ap-northeast-1.amazonaws.com",
-      "app.hanguru.school",
+      "portal.hanguru.blog",
     ],
     formats: ["image/webp", "image/avif"],
   },
@@ -97,7 +97,7 @@ const nextConfig: NextConfig = {
   env: {
     NODE_ENV: process.env.NODE_ENV,
     NEXT_PUBLIC_NODE_ENV: process.env.NODE_ENV,
-    NEXT_PUBLIC_PRODUCTION_URL: "https://app.hanguru.school",
+    NEXT_PUBLIC_PRODUCTION_URL: "https://portal.hanguru.blog",
   },
 };
 

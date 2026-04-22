@@ -17,25 +17,25 @@ async function testRoleRedirection() {
 
     const testUsers = [
       {
-        email: "test-student@hanguru.school",
+        email: "test-student@hanguru.blog",
         name: "테스트 학생",
         role: "STUDENT",
         password: "test123",
       },
       {
-        email: "test-admin@hanguru.school",
+        email: "test-admin@hanguru.blog",
         name: "테스트 관리자",
         role: "ADMIN",
         password: "test123",
       },
       {
-        email: "test-teacher@hanguru.school",
+        email: "test-teacher@hanguru.blog",
         name: "테스트 선생님",
         role: "TEACHER",
         password: "test123",
       },
       {
-        email: "test-staff@hanguru.school",
+        email: "test-staff@hanguru.blog",
         name: "테스트 직원",
         role: "STAFF",
         password: "test123",
@@ -151,7 +151,7 @@ async function testRoleRedirection() {
 
     // 4. 테스트 계정 정보 출력
     console.log("4. 테스트 계정 정보");
-    console.log("🌐 프로덕션 URL: https://app.hanguru.school");
+    console.log("🌐 프로덕션 URL: https://portal.hanguru.blog");
     console.log("📝 테스트 계정들:");
 
     for (const user of createdUsers) {

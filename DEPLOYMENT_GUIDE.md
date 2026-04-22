@@ -4,7 +4,7 @@
 
 이 프로젝트는 **운영 환경 전용** 시스템으로 구성되어 있습니다.
 
-- **운영 서버**: `https://app.hanguru.school`
+- **운영 서버**: `https://portal.hanguru.blog`
 - **테스트/개발 환경**: 접근 금지 및 자동 리다이렉트
 
 ## 🔒 보안 설정
@@ -62,13 +62,13 @@ git push origin main
 
 ### 비운영 환경 접속 시
 
-- **경고 메시지**: "現在の環境はテスト用のため、正式な動作を保証していません。必ず https://app.hanguru.school を使用してください。"
+- **경고 메시지**: "現在の環境はテスト用のため、正式な動作を保証していません。必ず https://portal.hanguru.blog を使用してください。"
 - **자동 리다이렉트**: 5초 후 운영 서버로 이동
 - **수동 이동**: 버튼 클릭으로 즉시 이동
 
 ### 지원 환경
 
-- ✅ `https://app.hanguru.school` - 정상 작동
+- ✅ `https://portal.hanguru.blog` - 정상 작동
 - ❌ `localhost:3000` - 경고 후 리다이렉트
 - ❌ `localhost:3006` - 경고 후 리다이렉트
 - ❌ `*.vercel.app` - 경고 후 리다이렉트
@@ -81,7 +81,7 @@ git push origin main
 ```bash
 # 운영 환경
 NODE_ENV=production
-NEXT_PUBLIC_APP_URL=https://app.hanguru.school
+NEXT_PUBLIC_APP_URL=https://portal.hanguru.blog
 DATABASE_URL=your-production-database-url
 NEXTAUTH_SECRET=your-production-secret
 ```

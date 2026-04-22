@@ -9,7 +9,7 @@ async function createTestUser() {
 
     // 1. 기존 테스트 사용자 확인
     const existingUser = await prisma.user.findUnique({
-      where: { email: "test@hanguru.school" },
+      where: { email: "test@hanguru.blog" },
     });
 
     if (existingUser) {
@@ -38,7 +38,7 @@ async function createTestUser() {
     const newUser = await prisma.user.create({
       data: {
         name: "테스트 학생",
-        email: "test@hanguru.school",
+        email: "test@hanguru.blog",
         password: hashedPassword,
         role: "STUDENT",
         phone: "010-1234-5678",
@@ -72,7 +72,7 @@ async function createTestUser() {
       const teacherUser = await prisma.user.create({
         data: {
           name: "기본 강사",
-          email: "teacher@hanguru.school",
+          email: "teacher@hanguru.blog",
           password: await bcrypt.hash("teacher123", 10),
           role: "TEACHER",
           phone: "010-0000-0000",

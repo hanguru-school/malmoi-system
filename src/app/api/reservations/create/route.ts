@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
           const teacherUser = await prisma.user.create({
             data: {
               name: "김선생님",
-              email: "teacher@hanguru.school",
+              email: "teacher@hanguru.blog",
               password: "hashed_password_placeholder",
               role: "TEACHER",
               phone: "010-1234-5678",

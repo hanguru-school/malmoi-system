@@ -11,7 +11,18 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+function defaultMetadataBase() {
+  const raw = String(process.env.APP_BASE_URL || process.env.NEXTAUTH_URL || "").trim().replace(/\/$/, "");
+  if (!raw) return new URL("https://portal.hanguru.blog");
+  try {
+    return new URL(raw.includes("://") ? raw : `https://${raw}`);
+  } catch {
+    return new URL("https://portal.hanguru.blog");
+  }
+}
+
 export const metadata = {
+  metadataBase: defaultMetadataBase(),
   title: "MalMoi Portal",
   description: "MalMoi integrated intro and login project",
 };

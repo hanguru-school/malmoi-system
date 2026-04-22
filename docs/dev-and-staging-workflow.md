@@ -131,13 +131,13 @@
 ## 8) 도메인 전략
 
 최종 목표:
-- `hanguru.school` -> 메인 사이트
-- `portal.hanguru.school` -> MalMoi 포털
+- `hanguru.blog` -> 메인 사이트
+- `portal.hanguru.blog` -> MalMoi 포털
 - `hanguru.blog` -> 블로그
 
 현재 권장 순서:
 1. 28 서버 임시 외부 주소로 스테이징 검증
-2. 안정화 후 `portal.hanguru.school` 연결
+2. 안정화 후 `portal.hanguru.blog` 연결
 3. 정식 공개 전 최종 점검
 
 ---

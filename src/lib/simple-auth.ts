@@ -14,10 +14,10 @@ export class SimpleAuthService {
       let user = await databaseService.getUserByEmail(email);
 
       // 사용자가 없으면 자동 생성 (관리자 계정인 경우)
-      if (!user && email === "hanguru.school@gmail.com") {
+      if (!user && email === "hanguru.blog@gmail.com") {
         const hashedPassword = await bcrypt.hash(password, 10);
         user = await databaseService.createUser({
-          email: "hanguru.school@gmail.com",
+          email: "hanguru.blog@gmail.com",
           name: "관리자",
           role: "admin",
           cognitoUserId: "simple_admin_001",

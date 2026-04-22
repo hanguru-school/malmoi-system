@@ -20,10 +20,10 @@ export async function POST(request: NextRequest) {
     console.log("Login attempt:", { email, password });
 
     // 하드코딩된 인증 (테스트용)
-    if (email === "hanguru.school@gmail.com" && password === "Alfl1204!") {
+    if (email === "hanguru.blog@gmail.com" && password === "Alfl1204!") {
       const user = {
         id: "1",
-        email: "hanguru.school@gmail.com",
+        email: "hanguru.blog@gmail.com",
         name: "관리자",
         role: "admin",
         cognitoUserId: "simple_admin_001",

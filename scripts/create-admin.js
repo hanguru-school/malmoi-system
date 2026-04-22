@@ -18,7 +18,7 @@ async function createAdminUser() {
     // 기존 관리자 계정 확인
     const existingAdminResult = await pool.query(
       "SELECT * FROM users WHERE email = $1",
-      ["admin@hanguru.school"],
+      ["admin@hanguru.blog"],
     );
 
     if (existingAdminResult.rows.length > 0) {
@@ -35,12 +35,12 @@ async function createAdminUser() {
     // 관리자 계정 생성
     const adminUserResult = await pool.query(
       "INSERT INTO users (email, name, password, role, created_at, updated_at) VALUES ($1, $2, $3, $4, NOW(), NOW()) RETURNING *",
-      ["admin@hanguru.school", "관리자", hashedPassword, "ADMIN"],
+      ["admin@hanguru.blog", "관리자", hashedPassword, "ADMIN"],
     );
 
     const adminUser = adminUserResult.rows[0];
     console.log("관리자 계정이 생성되었습니다:", adminUser.email);
-    console.log("이메일: admin@hanguru.school");
+    console.log("이메일: admin@hanguru.blog");
     console.log("비밀번호: admin123");
   } catch (error) {
     console.error("관리자 계정 생성 오류:", error);

@@ -48,7 +48,7 @@ export default function ProductionOnly({ children }: ProductionOnlyProps) {
             現在の環境はテスト用のため、正式な動作を保証していません。
           </div>
           <div className="text-lg mb-8">
-            必ず <strong>https://app.hanguru.school</strong>{" "}
+            必ず <strong>https://portal.hanguru.blog</strong>{" "}
             を使用してください。
           </div>
           <div className="text-sm opacity-75">

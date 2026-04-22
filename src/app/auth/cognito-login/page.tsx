@@ -222,7 +222,7 @@ function CognitoLoginContent() {
             </div>
             <div>
               <strong>Callback URL:</strong>{" "}
-              https://app.hanguru.school/api/auth/callback/cognito
+              https://portal.hanguru.blog/api/auth/callback/cognito
             </div>
             <div>
               <strong>OAuth Scopes:</strong> openid email profile phone

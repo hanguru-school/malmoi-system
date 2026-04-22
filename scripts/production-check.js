@@ -9,7 +9,7 @@ const fs = require("fs");
 const path = require("path");
 
 // 운영 서버 도메인
-const PRODUCTION_DOMAIN = "portal.hanguru.school";
+const PRODUCTION_DOMAIN = "portal.hanguru.blog";
 
 // 환경 변수 파일 경로
 const envFiles = [".env.local", ".env.production", ".env"];
@@ -159,7 +159,7 @@ function checkEnvironment() {
   console.log("   - .env.local 파일에 운영 서버 환경 변수 설정");
   console.log("   - Vercel에서 Preview 배포 비활성화");
   console.log("   - GitHub에서 main 브랜치 보호 설정");
-  console.log("   - https://portal.hanguru.school 에서 테스트");
+  console.log("   - https://portal.hanguru.blog 에서 테스트");
 }
 
 // 스크립트 실행

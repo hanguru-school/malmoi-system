@@ -3,7 +3,7 @@
  */
 
 // 운영 서버 도메인 목록
-const PRODUCTION_DOMAINS = ["app.hanguru.school", "hanguru.school"];
+const PRODUCTION_DOMAINS = ["portal.hanguru.blog", "hanguru.blog"];
 
 // 개발/테스트 환경 도메인 패턴
 const DEVELOPMENT_PATTERNS = [
@@ -46,14 +46,14 @@ export function isDevelopmentEnvironment(): boolean {
  */
 export function getEnvironmentWarningMessage(): string {
   return `現在の環境はテスト用のため、正式な動作を保証していません。
-必ず https://app.hanguru.school を使用してください。`;
+必ず https://portal.hanguru.blog を使用してください。`;
 }
 
 /**
  * 운영 서버 URL 가져오기
  */
 export function getProductionUrl(): string {
-  return "https://app.hanguru.school";
+  return "https://portal.hanguru.blog";
 }
 
 /**

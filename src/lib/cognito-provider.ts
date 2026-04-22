@@ -12,7 +12,7 @@ const DEFAULT_CONFIG = {
   clientId: "4bdn0n9r92huqpcs21e0th1nve",
   clientSecret: "9ko7sn73f63en08gqh8uhhmvaagmt2o1vn9gnffjcgoecjskf8e",
   domain: "https://malmoi-system-pool.auth.ap-northeast-1.amazoncognito.com",
-  redirectUri: "https://app.hanguru.school/api/auth/callback/cognito",
+  redirectUri: "https://portal.hanguru.blog/api/auth/callback/cognito",
   scopes: ["openid", "email", "profile", "phone"],
   responseType: "code",
 };

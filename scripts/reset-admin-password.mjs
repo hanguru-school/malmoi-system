@@ -9,12 +9,12 @@
  *   MALMOI_RESET_CONFIRM=yes printf '%s\n' '새비밀번호4자이상' | \\
  *     node scripts/reset-admin-password.mjs \\
  *     --store /srv/malmoi/shared/auth-store.json \\
- *     --email office@hanguru.school \\
+ *     --email office@hanguru.blog \\
  *     --stdin
  *
  * 예 (환경변수, 셸 히스토리 주의):
  *   MALMOI_RESET_CONFIRM=yes RESET_ADMIN_NEW_PASSWORD='...' \\
- *     node scripts/reset-admin-password.mjs --store ... --email office@hanguru.school
+ *     node scripts/reset-admin-password.mjs --store ... --email office@hanguru.blog
  */
 
 import crypto from "crypto";
@@ -84,7 +84,7 @@ Password source (first match):
     process.exit(1);
   }
 
-  const targetEmail = normalizeEmail(args.email || process.env.RESET_ADMIN_EMAIL || "office@hanguru.school");
+  const targetEmail = normalizeEmail(args.email || process.env.RESET_ADMIN_EMAIL || "office@hanguru.blog");
   if (!targetEmail) {
     console.error("ERROR: --email or RESET_ADMIN_EMAIL required.");
     process.exit(1);
