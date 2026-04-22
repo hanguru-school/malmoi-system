@@ -28,7 +28,7 @@ async function createAdminUser() {
     // 관리자 사용자 생성
     const adminUser = await prisma.user.create({
       data: {
-        email: "admin@hanguru.school",
+        email: "admin@hanguru.blog",
         name: "시스템 관리자",
         password: hashedPassword,
         role: "ADMIN",

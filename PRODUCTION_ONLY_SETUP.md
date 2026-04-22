@@ -2,7 +2,7 @@
 
 ## 개요
 
-이 프로젝트는 **운영 서버(https://app.hanguru.school)에서만 모든 기능을 개발하고 배포**하는 시스템입니다.
+이 프로젝트는 **운영 서버(https://portal.hanguru.blog)에서만 모든 기능을 개발하고 배포**하는 시스템입니다.
 Preview 환경이나 테스트 서버는 사용하지 않습니다.
 
 ## 🚫 금지 사항
@@ -41,7 +41,7 @@ Preview 환경이나 테스트 서버는 사용하지 않습니다.
 
 ### 3. 접근 가능 환경
 
-- ✅ https://app.hanguru.school (운영 서버)
+- ✅ https://portal.hanguru.blog (운영 서버)
 - ❌ localhost:3000 (경고 후 리다이렉트)
 - ❌ vercel.app 도메인 (경고 후 리다이렉트)
 
@@ -72,7 +72,7 @@ Preview 환경이나 테스트 서버는 사용하지 않습니다.
 
 ```bash
 # .env.local
-NEXT_PUBLIC_PRODUCTION_URL=https://app.hanguru.school
+NEXT_PUBLIC_PRODUCTION_URL=https://portal.hanguru.blog
 NEXT_PUBLIC_ENVIRONMENT=production
 NODE_ENV=production
 ```
@@ -85,7 +85,7 @@ NODE_ENV=production
 ⚠️ 環境エラー
 
 現在の環境はテスト用のため、正式な動作を保証していません。
-必ず https://app.hanguru.school を使用してください。
+必ず https://portal.hanguru.blog を使用してください。
 
 5秒後に自動的に正しい環境にリダイレクトされます...
 ```
@@ -101,7 +101,7 @@ NODE_ENV=production
 
 ### 배포 후 확인사항
 
-- [ ] https://app.hanguru.school 에서 정상 작동 확인
+- [ ] https://portal.hanguru.blog 에서 정상 작동 확인
 - [ ] 다른 환경에서 접속 시 경고 표시 확인
 - [ ] 자동 리다이렉트 동작 확인
 
@@ -122,7 +122,7 @@ NODE_ENV=production
 
 문제가 발생한 경우:
 
-1. 운영 서버(https://app.hanguru.school)에서 직접 확인
+1. 운영 서버(https://portal.hanguru.blog)에서 직접 확인
 2. 로컬 환경 변수 재설정
 3. Vercel 설정 재확인
 

@@ -61,7 +61,7 @@ sudo journalctl -u malmoi-web -n 100 --no-pager
 
 ```bash
 curl -I http://127.0.0.1:3000/login
-curl -I https://portal.hanguru.school/login
+curl -I https://portal.hanguru.blog/login
 ```
 
 ## 4) 롤백 전 기본 점검 순서

@@ -106,7 +106,7 @@ npm run dev
 
 1. **환경 체크**: `npm run check-production`
 2. **GitHub 설정**: https://github.com/hanguru-school/malmoi-system/settings/branches
-3. **운영 서버**: https://app.hanguru.school
+3. **운영 서버**: https://portal.hanguru.blog
 
 ---
 

@@ -39,7 +39,7 @@ cd /path/to/malmoi-app
 MALMOI_RESET_CONFIRM=yes printf '%s\n' '새비밀번호4자이상' | \
   node scripts/reset-admin-password.mjs \
   --store "${AUTH_STORE_PATH:-/srv/malmoi/shared/auth-store.json}" \
-  --email office@hanguru.school \
+  --email office@hanguru.blog \
   --stdin
 ```
 

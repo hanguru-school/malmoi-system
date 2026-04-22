@@ -23,7 +23,7 @@ fi
 GIT_REF="${DEPLOY_GIT_REF:-main}"
 SERVICE_NAME="${MALMOI_SYSTEMD_SERVICE:-malmoi-web}"
 INTERNAL_HEALTH_URL="http://127.0.0.1:3000/login"
-EXTERNAL_HEALTH_URL="https://portal.hanguru.school/login"
+EXTERNAL_HEALTH_URL="https://portal.hanguru.blog/login"
 
 if [[ ! -d "$APP_DIR" ]]; then
   echo "ERROR: app directory not found: $APP_DIR"

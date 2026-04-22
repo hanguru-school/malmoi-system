@@ -53,7 +53,7 @@ async function productionTest() {
 
     // 5. 테스트 사용자 생성
     console.log("5. 테스트 사용자 생성");
-    const testEmail = "test@hanguru.school";
+    const testEmail = "test@hanguru.blog";
     let testUser = await prisma.user.findUnique({
       where: { email: testEmail },
       include: { student: true },
@@ -175,7 +175,7 @@ async function productionTest() {
 
     // 8. API 엔드포인트 테스트 준비
     console.log("8. API 엔드포인트 테스트 정보");
-    console.log("🌐 프로덕션 URL: https://app.hanguru.school");
+    console.log("🌐 프로덕션 URL: https://portal.hanguru.blog");
     console.log("📝 테스트 계정:");
     console.log(`   - 이메일: ${testEmail}`);
     console.log(`   - 비밀번호: test123`);

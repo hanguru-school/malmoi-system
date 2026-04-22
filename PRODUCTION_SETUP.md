@@ -2,7 +2,7 @@
 
 ## 🚀 운영 환경 고정 설정
 
-이 프로젝트는 **오직 운영 서버(https://app.hanguru.school)에서만** 모든 기능을 개발하고 배포합니다.
+이 프로젝트는 **오직 운영 서버(https://portal.hanguru.blog)에서만** 모든 기능을 개발하고 배포합니다.
 
 ### 1. 배포 환경 설정
 
@@ -73,20 +73,20 @@ git push origin main
 #### 배포 확인:
 
 - GitHub Actions에서 배포 상태 확인
-- https://app.hanguru.school 에서 변경사항 확인
+- https://portal.hanguru.blog 에서 변경사항 확인
 
 ### 5. 환경 검증 시스템
 
 #### 자동 경고 시스템:
 
 - 운영 서버가 아닌 환경 접속 시 경고 메시지 표시
-- 5초 후 자동으로 https://app.hanguru.school 로 리다이렉트
+- 5초 후 자동으로 https://portal.hanguru.blog 로 리다이렉트
 
 #### 경고 메시지:
 
 ```
 現在の環境はテスト用のため、正式な動作を保証していません。
-必ず https://app.hanguru.school を使用してください。
+必ず https://portal.hanguru.blog を使用してください。
 ```
 
 ### 6. 환경 변수 설정
@@ -167,7 +167,7 @@ git push origin main
 
 1. **테스트 환경 사용 금지**: Preview 환경이나 개발 환경에서 테스트하지 마세요
 2. **main 브랜치 전용**: 모든 개발은 main 브랜치에서만 진행
-3. **운영 서버 확인**: 모든 기능은 https://app.hanguru.school 에서 확인
+3. **운영 서버 확인**: 모든 기능은 https://portal.hanguru.blog 에서 확인
 4. **자동 배포**: main 브랜치 푸시 시 자동으로 운영 서버에 배포됨
 
 ## 🆘 문제 해결
@@ -182,5 +182,5 @@ git push origin main
 ### 환경 검증 실패 시:
 
 1. 브라우저 캐시 삭제
-2. 올바른 URL 확인 (https://app.hanguru.school)
+2. 올바른 URL 확인 (https://portal.hanguru.blog)
 3. 네트워크 연결 확인

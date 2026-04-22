@@ -17,7 +17,7 @@ export default function TestPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: "hanguru.school@gmail.com",
+          email: "hanguru.blog@gmail.com",
           password: "Alfl1204!",
         }),
       });

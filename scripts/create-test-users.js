@@ -32,21 +32,21 @@ async function createTestUsers() {
         phone: "010-1234-5678",
       },
       {
-        email: "admin@hanguru.school",
+        email: "admin@hanguru.blog",
         name: "관리자",
         password: "admin123",
         role: "ADMIN",
         phone: "010-0000-0000",
       },
       {
-        email: "teacher@hanguru.school",
+        email: "teacher@hanguru.blog",
         name: "테스트 선생님",
         password: "teacher123",
         role: "TEACHER",
         phone: "010-1111-1111",
       },
       {
-        email: "staff@hanguru.school",
+        email: "staff@hanguru.blog",
         name: "테스트 직원",
         password: "staff123",
         role: "STAFF",
@@ -163,9 +163,9 @@ async function createTestUsers() {
     console.log("\n=== 테스트 사용자 생성 완료 ===");
     console.log("생성된 계정 정보:");
     console.log("- 학생: hp9419@gmail.com / gtbtyj");
-    console.log("- 관리자: admin@hanguru.school / admin123");
-    console.log("- 선생님: teacher@hanguru.school / teacher123");
-    console.log("- 직원: staff@hanguru.school / staff123");
+    console.log("- 관리자: admin@hanguru.blog / admin123");
+    console.log("- 선생님: teacher@hanguru.blog / teacher123");
+    console.log("- 직원: staff@hanguru.blog / staff123");
   } catch (error) {
     console.error("테스트 사용자 생성 오류:", error);
   } finally {

@@ -57,10 +57,10 @@ async function handleLineMessage(userId: string, message: string) {
 📚 수업 문의
 ✅ 출석 확인
 📞 관리자 연락
-🌐 웹사이트: https://hanguru.school`;
+🌐 웹사이트: https://hanguru.blog`;
     } else {
       response =
-        "메시지를 받았습니다. 더 자세한 정보는 웹사이트를 확인해주세요: https://hanguru.school";
+        "메시지를 받았습니다. 더 자세한 정보는 웹사이트를 확인해주세요: https://hanguru.blog";
     }
 
     await sendTextMessage(userId, response);

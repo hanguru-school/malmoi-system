@@ -4,7 +4,7 @@
 
 ## 1) 시스템 개요
 
-- 포털 도메인 역할: `portal.hanguru.school` (MalMoi 학생/보호자/교사/관리자 포털)
+- 포털 도메인 역할: `portal.hanguru.blog` (MalMoi 학생/보호자/교사/관리자 포털)
 - 스테이징 운영 서버: 28 서버
 - 개발 환경: 교실 맥미니
 - 데이터 저장: JSON 파일(`AUTH_STORE_PATH`)
@@ -101,12 +101,12 @@
 
 ## 7) 도메인/서비스 역할
 
-- `hanguru.school` -> 메인 사이트
-- `portal.hanguru.school` -> MalMoi 포털
+- `hanguru.blog` -> 메인 사이트
+- `portal.hanguru.blog` -> MalMoi 포털
 - `hanguru.blog` -> 블로그
 
 권장:
-- 스테이징 검증 완료 후 `portal.hanguru.school` 정식 연결
+- 스테이징 검증 완료 후 `portal.hanguru.blog` 정식 연결
 
 ---
 

@@ -5,7 +5,7 @@
 ### 1. **미들웨어 보안 (src/middleware.ts)**
 
 - ✅ **브라우저만 허용**: User-Agent가 브라우저가 아니면 403 차단
-- ✅ **API 보안**: hanguru.school 도메인에서만 API 호출 허용
+- ✅ **API 보안**: hanguru.blog 도메인에서만 API 호출 허용
 - ✅ **보안 헤더**: XSS, 클릭재킹, MIME 스니핑 방지
 
 ### 2. **Next.js 설정 보안 (next.config.js)**
@@ -26,8 +26,8 @@
 ### **워드프레스와 함께 운영**
 
 ```
-https://hanguru.school/          ← 워드프레스 (교실 홈페이지)
-https://hanguru.school/app/      ← Next.js 앱 (예약/관리 시스템)
+https://hanguru.blog/          ← 워드프레스 (교실 홈페이지)
+https://hanguru.blog/app/      ← Next.js 앱 (예약/관리 시스템)
 ```
 
 ### **배포 단계**
@@ -44,7 +44,7 @@ https://hanguru.school/app/      ← Next.js 앱 (예약/관리 시스템)
 ```nginx
 server {
     listen 443 ssl;
-    server_name hanguru.school;
+    server_name hanguru.blog;
 
     # SSL 설정
     ssl_certificate /path/to/certificate.crt;
@@ -87,12 +87,12 @@ server {
 ```bash
 # 브라우저로 접근 (정상)
 curl -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" \
-     https://hanguru.school/app/
+     https://hanguru.blog/app/
 
 # 브라우저로 API 호출 (정상)
 curl -H "User-Agent: Mozilla/5.0" \
-     -H "Referer: https://hanguru.school/app/" \
-     https://hanguru.school/app/api/hardware/uid-reader
+     -H "Referer: https://hanguru.blog/app/" \
+     https://hanguru.blog/app/api/hardware/uid-reader
 ```
 
 ### **차단 테스트**
@@ -100,12 +100,12 @@ curl -H "User-Agent: Mozilla/5.0" \
 ```bash
 # 비정상 User-Agent (차단됨)
 curl -H "User-Agent: python-requests/2.25.1" \
-     https://hanguru.school/app/
+     https://hanguru.blog/app/
 
 # 외부 도메인에서 API 호출 (차단됨)
 curl -H "User-Agent: Mozilla/5.0" \
      -H "Referer: https://malicious-site.com" \
-     https://hanguru.school/app/api/hardware/uid-reader
+     https://hanguru.blog/app/api/hardware/uid-reader
 ```
 
 ---
@@ -132,7 +132,7 @@ curl -H "User-Agent: Mozilla/5.0" \
 
 ### **API 호출 실패**
 
-- hanguru.school 도메인에서 호출하는지 확인
+- hanguru.blog 도메인에서 호출하는지 확인
 - CORS 설정 확인
 
 ### **하드웨어 리더 연결 실패**

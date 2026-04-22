@@ -145,7 +145,7 @@ export default function TestCognitoPage() {
             <li>Region: ap-northeast-2 (Seoul)</li>
             <li>
               OAuth Callback URL:
-              https://app.hanguru.school/api/auth/callback/cognito
+              https://portal.hanguru.blog/api/auth/callback/cognito
             </li>
             <li>OAuth Scopes: email openid phone</li>
           </ul>

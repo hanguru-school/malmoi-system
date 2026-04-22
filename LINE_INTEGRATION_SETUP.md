@@ -30,7 +30,7 @@
 2. **LINE Login** 탭에서:
    - **Callback URL** 설정:
      ```
-     https://hanguru.school/auth/line/callback
+     https://hanguru.blog/auth/line/callback
      ```
    - **Scope** 설정:
      - ✅ `profile` (프로필 정보)
@@ -48,7 +48,7 @@
 ```env
 # LINE Login Configuration
 NEXT_PUBLIC_LINE_CLIENT_ID=your_line_channel_id_here
-NEXT_PUBLIC_LINE_REDIRECT_URI=https://hanguru.school/auth/line/callback
+NEXT_PUBLIC_LINE_REDIRECT_URI=https://hanguru.blog/auth/line/callback
 
 # LINE Messaging API (Optional)
 LINE_CHANNEL_ACCESS_TOKEN=your_line_channel_access_token_here
@@ -59,7 +59,7 @@ DATABASE_URL=your_database_url_here
 
 # NextAuth Configuration
 NEXTAUTH_SECRET=your_nextauth_secret_here
-NEXTAUTH_URL=https://hanguru.school
+NEXTAUTH_URL=https://hanguru.blog
 ```
 
 ### 2.2 Vercel 배포 환경

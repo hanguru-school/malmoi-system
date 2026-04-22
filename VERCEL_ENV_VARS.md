@@ -37,8 +37,8 @@ COGNITO_DOMAIN = https://malmoi-system-pool.auth.ap-northeast-1.amazoncognito.co
 ### Next.js Public Environment Variables
 
 ```
-NEXT_PUBLIC_COGNITO_CALLBACK_URL = https://app.hanguru.school/api/auth/callback/cognito
-NEXT_PUBLIC_COGNITO_SIGNOUT_URL = https://app.hanguru.school
+NEXT_PUBLIC_COGNITO_CALLBACK_URL = https://portal.hanguru.blog/api/auth/callback/cognito
+NEXT_PUBLIC_COGNITO_SIGNOUT_URL = https://portal.hanguru.blog
 NEXT_PUBLIC_COGNITO_OAUTH_SCOPES = email openid phone
 ```
 

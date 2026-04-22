@@ -25,7 +25,7 @@ Environment: Production, Preview, Development
 
 ```
 Name: NEXT_PUBLIC_LINE_REDIRECT_URI
-Value: https://hanguru.school/auth/line/callback
+Value: https://hanguru.blog/auth/line/callback
 Environment: Production, Preview, Development
 ```
 
@@ -75,7 +75,7 @@ Environment: Production, Preview, Development
 
 ```
 Name: NEXTAUTH_URL
-Value: https://hanguru.school
+Value: https://hanguru.blog
 Environment: Production, Preview, Development
 ```
 

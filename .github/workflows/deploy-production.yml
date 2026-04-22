@@ -90,7 +90,7 @@ jobs:
             "${DEPLOY_USER}@${DEPLOY_HOST}" \
             "set -euo pipefail; curl -fsSI --max-time 25 http://127.0.0.1:3000/ | head -n 30"
 
-      - name: Server — curl health (https://portal.hanguru.school/)
+      - name: Server — curl health (https://portal.hanguru.blog/)
         run: |
           set -euo pipefail
           ssh -i ~/.ssh/deploy_key -p "${DEPLOY_PORT}" \
@@ -98,4 +98,4 @@ jobs:
             -o UserKnownHostsFile=~/.ssh/known_hosts \
             -o BatchMode=yes \
             "${DEPLOY_USER}@${DEPLOY_HOST}" \
-            "set -euo pipefail; curl -fsSI --max-time 30 https://portal.hanguru.school/ | head -n 30"
+            "set -euo pipefail; curl -fsSI --max-time 30 https://portal.hanguru.blog/ | head -n 30"
